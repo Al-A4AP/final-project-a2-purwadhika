@@ -17,3 +17,8 @@
     - npm install zustand
     - npm install motion
     - npm install lucide-react
+    - npm install react-router-dom
+    - npm install react-hot-toast         
+    - npm install react-datepicker        
+    - npm install @types/react-datepicker
+    - npm install @supabase/supabase-js

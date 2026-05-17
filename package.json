@@ -1,0 +1,9 @@
+{
+  "dependencies": {
+    "@supabase/supabase-js": "^2.105.4",
+    "@types/react-datepicker": "^6.2.0",
+    "react-datepicker": "^9.1.0",
+    "react-hot-toast": "^2.6.0",
+    "react-router-dom": "^7.15.1"
+  }
+}
