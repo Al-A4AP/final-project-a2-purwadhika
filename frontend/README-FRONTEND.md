@@ -22,3 +22,16 @@
     - npm install react-datepicker        
     - npm install @types/react-datepicker
     - npm install @supabase/supabase-js
+
+  Frontend Dependencies :
+
+    -  React            : Framework utama
+    -  React Router     : Navigation
+    -  Tailwind CSS     : UI Framework
+    -  Axios 1.16.1     : HTTP client untuk API calls
+    -  Zustand          : State management
+    -  Zod              : Input validation
+    -  Motion           : Animations
+    -  Lucide React     : Icons
+    -  React DatePicker : Kalender
+    -  React Hot Toast  : Notifications
