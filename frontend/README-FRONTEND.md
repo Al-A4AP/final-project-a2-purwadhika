@@ -22,6 +22,8 @@
     - npm install react-datepicker        
     - npm install @types/react-datepicker
     - npm install @supabase/supabase-js
+    - npm install leaflet react-leaflet
+    - npm install -D @types/leaflet
 
   Frontend Dependencies :
 
@@ -35,3 +37,4 @@
     -  Lucide React     : Icons
     -  React DatePicker : Kalender
     -  React Hot Toast  : Notifications
+    -  Leaflet          : Maps
