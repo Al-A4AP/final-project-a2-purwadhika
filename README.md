@@ -13,7 +13,7 @@
 
 ### Untuk Git di folder utama ya (bukan folder backend atau frontend)
 
-### git pull origin main buat update data terbaru dgn sy, git push origin main buat update data ke repo utama (nunggu di approve sy yaa)
+### git pull -u origin main buat update data terbaru dgn sy, git push -u origin main buat update data ke repo utama (nunggu di approve sy yaa)
 
 ### seteklah git pull biasanya ada data backend yg harus berubah, jangan lupa ada npx prisma migrate atw npx prisma migrate dev baru npm run dev
 
@@ -23,4 +23,5 @@
 
 - git add .
 - git commit -m "pesan"
-- git push origin main ( merubah repo utama )atau git pull origin main ( menyamakan/ update dgn repo utama)
+- git pull -u origin main ( menyamakan/ update dgn repo utama)
+- git push -u origin main ( merubah repo utama )
