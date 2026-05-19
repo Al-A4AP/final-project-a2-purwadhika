@@ -1,0 +1,227 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+
+// ===================== ENUMS =====================
+
+enum Role {
+  USER
+  TENANT
+}
+
+enum OrderStatus {
+  WAITING_PAYMENT
+  WAITING_CONFIRMATION
+  PROCESSED
+  CANCELLED
+}
+
+enum PaymentMethod {
+  MANUAL
+  MIDTRANS
+}
+
+enum RateType {
+  PERCENTAGE
+  NOMINAL
+}
+
+// ===================== MODELS =====================
+
+model User {
+  id            String    @id @default(cuid())
+  email         String    @unique
+  password_hash String
+  role          Role      @default(USER)
+  name          String
+  phone         String?
+  avatar_url    String?
+  verified_at   DateTime?
+  deleted_at    DateTime?
+  created_at    DateTime  @default(now())
+
+  orders          Order[]
+  reviews         Review[]
+  tenantProperties Property[]    @relation("TenantProperties")
+  reviewReplies    ReviewReply[]
+  emailVerifications EmailVerification[]
+  passwordResets   PasswordReset[]
+
+  @@map("users")
+}
+
+model EmailVerification {
+  id         String    @id @default(cuid())
+  userId     String
+  user       User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  token      String    @unique
+  expires_at DateTime
+  used_at    DateTime?
+  created_at DateTime  @default(now())
+
+  @@map("email_verifications")
+}
+
+model PasswordReset {
+  id         String    @id @default(cuid())
+  userId     String
+  user       User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  token      String    @unique
+  expires_at DateTime
+  used_at    DateTime?
+  created_at DateTime  @default(now())
+
+  @@map("password_resets")
+}
+
+model PropertyCategory {
+  id         String     @id @default(cuid())
+  name       String     @unique
+  icon       String?
+  properties Property[]
+
+  @@map("property_categories")
+}
+
+model Property {
+  id                  String           @id @default(cuid())
+  tenantId            String
+  tenant              User             @relation("TenantProperties", fields: [tenantId], references: [id])
+  categoryId          String
+  category            PropertyCategory @relation(fields: [categoryId], references: [id])
+  name                String
+  description         String
+  featured_image_url  String?
+  address             String
+  city                String
+  latitude            Float?
+  longitude           Float?
+  deleted_at          DateTime?
+  created_at          DateTime         @default(now())
+
+  images  PropertyImage[]
+  rooms   Room[]
+  orders  Order[]
+  reviews Review[]
+
+  @@map("properties")
+}
+
+model PropertyImage {
+  id                  String   @id @default(cuid())
+  propertyId          String
+  property            Property @relation(fields: [propertyId], references: [id], onDelete: Cascade)
+  image_url           String
+  cloudinary_public_id String?
+  order               Int      @default(0)
+  created_at          DateTime @default(now())
+
+  @@map("property_images")
+}
+
+model Room {
+  id          String   @id @default(cuid())
+  propertyId  String
+  property    Property @relation(fields: [propertyId], references: [id], onDelete: Cascade)
+  room_type   String
+  base_price  Int
+  description String?
+  capacity    Int
+  deleted_at  DateTime?
+  created_at  DateTime @default(now())
+
+  availability RoomAvailability[]
+  peakRates    PeakSeasonRate[]
+  orders       Order[]
+
+  @@map("rooms")
+}
+
+model RoomAvailability {
+  id           String   @id @default(cuid())
+  roomId       String
+  room         Room     @relation(fields: [roomId], references: [id], onDelete: Cascade)
+  date         DateTime
+  is_available Boolean  @default(true)
+  created_at   DateTime @default(now())
+
+  @@unique([roomId, date])
+  @@map("room_availabilities")
+}
+
+model PeakSeasonRate {
+  id          String    @id @default(cuid())
+  roomId      String
+  room        Room      @relation(fields: [roomId], references: [id], onDelete: Cascade)
+  start_date  DateTime
+  end_date    DateTime
+  rate_type   RateType
+  rate_value  Int
+  description String?
+  deleted_at  DateTime?
+  created_at  DateTime  @default(now())
+
+  @@map("peak_season_rates")
+}
+
+model Order {
+  id                     String        @id @default(cuid())
+  order_number           String        @unique
+  userId                 String
+  user                   User          @relation(fields: [userId], references: [id])
+  roomId                 String
+  room                   Room          @relation(fields: [roomId], references: [id])
+  propertyId             String
+  property               Property      @relation(fields: [propertyId], references: [id])
+  check_in_date          DateTime
+  check_out_date         DateTime
+  total_price            Int
+  status                 OrderStatus   @default(WAITING_PAYMENT)
+  payment_method         PaymentMethod @default(MANUAL)
+  payment_proof_url      String?
+  midtrans_transaction_id String?
+  payment_verified_at    DateTime?
+  deleted_at             DateTime?
+  canceled_at            DateTime?
+  created_at             DateTime      @default(now())
+
+  review Review?
+
+  @@map("orders")
+}
+
+model Review {
+  id         String    @id @default(cuid())
+  orderId    String    @unique
+  order      Order     @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  propertyId String
+  property   Property  @relation(fields: [propertyId], references: [id])
+  userId     String
+  user       User      @relation(fields: [userId], references: [id])
+  rating     Int
+  comment    String
+  deleted_at DateTime?
+  created_at DateTime  @default(now())
+
+  replies ReviewReply[]
+
+  @@map("reviews")
+}
+
+model ReviewReply {
+  id         String    @id @default(cuid())
+  reviewId   String
+  review     Review    @relation(fields: [reviewId], references: [id], onDelete: Cascade)
+  tenantId   String
+  tenant     User      @relation(fields: [tenantId], references: [id])
+  reply_text String
+  deleted_at DateTime?
+  created_at DateTime  @default(now())
+
+  @@map("review_replies")
+}
