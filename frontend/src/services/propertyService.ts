@@ -31,7 +31,7 @@ export const propertyService = {
   },
 
   async getCategories() {
-    const response = await api.get('/property-categories');
+    const response = await api.get('/properties/categories');
     return response.data.data;
   },
 };

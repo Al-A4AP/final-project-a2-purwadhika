@@ -32,7 +32,7 @@ export const createOrder = async (data: CreateOrderData) => {
   // Calculate nights
   const nights = Math.ceil((checkOut.getTime() - checkIn.getTime()) / (1000 * 60 * 60 * 24));
 
-  // Get Room and Calculate Price (Simplified for now, ideally includes Peak rates)
+  // Get Room and Calculate Price ini di simpel kan, coba cek lagi anggi
   const room = await prisma.room.findUnique({
     where: { id: roomId },
     include: { peakRates: true }
@@ -44,8 +44,8 @@ export const createOrder = async (data: CreateOrderData) => {
     throw error;
   }
 
-  // Very basic price calculation (Base price * nights)
-  // TODO: integrate peak rates calculation per day
+  // pake perhitunag sederhana (Base price * nights) kalo anggi ada ide boleh tambahin
+  // paling pake yg ini untuk nanti kalo udh beres ui ux blh langsung integrate peak rates calculation per day
   let total_price = room.base_price * nights;
 
   const order_number = generateOrderNumber();
@@ -222,3 +222,4 @@ export const handleMidtransNotification = async (notificationData: any) => {
     }
   }
 };
+

@@ -6,9 +6,9 @@ import { useThemeStore } from '@/stores/themeStore';
 import './App.css'
 
 function App() {
-  // We don't subscribe to the full store object to prevent infinite loops
+   // udh d rbh u hindari loop di simpan ke global state
 
-  // Initialize stores on mount
+  // aplikasi pertama dbuka inisasi auth+theme 
   useEffect(() => {
     useAuthStore.getState().hydrate();
     useThemeStore.getState().hydrate();

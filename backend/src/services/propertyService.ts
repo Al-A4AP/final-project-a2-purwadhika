@@ -23,6 +23,7 @@ export const getProperties = async (filters: PropertyFilters) => {
         category: true,
         rooms: { where: { deleted_at: null }, select: { base_price: true } },
         reviews: { where: { deleted_at: null }, select: { rating: true } },
+        _count: { select: { orders: true } },
       },
     }),
     prisma.property.count({ where }),
@@ -67,7 +68,13 @@ const buildPropertyWhere = (filters: PropertyFilters) => {
 };
 
 const buildOrderBy = (sort: string, order: string) => {
-  const validSorts: any = { name: { name: order }, created_at: { created_at: order }, price: { rooms: { _min: { base_price: order } } } };
+  const validSorts: Record<string, unknown> = {
+    name: { name: order },
+    created_at: { created_at: order },
+    price: { rooms: { _min: { base_price: order } } },
+    popularity: { orders: { _count: order } },
+    rating: { reviews: { _count: order } },
+  };
   return validSorts[sort] || { created_at: 'desc' };
 };
 
@@ -81,8 +88,10 @@ const formatProperty = (p: any) => {
     min_price,
     rating: rating ? Math.round(rating * 10) / 10 : undefined,
     review_count: ratings.length,
+    order_count: p._count?.orders ?? 0,
     rooms: undefined,
     reviews: undefined,
+    _count: undefined,
   };
 };
 

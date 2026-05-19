@@ -130,6 +130,7 @@ model Room {
   property    Property @relation(fields: [propertyId], references: [id], onDelete: Cascade)
   room_type   String
   base_price  Int
+  child_price Int?
   description String?
   capacity    Int
   deleted_at  DateTime?

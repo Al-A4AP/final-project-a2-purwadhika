@@ -20,7 +20,7 @@ export const PROPERTY_CATEGORIES = [
 
 export const ITEMS_PER_PAGE = 12;
 
-export const WHATSAPP_NUMBER = '6281234567890';
+export const WHATSAPP_NUMBER = '6281909333337';
 
 export const PRICE_RANGES = [
   { label: 'Semua Harga', min: 0, max: Infinity },

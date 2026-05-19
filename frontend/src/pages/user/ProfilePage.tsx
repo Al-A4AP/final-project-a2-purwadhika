@@ -3,7 +3,7 @@ import { useState, useRef } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
-import { User, Camera, Loader2, CheckCircle } from 'lucide-react';
+import { User, Camera, Loader2, CheckCircle, Eye, EyeOff } from 'lucide-react';
 import { userService } from '@/services/userService';
 import { useAuthStore } from '@/stores/authStore';
 
@@ -13,10 +13,23 @@ const schema = z.object({
 });
 type FormInput = z.infer<typeof schema>;
 
+const passwordSchema = z.object({
+  old_password: z.string().min(1, 'Password lama wajib diisi'),
+  new_password: z.string().min(6, 'Password baru minimal 6 karakter'),
+  confirm_password: z.string().min(1, 'Konfirmasi password wajib diisi'),
+}).refine((data) => data.new_password === data.confirm_password, {
+  message: 'Konfirmasi password tidak cocok',
+  path: ['confirm_password'],
+});
+type PasswordFormInput = z.infer<typeof passwordSchema>;
+
 const ProfilePage: FC = () => {
   const { user, setUser } = useAuthStore();
   const [saved, setSaved] = useState(false);
   const [uploadingAvatar, setUploadingAvatar] = useState(false);
+  const [passwordSaved, setPasswordSaved] = useState(false);
+  const [showNewPassword, setShowNewPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const fileRef = useRef<HTMLInputElement>(null);
 
   const { register, handleSubmit, formState: { errors, isSubmitting } } =
@@ -31,6 +44,26 @@ const ProfilePage: FC = () => {
     setUser(updated);
     setSaved(true);
     setTimeout(() => setSaved(false), 3000);
+  };
+
+  const { 
+    register: registerPassword, 
+    handleSubmit: handlePasswordSubmit, 
+    reset: resetPassword,
+    setError: setPasswordError,
+    formState: { errors: passwordErrors, isSubmitting: isSubmittingPassword } 
+  } = useForm<PasswordFormInput>({ resolver: zodResolver(passwordSchema) });
+
+  const onPasswordSubmit = async (data: PasswordFormInput) => {
+    try {
+      await userService.changePassword({ old_password: data.old_password, new_password: data.new_password });
+      setPasswordSaved(true);
+      resetPassword();
+      setTimeout(() => setPasswordSaved(false), 3000);
+    } catch (err: unknown) {
+      const e = err as { response?: { data?: { message?: string } } };
+      setPasswordError('root', { message: e.response?.data?.message || 'Gagal mengubah password' });
+    }
   };
 
   const handleAvatarChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -106,6 +139,56 @@ const ProfilePage: FC = () => {
               className="w-full bg-red-600 text-white py-2.5 rounded-lg font-semibold hover:bg-red-700 transition flex items-center justify-center gap-2 disabled:opacity-60"
             >
               {isSubmitting ? <><Loader2 size={18} className="animate-spin" /> Menyimpan...</> : 'Simpan Perubahan'}
+            </button>
+          </form>
+        </div>
+
+        {/* Form Ubah Password */}
+        <div className="bg-white dark:bg-slate-800 rounded-xl shadow-sm border dark:border-slate-700 p-6 mt-6">
+          <h2 className="font-semibold text-gray-900 dark:text-white mb-5">Ubah Password</h2>
+          {passwordSaved && (
+            <div className="flex items-center gap-2 bg-green-50 dark:bg-green-900/20 text-green-600 rounded-lg p-3 mb-4 text-sm">
+              <CheckCircle size={16} /> Password berhasil diubah!
+            </div>
+          )}
+          {passwordErrors.root && (
+            <div className="flex items-center gap-2 bg-red-50 dark:bg-red-900/20 text-red-600 rounded-lg p-3 mb-4 text-sm">
+              {passwordErrors.root.message}
+            </div>
+          )}
+          <form onSubmit={handlePasswordSubmit(onPasswordSubmit)} className="space-y-4">
+            <div>
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Password Lama</label>
+              <input type="password" {...registerPassword('old_password')} placeholder="••••••••" className={inputClass} />
+              {passwordErrors.old_password && <p className="text-red-500 text-xs mt-1">{passwordErrors.old_password.message}</p>}
+            </div>
+            
+            <div>
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Password Baru</label>
+              <div className="relative">
+                <input type={showNewPassword ? 'text' : 'password'} {...registerPassword('new_password')} placeholder="••••••••" className={inputClass} />
+                <button type="button" onClick={() => setShowNewPassword(!showNewPassword)} className="absolute right-3 top-3 text-gray-500 hover:text-gray-700 dark:text-gray-400">
+                  {showNewPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+                </button>
+              </div>
+              {passwordErrors.new_password && <p className="text-red-500 text-xs mt-1">{passwordErrors.new_password.message}</p>}
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Konfirmasi Password Baru</label>
+              <div className="relative">
+                <input type={showConfirmPassword ? 'text' : 'password'} {...registerPassword('confirm_password')} placeholder="••••••••" className={inputClass} />
+                <button type="button" onClick={() => setShowConfirmPassword(!showConfirmPassword)} className="absolute right-3 top-3 text-gray-500 hover:text-gray-700 dark:text-gray-400">
+                  {showConfirmPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+                </button>
+              </div>
+              {passwordErrors.confirm_password && <p className="text-red-500 text-xs mt-1">{passwordErrors.confirm_password.message}</p>}
+            </div>
+
+            <button type="submit" disabled={isSubmittingPassword}
+              className="w-full bg-slate-900 dark:bg-slate-700 text-white py-2.5 rounded-lg font-semibold hover:bg-slate-800 dark:hover:bg-slate-600 transition flex items-center justify-center gap-2 disabled:opacity-60"
+            >
+              {isSubmittingPassword ? <><Loader2 size={18} className="animate-spin" /> Memproses...</> : 'Perbarui Password'}
             </button>
           </form>
         </div>

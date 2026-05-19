@@ -8,6 +8,7 @@ import propertyRoutes from './src/routes/propertyRoutes';
 import orderRoutes from './src/routes/orderRoutes';
 import tenantRoutes from './src/routes/tenantRoutes';
 import userRoutes from './src/routes/userRoutes';
+import reviewRoutes from './src/routes/reviewRoutes';
 import { initCronJobs } from './src/cron';
 
 const app = express();
@@ -35,6 +36,7 @@ app.use('/api/properties', propertyRoutes);
 app.use('/api/tenant', tenantRoutes);
 app.use('/api/orders', orderRoutes);
 app.use('/api/users', userRoutes);
+app.use('/api', reviewRoutes);
 
 // 404
 app.use((_req, res) => {

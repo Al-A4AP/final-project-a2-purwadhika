@@ -23,7 +23,7 @@ export const registerUser = async (data: {
 
   const password_hash = await bcryptjs.hash(data.password, 10);
 
-  // DEV MODE: auto-verified
+  // yang iniake mode auto-verified dulu anggi
   const user = await prisma.user.create({
     data: {
       name: data.name,

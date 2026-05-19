@@ -81,16 +81,17 @@ async function main() {
 
   // 2. CATEGORIES
   console.log('📂 Membuat kategori properti...');
-  const [catHotel, catApt, catRumah, catKost] = await Promise.all([
+  const [catHotel, catApt, catRumah, catVilla, catKost] = await Promise.all([
     prisma.propertyCategory.create({ data: { name: 'Hotel', icon: '🏨' } }),
     prisma.propertyCategory.create({ data: { name: 'Apartemen', icon: '🏢' } }),
     prisma.propertyCategory.create({ data: { name: 'Rumah', icon: '🏠' } }),
+    prisma.propertyCategory.create({ data: { name: 'Villa', icon: '🏡' } }),
     prisma.propertyCategory.create({ data: { name: 'Kost', icon: '🏘️' } }),
   ]);
-  console.log('  ✓ 4 kategori dibuat\n');
+  console.log('  ✓ 5 kategori dibuat\n');
 
   // 3. USERS
-  console.log('👤 Membuat users...');
+  console.log(' Membuat users...');
   const passwordHash = await bcryptjs.hash('Password123!', 10);
   const now = new Date();
 
@@ -129,7 +130,7 @@ async function main() {
   console.log('  ✓ 3 users dibuat (password: Password123!)\n');
 
   // 4. UPLOAD IMAGES TO CLOUDINARY
-  console.log('🖼️  Upload gambar ke Cloudinary...');
+  console.log(' Upload gambar ke Cloudinary...');
   const [imgH1, imgH2, imgH3, imgA1, imgA2, imgA3, imgV1, imgV2, imgV3, imgK1, imgK2, imgK3] =
     await Promise.all([
       uploadImg(IMG.hotel1), uploadImg(IMG.hotel2), uploadImg(IMG.hotel3),
@@ -140,7 +141,7 @@ async function main() {
   console.log('  ✓ 12 gambar diupload ke Cloudinary\n');
 
   // 5. PROPERTIES
-  console.log('🏡 Membuat properti...');
+  console.log(' Membuat properti...');
 
   const propData = [
     {
@@ -189,7 +190,7 @@ async function main() {
       city: 'Bali',
       address: 'Jl. Suweta No.8, Ubud, Gianyar, Bali',
       latitude: -8.5069, longitude: 115.2625,
-      categoryId: catRumah.id,
+      categoryId: catVilla.id,
       featured: imgV1.url,
       images: [imgV1, imgV2, imgV3],
     },
@@ -269,13 +270,10 @@ async function main() {
     // Apt Surabaya (idx 3)
     { propIdx: 3, type: 'Studio', price: 700000, cap: 2, desc: 'Studio bersih dekat pusat kota' },
     { propIdx: 3, type: '1 Bedroom', price: 1100000, cap: 3, desc: 'Unit 1 kamar tidur dengan view kota' },
-    // Villa Ubud (idx 4)
-    { propIdx: 4, type: 'Garden Villa', price: 2800000, cap: 4, desc: 'Villa dengan taman tropis dan kolam renang pribadi' },
-    { propIdx: 4, type: 'Pool Villa', price: 3500000, cap: 6, desc: 'Villa premium dengan infinity pool menghadap sawah' },
-    // Rumah Lombok (idx 5)
-    { propIdx: 5, type: 'Kamar Standar', price: 600000, cap: 2, desc: 'Kamar nyaman dengan view laut' },
-    { propIdx: 5, type: 'Kamar Family', price: 1200000, cap: 6, desc: 'Kamar besar untuk keluarga dengan 2 kasur besar' },
-    { propIdx: 5, type: 'Sewa Rumah Penuh', price: 3000000, cap: 10, desc: 'Sewa seluruh rumah 4 kamar untuk grup besar' },
+    // Villa Ubud (idx 4) - 1 unit sewa seluruh villa
+    { propIdx: 4, type: 'Seluruh Villa Ubud Hijau', price: 3500000, cap: 8, desc: 'Sewa eksklusif seluruh villa dengan kolam renang pribadi, bale bengong, dan pemandangan sawah Ubud. Termasuk 3 kamar tidur.' },
+    // Rumah Lombok (idx 5) - 1 unit sewa seluruh rumah
+    { propIdx: 5, type: 'Seluruh Rumah Tepi Pantai', price: 3000000, cap: 10, desc: 'Sewa seluruh rumah beachfront 4 kamar tidur dengan akses langsung ke pantai, BBQ area, dan hammock.' },
     // Kost Bandung (idx 6)
     { propIdx: 6, type: 'Kamar Standard', price: 1800000, cap: 1, desc: 'Kamar per bulan - AC, WiFi, KM dalam' },
     { propIdx: 6, type: 'Kamar Premium', price: 2300000, cap: 1, desc: 'Kamar lebih luas dengan sofa dan kulkas mini' },
@@ -300,33 +298,32 @@ async function main() {
   console.log(`  ✓ ${rooms.length} kamar dibuat\n`);
 
   // 7. PEAK SEASON RATES
-  console.log('📅 Membuat peak season rates...');
+  console.log('Membuat peak season rates...');
   await prisma.peakSeasonRate.createMany({
     data: [
       { roomId: rooms[0].id, start_date: new Date('2026-12-20'), end_date: new Date('2027-01-05'), rate_type: 'PERCENTAGE', rate_value: 50, description: 'Libur Natal & Tahun Baru' },
       { roomId: rooms[1].id, start_date: new Date('2026-12-20'), end_date: new Date('2027-01-05'), rate_type: 'PERCENTAGE', rate_value: 50, description: 'Libur Natal & Tahun Baru' },
       { roomId: rooms[10].id, start_date: new Date('2026-07-01'), end_date: new Date('2026-07-31'), rate_type: 'NOMINAL', rate_value: 500000, description: 'High season Bali Juli' },
-      { roomId: rooms[11].id, start_date: new Date('2026-07-01'), end_date: new Date('2026-07-31'), rate_type: 'NOMINAL', rate_value: 800000, description: 'High season Bali Juli' },
     ],
   });
   console.log('  ✓ Peak season rates dibuat\n');
 
   // 8. ORDERS
-  console.log('📦 Membuat orders...');
+  console.log(' Membuat orders...');
   const ordersData = [
     // Completed orders (untuk review)
-    { userId: user1.id, roomIdx: 0, propIdx: 0, checkIn: daysAgo(30), checkOut: daysAgo(28), nights: 2, status: 'PROCESSED' as const },
-    { userId: user1.id, roomIdx: 4, propIdx: 1, checkIn: daysAgo(20), checkOut: daysAgo(18), nights: 2, status: 'PROCESSED' as const },
+    { userId: user1.id, roomIdx: 0,  propIdx: 0, checkIn: daysAgo(30), checkOut: daysAgo(28), nights: 2, status: 'PROCESSED' as const },
+    { userId: user1.id, roomIdx: 4,  propIdx: 1, checkIn: daysAgo(20), checkOut: daysAgo(18), nights: 2, status: 'PROCESSED' as const },
     { userId: user2.id, roomIdx: 10, propIdx: 4, checkIn: daysAgo(15), checkOut: daysAgo(12), nights: 3, status: 'PROCESSED' as const },
-    { userId: user2.id, roomIdx: 6, propIdx: 2, checkIn: daysAgo(10), checkOut: daysAgo(8), nights: 2, status: 'PROCESSED' as const },
+    { userId: user2.id, roomIdx: 5,  propIdx: 2, checkIn: daysAgo(10), checkOut: daysAgo(8),  nights: 2, status: 'PROCESSED' as const },
     // Active orders
-    { userId: user1.id, roomIdx: 11, propIdx: 4, checkIn: daysFromNow(5), checkOut: daysFromNow(8), nights: 3, status: 'WAITING_PAYMENT' as const },
-    { userId: user2.id, roomIdx: 1, propIdx: 0, checkIn: daysFromNow(7), checkOut: daysFromNow(9), nights: 2, status: 'WAITING_CONFIRMATION' as const },
-    { userId: user1.id, roomIdx: 12, propIdx: 5, checkIn: daysFromNow(10), checkOut: daysFromNow(12), nights: 2, status: 'WAITING_PAYMENT' as const },
-    { userId: user2.id, roomIdx: 5, propIdx: 2, checkIn: daysFromNow(3), checkOut: daysFromNow(5), nights: 2, status: 'PROCESSED' as const },
+    { userId: user1.id, roomIdx: 10, propIdx: 4, checkIn: daysFromNow(5),  checkOut: daysFromNow(8),  nights: 3, status: 'WAITING_PAYMENT' as const },
+    { userId: user2.id, roomIdx: 1,  propIdx: 0, checkIn: daysFromNow(7),  checkOut: daysFromNow(9),  nights: 2, status: 'WAITING_CONFIRMATION' as const },
+    { userId: user1.id, roomIdx: 11, propIdx: 5, checkIn: daysFromNow(10), checkOut: daysFromNow(12), nights: 2, status: 'WAITING_PAYMENT' as const },
+    { userId: user2.id, roomIdx: 6,  propIdx: 2, checkIn: daysFromNow(3),  checkOut: daysFromNow(5),  nights: 2, status: 'PROCESSED' as const },
     // Cancelled
-    { userId: user1.id, roomIdx: 3, propIdx: 1, checkIn: daysAgo(5), checkOut: daysAgo(3), nights: 2, status: 'CANCELLED' as const },
-    { userId: user2.id, roomIdx: 8, propIdx: 3, checkIn: daysFromNow(15), checkOut: daysFromNow(17), nights: 2, status: 'WAITING_PAYMENT' as const },
+    { userId: user1.id, roomIdx: 3,  propIdx: 1, checkIn: daysAgo(5), checkOut: daysAgo(3), nights: 2, status: 'CANCELLED' as const },
+    { userId: user2.id, roomIdx: 8,  propIdx: 3, checkIn: daysFromNow(15), checkOut: daysFromNow(17), nights: 2, status: 'WAITING_PAYMENT' as const },
   ];
 
   const orders = [];
@@ -353,7 +350,7 @@ async function main() {
   console.log(`  ✓ ${orders.length} orders dibuat\n`);
 
   // 9. REVIEWS (untuk PROCESSED orders)
-  console.log('⭐ Membuat reviews...');
+  console.log('Membuat reviews...');
   const processedOrders = orders.filter((_, i) => ordersData[i].status === 'PROCESSED');
   const reviewsData = [
     { rating: 5, comment: 'Hotel sangat mewah! Pelayanan staf ramah, kamar bersih, dan lokasi strategis. Pasti akan kembali lagi.' },
@@ -381,7 +378,7 @@ async function main() {
   console.log(`  ✓ ${reviews.length} reviews dibuat\n`);
 
   // 10. REVIEW REPLIES (tenant balas 2 review)
-  console.log('💬 Membuat review replies...');
+  console.log(' Membuat review replies...');
   if (reviews.length >= 2) {
     await prisma.reviewReply.createMany({
       data: [
@@ -393,16 +390,16 @@ async function main() {
   }
 
   // SUMMARY
-  console.log('✅ Seeding selesai!\n');
+  console.log('Seeding selesai!\n');
   console.log('='.repeat(50));
-  console.log('📊 Summary:');
-  console.log(`  👤 Users     : 3 (tenant@proprrent.com, user1@, user2@)`);
-  console.log(`  🏡 Properties: ${properties.length}`);
-  console.log(`  🛏️  Rooms     : ${rooms.length}`);
-  console.log(`  📦 Orders    : ${orders.length}`);
-  console.log(`  ⭐ Reviews   : ${reviews.length}`);
-  console.log(`  🖼️  Images    : 12 (Cloudinary)`);
-  console.log('  🔑 Password  : Password123!');
+  console.log(' Summary:');
+  console.log(`  Users     : 3 (tenant@proprrent.com, user1@, user2@)`);
+  console.log(`  Properties: ${properties.length}`);
+  console.log(`  Rooms     : ${rooms.length}`);
+  console.log(`  Orders    : ${orders.length}`);
+  console.log(`  Reviews   : ${reviews.length}`);
+  console.log(`  Images    : 12 (Cloudinary)`);
+  console.log('  Password  : Password123!');
   console.log('='.repeat(50));
 }
 

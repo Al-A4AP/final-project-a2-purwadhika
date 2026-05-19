@@ -1,15 +1,77 @@
 import type { FC } from 'react';
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useMemo } from 'react';
 import { Link } from 'react-router-dom';
 import { Plus, Pencil, Trash2, BedDouble, Star } from 'lucide-react';
 import { tenantService } from '@/services/tenantService';
 import type { TenantProperty } from '@/types';
 import { formatPrice } from '@/lib/formatters';
+import SortFilterBar from '@/components/common/SortFilterBar';
+import type { SortGroup } from '@/components/common/SortFilterBar';
 
 const PropertiesListPage: FC = () => {
   const [properties, setProperties] = useState<TenantProperty[]>([]);
   const [loading, setLoading] = useState(true);
   const [deletingId, setDeletingId] = useState<string | null>(null);
+  const [sortKey, setSortKey] = useState('created_at');
+  const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('desc');
+
+  const tenantSortGroups: SortGroup[] = [
+    {
+      key: 'created_at', label: 'Tanggal', icon: 'clock',
+      options: [
+        { order: 'desc', label: 'Terbaru' },
+        { order: 'asc',  label: 'Terlama' },
+      ],
+    },
+    {
+      key: 'name', label: 'Nama', icon: 'alpha',
+      options: [
+        { order: 'asc',  label: 'A → Z' },
+        { order: 'desc', label: 'Z → A' },
+      ],
+    },
+    {
+      key: 'price', label: 'Harga', icon: 'price',
+      options: [
+        { order: 'desc', label: 'Termahal' },
+        { order: 'asc',  label: 'Termurah' },
+      ],
+    },
+    {
+      key: 'rooms', label: 'Kamar', icon: 'bed',
+      options: [
+        { order: 'desc', label: 'Terbanyak' },
+        { order: 'asc',  label: 'Tersedikit' },
+      ],
+    },
+    {
+      key: 'reviews', label: 'Review', icon: 'star',
+      options: [
+        { order: 'desc', label: 'Terbanyak' },
+        { order: 'asc',  label: 'Tersedikit' },
+      ],
+    },
+  ];
+
+  // Client-side sorting
+  const sortedProperties = useMemo(() => {
+    const getVal = (p: TenantProperty): number | string => {
+      if (sortKey === 'name')    return p.name.toLowerCase();
+      if (sortKey === 'price')   return p.rooms && p.rooms.length > 0 ? Math.min(...p.rooms.map(r => r.base_price)) : 0;
+      if (sortKey === 'rooms')   return p._count?.rooms ?? 0;
+      if (sortKey === 'reviews') return p._count?.reviews ?? 0;
+      return new Date(p.created_at ?? 0).getTime(); // created_at default
+    };
+
+    return [...properties].sort((a, b) => {
+      const aVal = getVal(a);
+      const bVal = getVal(b);
+      if (aVal < bVal) return sortOrder === 'asc' ? -1 : 1;
+      if (aVal > bVal) return sortOrder === 'asc' ? 1 : -1;
+      return 0;
+    });
+
+  }, [properties, sortKey, sortOrder]);
 
   const fetchProperties = () =>
     tenantService.getProperties().then(setProperties).finally(() => setLoading(false));
@@ -43,6 +105,17 @@ const PropertiesListPage: FC = () => {
         </Link>
       </div>
 
+      {properties.length > 0 && (
+        <SortFilterBar
+          sortGroups={tenantSortGroups}
+          currentSort={sortKey}
+          currentOrder={sortOrder}
+          onChange={(sort, order) => { setSortKey(sort); setSortOrder(order); }}
+          resultCount={properties.length}
+          resultLabel="properti"
+        />
+      )}
+
       {properties.length === 0 ? (
         <div className="text-center py-20">
           <p className="text-gray-500 mb-4">Anda belum memiliki properti</p>
@@ -52,7 +125,7 @@ const PropertiesListPage: FC = () => {
         </div>
       ) : (
         <div className="space-y-4">
-          {properties.map((p) => {
+          {sortedProperties.map((p) => {
             const minPrice = p.rooms && p.rooms.length > 0
               ? Math.min(...p.rooms.map((r) => r.base_price))
               : null;

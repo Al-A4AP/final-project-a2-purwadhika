@@ -4,6 +4,7 @@ import {
   getPropertyDetailController,
   getCategoriesController,
 } from '../controllers/propertyController';
+import { getRoomAvailabilitiesCtrl } from '../controllers/tenantRoomController';
 
 const router = Router();
 
@@ -11,5 +12,6 @@ const router = Router();
 router.get('/', listPropertiesController);
 router.get('/categories', getCategoriesController);
 router.get('/:id', getPropertyDetailController);
+router.get('/rooms/:roomId/availability', getRoomAvailabilitiesCtrl);
 
 export default router;

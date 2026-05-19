@@ -1,12 +1,14 @@
 import { z } from 'zod';
 
 export const searchFormSchema = z.object({
-  city: z.string().min(1, 'Pilih kota'),
-  check_in_date: z.string().min(1, 'Pilih tanggal check-in'),
-  check_out_date: z.string().min(1, 'Pilih tanggal check-out'),
-  capacity: z.coerce.number().min(1, 'Minimal 1 orang').max(20, 'Maksimal 20 orang'),
+  city: z.string().optional(),
+  check_in_date: z.string().optional(),
+  check_out_date: z.string().optional(),
+  adults: z.coerce.number().min(1, 'Minimal 1 dewasa').max(20),
+  children: z.coerce.number().min(0).max(20),
+  babies: z.coerce.number().min(0).max(10),
 }).refine(
-  (data) => new Date(data.check_out_date) > new Date(data.check_in_date),
+  (data) => !data.check_in_date || !data.check_out_date || new Date(data.check_out_date) > new Date(data.check_in_date),
   {
     message: 'Tanggal check-out harus lebih besar dari check-in',
     path: ['check_out_date'],

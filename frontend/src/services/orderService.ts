@@ -6,7 +6,7 @@ export interface CreateOrderPayload {
   roomId: string;
   check_in_date: string;
   check_out_date: string;
-  payment_method: 'MANUAL' | 'MIDTRANS';
+  payment_method: 'MANUAL' | 'MIDTRANS'; // blm di test yg midtrans, qr & lain
 }
 
 export const orderService = {

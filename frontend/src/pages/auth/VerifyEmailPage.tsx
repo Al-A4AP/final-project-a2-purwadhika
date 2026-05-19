@@ -3,14 +3,14 @@ import { useEffect, useState } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { CheckCircle, XCircle, Loader2 } from 'lucide-react';
 
-// Dev mode: auto-verified, halaman ini hanya informasi
+// pake auto verify dulu buat dev skrng
 const VerifyEmailPage: FC = () => {
   const { token } = useParams<{ token: string }>();
   const [status, setStatus] = useState<'loading' | 'success' | 'error'>('loading');
 
   useEffect(() => {
-    // Dalam dev mode, akun sudah terverifikasi otomatis saat register
-    // Halaman ini sebagai landing jika user klik link email
+    // akun sudah terverfiks otomatis saat register
+    // Halaman buat landing jk user klik link email
     const timer = setTimeout(() => setStatus('success'), 1000);
     return () => clearTimeout(timer);
   }, [token]);

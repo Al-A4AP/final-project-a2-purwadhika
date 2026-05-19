@@ -64,3 +64,21 @@ export const deletePeakRateCtrl = async (req: Request, res: Response) => {
     return sendSuccess(res, null, 'Peak rate berhasil dihapus');
   } catch (err: any) { return sendError(res, err.message, err.statusCode || 500); }
 };
+
+export const getRoomAvailabilitiesCtrl = async (req: Request, res: Response) => {
+  try {
+    const { roomId } = req.params as { roomId: string };
+    const data = await svc.getRoomAvailabilities(roomId);
+    return sendSuccess(res, data, 'Ketersediaan kamar berhasil diambil');
+  } catch (err: any) { return sendError(res, err.message, err.statusCode || 500); }
+};
+
+export const setRoomAvailabilityCtrl = async (req: Request, res: Response) => {
+  try {
+    const { roomId } = req.params as { roomId: string };
+    const tenantId = req.user!.id as string;
+    const { date, is_available } = req.body;
+    const data = await svc.setRoomAvailability(roomId, tenantId, new Date(date), is_available);
+    return sendSuccess(res, data, 'Ketersediaan kamar berhasil diperbarui');
+  } catch (err: any) { return sendError(res, err.message, err.statusCode || 500); }
+};

@@ -14,4 +14,8 @@ export const userService = {
     });
     return res.data.data;
   },
+  async changePassword(data: { old_password?: string; new_password?: string }) {
+    const res = await api.patch<ApiResponse<null>>('/users/change-password', data);
+    return res.data;
+  }
 };

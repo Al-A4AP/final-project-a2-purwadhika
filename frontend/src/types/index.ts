@@ -67,6 +67,7 @@ export interface Room {
   propertyId: string;
   room_type: string;
   base_price: number;
+  child_price?: number;
   description?: string;
   capacity: number;
   availability?: RoomAvailability[];
@@ -109,6 +110,7 @@ export interface Order {
   user?: { name: string; email: string; phone?: string };
   property?: { name: string; city: string; featured_image_url?: string };
   room?: { room_type: string; base_price: number };
+  review?: Review;
 }
 
 // Review
@@ -226,6 +228,7 @@ export interface DashboardStats {
 export interface RoomFormInput {
   room_type: string;
   base_price: string;
+  child_price?: string;
   capacity: string;
   description?: string;
 }

@@ -1,6 +1,7 @@
 import type { FC } from 'react';
 import { useEffect, useState, useRef } from 'react';
 import { orderService } from '@/services/orderService';
+import { reviewService } from '@/services/reviewService';
 import type { Order } from '@/types';
 import { formatPrice, formatDate } from '@/lib/formatters';
 import { Clock, CheckCircle2, XCircle, CreditCard, UploadCloud } from 'lucide-react';
@@ -11,6 +12,12 @@ const OrdersPage: FC = () => {
   const [uploading, setUploading] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [selectedOrderId, setSelectedOrderId] = useState<string | null>(null);
+  
+  // Review states
+  const [reviewOrderId, setReviewOrderId] = useState<string | null>(null);
+  const [rating, setRating] = useState(5);
+  const [comment, setComment] = useState('');
+  const [submittingReview, setSubmittingReview] = useState(false);
 
   const fetchOrders = () => {
     orderService.getUserOrders()
@@ -42,6 +49,27 @@ const OrdersPage: FC = () => {
       setUploading(null);
       setSelectedOrderId(null);
       if (fileInputRef.current) fileInputRef.current.value = '';
+    }
+  };
+
+  const handleReviewSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!reviewOrderId) return;
+    setSubmittingReview(true);
+    try {
+      await reviewService.createReview(reviewOrderId, rating, comment);
+      alert('Review berhasil dikirim!');
+      setReviewOrderId(null);
+      setComment('');
+      setRating(5);
+      setRating(5);
+      fetchOrders();
+    } catch (err: unknown) {
+      const e = err as { response?: { data?: { message?: string } } };
+      const errorMsg = e.response?.data?.message || 'Gagal mengirim review';
+      alert(errorMsg);
+    } finally {
+      setSubmittingReview(false);
     }
   };
 
@@ -122,8 +150,37 @@ const OrdersPage: FC = () => {
                   {order.status === 'WAITING_PAYMENT' && order.payment_method === 'MIDTRANS' && !order.midtrans_transaction_id && (
                     <p className="text-yellow-600 text-xs mt-2 italic">Menunggu pembayaran Midtrans diselesaikan.</p>
                   )}
+                  {order.status === 'PROCESSED' && !order.review && (
+                    <button 
+                      onClick={() => setReviewOrderId(reviewOrderId === order.id ? null : order.id)}
+                      className="text-sm text-blue-600 hover:underline mt-2"
+                    >
+                      Beri Ulasan
+                    </button>
+                  )}
+                  {order.review && (
+                    <p className="text-xs text-green-600 mt-2">✓ Sudah diulas</p>
+                  )}
                 </div>
               </div>
+
+              {/* Review Form */}
+              {reviewOrderId === order.id && (
+                <form onSubmit={handleReviewSubmit} className="mt-4 p-4 bg-gray-50 dark:bg-slate-700/50 rounded-lg border dark:border-slate-600">
+                  <h4 className="font-semibold text-gray-900 dark:text-white mb-2">Berikan Ulasan Anda</h4>
+                  <div className="mb-3">
+                    <label className="text-sm text-gray-600 dark:text-gray-300">Rating (1-5)</label>
+                    <input type="number" min="1" max="5" value={rating} onChange={(e) => setRating(Number(e.target.value))} className="w-full mt-1 p-2 border rounded-md dark:bg-slate-800 dark:border-slate-600" required />
+                  </div>
+                  <div className="mb-3">
+                    <label className="text-sm text-gray-600 dark:text-gray-300">Komentar</label>
+                    <textarea value={comment} onChange={(e) => setComment(e.target.value)} className="w-full mt-1 p-2 border rounded-md dark:bg-slate-800 dark:border-slate-600" required rows={3}></textarea>
+                  </div>
+                  <button type="submit" disabled={submittingReview} className="bg-blue-600 text-white px-4 py-2 rounded-lg font-medium text-sm hover:bg-blue-700 transition disabled:opacity-70">
+                    {submittingReview ? 'Mengirim...' : 'Kirim Ulasan'}
+                  </button>
+                </form>
+              )}
             </div>
           ))}
         </div>

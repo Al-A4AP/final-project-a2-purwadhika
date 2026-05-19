@@ -77,3 +77,22 @@ export const deletePeakRate = async (id: string, tenantId: string) => {
   if (!rate || rate.room.property.tenantId !== tenantId) throw new AppError('Rate tidak ditemukan', 404);
   return prisma.peakSeasonRate.update({ where: { id }, data: { deleted_at: new Date() } });
 };
+
+export const getRoomAvailabilities = async (roomId: string) => {
+  return prisma.roomAvailability.findMany({
+    where: { roomId },
+    orderBy: { date: 'asc' },
+  });
+};
+
+export const setRoomAvailability = async (roomId: string, tenantId: string, date: Date, is_available: boolean) => {
+  await verifyRoomOwner(roomId, tenantId);
+  const startOfDay = new Date(date);
+  startOfDay.setUTCHours(0, 0, 0, 0);
+
+  return prisma.roomAvailability.upsert({
+    where: { roomId_date: { roomId, date: startOfDay } },
+    update: { is_available },
+    create: { roomId, date: startOfDay, is_available },
+  });
+};

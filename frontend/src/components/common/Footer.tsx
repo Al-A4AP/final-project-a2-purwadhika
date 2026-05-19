@@ -1,14 +1,19 @@
 import type { FC } from 'react';
 import { Mail, Phone, MapPin } from 'lucide-react';
+import { Link } from 'react-router-dom';
+import { useAuthStore } from '@/stores/authStore';
 
 const Footer: FC = () => {
+  const { isTenant, isAuthenticated } = useAuthStore();
+  const isRegularUser = isAuthenticated && !isTenant;
+
   return (
     <footer className="bg-gray-900 dark:bg-slate-950 text-gray-300 mt-16">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
         <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
           {/* About */}
           <div>
-            <h3 className="text-white text-lg font-bold mb-4">🏡 Property Renting</h3>
+            <h3 className="text-white text-lg font-bold mb-4">Property Renting</h3>
             <p className="text-sm leading-relaxed">
               Platform terpercaya untuk menemukan akomodasi terbaik di Indonesia dengan harga yang kompetitif dan transparan.
             </p>
@@ -18,23 +23,37 @@ const Footer: FC = () => {
           <div>
             <h4 className="text-white font-semibold mb-4">Navigasi</h4>
             <ul className="space-y-2 text-sm">
-              <li><a href="#" className="hover:text-white transition">Beranda</a></li>
-              <li><a href="#" className="hover:text-white transition">Properti</a></li>
-              <li><a href="#" className="hover:text-white transition">Tentang Kami</a></li>
-              <li><a href="#" className="hover:text-white transition">Kontak</a></li>
+              <li><Link to="/" className="hover:text-white transition">Beranda</Link></li>
+              <li><Link to="/about" className="hover:text-white transition">Tentang Kami</Link></li>
+              <li><Link to="/contact" className="hover:text-white transition">Kontak</Link></li>
             </ul>
           </div>
 
           {/* Tenant */}
-          <div>
-            <h4 className="text-white font-semibold mb-4">Untuk Pemilik</h4>
-            <ul className="space-y-2 text-sm">
-              <li><a href="#" className="hover:text-white transition">Daftar Properti</a></li>
-              <li><a href="#" className="hover:text-white transition">Kelola Properti</a></li>
-              <li><a href="#" className="hover:text-white transition">Laporan Penjualan</a></li>
-              <li><a href="#" className="hover:text-white transition">Pusat Bantuan</a></li>
-            </ul>
-          </div>
+          {!isRegularUser && (
+            <div>
+              <h4 className="text-white font-semibold mb-4">Untuk Pemilik</h4>
+              <ul className="space-y-2 text-sm">
+                {isTenant ? (
+                  <>
+                    <li><Link to="/tenant/dashboard" className="hover:text-white transition">Dashboard</Link></li>
+                    <li><Link to="/tenant/properties" className="hover:text-white transition">Kelola Properti</Link></li>
+                    <li><Link to="/tenant/reports" className="hover:text-white transition">Laporan Penjualan</Link></li>
+                    <li><Link to="/tenant/orders" className="hover:text-white transition">Pesanan Tamu</Link></li>
+                  </>
+                ) : (
+                  <>
+                    <li>
+                      <Link to="/auth/register" className="hover:text-white transition text-red-400 font-medium">
+                        Daftar Menjadi Tenant
+                      </Link>
+                    </li>
+                    <li><p className="text-gray-500 mt-2">Sewakan properti Anda dan raih penghasilan tambahan bersama kami.</p></li>
+                  </>
+                )}
+              </ul>
+            </div>
+          )}
 
           {/* Contact */}
           <div>
@@ -48,13 +67,13 @@ const Footer: FC = () => {
               </div>
               <div className="flex items-center gap-2">
                 <Phone size={16} />
-                <a href="tel:+6281234567890" className="hover:text-white transition">
-                  +62 812-3456-7890
+                <a href="tel:+6281909333337" className="hover:text-white transition">
+                  +62 819 0933 3337
                 </a>
               </div>
               <div className="flex items-start gap-2">
                 <MapPin size={16} className="mt-1 shrink-0" />
-                <span>Jakarta, Indonesia</span>
+                <span>Bandung, Indonesia</span>
               </div>
             </div>
           </div>
@@ -76,4 +95,5 @@ const Footer: FC = () => {
   );
 };
 
+// saat ini ckp segini dulu, kalo mau tambahin kita diskusi dulu
 export default Footer;

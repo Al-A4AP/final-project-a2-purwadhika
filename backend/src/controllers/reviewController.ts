@@ -1,0 +1,34 @@
+import { Request, Response } from 'express';
+import * as reviewService from '../services/reviewService';
+
+export const createReviewCtrl = async (req: Request, res: Response) => {
+  try {
+    const orderId = req.params.orderId as string;
+    const { rating, comment } = req.body;
+    const review = await reviewService.createReview(req.user!.id, orderId, rating, comment);
+    res.status(201).json({ message: 'Review berhasil dikirim', data: review });
+  } catch (err: any) {
+    res.status(400).json({ message: err.message });
+  }
+};
+
+export const getPropertyReviewsCtrl = async (req: Request, res: Response) => {
+  try {
+    const propertyId = req.params.propertyId as string;
+    const reviews = await reviewService.getPropertyReviews(propertyId);
+    res.status(200).json({ data: reviews });
+  } catch (err: any) {
+    res.status(400).json({ message: err.message });
+  }
+};
+
+export const replyReviewCtrl = async (req: Request, res: Response) => {
+  try {
+    const reviewId = req.params.reviewId as string;
+    const { reply_text } = req.body;
+    const reply = await reviewService.replyReview(req.user!.id, reviewId, reply_text);
+    res.status(201).json({ message: 'Balasan berhasil dikirim', data: reply });
+  } catch (err: any) {
+    res.status(400).json({ message: err.message });
+  }
+};

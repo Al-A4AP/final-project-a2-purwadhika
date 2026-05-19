@@ -1,4 +1,5 @@
 @import "tailwindcss";
+@custom-variant dark (&:is(.dark *));
 @import "leaflet/dist/leaflet.css";
 
 :root {
@@ -112,3 +113,4 @@ code {
   padding: 4px 8px;
   background: var(--code-bg);
 }
+

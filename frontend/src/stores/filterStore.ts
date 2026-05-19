@@ -2,10 +2,16 @@ import { create } from 'zustand';
 import type { PropertySearchFilters } from '@/types';
 
 interface FilterStore extends PropertySearchFilters {
+  adults: number;
+  children: number;
+  babies: number;
   setCity: (city: string) => void;
   setCheckInDate: (date: string) => void;
   setCheckOutDate: (date: string) => void;
   setCapacity: (capacity: number) => void;
+  setAdults: (n: number) => void;
+  setChildren: (n: number) => void;
+  setBabies: (n: number) => void;
   setCategory: (category: string) => void;
   setSearch: (search: string) => void;
   setPage: (page: number) => void;
@@ -14,11 +20,14 @@ interface FilterStore extends PropertySearchFilters {
   resetFilters: () => void;
 }
 
-const initialState: PropertySearchFilters = {
+const initialState: PropertySearchFilters & { adults: number; children: number; babies: number } = {
   city: '',
   check_in_date: '',
   check_out_date: '',
   capacity: undefined,
+  adults: 1,
+  children: 0,
+  babies: 0,
   search: '',
   category: '',
   page: 1,
@@ -33,6 +42,9 @@ export const useFilterStore = create<FilterStore>((set) => ({
   setCity: (city) => set({ city, page: 1 }),
   setCheckInDate: (date) => set({ check_in_date: date, page: 1 }),
   setCheckOutDate: (date) => set({ check_out_date: date, page: 1 }),
+  setAdults: (adults) => set((s) => ({ adults, capacity: adults + s.children, page: 1 })),
+  setChildren: (children) => set((s) => ({ children, capacity: s.adults + children, page: 1 })),
+  setBabies: (babies) => set({ babies }),
   setCapacity: (capacity) => set({ capacity, page: 1 }),
   setCategory: (category) => set({ category, page: 1 }),
   setSearch: (search) => set({ search, page: 1 }),

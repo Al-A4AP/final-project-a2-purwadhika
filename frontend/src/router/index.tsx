@@ -7,6 +7,8 @@ import ProtectedRoute from './ProtectedRoute';
 // Public pages
 import HomePage from '@/pages/user/HomePage';
 import PropertyDetailPage from '@/pages/user/PropertyDetailPage';
+import AboutPage from '@/pages/AboutPage';
+import ContactPage from '@/pages/ContactPage';
 
 // Auth pages
 import LoginPage from '@/pages/auth/LoginPage';
@@ -26,6 +28,7 @@ import PropertiesListPage from '@/pages/tenant/PropertiesListPage';
 import PropertyFormPage from '@/pages/tenant/PropertyFormPage';
 import RoomsPage from '@/pages/tenant/RoomsPage';
 import TenantOrdersPage from '@/pages/tenant/OrdersPage';
+import ReportsPage from '@/pages/tenant/ReportsPage';
 
 export const router = createBrowserRouter([
   // ─── Public + User Routes ─────────────────────────────────
@@ -35,6 +38,8 @@ export const router = createBrowserRouter([
     children: [
       { path: '', element: <HomePage /> },
       { path: 'properties/:id', element: <PropertyDetailPage /> },
+      { path: 'about', element: <AboutPage /> },
+      { path: 'contact', element: <ContactPage /> },
       {
         path: 'profile',
         element: <ProtectedRoute component={<ProfilePage />} />,
@@ -74,7 +79,7 @@ export const router = createBrowserRouter([
       { path: 'properties/:id/edit', element: <PropertyFormPage /> },
       { path: 'properties/:id/rooms', element: <RoomsPage /> },
       { path: 'orders', element: <TenantOrdersPage /> },
-      // TODO: tenant/reports
+      { path: 'reports', element: <ReportsPage /> },
     ],
   },
 ]);

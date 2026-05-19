@@ -1,15 +1,21 @@
-import type { FC } from 'react';
+import { useState, type FC } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { Link, useNavigate } from 'react-router-dom';
-import { LogIn, Loader2 } from 'lucide-react';
+import { LogIn, Loader2, Eye, EyeOff } from 'lucide-react';
+import { useAuthStore } from '@/stores/authStore';
 import { loginSchema, type LoginInput } from '@/validations/auth';
 import { authService } from '@/services/authService';
 import type { AxiosError } from 'axios';
 import type { ApiResponse } from '@/types';
 
+// udh di fix, muncul sekarang kl di run dev, token dismpn lokal strg
+
 const LoginPage: FC = () => {
   const navigate = useNavigate();
+  const [showPassword, setShowPassword] = useState(false);
+  const setToken = useAuthStore((state) => state.setToken);
+  const setUser = useAuthStore((state) => state.setUser);
 
   // Inisialisasi React Hook Form dengan Zod Resolver
   const { register, handleSubmit, formState: { errors, isSubmitting }, setError } =
@@ -19,6 +25,10 @@ const LoginPage: FC = () => {
     try {
       // 1. Panggil API Login
       const result = await authService.login(data.email, data.password);
+
+      // Simpan ke global store
+      setToken(result.token);
+      setUser(result.user);
 
       // 2. Redirect berdasarkan Role (Role-Based Routing)
       navigate(result.user.role === 'TENANT' ? '/tenant/dashboard' : '/');
@@ -62,12 +72,21 @@ const LoginPage: FC = () => {
         {/* Input Password */}
         <div>
           <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Password</label>
-          <input
-            {...register('password')}
-            type="password"
-            placeholder="••••••••"
-            className="w-full px-4 py-2.5 border border-gray-300 dark:border-slate-600 dark:bg-slate-700 dark:text-white rounded-lg focus:ring-2 focus:ring-red-500 outline-none transition"
-          />
+          <div className="relative">
+            <input
+              {...register('password')}
+              type={showPassword ? 'text' : 'password'}
+              placeholder="••••••••"
+              className="w-full px-4 py-2.5 border border-gray-300 dark:border-slate-600 dark:bg-slate-700 dark:text-white rounded-lg focus:ring-2 focus:ring-red-500 outline-none transition"
+            />
+            <button
+              type="button"
+              onClick={() => setShowPassword(!showPassword)}
+              className="absolute right-3 top-3 text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200"
+            >
+              {showPassword ? <EyeOff size={20} /> : <Eye size={20} />}
+            </button>
+          </div>
           {errors.password && <p className="text-red-500 text-xs mt-1">{errors.password.message}</p>}
         </div>
 

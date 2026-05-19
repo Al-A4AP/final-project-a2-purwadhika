@@ -15,10 +15,10 @@ export const useThemeStore = create<ThemeStore>((set) => ({
   isDark: false,
 
   setTheme: (theme) => {
-    // Save to localStorage
+    // Save k localStorage
     localStorage.setItem(STORAGE_KEYS.THEME, theme);
 
-    // Determine if dark should be applied
+    // cek apa darak perlu aktif
     let isDark = false;
     if (theme === 'dark') {
       isDark = true;
@@ -26,7 +26,7 @@ export const useThemeStore = create<ThemeStore>((set) => ({
       isDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
     }
 
-    // Apply to DOM
+    // Apply k DOM
     if (isDark) {
       document.documentElement.classList.add('dark');
     } else {
@@ -39,7 +39,7 @@ export const useThemeStore = create<ThemeStore>((set) => ({
   hydrate: () => {
     const savedTheme = (localStorage.getItem(STORAGE_KEYS.THEME) as Theme) || 'system';
     
-    // Determine if dark
+    // jk dark
     let isDark = false;
     if (savedTheme === 'dark') {
       isDark = true;
@@ -47,7 +47,7 @@ export const useThemeStore = create<ThemeStore>((set) => ({
       isDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
     }
 
-    // Apply to DOM
+    // Apply k DOM
     if (isDark) {
       document.documentElement.classList.add('dark');
     } else {

@@ -16,3 +16,10 @@ export const updateAvatarCtrl = async (req: Request, res: Response) => {
     return sendSuccess(res, data, 'Avatar berhasil diperbarui');
   } catch (err: any) { return sendError(res, err.message, err.statusCode || 500); }
 };
+
+export const changePasswordCtrl = async (req: Request, res: Response) => {
+  try {
+    const data = await svc.changePassword(req.user!.id, req.body);
+    return sendSuccess(res, data, 'Password berhasil diubah');
+  } catch (err: any) { return sendError(res, err.message, err.statusCode || 500); }
+};

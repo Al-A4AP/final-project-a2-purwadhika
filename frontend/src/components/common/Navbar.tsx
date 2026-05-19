@@ -27,6 +27,10 @@ const Navbar: FC = () => {
 
           {/* Desktop Menu */}
           <div className="hidden md:flex items-center space-x-4">
+            <Link to="/" className="text-gray-700 dark:text-gray-300 hover:text-red-600 transition">Beranda</Link>
+            <Link to="/about" className="text-gray-700 dark:text-gray-300 hover:text-red-600 transition">Tentang Kami</Link>
+            <Link to="/contact" className="text-gray-700 dark:text-gray-300 hover:text-red-600 transition">Kontak</Link>
+            <div className="w-px h-5 bg-gray-300 dark:bg-slate-600 mx-1" />
             {isAuthenticated ? (
               <>
                 {user?.role === 'USER' && (
@@ -74,6 +78,10 @@ const Navbar: FC = () => {
         {/* Mobile Menu */}
         {isOpen && (
           <div className="md:hidden pb-4 space-y-2">
+            <Link to="/" onClick={() => setIsOpen(false)} className="block px-4 py-2 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-slate-700">Beranda</Link>
+            <Link to="/about" onClick={() => setIsOpen(false)} className="block px-4 py-2 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-slate-700">Tentang Kami</Link>
+            <Link to="/contact" onClick={() => setIsOpen(false)} className="block px-4 py-2 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-slate-700">Kontak</Link>
+            <hr className="border-gray-200 dark:border-slate-700 mx-4" />
             {isAuthenticated ? (
               <>
                 {user?.role === 'USER' && (
@@ -111,3 +119,5 @@ const Navbar: FC = () => {
 };
 
 export default Navbar;
+
+// ide navbar baru ini, next ada ide kita set lg

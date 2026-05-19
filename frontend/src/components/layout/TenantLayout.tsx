@@ -43,7 +43,7 @@ const TenantLayout: FC = () => {
         </nav>
 
         <div className="p-3 border-t dark:border-slate-700 space-y-1">
-          <Link to="/tenant/profile"
+          <Link to="/profile"
             className="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-slate-700 transition"
           >
             <User size={18} className="shrink-0" />
