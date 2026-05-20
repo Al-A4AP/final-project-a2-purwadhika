@@ -9,6 +9,7 @@ import SortFilterBar from '@/components/common/SortFilterBar';
 import type { SortGroup } from '@/components/common/SortFilterBar';
 import { toast } from 'react-hot-toast';
 import { ConfirmModal } from '@/components/common/ConfirmModal';
+import { Pagination } from '@/components/common/Pagination';
 
 const PropertiesListPage: FC = () => {
   const [properties, setProperties] = useState<TenantProperty[]>([]);
@@ -198,28 +199,12 @@ const PropertiesListPage: FC = () => {
         </div>
       )}
 
-      {/* Pagination Controls */}
-      {totalPages > 1 && (
-        <div className="flex items-center justify-between border-t dark:border-slate-700 pt-6">
-          <button
-            onClick={() => fetchProperties((pagination.page || 1) - 1)}
-            disabled={pagination.page === 1}
-            className="px-4 py-2 text-sm font-medium border dark:border-slate-700 rounded-lg hover:bg-gray-50 dark:hover:bg-slate-700 disabled:opacity-50 bg-white dark:bg-slate-800"
-          >
-            Sebelumnya
-          </button>
-          <span className="text-sm text-gray-600 dark:text-gray-400">
-            Halaman {pagination.page} dari {totalPages}
-          </span>
-          <button
-            onClick={() => fetchProperties((pagination.page || 1) + 1)}
-            disabled={pagination.page === totalPages}
-            className="px-4 py-2 text-sm font-medium border dark:border-slate-700 rounded-lg hover:bg-gray-50 dark:hover:bg-slate-700 disabled:opacity-50 bg-white dark:bg-slate-800"
-          >
-            Selanjutnya
-          </button>
-        </div>
-      )}
+      <Pagination
+        currentPage={pagination.page || 1}
+        totalPages={totalPages}
+        totalItems={pagination.total}
+        onPageChange={fetchProperties}
+      />
 
       {/* Confirm Modal */}
       <ConfirmModal

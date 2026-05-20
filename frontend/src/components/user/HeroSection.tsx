@@ -92,7 +92,7 @@ export const HeroSection: FC = () => {
             <div className="absolute inset-0 z-20 flex flex-col items-center justify-center text-center px-4 mb-20 md:mb-12">
               <span className="flex items-center gap-1.5 text-red-500 font-semibold text-xs md:text-sm tracking-wider uppercase bg-white/10 backdrop-blur-md px-3.5 py-1.5 rounded-full mb-4 animate-fade-in-down border border-white/20">
                 <Sparkles size={14} className="text-red-500 fill-red-500" />
-                PropRent Premium Vacation Homes
+                <span className="text-rose-600 font-bold">PURWA</span><span className="text-slate-900 font-bold">LOKA</span> Premium Vacation Homes
               </span>
               <h1 className="text-3xl md:text-6xl font-bold text-white max-w-4xl leading-tight drop-shadow-lg">
                 {slide.title}

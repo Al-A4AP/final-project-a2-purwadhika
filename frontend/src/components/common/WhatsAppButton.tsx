@@ -4,7 +4,7 @@ import { WHATSAPP_NUMBER } from '@/lib/constants';
 
 const WhatsAppButton: FC = () => {
   const handleClick = () => {
-    const message = 'Halo, saya ingin bertanya tentang properti di Property Renting.';
+    const message = 'Halo, saya ingin bertanya tentang properti di PURWALOKA.';
     const url = `https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(message)}`;
     window.open(url, '_blank');
   };

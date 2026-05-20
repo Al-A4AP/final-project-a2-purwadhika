@@ -83,8 +83,8 @@ const HomePage: FC = () => {
           
         const result = await propertyService.getProperties(fetchParams);
         setProperties(result.items);
-        setTotalCount(result.pagination.total);
-        setTotalPages(result.pagination.pages);
+        setTotalCount(result.pagination?.total || 0);
+        setTotalPages(result.pagination?.pages || 1);
       } catch {
         setProperties([]);
       } finally {
@@ -112,6 +112,7 @@ const HomePage: FC = () => {
           resultCount={totalCount}
           resultLabel={filters.city ? `properti di ${filters.city}` : 'properti terpopuler'}
         />
+        
         <PropertyGrid
           properties={properties}
           loading={loading}

@@ -158,7 +158,7 @@ const PropertyDetailPage: FC = () => {
             )}
             {checkIn && checkOut && new Date(checkOut) > new Date(checkIn) && (
               <p className="mt-3 text-sm text-green-600 dark:text-green-400 font-medium">
-                ✅ {Math.ceil((new Date(checkOut).getTime() - new Date(checkIn).getTime()) / 86400000)} malam dipilih
+                Terpilih: {Math.ceil((new Date(checkOut).getTime() - new Date(checkIn).getTime()) / 86400000)} malam
               </p>
             )}
           </div>
@@ -174,7 +174,7 @@ const PropertyDetailPage: FC = () => {
             return (
               <div className="bg-white dark:bg-slate-800 rounded-xl p-8 shadow-sm border dark:border-slate-700">
                 <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-2">
-                  {property.category?.name === 'Villa' ? '🏡 Sewa Seluruh Villa' : '🏠 Sewa Seluruh Rumah'}
+                  {property.category?.name === 'Villa' ? 'Sewa Seluruh Villa' : 'Sewa Seluruh Rumah'}
                 </h2>
                 <p className="text-gray-500 dark:text-gray-400 text-sm mb-6">
                   Anda akan menyewa seluruh {property.category?.name?.toLowerCase()} ini secara eksklusif.

@@ -8,6 +8,7 @@ import { verifyEmailSchema, type VerifyEmailInput } from '@/validations/auth';
 import { authService } from '@/services/authService';
 import type { AxiosError } from 'axios';
 import type { ApiResponse } from '@/types';
+import { toast } from 'react-hot-toast';
 
 const VerifyEmailPage: FC = () => {
   const { token } = useParams<{ token: string }>();
@@ -30,11 +31,13 @@ const VerifyEmailPage: FC = () => {
       setStatus('loading');
       await authService.verifyEmail(token, data.password);
       setStatus('success');
+      toast.success('Email berhasil diverifikasi!');
     } catch (err) {
       const axiosErr = err as AxiosError<ApiResponse<null>>;
       const msg = axiosErr.response?.data?.message || 'Verifikasi gagal';
       setErrorMessage(msg);
       setStatus('error');
+      toast.error(msg);
     }
   };
 
@@ -48,7 +51,7 @@ const VerifyEmailPage: FC = () => {
             </div>
             <h2 className="text-2xl font-bold text-gray-900 dark:text-white">Buat Password Anda</h2>
             <p className="text-gray-600 dark:text-gray-400 text-sm mt-1">
-              Atur password Anda untuk mengaktifkan akun Property Renting Anda.
+              Atur password Anda untuk mengaktifkan akun <span className="text-rose-600 font-bold">PURWA</span><span className="text-slate-900 dark:text-white font-bold">LOKA</span> Anda.
             </p>
           </div>
 

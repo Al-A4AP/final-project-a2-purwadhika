@@ -8,7 +8,7 @@ const AuthLayout: FC = () => {
         {/* Logo */}
         <div className="text-center mb-8">
           <Link to="/" className="text-2xl font-bold text-red-600">
-            🏡 Property Renting
+            <span className="text-rose-600 font-black">PURWA</span><span className="text-slate-900 dark:text-white font-black">LOKA</span>
           </Link>
           <p className="text-gray-600 dark:text-gray-400 text-sm mt-2">
             Temukan akomodasi terbaik untuk kebutuhan Anda

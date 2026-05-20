@@ -6,8 +6,10 @@ import { LogIn, Loader2, Eye, EyeOff } from 'lucide-react';
 import { useAuthStore } from '@/stores/authStore';
 import { loginSchema, type LoginInput } from '@/validations/auth';
 import { authService } from '@/services/authService';
-import type { AxiosError } from 'axios';
+import axios, { type AxiosError } from 'axios';
 import type { ApiResponse } from '@/types';
+import { toast } from 'react-hot-toast';
+import { useGoogleLogin } from '@react-oauth/google';
 
 // udh di fix, muncul sekarang kl di run dev, token dismpn lokal strg
 
@@ -37,12 +39,14 @@ const LoginPage: FC = () => {
       setUser(result.user);
 
       // 2. Redirect berdasarkan Role (Role-Based Routing)
+      toast.success('Login berhasil!');
       navigate(result.user.role === 'TENANT' ? '/tenant/dashboard' : '/');
     } catch (err) {
       // 3. Error Handling untuk Axios
       const axiosErr = err as AxiosError<ApiResponse<null>>;
       const msg = axiosErr.response?.data?.message || 'Login gagal';
       
+      toast.error(msg);
       // Set pesan error ke level 'root' agar bisa ditampilkan di atas form
       setError('root', { message: msg });
 
@@ -58,25 +62,40 @@ const LoginPage: FC = () => {
       setResendStatus('loading');
       await authService.resendVerification(resendEmail);
       setResendStatus('success');
+      toast.success('Email verifikasi telah dikirim ulang');
     } catch {
       setResendStatus('error');
+      toast.error('Gagal mengirim ulang email');
     }
   };
 
-  const handleGoogleLogin = async () => {
-    try {
-      const result = await authService.googleLogin({
-        email: 'googleuser@gmail.com',
-        name: 'Google User',
-        avatarUrl: 'https://lh3.googleusercontent.com/a/default-user',
-      });
-      setToken(result.token);
-      setUser(result.user);
-      navigate('/');
-    } catch {
-      setError('root', { message: 'Gagal login menggunakan Google' });
+  const handleGoogleLogin = useGoogleLogin({
+    onSuccess: async (tokenResponse) => {
+      try {
+        const userInfo = await axios.get('https://www.googleapis.com/oauth2/v3/userinfo', {
+          headers: { Authorization: `Bearer ${tokenResponse.access_token}` },
+        });
+        
+        const result = await authService.googleLogin({
+          email: userInfo.data.email,
+          name: userInfo.data.name,
+          avatarUrl: userInfo.data.picture,
+        });
+        setToken(result.token);
+        setUser(result.user);
+        toast.success('Berhasil login menggunakan Google');
+        navigate('/');
+      } catch (err) {
+        console.error('Google login error:', err);
+        setError('root', { message: 'Gagal memproses login Google' });
+        toast.error('Gagal login menggunakan Google');
+      }
+    },
+    onError: (error) => {
+      console.error('Google login error:', error);
+      toast.error('Gagal terhubung ke Google');
     }
-  };
+  });
 
   return (
     <>
@@ -166,7 +185,7 @@ const LoginPage: FC = () => {
 
         <button
           type="button"
-          onClick={handleGoogleLogin}
+          onClick={() => handleGoogleLogin()}
           className="w-full bg-white dark:bg-slate-800 border border-gray-300 dark:border-slate-600 text-gray-700 dark:text-gray-200 py-2.5 rounded-lg font-semibold hover:bg-gray-50 dark:hover:bg-slate-700 transition flex items-center justify-center gap-2 cursor-pointer"
         >
           <svg className="w-5 h-5" viewBox="0 0 24 24">

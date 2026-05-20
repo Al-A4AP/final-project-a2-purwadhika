@@ -1,40 +1,51 @@
-import { createBrowserRouter } from 'react-router-dom';
+import { lazy, Suspense } from 'react';
+import { createBrowserRouter, Outlet } from 'react-router-dom';
 import UserLayout from '@/components/layout/UserLayout';
 import AuthLayout from '@/components/layout/AuthLayout';
 import TenantLayout from '@/components/layout/TenantLayout';
 import ProtectedRoute from './ProtectedRoute';
+import { Loading } from '@/components/common/Loading';
+
+// Helper component for Suspense
+const Loadable = (Component: React.LazyExoticComponent<any>) => (props: any) => (
+  <Suspense fallback={<Loading fullScreen />}>
+    <Component {...props} />
+  </Suspense>
+);
 
 // Public pages
-import HomePage from '@/pages/user/HomePage';
-import PropertyDetailPage from '@/pages/user/PropertyDetailPage';
-import AboutPage from '@/pages/AboutPage';
-import ContactPage from '@/pages/ContactPage';
+const HomePage = Loadable(lazy(() => import('@/pages/user/HomePage')));
+const PropertyDetailPage = Loadable(lazy(() => import('@/pages/user/PropertyDetailPage')));
+const AboutPage = Loadable(lazy(() => import('@/pages/AboutPage')));
+const ContactPage = Loadable(lazy(() => import('@/pages/ContactPage')));
 
 // Auth pages
-import LoginPage from '@/pages/auth/LoginPage';
-import RegisterPage from '@/pages/auth/RegisterPage';
-import VerifyEmailPage from '@/pages/auth/VerifyEmailPage';
-import ForgotPasswordPage from '@/pages/auth/ForgotPasswordPage';
-import ResetPasswordPage from '@/pages/auth/ResetPasswordPage';
+const LoginPage = Loadable(lazy(() => import('@/pages/auth/LoginPage')));
+const RegisterPage = Loadable(lazy(() => import('@/pages/auth/RegisterPage')));
+const VerifyEmailPage = Loadable(lazy(() => import('@/pages/auth/VerifyEmailPage')));
+const ForgotPasswordPage = Loadable(lazy(() => import('@/pages/auth/ForgotPasswordPage')));
+const ResetPasswordPage = Loadable(lazy(() => import('@/pages/auth/ResetPasswordPage')));
 
 // User pages
-import ProfilePage from '@/pages/user/ProfilePage';
-import BookingPage from '@/pages/user/BookingPage';
-import OrdersPage from '@/pages/user/OrdersPage';
+const ProfilePage = Loadable(lazy(() => import('@/pages/user/ProfilePage')));
+const BookingPage = Loadable(lazy(() => import('@/pages/user/BookingPage')));
+const OrdersPage = Loadable(lazy(() => import('@/pages/user/OrdersPage')));
 
 // Tenant pages
-import DashboardPage from '@/pages/tenant/DashboardPage';
-import PropertiesListPage from '@/pages/tenant/PropertiesListPage';
-import PropertyFormPage from '@/pages/tenant/PropertyFormPage';
-import RoomsPage from '@/pages/tenant/RoomsPage';
-import TenantOrdersPage from '@/pages/tenant/OrdersPage';
-import ReportsPage from '@/pages/tenant/ReportsPage';
+const DashboardPage = Loadable(lazy(() => import('@/pages/tenant/DashboardPage')));
+const PropertiesListPage = Loadable(lazy(() => import('@/pages/tenant/PropertiesListPage')));
+const PropertyFormPage = Loadable(lazy(() => import('@/pages/tenant/PropertyFormPage')));
+const RoomsPage = Loadable(lazy(() => import('@/pages/tenant/RoomsPage')));
+const TenantOrdersPage = Loadable(lazy(() => import('@/pages/tenant/OrdersPage').then(module => ({ default: module.default || module.OrdersPage }))));
+const ReportsPage = Loadable(lazy(() => import('@/pages/tenant/ReportsPage')));
+const NotFoundPage = Loadable(lazy(() => import('@/pages/NotFoundPage')));
 
 export const router = createBrowserRouter([
   // ─── Public + User Routes ─────────────────────────────────
   {
     path: '/',
     element: <UserLayout />,
+    errorElement: <NotFoundPage />,
     children: [
       { path: '', element: <HomePage /> },
       { path: 'properties/:id', element: <PropertyDetailPage /> },

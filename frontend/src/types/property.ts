@@ -44,6 +44,7 @@ export interface PropertySearchFilters {
   capacity?: number;
   min_price?: number;
   max_price?: number;
+  amenities?: string[];
   search?: string;
   category?: string;
   page?: number;

@@ -21,7 +21,7 @@ const TenantLayout: FC = () => {
     <div className="flex min-h-screen bg-gray-50 dark:bg-slate-900">
       <aside className={`${collapsed ? 'w-16' : 'w-64'} bg-white dark:bg-slate-800 border-r dark:border-slate-700 flex flex-col transition-all duration-300 shrink-0`}>
         <div className="p-4 border-b dark:border-slate-700 flex items-center justify-between">
-          {!collapsed && <span className="font-bold text-red-600 text-lg">PropRent</span>}
+          {!collapsed && <span className="text-lg"><span className="text-rose-600 font-black">PURWA</span><span className="text-slate-900 dark:text-white font-black">LOKA</span></span>}
           <button onClick={() => setCollapsed(!collapsed)} className="p-1.5 rounded-lg hover:bg-gray-100 dark:hover:bg-slate-700 text-gray-500">
             {collapsed ? <ChevronRight size={18} /> : <ChevronLeft size={18} />}
           </button>

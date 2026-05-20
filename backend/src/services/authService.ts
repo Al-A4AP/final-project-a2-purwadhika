@@ -58,13 +58,8 @@ export const loginUser = async (email: string, password: string) => {
   const valid = await bcryptjs.compare(password, user.password_hash);
   if (!valid) throw new AppError('Email atau password salah', 401);
 
-  // Auto-verify pre-existing users on successful password match for backwards compatibility
   if (!user.verified_at) {
-    await prisma.user.update({
-      where: { id: user.id },
-      data: { verified_at: new Date() }
-    });
-    user.verified_at = new Date();
+    throw new AppError('Silakan verifikasi email Anda terlebih dahulu', 403);
   }
 
   const token = generateToken({ id: user.id, email: user.email, role: user.role });

@@ -5,6 +5,7 @@ import { tenantService } from '@/services/tenantService';
 import type { Order, TenantProperty, PaginationMeta } from '@/types';
 import { formatPrice } from '@/lib/formatters';
 import { Check, X, ExternalLink } from 'lucide-react';
+import { Pagination } from '@/components/common/Pagination';
 
 const TenantOrdersPage: FC = () => {
   const [orders, setOrders] = useState<Order[]>([]);
@@ -256,28 +257,12 @@ const TenantOrdersPage: FC = () => {
             </table>
           </div>
 
-          {/* Pagination Controls */}
-          {totalPages > 1 && (
-            <div className="flex items-center justify-between border-t dark:border-slate-700 p-4 bg-gray-50 dark:bg-slate-700/50">
-              <button
-                onClick={() => fetchOrders((pagination.page || 1) - 1)}
-                disabled={pagination.page === 1}
-                className="px-4 py-2 text-sm font-medium border dark:border-slate-600 rounded-lg hover:bg-gray-100 dark:hover:bg-slate-700 disabled:opacity-50 bg-white dark:bg-slate-800 text-gray-700 dark:text-gray-300"
-              >
-                Sebelumnya
-              </button>
-              <span className="text-sm text-gray-600 dark:text-gray-400">
-                Halaman {pagination.page} dari {totalPages} (Total: {pagination.total} pesanan)
-              </span>
-              <button
-                onClick={() => fetchOrders((pagination.page || 1) + 1)}
-                disabled={pagination.page === totalPages}
-                className="px-4 py-2 text-sm font-medium border dark:border-slate-600 rounded-lg hover:bg-gray-100 dark:hover:bg-slate-700 disabled:opacity-50 bg-white dark:bg-slate-800 text-gray-700 dark:text-gray-300"
-              >
-                Selanjutnya
-              </button>
-            </div>
-          )}
+          <Pagination
+            currentPage={pagination.page || 1}
+            totalPages={totalPages}
+            totalItems={pagination.total}
+            onPageChange={fetchOrders}
+          />
         </div>
       )}
     </div>

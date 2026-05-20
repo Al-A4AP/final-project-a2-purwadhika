@@ -8,6 +8,7 @@ import { resetPasswordSchema, type ResetPasswordInput } from '@/validations/auth
 import { authService } from '@/services/authService';
 import type { AxiosError } from 'axios';
 import type { ApiResponse } from '@/types';
+import { toast } from 'react-hot-toast';
 
 const ResetPasswordPage: FC = () => {
   const [searchParams] = useSearchParams();
@@ -23,10 +24,13 @@ const ResetPasswordPage: FC = () => {
     try {
       await authService.resetPassword(token, data.password);
       setSuccess(true);
+      toast.success('Password berhasil direset!');
       setTimeout(() => navigate('/auth/login'), 2000);
     } catch (err) {
       const axiosErr = err as AxiosError<ApiResponse<null>>;
-      setError('root', { message: axiosErr.response?.data?.message || 'Reset gagal, token tidak valid.' });
+      const msg = axiosErr.response?.data?.message || 'Reset gagal, token tidak valid.';
+      toast.error(msg);
+      setError('root', { message: msg });
     }
   };
 

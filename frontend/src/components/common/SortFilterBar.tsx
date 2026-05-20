@@ -1,6 +1,7 @@
 import type { FC } from 'react';
-import { useState } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import { ArrowUpDown, TrendingUp, Star, DollarSign, Clock, BedDouble, ChevronDown } from 'lucide-react';
+import { PropertyFilterDropdown } from '../user/PropertyFilterDropdown';
 
 export interface SortSubOption {
   order: 'asc' | 'desc';
@@ -41,14 +42,13 @@ const SortFilterBar: FC<Props> = ({
   resultLabel = 'hasil',
 }) => {
   const [openGroup, setOpenGroup] = useState<string | null>(null);
+  const dropdownRefs = useRef<Record<string, HTMLDivElement | null>>({});
 
   const handleGroupClick = (group: SortGroup) => {
     if (openGroup === group.key) {
-      // Tutup jika sudah terbuka
       setOpenGroup(null);
     } else {
       setOpenGroup(group.key);
-      // Jika grup belum aktif, pilih sub-opsi default (desc)
       if (currentSort !== group.key) {
         onChange(group.key, group.options[0].order);
       }
@@ -60,19 +60,38 @@ const SortFilterBar: FC<Props> = ({
     setOpenGroup(null);
   };
 
+  // Close dropdowns when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (openGroup) {
+        const ref = dropdownRefs.current[openGroup];
+        if (ref && !ref.contains(event.target as Node)) {
+          setOpenGroup(null);
+        }
+      }
+    };
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, [openGroup]);
+
   return (
     <div className="mb-6">
       {/* Header: jumlah hasil + label */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-3 border-b dark:border-slate-700 mb-4">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-3 border-b dark:border-slate-800 mb-4">
         {resultCount !== undefined && (
-          <p className="text-sm text-gray-500 dark:text-gray-400">
-            <span className="font-semibold text-gray-900 dark:text-white">{resultCount}</span> {resultLabel}
+          <p className="text-sm text-slate-500 dark:text-slate-400">
+            <span className="font-semibold text-slate-900 dark:text-white">{resultCount}</span> {resultLabel}
           </p>
         )}
 
-        {/* Sort Group Buttons */}
-        <div className="flex items-center gap-2 flex-wrap">
-          <span className="flex items-center gap-1 text-xs text-gray-500 dark:text-gray-400 font-medium shrink-0">
+        {/* Sort & Filter Buttons */}
+        <div className="flex items-center gap-3 flex-wrap">
+          {/* Integrated Filter Dropdown */}
+          <PropertyFilterDropdown />
+
+          <div className="hidden sm:block w-px h-5 bg-slate-200 dark:bg-slate-800 mx-1" />
+
+          <span className="flex items-center gap-1 text-xs text-slate-500 dark:text-slate-400 font-bold uppercase tracking-wider shrink-0">
             <ArrowUpDown size={13} /> Urutkan:
           </span>
 
@@ -84,14 +103,20 @@ const SortFilterBar: FC<Props> = ({
               : null;
 
             return (
-              <div key={group.key} className="relative flex items-center gap-1">
+              <div 
+                key={group.key} 
+                className="relative inline-block text-left"
+                ref={el => dropdownRefs.current[group.key] = el}
+              >
                 {/* Grup Button */}
                 <button
                   onClick={() => handleGroupClick(group)}
-                  className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-medium transition border ${
+                  className={`flex items-center gap-1.5 px-3.5 py-2 rounded-full text-xs font-semibold transition border ${
                     isActive
-                      ? 'bg-red-600 text-white border-red-600 shadow-sm'
-                      : 'bg-white dark:bg-slate-800 text-gray-600 dark:text-gray-400 border-gray-200 dark:border-slate-600 hover:border-red-400 hover:text-red-600 dark:hover:text-red-400'
+                      ? 'bg-rose-600 text-white border-rose-600 shadow-sm'
+                      : isOpen
+                        ? 'bg-slate-100 dark:bg-slate-800 text-slate-800 dark:text-slate-200 border-slate-300 dark:border-slate-600'
+                        : 'bg-white dark:bg-slate-900 text-slate-600 dark:text-slate-400 border-slate-200 dark:border-slate-850 hover:border-rose-450 hover:text-rose-600'
                   }`}
                 >
                   {group.icon && iconMap[group.icon]}
@@ -102,19 +127,19 @@ const SortFilterBar: FC<Props> = ({
                   />
                 </button>
 
-                {/* Sub-opsi: muncul inline di sebelah tombol grup saat terbuka */}
+                {/* Sub-opsi: Dropdown Menu */}
                 {isOpen && (
-                  <div className="flex items-center gap-1 animate-in fade-in slide-in-from-top-1 duration-150">
+                  <div className="absolute left-0 mt-2 w-48 bg-white dark:bg-slate-900 border border-slate-100 dark:border-slate-800 rounded-2xl shadow-xl py-2 z-40 origin-top-left animate-fade-in">
                     {group.options.map((sub) => {
                       const isSubActive = isActive && currentOrder === sub.order;
                       return (
                         <button
                           key={sub.order}
                           onClick={() => handleSubOption(group, sub)}
-                          className={`px-3 py-1.5 rounded-full text-xs font-medium transition border ${
+                          className={`w-full text-left px-5 py-2.5 text-xs font-semibold transition ${
                             isSubActive
-                              ? 'bg-red-600 text-white border-red-600'
-                              : 'bg-red-50 dark:bg-red-900/10 text-red-600 dark:text-red-400 border-red-200 dark:border-red-800 hover:bg-red-100 dark:hover:bg-red-900/20'
+                              ? 'bg-rose-50 dark:bg-rose-500/10 text-rose-700 dark:text-rose-400'
+                              : 'text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-800'
                           }`}
                         >
                           {sub.label}

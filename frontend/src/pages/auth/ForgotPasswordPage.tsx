@@ -6,6 +6,7 @@ import { Link } from 'react-router-dom';
 import { Mail, Loader2, CheckCircle } from 'lucide-react';
 import { forgotPasswordSchema, type ForgotPasswordInput } from '@/validations/auth';
 import { authService } from '@/services/authService';
+import { toast } from 'react-hot-toast';
 
 const ForgotPasswordPage: FC = () => {
   const [sent, setSent] = useState(false);
@@ -17,7 +18,9 @@ const ForgotPasswordPage: FC = () => {
     try {
       await authService.forgotPassword(data.email);
       setSent(true);
+      toast.success('Link reset password dikirim!');
     } catch {
+      toast.error('Terjadi kesalahan, coba lagi.');
       setError('root', { message: 'Terjadi kesalahan, coba lagi.' });
     }
   };
