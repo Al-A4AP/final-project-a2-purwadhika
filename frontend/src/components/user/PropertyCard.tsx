@@ -64,7 +64,11 @@ const PropertyCard: FC<PropertyCardProps> = ({ property }) => {
         {/* Price */}
         <div className="pt-3 border-t border-gray-200 dark:border-slate-700">
           <div className="text-2xl font-bold text-red-600">
-            {formatPrice(property.min_price)}
+            {property.min_price === 0 ? (
+              <span className="text-green-600 dark:text-green-400">Gratis</span>
+            ) : (
+              formatPrice(property.min_price)
+            )}
           </div>
           <p className="text-sm text-gray-600 dark:text-gray-400">per malam</p>
         </div>

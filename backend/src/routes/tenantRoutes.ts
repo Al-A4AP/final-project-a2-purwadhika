@@ -13,7 +13,7 @@ import {
   getPeakRatesCtrl, createPeakRateCtrl, deletePeakRateCtrl,
   getRoomAvailabilitiesCtrl, setRoomAvailabilityCtrl
 } from '../controllers/tenantRoomController';
-import { getDashboardAnalyticsCtrl } from '../controllers/tenantReportController';
+import { getDashboardAnalyticsCtrl, getOccupancyCalendarCtrl } from '../controllers/tenantReportController';
 
 const router = Router();
 const isTenant = [requireAuth, requireRole(['TENANT'])];
@@ -49,5 +49,6 @@ router.post('/rooms/:roomId/availability', ...isTenant, setRoomAvailabilityCtrl)
 
 // Reporting
 router.get('/reports', ...isTenant, getDashboardAnalyticsCtrl);
+router.get('/reports/occupancy', ...isTenant, getOccupancyCalendarCtrl);
 
 export default router;

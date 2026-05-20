@@ -1,9 +1,27 @@
 import prisma from '../config/prisma';
 
-export const getDashboardAnalytics = async (tenantId: string) => {
-  const propertyIds = (await prisma.property.findMany({ where: { tenantId }, select: { id: true } })).map(p => p.id);
+export interface GetDashboardAnalyticsOptions {
+  startDate?: string;
+  endDate?: string;
+  propertyId?: string;
+  status?: string;
+  sortBy?: string;
+  sortOrder?: 'asc' | 'desc';
+}
 
-  if (propertyIds.length === 0) {
+export const getDashboardAnalytics = async (tenantId: string, options: GetDashboardAnalyticsOptions = {}) => {
+  const {
+    startDate,
+    endDate,
+    propertyId,
+    status,
+    sortBy = 'created_at',
+    sortOrder = 'desc',
+  } = options;
+
+  const tenantPropertyIds = (await prisma.property.findMany({ where: { tenantId, deleted_at: null }, select: { id: true } })).map(p => p.id);
+
+  if (tenantPropertyIds.length === 0) {
     return {
       totalRevenue: 0,
       totalOrders: 0,
@@ -12,26 +30,56 @@ export const getDashboardAnalytics = async (tenantId: string) => {
     };
   }
 
-  // Aggregate total revenue for PROCESSED orders
+  const where: any = {
+    propertyId: { in: tenantPropertyIds }
+  };
+
+  if (propertyId) {
+    where.propertyId = propertyId;
+  }
+
+  if (status) {
+    where.status = status;
+  }
+
+  if (startDate || endDate) {
+    where.created_at = {};
+    if (startDate) {
+      where.created_at.gte = new Date(startDate);
+    }
+    if (endDate) {
+      const endOf = new Date(endDate);
+      endOf.setHours(23, 59, 59, 999);
+      where.created_at.lte = endOf;
+    }
+  }
+
+  // Aggregate total revenue for PROCESSED/COMPLETED orders (or matching status if provided)
+  const revenueWhere = { ...where };
+  if (!status) {
+    revenueWhere.status = { in: ['PROCESSED', 'COMPLETED'] };
+  }
   const revenueAgg = await prisma.order.aggregate({
-    where: { propertyId: { in: propertyIds }, status: 'PROCESSED' },
+    where: revenueWhere,
     _sum: { total_price: true }
   });
 
   // Group orders by status
+  const statusWhere = { ...where };
+  delete statusWhere.status;
   const ordersByStatus = await prisma.order.groupBy({
     by: ['status'],
-    where: { propertyId: { in: propertyIds } },
+    where: statusWhere,
     _count: { id: true }
   });
 
-  const totalOrders = ordersByStatus.reduce((acc, curr) => acc + curr._count.id, 0);
+  const totalOrders = await prisma.order.count({ where });
 
-  // Get recent 5 orders
+  // Get orders list sorted
   const recentOrders = await prisma.order.findMany({
-    where: { propertyId: { in: propertyIds } },
-    orderBy: { created_at: 'desc' },
-    take: 5,
+    where,
+    orderBy: { [sortBy]: sortOrder },
+    take: 50,
     include: {
       property: { select: { name: true } },
       user: { select: { name: true } }
@@ -44,4 +92,33 @@ export const getDashboardAnalytics = async (tenantId: string) => {
     ordersByStatus: ordersByStatus.map(s => ({ name: s.status, count: s._count.id })),
     recentOrders
   };
+};
+
+export const getOccupancyCalendar = async (tenantId: string) => {
+  return prisma.property.findMany({
+    where: { tenantId, deleted_at: null },
+    select: {
+      id: true,
+      name: true,
+      rooms: {
+        where: { deleted_at: null },
+        select: {
+          id: true,
+          room_type: true,
+          orders: {
+            where: {
+              status: { in: ['WAITING_PAYMENT', 'WAITING_CONFIRMATION', 'PROCESSED', 'COMPLETED'] }
+            },
+            select: {
+              id: true,
+              order_number: true,
+              check_in_date: true,
+              check_out_date: true,
+              user: { select: { name: true } }
+            }
+          }
+        }
+      }
+    }
+  });
 };

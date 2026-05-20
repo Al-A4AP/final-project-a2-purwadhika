@@ -15,7 +15,8 @@ export const PROPERTY_CATEGORIES = [
   { id: '1', name: 'Hotel', icon: '🏨' },
   { id: '2', name: 'Apartemen', icon: '🏢' },
   { id: '3', name: 'Rumah', icon: '🏠' },
-  { id: '4', name: 'Kost', icon: '🏘️' },
+  { id: '4', name: 'Villa', icon: '🏡' },
+  { id: '5', name: 'Kost', icon: '🏘️' },
 ];
 
 export const ITEMS_PER_PAGE = 12;

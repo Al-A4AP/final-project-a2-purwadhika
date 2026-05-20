@@ -16,30 +16,39 @@ const hashToken = (token: string) =>
   crypto.createHash('sha256').update(token).digest('hex');
 
 export const registerUser = async (data: {
-  name: string; email: string; password: string; role?: 'USER' | 'TENANT';
+  name: string; email: string; role?: 'USER' | 'TENANT';
 }) => {
   const exists = await prisma.user.findUnique({ where: { email: data.email } });
   if (exists) throw new AppError('Email sudah terdaftar', 409);
 
-  const password_hash = await bcryptjs.hash(data.password, 10);
+  // Buat random dummy password hash karena password_hash not null di db
+  const dummyPassword = crypto.randomBytes(16).toString('hex');
+  const password_hash = await bcryptjs.hash(dummyPassword, 10);
 
-  // yang iniake mode auto-verified dulu anggi
   const user = await prisma.user.create({
     data: {
       name: data.name,
       email: data.email,
       password_hash,
       role: data.role || 'USER',
-      verified_at: new Date(),
+      verified_at: null, // Verifikasi lewat email
     },
   });
 
-  // Generate verification token (mock implementation for email verification)
-  const verificationToken = crypto.randomBytes(32).toString('hex');
-  await sendVerificationEmail(user.email, verificationToken).catch(() => console.error('Gagal mengirim email verifikasi'));
+  const rawToken = crypto.randomBytes(32).toString('hex');
+  const hashedToken = hashToken(rawToken);
 
-  const token = generateToken({ id: user.id, email: user.email, role: user.role });
-  return { user: sanitizeUser(user), token };
+  await prisma.emailVerification.create({
+    data: {
+      userId: user.id,
+      token: hashedToken,
+      expires_at: new Date(Date.now() + ONE_HOUR),
+    },
+  });
+
+  await sendVerificationEmail(user.email, rawToken).catch(() => console.error('Gagal mengirim email verifikasi'));
+
+  return { email: user.email };
 };
 
 export const loginUser = async (email: string, password: string) => {
@@ -48,6 +57,84 @@ export const loginUser = async (email: string, password: string) => {
 
   const valid = await bcryptjs.compare(password, user.password_hash);
   if (!valid) throw new AppError('Email atau password salah', 401);
+
+  // Auto-verify pre-existing users on successful password match for backwards compatibility
+  if (!user.verified_at) {
+    await prisma.user.update({
+      where: { id: user.id },
+      data: { verified_at: new Date() }
+    });
+    user.verified_at = new Date();
+  }
+
+  const token = generateToken({ id: user.id, email: user.email, role: user.role });
+  return { user: sanitizeUser(user), token };
+};
+
+export const verifyEmail = async (rawToken: string, newPassword?: string) => {
+  const hashedToken = hashToken(rawToken);
+  const record = await prisma.emailVerification.findFirst({
+    where: { token: hashedToken, used_at: null, expires_at: { gt: new Date() } },
+  });
+  if (!record) throw new AppError('Token tidak valid atau kadaluarsa', 400);
+
+  const updateData: any = { verified_at: new Date() };
+  if (newPassword) {
+    updateData.password_hash = await bcryptjs.hash(newPassword, 10);
+  }
+
+  await Promise.all([
+    prisma.user.update({ where: { id: record.userId }, data: updateData }),
+    prisma.emailVerification.update({ where: { id: record.id }, data: { used_at: new Date() } }),
+  ]);
+};
+
+export const resendVerification = async (email: string) => {
+  const user = await prisma.user.findUnique({ where: { email, deleted_at: null } });
+  if (!user) throw new AppError('Email tidak terdaftar', 404);
+  if (user.verified_at) throw new AppError('Email sudah terverifikasi', 400);
+
+  const rawToken = crypto.randomBytes(32).toString('hex');
+  const hashedToken = hashToken(rawToken);
+
+  await prisma.emailVerification.create({
+    data: {
+      userId: user.id,
+      token: hashedToken,
+      expires_at: new Date(Date.now() + ONE_HOUR),
+    },
+  });
+
+  await sendVerificationEmail(email, rawToken);
+};
+
+export const googleLogin = async (data: { email: string; name: string; avatarUrl?: string }) => {
+  let user = await prisma.user.findFirst({
+    where: { email: data.email, deleted_at: null },
+  });
+
+  if (!user) {
+    const dummyPassword = crypto.randomBytes(16).toString('hex');
+    const password_hash = await bcryptjs.hash(dummyPassword, 10);
+    user = await prisma.user.create({
+      data: {
+        email: data.email,
+        name: data.name,
+        password_hash,
+        role: 'USER',
+        verified_at: new Date(),
+        avatar_url: data.avatarUrl,
+      },
+    });
+  } else {
+    if (!user.verified_at) {
+      await prisma.user.update({
+        where: { id: user.id },
+        data: { verified_at: new Date() },
+      });
+      user.verified_at = new Date();
+    }
+  }
 
   const token = generateToken({ id: user.id, email: user.email, role: user.role });
   return { user: sanitizeUser(user), token };

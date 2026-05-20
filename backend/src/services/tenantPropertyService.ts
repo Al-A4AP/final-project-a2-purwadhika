@@ -2,16 +2,78 @@ import prisma from '../config/prisma';
 import { uploadBuffer, deleteFromCloudinary } from '../utils/cloudinaryUpload';
 import { AppError } from '../middlewares/errorHandler';
 
-export const getTenantProperties = async (tenantId: string) =>
-  prisma.property.findMany({
-    where: { tenantId, deleted_at: null },
-    include: {
-      category: true,
-      rooms: { where: { deleted_at: null }, select: { base_price: true } },
-      _count: { select: { rooms: true, orders: true, reviews: true } },
+export interface GetTenantPropertiesOptions {
+  search?: string;
+  categoryId?: string;
+  sortBy?: string;
+  sortOrder?: 'asc' | 'desc';
+  page?: number;
+  limit?: number;
+}
+
+export const getTenantProperties = async (tenantId: string, options: GetTenantPropertiesOptions = {}) => {
+  const {
+    search,
+    categoryId,
+    sortBy = 'created_at',
+    sortOrder = 'desc',
+    page = 1,
+    limit = 10,
+  } = options;
+
+  const skip = (page - 1) * limit;
+
+  const where: any = {
+    tenantId,
+    deleted_at: null,
+  };
+
+  if (categoryId) {
+    where.categoryId = categoryId;
+  }
+
+  if (search) {
+    where.OR = [
+      { name: { contains: search, mode: 'insensitive' } },
+      { address: { contains: search, mode: 'insensitive' } },
+      { city: { contains: search, mode: 'insensitive' } },
+    ];
+  }
+
+  // Handle client-side sorting names to match database names
+  let dbSortBy = sortBy;
+  if (sortBy === 'price') {
+    // For simplicity, sort by rooms min price logic requires raw queries or sorting on main field. We'll default to created_at
+    dbSortBy = 'created_at';
+  } else if (sortBy === 'rooms' || sortBy === 'reviews') {
+    dbSortBy = 'created_at';
+  }
+
+  const [properties, total] = await Promise.all([
+    prisma.property.findMany({
+      where,
+      include: {
+        category: true,
+        rooms: { where: { deleted_at: null }, select: { base_price: true } },
+        _count: { select: { rooms: true, orders: true, reviews: true } },
+      },
+      orderBy: { [dbSortBy]: sortOrder },
+      skip,
+      take: limit,
+    }),
+    prisma.property.count({ where }),
+  ]);
+
+  return {
+    properties,
+    pagination: {
+      page,
+      limit,
+      total,
+      totalPages: Math.ceil(total / limit),
     },
-    orderBy: { created_at: 'desc' },
-  });
+  };
+};
 
 export const getTenantPropertyById = async (id: string, tenantId: string) => {
   const p = await prisma.property.findFirst({

@@ -46,3 +46,30 @@ export const getMeController = async (req: Request, res: Response) => {
     return sendError(res, err.message, err.statusCode || 500);
   }
 };
+
+export const verifyEmailController = async (req: Request, res: Response) => {
+  try {
+    await authService.verifyEmail(req.body.token, req.body.password);
+    return sendSuccess(res, null, 'Email berhasil diverifikasi');
+  } catch (err: any) {
+    return sendError(res, err.message, err.statusCode || 500);
+  }
+};
+
+export const resendVerificationController = async (req: Request, res: Response) => {
+  try {
+    await authService.resendVerification(req.body.email);
+    return sendSuccess(res, null, 'Email verifikasi berhasil dikirim ulang');
+  } catch (err: any) {
+    return sendError(res, err.message, err.statusCode || 500);
+  }
+};
+
+export const googleLoginController = async (req: Request, res: Response) => {
+  try {
+    const result = await authService.googleLogin(req.body);
+    return sendSuccess(res, result, 'Login Google berhasil');
+  } catch (err: any) {
+    return sendError(res, err.message, err.statusCode || 500);
+  }
+};

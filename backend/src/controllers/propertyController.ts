@@ -14,7 +14,7 @@ export const listPropertiesController = async (req: Request, res: Response) => {
 export const getPropertyDetailController = async (req: Request, res: Response) => {
   try {
     const { id } = req.params as { id: string };
-    const property = await propertyService.getPropertyDetail(id);
+    const property = await propertyService.getPropertyDetail(id, req.query as any);
     return sendSuccess(res, property, 'Detail properti berhasil diambil');
   } catch (err: any) {
     return sendError(res, err.message, err.statusCode || 404);

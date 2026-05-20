@@ -22,7 +22,17 @@ export const getUserOrdersCtrl = async (req: Request, res: Response) => {
 export const getTenantOrdersCtrl = async (req: Request, res: Response) => {
   try {
     const tenantId = req.user!.id as string;
-    const data = await orderService.getTenantOrders(tenantId);
+    const { propertyId, status, startDate, endDate, sortBy, sortOrder, page, limit } = req.query;
+    const data = await orderService.getTenantOrders(tenantId, {
+      propertyId: propertyId as string,
+      status: status as string,
+      startDate: startDate as string,
+      endDate: endDate as string,
+      sortBy: sortBy as string,
+      sortOrder: sortOrder as 'asc' | 'desc',
+      page: page ? Number(page) : undefined,
+      limit: limit ? Number(limit) : undefined,
+    });
     return sendSuccess(res, data, 'Daftar pesanan tenant');
   } catch (err: any) { return sendError(res, err.message, err.statusCode || 500); }
 };

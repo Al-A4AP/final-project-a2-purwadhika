@@ -1,7 +1,9 @@
 import prisma from '../config/prisma';
 import { snap } from '../config/midtrans';
 import crypto from 'crypto';
-import { sendPaymentConfirmationEmail } from '../utils/emailService';
+import { sendPaymentConfirmationEmail, sendPaymentRejectionEmail, sendOrderConfirmationEmail } from '../utils/emailService';
+import { checkAvailability } from './availabilityService';
+import { calculateStayDetails } from './pricingService';
 
 interface CreateOrderData {
   userId: string;
@@ -20,6 +22,21 @@ const generateOrderNumber = () => {
 export const createOrder = async (data: CreateOrderData) => {
   const { userId, propertyId, roomId, check_in_date, check_out_date, payment_method } = data;
 
+  // 1. Validate user verification status
+  const user = await prisma.user.findFirst({
+    where: { id: userId, deleted_at: null }
+  });
+  if (!user) {
+    const error: any = new Error('User tidak ditemukan');
+    error.statusCode = 404;
+    throw error;
+  }
+  if (!user.verified_at) {
+    const error: any = new Error('Akun Anda belum terverifikasi. Silakan verifikasi email Anda terlebih dahulu.');
+    error.statusCode = 403;
+    throw error;
+  }
+
   // Validate dates
   const checkIn = new Date(check_in_date);
   const checkOut = new Date(check_out_date);
@@ -32,42 +49,41 @@ export const createOrder = async (data: CreateOrderData) => {
   // Calculate nights
   const nights = Math.ceil((checkOut.getTime() - checkIn.getTime()) / (1000 * 60 * 60 * 24));
 
-  // Get Room and Calculate Price ini di simpel kan, coba cek lagi anggi
-  const room = await prisma.room.findUnique({
-    where: { id: roomId },
-    include: { peakRates: true }
-  });
-
-  if (!room) {
-    const error: any = new Error('Kamar tidak ditemukan');
-    error.statusCode = 404;
-    throw error;
-  }
-
-  // pake perhitunag sederhana (Base price * nights) kalo anggi ada ide boleh tambahin
-  // paling pake yg ini untuk nanti kalo udh beres ui ux blh langsung integrate peak rates calculation per day
-  let total_price = room.base_price * nights;
-
-  const order_number = generateOrderNumber();
-
-  // Create Order in DB
-  const order = await prisma.order.create({
-    data: {
-      order_number,
-      userId,
-      propertyId,
-      roomId,
-      check_in_date: checkIn,
-      check_out_date: checkOut,
-      total_price,
-      payment_method,
-      status: 'WAITING_PAYMENT'
-    },
-    include: {
-      user: { select: { name: true, email: true, phone: true } },
-      property: { select: { name: true } },
-      room: { select: { room_type: true } }
+  // Create Order in DB inside a transaction to prevent race conditions
+  const order = await prisma.$transaction(async (tx) => {
+    // 2. Validate room availability
+    const avail = await checkAvailability(roomId, checkIn, checkOut, tx);
+    if (!avail.available) {
+      const error: any = new Error(avail.reason || 'Kamar tidak tersedia pada tanggal yang dipilih');
+      error.statusCode = 400;
+      throw error;
     }
+
+    // 3. Calculate dynamic stay pricing
+    const priceDetails = await calculateStayDetails(roomId, checkIn, checkOut, tx);
+
+    const order_number = generateOrderNumber();
+    const expires_at = new Date(Date.now() + 2 * 60 * 60 * 1000); // 2 hours expiration
+
+    return tx.order.create({
+      data: {
+        order_number,
+        userId,
+        propertyId,
+        roomId,
+        check_in_date: checkIn,
+        check_out_date: checkOut,
+        total_price: priceDetails.totalPrice,
+        payment_method,
+        status: 'WAITING_PAYMENT',
+        expires_at,
+      },
+      include: {
+        user: { select: { name: true, email: true, phone: true } },
+        property: { select: { name: true } },
+        room: { select: { room_type: true } }
+      }
+    });
   });
 
   // If Midtrans, create Snap Token
@@ -78,7 +94,7 @@ export const createOrder = async (data: CreateOrderData) => {
     const parameter = {
       transaction_details: {
         order_id: order.id,
-        gross_amount: total_price
+        gross_amount: order.total_price
       },
       customer_details: {
         first_name: order.user.name,
@@ -86,8 +102,8 @@ export const createOrder = async (data: CreateOrderData) => {
         phone: order.user.phone || ''
       },
       item_details: [{
-        id: room.id,
-        price: room.base_price,
+        id: order.roomId,
+        price: Math.round(order.total_price / nights),
         quantity: nights,
         name: `${order.property.name} - ${order.room.room_type} (${nights} Malam)`
       }]
@@ -97,6 +113,17 @@ export const createOrder = async (data: CreateOrderData) => {
     snapToken = transaction.token;
     snapRedirectUrl = transaction.redirect_url;
   }
+
+  // Send booking confirmation email asynchronously
+  sendOrderConfirmationEmail(
+    order.user.email,
+    order.order_number,
+    order.property.name,
+    order.room.room_type,
+    order.check_in_date,
+    order.check_out_date,
+    order.total_price
+  ).catch(() => {});
 
   return {
     order,
@@ -117,16 +144,79 @@ export const getUserOrders = async (userId: string) => {
   });
 };
 
-export const getTenantOrders = async (tenantId: string) => {
-  return prisma.order.findMany({
-    where: { property: { tenantId } },
-    include: {
-      user: { select: { name: true, email: true } },
-      property: { select: { name: true } },
-      room: { select: { room_type: true } }
-    },
-    orderBy: { created_at: 'desc' }
-  });
+export interface GetTenantOrdersOptions {
+  propertyId?: string;
+  status?: string;
+  startDate?: string;
+  endDate?: string;
+  sortBy?: string;
+  sortOrder?: 'asc' | 'desc';
+  page?: number;
+  limit?: number;
+}
+
+export const getTenantOrders = async (tenantId: string, options: GetTenantOrdersOptions = {}) => {
+  const {
+    propertyId,
+    status,
+    startDate,
+    endDate,
+    sortBy = 'created_at',
+    sortOrder = 'desc',
+    page = 1,
+    limit = 10,
+  } = options;
+
+  const skip = (page - 1) * limit;
+
+  const where: any = {
+    property: { tenantId }
+  };
+
+  if (propertyId) {
+    where.propertyId = propertyId;
+  }
+
+  if (status) {
+    where.status = status;
+  }
+
+  if (startDate || endDate) {
+    where.created_at = {};
+    if (startDate) {
+      where.created_at.gte = new Date(startDate);
+    }
+    if (endDate) {
+      const endOf = new Date(endDate);
+      endOf.setHours(23, 59, 59, 999);
+      where.created_at.lte = endOf;
+    }
+  }
+
+  const [orders, total] = await Promise.all([
+    prisma.order.findMany({
+      where,
+      include: {
+        user: { select: { name: true, email: true } },
+        property: { select: { name: true } },
+        room: { select: { room_type: true } }
+      },
+      orderBy: { [sortBy]: sortOrder },
+      skip,
+      take: limit,
+    }),
+    prisma.order.count({ where }),
+  ]);
+
+  return {
+    orders,
+    pagination: {
+      page,
+      limit,
+      total,
+      totalPages: Math.ceil(total / limit),
+    }
+  };
 };
 
 export const updateOrderStatus = async (orderId: string, tenantId: string, status: any) => {
@@ -141,17 +231,32 @@ export const updateOrderStatus = async (orderId: string, tenantId: string, statu
     throw error;
   }
 
-    await prisma.order.update({
-      where: { id: orderId },
-      data: { status }
-    });
+  let finalStatus = status;
+  let updateData: any = { status: finalStatus };
 
-    if (status === 'PROCESSED') {
-      await sendPaymentConfirmationEmail(order.user.email, order.order_number).catch(() => {});
-    }
-
-    return order;
+  // If order is in WAITING_CONFIRMATION and tenant chooses CANCELLED, this is a payment rejection!
+  if (order.status === 'WAITING_CONFIRMATION' && status === 'CANCELLED') {
+    finalStatus = 'WAITING_PAYMENT';
+    updateData = {
+      status: 'WAITING_PAYMENT',
+      payment_proof_url: null,
+      expires_at: new Date(Date.now() + 2 * 60 * 60 * 1000) // extend by 2 hours
+    };
   }
+
+  const updatedOrder = await prisma.order.update({
+    where: { id: orderId },
+    data: updateData
+  });
+
+  if (finalStatus === 'PROCESSED') {
+    await sendPaymentConfirmationEmail(order.user.email, order.order_number).catch(() => {});
+  } else if (order.status === 'WAITING_CONFIRMATION' && status === 'CANCELLED') {
+    await sendPaymentRejectionEmail(order.user.email, order.order_number).catch(() => {});
+  }
+
+  return updatedOrder;
+};
 
 export const uploadPaymentProof = async (orderId: string, userId: string, imageUrl: string) => {
   const order = await prisma.order.findUnique({

@@ -80,7 +80,9 @@ const OrdersPage: FC = () => {
       case 'WAITING_CONFIRMATION':
         return <span className="flex items-center gap-1 text-blue-600 bg-blue-50 px-2 py-1 rounded-md text-xs font-medium"><Clock size={14}/> Menunggu Konfirmasi</span>;
       case 'PROCESSED':
-        return <span className="flex items-center gap-1 text-green-600 bg-green-50 px-2 py-1 rounded-md text-xs font-medium"><CheckCircle2 size={14}/> Selesai</span>;
+        return <span className="flex items-center gap-1 text-green-600 bg-green-50 px-2 py-1 rounded-md text-xs font-medium"><CheckCircle2 size={14}/> Dikonfirmasi</span>;
+      case 'COMPLETED':
+        return <span className="flex items-center gap-1 text-emerald-600 bg-emerald-50 px-2 py-1 rounded-md text-xs font-medium"><CheckCircle2 size={14}/> Selesai Menginap</span>;
       case 'CANCELLED':
         return <span className="flex items-center gap-1 text-red-600 bg-red-50 px-2 py-1 rounded-md text-xs font-medium"><XCircle size={14}/> Dibatalkan</span>;
       default:

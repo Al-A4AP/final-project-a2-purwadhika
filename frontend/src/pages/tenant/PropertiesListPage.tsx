@@ -1,12 +1,14 @@
 import type { FC } from 'react';
-import { useEffect, useState, useMemo } from 'react';
+import { useEffect, useState, useCallback } from 'react';
 import { Link } from 'react-router-dom';
 import { Plus, Pencil, Trash2, BedDouble, Star } from 'lucide-react';
 import { tenantService } from '@/services/tenantService';
-import type { TenantProperty } from '@/types';
+import type { TenantProperty, PaginationMeta } from '@/types';
 import { formatPrice } from '@/lib/formatters';
 import SortFilterBar from '@/components/common/SortFilterBar';
 import type { SortGroup } from '@/components/common/SortFilterBar';
+import { toast } from 'react-hot-toast';
+import { ConfirmModal } from '@/components/common/ConfirmModal';
 
 const PropertiesListPage: FC = () => {
   const [properties, setProperties] = useState<TenantProperty[]>([]);
@@ -14,6 +16,21 @@ const PropertiesListPage: FC = () => {
   const [deletingId, setDeletingId] = useState<string | null>(null);
   const [sortKey, setSortKey] = useState('created_at');
   const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('desc');
+  const [searchQuery, setSearchQuery] = useState('');
+  const [activeSearch, setActiveSearch] = useState('');
+  const [pagination, setPagination] = useState<PaginationMeta>({ page: 1, limit: 10, total: 0, totalPages: 1 });
+
+  const [confirmModal, setConfirmModal] = useState<{
+    isOpen: boolean;
+    title: string;
+    message: string;
+    onConfirm: () => void;
+  }>({
+    isOpen: false,
+    title: '',
+    message: '',
+    onConfirm: () => {},
+  });
 
   const tenantSortGroups: SortGroup[] = [
     {
@@ -30,63 +47,53 @@ const PropertiesListPage: FC = () => {
         { order: 'desc', label: 'Z → A' },
       ],
     },
-    {
-      key: 'price', label: 'Harga', icon: 'price',
-      options: [
-        { order: 'desc', label: 'Termahal' },
-        { order: 'asc',  label: 'Termurah' },
-      ],
-    },
-    {
-      key: 'rooms', label: 'Kamar', icon: 'bed',
-      options: [
-        { order: 'desc', label: 'Terbanyak' },
-        { order: 'asc',  label: 'Tersedikit' },
-      ],
-    },
-    {
-      key: 'reviews', label: 'Review', icon: 'star',
-      options: [
-        { order: 'desc', label: 'Terbanyak' },
-        { order: 'asc',  label: 'Tersedikit' },
-      ],
-    },
   ];
 
-  // Client-side sorting
-  const sortedProperties = useMemo(() => {
-    const getVal = (p: TenantProperty): number | string => {
-      if (sortKey === 'name')    return p.name.toLowerCase();
-      if (sortKey === 'price')   return p.rooms && p.rooms.length > 0 ? Math.min(...p.rooms.map(r => r.base_price)) : 0;
-      if (sortKey === 'rooms')   return p._count?.rooms ?? 0;
-      if (sortKey === 'reviews') return p._count?.reviews ?? 0;
-      return new Date(p.created_at ?? 0).getTime(); // created_at default
-    };
+  const fetchProperties = useCallback((pageNumber = 1) => {
+    setLoading(true);
+    tenantService.getProperties({
+      search: activeSearch || undefined,
+      sortBy: sortKey,
+      sortOrder: sortOrder,
+      page: pageNumber,
+      limit: 10,
+    })
+      .then((data) => {
+        setProperties(data.properties);
+        setPagination(data.pagination);
+      })
+      .catch(() => toast.error('Gagal memuat properti'))
+      .finally(() => setLoading(false));
+  }, [activeSearch, sortKey, sortOrder]);
 
-    return [...properties].sort((a, b) => {
-      const aVal = getVal(a);
-      const bVal = getVal(b);
-      if (aVal < bVal) return sortOrder === 'asc' ? -1 : 1;
-      if (aVal > bVal) return sortOrder === 'asc' ? 1 : -1;
-      return 0;
+  useEffect(() => {
+    Promise.resolve().then(() => {
+      fetchProperties(1);
     });
+  }, [fetchProperties]);
 
-  }, [properties, sortKey, sortOrder]);
-
-  const fetchProperties = () =>
-    tenantService.getProperties().then(setProperties).finally(() => setLoading(false));
-
-  useEffect(() => { fetchProperties(); }, []);
-
-  const handleDelete = async (id: string, name: string) => {
-    if (!confirm(`Hapus properti "${name}"? Tindakan ini tidak dapat dibatalkan.`)) return;
-    setDeletingId(id);
-    try {
-      await tenantService.deleteProperty(id);
-      setProperties((prev) => prev.filter((p) => p.id !== id));
-    } catch { alert('Gagal menghapus properti'); }
-    finally { setDeletingId(null); }
+  const handleDelete = (id: string, name: string) => {
+    setConfirmModal({
+      isOpen: true,
+      title: 'Hapus Properti',
+      message: `Hapus properti "${name}"? Tindakan ini tidak dapat dibatalkan dan semua kamar serta peak rate di dalamnya akan ikut terhapus.`,
+      onConfirm: async () => {
+        setDeletingId(id);
+        try {
+          await tenantService.deleteProperty(id);
+          setProperties((prev) => prev.filter((p) => p.id !== id));
+          toast.success('Properti berhasil dihapus');
+        } catch {
+          toast.error('Gagal menghapus properti');
+        } finally {
+          setDeletingId(null);
+          setConfirmModal(prev => ({ ...prev, isOpen: false }));
+        }
+      }
+    });
   };
+
+  const totalPages = pagination.totalPages || pagination.pages || 1;
 
   if (loading) return (
     <div className="p-8 space-y-4">
@@ -105,27 +112,47 @@ const PropertiesListPage: FC = () => {
         </Link>
       </div>
 
-      {properties.length > 0 && (
-        <SortFilterBar
-          sortGroups={tenantSortGroups}
-          currentSort={sortKey}
-          currentOrder={sortOrder}
-          onChange={(sort, order) => { setSortKey(sort); setSortOrder(order); }}
-          resultCount={properties.length}
-          resultLabel="properti"
-        />
-      )}
+      {/* Search & Sort Bar */}
+      <div className="flex flex-col md:flex-row gap-4 items-stretch md:items-center justify-between">
+        <div className="flex gap-2 max-w-md flex-1">
+          <input
+            type="text"
+            placeholder="Cari nama properti, alamat atau kota..."
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            onKeyDown={(e) => { if (e.key === 'Enter') setActiveSearch(searchQuery); }}
+            className="flex-1 px-4 py-2 border dark:border-slate-700 rounded-lg bg-white dark:bg-slate-800 text-sm text-gray-900 dark:text-white"
+          />
+          <button
+            onClick={() => setActiveSearch(searchQuery)}
+            className="px-4 py-2 bg-slate-900 text-white dark:bg-slate-700 dark:hover:bg-slate-600 rounded-lg text-sm hover:bg-slate-800 transition"
+          >
+            Cari
+          </button>
+        </div>
+
+        {properties.length > 0 && (
+          <SortFilterBar
+            sortGroups={tenantSortGroups}
+            currentSort={sortKey}
+            currentOrder={sortOrder}
+            onChange={(sort, order) => { setSortKey(sort); setSortOrder(order); }}
+            resultCount={pagination.total}
+            resultLabel="properti"
+          />
+        )}
+      </div>
 
       {properties.length === 0 ? (
         <div className="text-center py-20">
-          <p className="text-gray-500 mb-4">Anda belum memiliki properti</p>
+          <p className="text-gray-500 mb-4">Tidak ada properti ditemukan</p>
           <Link to="/tenant/properties/new" className="bg-red-600 text-white px-6 py-2 rounded-lg hover:bg-red-700 transition">
             Tambah Properti Pertama
           </Link>
         </div>
       ) : (
         <div className="space-y-4">
-          {sortedProperties.map((p) => {
+          {properties.map((p) => {
             const minPrice = p.rooms && p.rooms.length > 0
               ? Math.min(...p.rooms.map((r) => r.base_price))
               : null;
@@ -170,6 +197,38 @@ const PropertiesListPage: FC = () => {
           })}
         </div>
       )}
+
+      {/* Pagination Controls */}
+      {totalPages > 1 && (
+        <div className="flex items-center justify-between border-t dark:border-slate-700 pt-6">
+          <button
+            onClick={() => fetchProperties((pagination.page || 1) - 1)}
+            disabled={pagination.page === 1}
+            className="px-4 py-2 text-sm font-medium border dark:border-slate-700 rounded-lg hover:bg-gray-50 dark:hover:bg-slate-700 disabled:opacity-50 bg-white dark:bg-slate-800"
+          >
+            Sebelumnya
+          </button>
+          <span className="text-sm text-gray-600 dark:text-gray-400">
+            Halaman {pagination.page} dari {totalPages}
+          </span>
+          <button
+            onClick={() => fetchProperties((pagination.page || 1) + 1)}
+            disabled={pagination.page === totalPages}
+            className="px-4 py-2 text-sm font-medium border dark:border-slate-700 rounded-lg hover:bg-gray-50 dark:hover:bg-slate-700 disabled:opacity-50 bg-white dark:bg-slate-800"
+          >
+            Selanjutnya
+          </button>
+        </div>
+      )}
+
+      {/* Confirm Modal */}
+      <ConfirmModal
+        isOpen={confirmModal.isOpen}
+        title={confirmModal.title}
+        message={confirmModal.message}
+        onConfirm={confirmModal.onConfirm}
+        onCancel={() => setConfirmModal(prev => ({ ...prev, isOpen: false }))}
+      />
     </div>
   );
 };

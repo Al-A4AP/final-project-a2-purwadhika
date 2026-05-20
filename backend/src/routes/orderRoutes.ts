@@ -1,7 +1,7 @@
 import { Router } from 'express';
 import { requireAuth, requireRole } from '../middlewares/authMiddleware';
 import { validate } from '../middlewares/validateMiddleware';
-import { upload } from '../middlewares/uploadMiddleware';
+import { upload, uploadPaymentProof } from '../middlewares/uploadMiddleware';
 import {
   createOrderCtrl,
   getUserOrdersCtrl,
@@ -18,9 +18,9 @@ const router = Router();
 router.post('/midtrans-notification', midtransNotificationCtrl);
 
 // User Routes
-router.post('/', requireAuth, validate(createOrderSchema), createOrderCtrl);
-router.get('/user', requireAuth, getUserOrdersCtrl);
-router.post('/:id/payment-proof', requireAuth, upload.single('payment_proof'), uploadPaymentProofCtrl);
+router.post('/', requireAuth, requireRole(['USER']), validate(createOrderSchema), createOrderCtrl);
+router.get('/user', requireAuth, requireRole(['USER']), getUserOrdersCtrl);
+router.post('/:id/payment-proof', requireAuth, requireRole(['USER']), uploadPaymentProof.single('payment_proof'), uploadPaymentProofCtrl);
 
 // Tenant Routes
 router.get('/tenant', requireAuth, requireRole(['TENANT']), getTenantOrdersCtrl);

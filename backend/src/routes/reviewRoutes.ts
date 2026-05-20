@@ -5,7 +5,7 @@ import { createReviewCtrl, getPropertyReviewsCtrl, replyReviewCtrl } from '../co
 const router = Router();
 
 router.get('/properties/:propertyId/reviews', getPropertyReviewsCtrl);
-router.post('/orders/:orderId/reviews', requireAuth, createReviewCtrl);
+router.post('/orders/:orderId/reviews', requireAuth, requireRole(['USER']), createReviewCtrl);
 router.post('/reviews/:reviewId/reply', requireAuth, requireRole(['TENANT']), replyReviewCtrl);
 
 export default router;

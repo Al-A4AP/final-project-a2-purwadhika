@@ -18,8 +18,13 @@ export const propertyService = {
     return response.data.data;
   },
 
-  async getPropertyDetail(id: string) {
-    const response = await api.get<ApiResponse<PropertyDetail>>(`/properties/${id}`);
+  async getPropertyDetail(id: string, checkInDate?: string, checkOutDate?: string) {
+    const params = new URLSearchParams();
+    if (checkInDate) params.append('check_in_date', checkInDate);
+    if (checkOutDate) params.append('check_out_date', checkOutDate);
+    const queryString = params.toString() ? `?${params.toString()}` : '';
+    
+    const response = await api.get<ApiResponse<PropertyDetail>>(`/properties/${id}${queryString}`);
     return response.data.data;
   },
 

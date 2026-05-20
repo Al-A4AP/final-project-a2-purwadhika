@@ -19,6 +19,7 @@ enum OrderStatus {
   WAITING_CONFIRMATION
   PROCESSED
   CANCELLED
+  COMPLETED
 }
 
 enum PaymentMethod {
@@ -44,6 +45,7 @@ model User {
   verified_at   DateTime?
   deleted_at    DateTime?
   created_at    DateTime  @default(now())
+  updated_at    DateTime  @default(now()) @updatedAt
 
   orders          Order[]
   reviews         Review[]
@@ -63,6 +65,7 @@ model EmailVerification {
   expires_at DateTime
   used_at    DateTime?
   created_at DateTime  @default(now())
+  updated_at DateTime  @default(now()) @updatedAt
 
   @@map("email_verifications")
 }
@@ -75,6 +78,7 @@ model PasswordReset {
   expires_at DateTime
   used_at    DateTime?
   created_at DateTime  @default(now())
+  updated_at DateTime  @default(now()) @updatedAt
 
   @@map("password_resets")
 }
@@ -84,6 +88,7 @@ model PropertyCategory {
   name       String     @unique
   icon       String?
   properties Property[]
+  updated_at DateTime  @default(now()) @updatedAt
 
   @@map("property_categories")
 }
@@ -99,16 +104,23 @@ model Property {
   featured_image_url  String?
   address             String
   city                String
+  province            String?
+  amenities           String[]
   latitude            Float?
   longitude           Float?
   deleted_at          DateTime?
   created_at          DateTime         @default(now())
+  updated_at          DateTime         @default(now()) @updatedAt
 
   images  PropertyImage[]
   rooms   Room[]
   orders  Order[]
   reviews Review[]
 
+  @@index([tenantId])
+  @@index([categoryId])
+  @@index([city])
+  @@index([deleted_at])
   @@map("properties")
 }
 
@@ -120,6 +132,7 @@ model PropertyImage {
   cloudinary_public_id String?
   order               Int      @default(0)
   created_at          DateTime @default(now())
+  updated_at          DateTime @default(now()) @updatedAt
 
   @@map("property_images")
 }
@@ -133,13 +146,19 @@ model Room {
   child_price Int?
   description String?
   capacity    Int
+  quantity    Int      @default(1)
   deleted_at  DateTime?
   created_at  DateTime @default(now())
+  updated_at  DateTime @default(now()) @updatedAt
 
   availability RoomAvailability[]
   peakRates    PeakSeasonRate[]
   orders       Order[]
+  images       RoomImage[]
 
+  @@index([propertyId])
+  @@index([deleted_at])
+  @@index([capacity])
   @@map("rooms")
 }
 
@@ -150,9 +169,23 @@ model RoomAvailability {
   date         DateTime
   is_available Boolean  @default(true)
   created_at   DateTime @default(now())
+  updated_at   DateTime @default(now()) @updatedAt
 
   @@unique([roomId, date])
   @@map("room_availabilities")
+}
+
+model RoomImage {
+  id                  String   @id @default(cuid())
+  roomId              String
+  room                Room     @relation(fields: [roomId], references: [id], onDelete: Cascade)
+  image_url           String
+  cloudinary_public_id String?
+  order               Int      @default(0)
+  created_at          DateTime @default(now())
+  updated_at          DateTime @default(now()) @updatedAt
+
+  @@map("room_images")
 }
 
 model PeakSeasonRate {
@@ -166,7 +199,9 @@ model PeakSeasonRate {
   description String?
   deleted_at  DateTime?
   created_at  DateTime  @default(now())
+  updated_at  DateTime  @default(now()) @updatedAt
 
+  @@index([roomId])
   @@map("peak_season_rates")
 }
 
@@ -187,12 +222,20 @@ model Order {
   payment_proof_url      String?
   midtrans_transaction_id String?
   payment_verified_at    DateTime?
+  expires_at             DateTime?
+  completed_at           DateTime?
   deleted_at             DateTime?
   canceled_at            DateTime?
   created_at             DateTime      @default(now())
+  updated_at             DateTime      @default(now()) @updatedAt
 
   review Review?
 
+  @@index([userId])
+  @@index([roomId])
+  @@index([propertyId])
+  @@index([status])
+  @@index([check_in_date, check_out_date])
   @@map("orders")
 }
 
@@ -208,9 +251,12 @@ model Review {
   comment    String
   deleted_at DateTime?
   created_at DateTime  @default(now())
+  updated_at DateTime  @default(now()) @updatedAt
 
   replies ReviewReply[]
 
+  @@index([propertyId])
+  @@index([userId])
   @@map("reviews")
 }
 
@@ -223,6 +269,9 @@ model ReviewReply {
   reply_text String
   deleted_at DateTime?
   created_at DateTime  @default(now())
+  updated_at DateTime  @default(now()) @updatedAt
 
+  @@index([reviewId])
+  @@index([tenantId])
   @@map("review_replies")
 }

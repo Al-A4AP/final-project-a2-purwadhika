@@ -17,12 +17,18 @@ const LoginPage: FC = () => {
   const setToken = useAuthStore((state) => state.setToken);
   const setUser = useAuthStore((state) => state.setUser);
 
+  const [showResend, setShowResend] = useState(false);
+  const [resendEmail, setResendEmail] = useState('');
+  const [resendStatus, setResendStatus] = useState<'idle' | 'loading' | 'success' | 'error'>('idle');
+
   // Inisialisasi React Hook Form dengan Zod Resolver
   const { register, handleSubmit, formState: { errors, isSubmitting }, setError } =
     useForm<LoginInput>({ resolver: zodResolver(loginSchema) });
 
   const onSubmit = async (data: LoginInput) => {
     try {
+      setShowResend(false);
+      setResendStatus('idle');
       // 1. Panggil API Login
       const result = await authService.login(data.email, data.password);
 
@@ -39,6 +45,36 @@ const LoginPage: FC = () => {
       
       // Set pesan error ke level 'root' agar bisa ditampilkan di atas form
       setError('root', { message: msg });
+
+      if (axiosErr.response?.status === 403) {
+        setShowResend(true);
+        setResendEmail(data.email);
+      }
+    }
+  };
+
+  const handleResend = async () => {
+    try {
+      setResendStatus('loading');
+      await authService.resendVerification(resendEmail);
+      setResendStatus('success');
+    } catch {
+      setResendStatus('error');
+    }
+  };
+
+  const handleGoogleLogin = async () => {
+    try {
+      const result = await authService.googleLogin({
+        email: 'googleuser@gmail.com',
+        name: 'Google User',
+        avatarUrl: 'https://lh3.googleusercontent.com/a/default-user',
+      });
+      setToken(result.token);
+      setUser(result.user);
+      navigate('/');
+    } catch {
+      setError('root', { message: 'Gagal login menggunakan Google' });
     }
   };
 
@@ -52,6 +88,21 @@ const LoginPage: FC = () => {
       {errors.root && (
         <div className="bg-red-50 dark:bg-red-900/20 border border-red-300 dark:border-red-700 rounded-lg p-3 mb-4">
           <p className="text-red-600 dark:text-red-400 text-sm">{errors.root.message}</p>
+          {showResend && (
+            <button
+              type="button"
+              onClick={handleResend}
+              disabled={resendStatus === 'loading'}
+              className="mt-2 text-xs font-semibold text-red-600 hover:underline block text-left"
+            >
+              {resendStatus === 'loading' ? 'Mengirim...' : 'Kirim ulang email verifikasi'}
+            </button>
+          )}
+          {resendStatus === 'success' && (
+            <p className="text-green-600 dark:text-green-400 text-xs mt-1 font-medium">
+              ✓ Email verifikasi baru berhasil dikirim. Silakan periksa inbox Anda.
+            </p>
+          )}
         </div>
       )}
 
@@ -105,6 +156,38 @@ const LoginPage: FC = () => {
         >
           {isSubmitting ? <Loader2 size={18} className="animate-spin" /> : <LogIn size={18} />}
           {isSubmitting ? 'Memproses...' : 'Masuk'}
+        </button>
+
+        <div className="relative flex py-2 items-center">
+          <div className="grow border-t border-gray-300 dark:border-slate-600"></div>
+          <span className="shrink mx-4 text-gray-500 text-xs">atau</span>
+          <div className="grow border-t border-gray-300 dark:border-slate-600"></div>
+        </div>
+
+        <button
+          type="button"
+          onClick={handleGoogleLogin}
+          className="w-full bg-white dark:bg-slate-800 border border-gray-300 dark:border-slate-600 text-gray-700 dark:text-gray-200 py-2.5 rounded-lg font-semibold hover:bg-gray-50 dark:hover:bg-slate-700 transition flex items-center justify-center gap-2 cursor-pointer"
+        >
+          <svg className="w-5 h-5" viewBox="0 0 24 24">
+            <path
+              fill="#EA4335"
+              d="M12 5.04c1.66 0 3.2.57 4.38 1.69l3.27-3.27C17.67 1.48 14.98 1 12 1 7.28 1 3.28 3.73 1.34 7.73l3.87 3a7.16 7.16 0 0 1 6.79-5.69z"
+            />
+            <path
+              fill="#4285F4"
+              d="M23.49 12.27c0-.81-.07-1.59-.2-2.34H12v4.44h6.44a5.51 5.51 0 0 1-2.39 3.62l3.71 2.87c2.17-2 3.43-4.94 3.43-8.59z"
+            />
+            <path
+              fill="#FBBC05"
+              d="M5.21 14.73A7.13 7.13 0 0 1 4.8 12c0-.96.16-1.9.41-2.73L1.34 6.27A11.96 11.96 0 0 0 0 12c0 2.12.55 4.12 1.5 5.88l3.71-3.15z"
+            />
+            <path
+              fill="#34A853"
+              d="M12 23c3.24 0 5.97-1.07 7.96-2.91l-3.71-2.87c-1.03.69-2.35 1.1-4.25 1.1-3.69 0-6.8-2.49-7.91-5.83l-3.87 3A11.97 11.97 0 0 0 12 23z"
+            />
+          </svg>
+          Masuk dengan Google
         </button>
       </form>
 

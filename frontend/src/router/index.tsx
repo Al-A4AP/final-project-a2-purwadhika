@@ -61,7 +61,11 @@ export const router = createBrowserRouter([
     element: <AuthLayout />,
     children: [
       { path: 'login', element: <LoginPage /> },
+      { path: 'login/user', element: <LoginPage /> },
+      { path: 'login/tenant', element: <LoginPage /> },
       { path: 'register', element: <RegisterPage /> },
+      { path: 'register/user', element: <RegisterPage /> },
+      { path: 'register/tenant', element: <RegisterPage /> },
       { path: 'verify-email/:token', element: <VerifyEmailPage /> },
       { path: 'forgot-password', element: <ForgotPasswordPage /> },
       { path: 'reset-password', element: <ResetPasswordPage /> },

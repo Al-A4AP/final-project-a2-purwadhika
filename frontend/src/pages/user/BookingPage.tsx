@@ -54,12 +54,13 @@ const BookingPage: FC = () => {
     script.setAttribute('data-client-key', import.meta.env.VITE_MIDTRANS_CLIENT_KEY || '');
     document.body.appendChild(script);
 
-    propertyService.getPropertyDetail(propertyId)
+    propertyService.getPropertyDetail(propertyId, checkIn, checkOut)
       .then((data) => {
         setProperty(data);
         const selectedRoom = data.rooms?.find(r => r.id === roomId);
         if (selectedRoom) setRoom(selectedRoom);
       })
+      .catch(() => navigate('/'))
       .finally(() => setLoading(false));
 
     return () => {
@@ -72,7 +73,7 @@ const BookingPage: FC = () => {
   const checkInDate = new Date(checkIn!);
   const checkOutDate = new Date(checkOut!);
   const nights = Math.ceil((checkOutDate.getTime() - checkInDate.getTime()) / (1000 * 60 * 60 * 24));
-  const totalPrice = room.base_price * nights;
+  const totalPrice = room.priceDetails ? room.priceDetails.totalPrice : room.base_price * nights;
 
   const handleCheckout = async () => {
     setProcessing(true);
@@ -205,16 +206,38 @@ const BookingPage: FC = () => {
               </div>
             </div>
 
-            <div className="space-y-4 text-sm mb-6 border-y dark:border-slate-700 py-4">
-              <div className="flex justify-between">
-                <span className="text-gray-600 dark:text-gray-400">{formatPrice(room.base_price)} x {nights} malam</span>
-                <span className="text-gray-900 dark:text-white font-medium">{formatPrice(totalPrice)}</span>
-              </div>
+            <div className="space-y-3 text-xs mb-6 border-y dark:border-slate-700 py-4 max-h-48 overflow-y-auto">
+              {room.priceDetails ? (
+                room.priceDetails.breakdown.map((day, idx) => (
+                  <div key={idx} className="flex justify-between text-gray-600 dark:text-gray-400">
+                    <span className="flex items-center gap-1">
+                      {day.date}
+                      {day.isPeak && (
+                        <span className="text-[9px] bg-red-100 text-red-600 dark:bg-red-900/40 dark:text-red-400 px-1 rounded font-semibold">
+                          {day.rateName || 'Peak'}
+                        </span>
+                      )}
+                    </span>
+                    <span className="text-gray-955 dark:text-white font-medium">
+                      {day.price === 0 ? 'Gratis' : formatPrice(day.price)}
+                    </span>
+                  </div>
+                ))
+              ) : (
+                <div className="flex justify-between">
+                  <span className="text-gray-600 dark:text-gray-400">{formatPrice(room.base_price)} x {nights} malam</span>
+                  <span className="text-gray-950 dark:text-white font-medium">{formatPrice(totalPrice)}</span>
+                </div>
+              )}
             </div>
 
             <div className="flex justify-between items-center mb-8">
               <span className="font-bold text-gray-900 dark:text-white">Total</span>
-              <span className="text-xl font-bold text-red-600">{formatPrice(totalPrice)}</span>
+              {totalPrice === 0 ? (
+                <span className="text-xl font-bold text-green-600 dark:text-green-400">Gratis</span>
+              ) : (
+                <span className="text-xl font-bold text-red-600">{formatPrice(totalPrice)}</span>
+              )}
             </div>
 
             <button

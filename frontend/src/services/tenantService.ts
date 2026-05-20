@@ -1,7 +1,7 @@
 import { api } from './api';
 import type {
   ApiResponse, DashboardStats, TenantProperty, TenantPropertyDetail,
-  RoomWithPeakRates, PeakSeasonRate, RoomFormInput,
+  RoomWithPeakRates, PeakSeasonRate, RoomFormInput, PaginationMeta,
 } from '@/types';
 
 export const tenantService = {
@@ -9,8 +9,21 @@ export const tenantService = {
     const res = await api.get<ApiResponse<DashboardStats>>('/tenant/dashboard');
     return res.data.data;
   },
-  async getProperties(): Promise<TenantProperty[]> {
-    const res = await api.get<ApiResponse<TenantProperty[]>>('/tenant/properties');
+  async getProperties(params?: {
+    search?: string;
+    categoryId?: string;
+    sortBy?: string;
+    sortOrder?: 'asc' | 'desc';
+    page?: number;
+    limit?: number;
+  }): Promise<{ properties: TenantProperty[]; pagination: PaginationMeta }> {
+    const query = new URLSearchParams();
+    if (params) {
+      Object.entries(params).forEach(([key, val]) => {
+        if (val !== undefined) query.append(key, String(val));
+      });
+    }
+    const res = await api.get<ApiResponse<{ properties: TenantProperty[]; pagination: PaginationMeta }>>(`/tenant/properties?${query.toString()}`);
     return res.data.data;
   },
   async getProperty(id: string): Promise<TenantPropertyDetail> {

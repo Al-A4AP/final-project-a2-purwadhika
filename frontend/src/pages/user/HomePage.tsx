@@ -4,12 +4,11 @@ import axios from 'axios';
 import { propertyService } from '@/services/propertyService';
 import { useFilterStore } from '@/stores/filterStore';
 import type { Property } from '@/types';
-import SearchForm from '@/components/user/SearchForm';
+import { HeroSection } from '@/components/user/HeroSection';
 import PropertyGrid from '@/components/user/PropertyGrid';
 import SortFilterBar from '@/components/common/SortFilterBar';
 import type { SortGroup } from '@/components/common/SortFilterBar';
 
-// ini dulu
 const HomePage: FC = () => {
   const [properties, setProperties] = useState<Property[]>([]);
   const [loading, setLoading] = useState(false);
@@ -78,10 +77,9 @@ const HomePage: FC = () => {
       setLoading(true);
       try {
         // Jika filter kosong, tampilkan 10 properti paling populer (banyak dipesan)
-       const fetchParams = (!filters.city && !filters.search)
-  ? { ...filters, limit: 10, sort: 'popularity', order: 'desc' as 'asc' | 'desc' }
-  : filters;
-
+        const fetchParams = (!filters.city && !filters.search)
+          ? { ...filters, limit: 10, sort: 'popularity', order: 'desc' as 'asc' | 'desc' }
+          : filters;
           
         const result = await propertyService.getProperties(fetchParams);
         setProperties(result.items);
@@ -98,23 +96,11 @@ const HomePage: FC = () => {
 
   return (
     <div className="min-h-screen bg-white dark:bg-slate-900">
-      {/* Hero */}
-      <section className="bg-linear-to-br from-red-50 to-blue-50 dark:from-slate-800 dark:to-slate-900 py-12 md:py-20 px-4">
-        <div className="max-w-7xl mx-auto">
-          <div className="text-center mb-12">
-            <h1 className="text-4xl md:text-5xl font-bold text-gray-900 dark:text-white mb-4">
-              Temukan Akomodasi Impian Anda
-            </h1>
-            <p className="text-lg text-gray-600 dark:text-gray-400">
-              Jelajahi berbagai pilihan properti dengan harga terbaik
-            </p>
-          </div>
-          <SearchForm />
-        </div>
-      </section>
+      {/* Premium Hero Carousel & Trending Section */}
+      <HeroSection />
 
       {/* Results */}
-      <section className="max-w-7xl mx-auto px-4 py-16">
+      <section id="results-section" className="max-w-7xl mx-auto px-4 py-16 scroll-mt-24">
         <SortFilterBar
           sortGroups={sortGroups}
           currentSort={filters.sort || 'popularity'}

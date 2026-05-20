@@ -5,6 +5,8 @@ import { useAuthStore } from '@/stores/authStore';
 import { useThemeStore } from '@/stores/themeStore';
 import './App.css'
 
+import { Toaster } from 'react-hot-toast';
+
 function App() {
    // udh d rbh u hindari loop di simpan ke global state
 
@@ -14,7 +16,12 @@ function App() {
     useThemeStore.getState().hydrate();
   }, []);
 
-  return <RouterProvider router={router} />;
+  return (
+    <>
+      <RouterProvider router={router} />
+      <Toaster position="top-right" />
+    </>
+  );
 }
 
 export default App;

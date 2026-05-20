@@ -13,7 +13,15 @@ export const getDashboard = async (req: Request, res: Response) => {
 export const getPropertiesCtrl = async (req: Request, res: Response) => {
   try {
     const tenantId = req.user!.id as string;
-    const data = await svc.getTenantProperties(tenantId);
+    const { search, categoryId, sortBy, sortOrder, page, limit } = req.query;
+    const data = await svc.getTenantProperties(tenantId, {
+      search: search as string,
+      categoryId: categoryId as string,
+      sortBy: sortBy as string,
+      sortOrder: sortOrder as 'asc' | 'desc',
+      page: page ? Number(page) : undefined,
+      limit: limit ? Number(limit) : undefined,
+    });
     return sendSuccess(res, data, 'Properti berhasil diambil');
   } catch (err: any) { return sendError(res, err.message, err.statusCode || 500); }
 };

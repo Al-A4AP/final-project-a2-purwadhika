@@ -7,9 +7,24 @@ export const authService = {
     return res.data.data;
   },
 
-  async register(data: { name: string; email: string; password: string; role: string }) {
-    const res = await api.post<ApiResponse<AuthResponse>>('/auth/register', data);
+  async googleLogin(data: { email: string; name: string; avatarUrl?: string }) {
+    const res = await api.post<ApiResponse<AuthResponse>>('/auth/google-login', data);
     return res.data.data;
+  },
+
+  async register(data: { name: string; email: string; role: string }) {
+    const res = await api.post<ApiResponse<{ email: string }>>('/auth/register', data);
+    return res.data.data;
+  },
+
+  async verifyEmail(token: string, password: string) {
+    const res = await api.post<ApiResponse<null>>('/auth/verify-email', { token, password });
+    return res.data;
+  },
+
+  async resendVerification(email: string) {
+    const res = await api.post<ApiResponse<null>>('/auth/resend-verification', { email });
+    return res.data;
   },
 
   async forgotPassword(email: string) {

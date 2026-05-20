@@ -1,27 +1,26 @@
-import type { FC } from 'react';
+import { useState, type FC } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { Link, useNavigate } from 'react-router-dom';
-import { UserPlus, Loader2 } from 'lucide-react';
+import { Link } from 'react-router-dom';
+import { UserPlus, Loader2, MailCheck } from 'lucide-react';
 import { registerSchema, type RegisterInput } from '@/validations/auth';
 import { authService } from '@/services/authService';
-import { useAuthStore } from '@/stores/authStore';
 import type { AxiosError } from 'axios';
 import type { ApiResponse } from '@/types';
 
 const RegisterPage: FC = () => {
-  const navigate = useNavigate();
-  const { setUser, setToken } = useAuthStore();
+  const [registeredEmail, setRegisteredEmail] = useState<string | null>(null);
+  const isTenantRegister = window.location.pathname.includes('/tenant');
+  const isUserRegister = window.location.pathname.includes('/user');
+  const defaultRole = isTenantRegister ? 'TENANT' : 'USER';
 
   const { register, handleSubmit, formState: { errors, isSubmitting }, setError } =
-    useForm<RegisterInput>({ resolver: zodResolver(registerSchema), defaultValues: { role: 'USER' } });
+    useForm<RegisterInput>({ resolver: zodResolver(registerSchema), defaultValues: { role: defaultRole } });
 
   const onSubmit = async (data: RegisterInput) => {
     try {
       const result = await authService.register(data);
-      setToken(result.token);
-      setUser(result.user);
-      navigate('/');
+      setRegisteredEmail(result.email);
     } catch (err) {
       const axiosErr = err as AxiosError<ApiResponse<null>>;
       const msg = axiosErr.response?.data?.message || 'Registrasi gagal';
@@ -29,9 +28,32 @@ const RegisterPage: FC = () => {
     }
   };
 
+  if (registeredEmail) {
+    return (
+      <div className="text-center py-6">
+        <div className="w-16 h-16 bg-green-50 dark:bg-green-950/20 text-green-600 dark:text-green-400 rounded-full flex items-center justify-center mx-auto mb-4 border border-green-200 dark:border-green-800">
+          <MailCheck size={32} />
+        </div>
+        <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-2">Registrasi Sukses!</h2>
+        <p className="text-gray-600 dark:text-gray-400 text-sm mb-6 max-w-sm mx-auto">
+          Email verifikasi telah dikirim ke <span className="font-semibold text-gray-900 dark:text-white">{registeredEmail}</span>. 
+          Silakan periksa kotak masuk email Anda untuk melakukan verifikasi dan mengatur password Anda.
+        </p>
+        <Link 
+          to="/auth/login" 
+          className="inline-block bg-red-600 text-white px-6 py-2.5 rounded-lg font-semibold hover:bg-red-700 transition"
+        >
+          Ke Halaman Login
+        </Link>
+      </div>
+    );
+  }
+
   return (
     <>
-      <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-2">Buat Akun</h2>
+      <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-2">
+        Daftar Sebagai {isTenantRegister ? 'Tenant' : 'Penyewa'}
+      </h2>
       <p className="text-gray-600 dark:text-gray-400 text-sm mb-6">Bergabung dengan Property Renting</p>
 
       {errors.root && (
@@ -62,27 +84,18 @@ const RegisterPage: FC = () => {
           {errors.email && <p className="text-red-500 text-xs mt-1">{errors.email.message}</p>}
         </div>
 
-        <div>
-          <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Password</label>
-          <input
-            {...register('password')}
-            type="password"
-            placeholder="Minimal 8 karakter"
-            className="w-full px-4 py-2.5 border border-gray-300 dark:border-slate-600 dark:bg-slate-700 dark:text-white rounded-lg focus:ring-2 focus:ring-red-500 outline-none transition"
-          />
-          {errors.password && <p className="text-red-500 text-xs mt-1">{errors.password.message}</p>}
-        </div>
-
-        <div>
-          <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Daftar sebagai</label>
-          <select
-            {...register('role')}
-            className="w-full px-4 py-2.5 border border-gray-300 dark:border-slate-600 dark:bg-slate-700 dark:text-white rounded-lg focus:ring-2 focus:ring-red-500 outline-none transition"
-          >
-            <option value="USER">Penyewa (Pencari Properti)</option>
-            <option value="TENANT">Pemilik Properti (Tenant)</option>
-          </select>
-        </div>
+        {!isTenantRegister && !isUserRegister && (
+          <div>
+            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Daftar sebagai</label>
+            <select
+              {...register('role')}
+              className="w-full px-4 py-2.5 border border-gray-300 dark:border-slate-600 dark:bg-slate-700 dark:text-white rounded-lg focus:ring-2 focus:ring-red-500 outline-none transition"
+            >
+              <option value="USER">Penyewa (Pencari Properti)</option>
+              <option value="TENANT">Pemilik Properti (Tenant)</option>
+            </select>
+          </div>
+        )}
 
         <button
           type="submit"
