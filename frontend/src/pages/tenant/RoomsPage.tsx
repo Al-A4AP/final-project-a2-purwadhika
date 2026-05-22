@@ -56,8 +56,12 @@ const RoomsPage: FC = () => {
     ]).then(([roomsData, propData]) => {
       setRooms(roomsData);
       setProperty(propData);
+    }).catch((err) => {
+      const e = err as { response?: { data?: { message?: string } } };
+      toast.error(e.response?.data?.message || 'Properti tidak ditemukan atau Anda tidak memiliki akses');
+      navigate('/tenant/properties');
     }).finally(() => setLoading(false));
-  }, [id]);
+  }, [id, navigate]);
 
   useEffect(() => { fetchRooms(); }, [fetchRooms]);
 

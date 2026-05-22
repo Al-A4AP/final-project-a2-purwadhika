@@ -7,6 +7,7 @@ import type { PropertyDetail, Room, ApiResponse } from '@/types';
 import { formatPrice } from '@/lib/formatters';
 import { CreditCard, Wallet } from 'lucide-react';
 import type { AxiosError } from 'axios';
+import { toast } from 'react-hot-toast';
 
 // ini juga 200, nanti kt diskusi lg
 declare global {
@@ -33,9 +34,24 @@ const BookingPage: FC = () => {
   const [guests, setGuests] = useState({ adults: 1, children: 0, babies: 0 });
 
   const updateGuest = (type: 'adults' | 'children' | 'babies', delta: number) => {
+    if (!room) return;
     setGuests((prev) => {
-      const next = { ...prev, [type]: Math.max(type === 'adults' ? 1 : 0, prev[type] + delta) };
-      return next;
+      let nextAdults = prev.adults;
+      let nextChildren = prev.children;
+      let nextBabies = prev.babies;
+
+      if (type === 'adults') {
+        nextAdults = Math.max(1, Math.min(room.capacity, prev.adults + delta));
+        // Clamp children and babies to new adults count
+        nextChildren = Math.min(nextAdults, nextChildren);
+        nextBabies = Math.min(nextAdults, nextBabies);
+      } else if (type === 'children') {
+        nextChildren = Math.max(0, Math.min(prev.adults, prev.children + delta));
+      } else if (type === 'babies') {
+        nextBabies = Math.max(0, Math.min(prev.adults, prev.babies + delta));
+      }
+
+      return { adults: nextAdults, children: nextChildren, babies: nextBabies };
     });
   };
 
@@ -73,9 +89,43 @@ const BookingPage: FC = () => {
   const checkInDate = new Date(checkIn!);
   const checkOutDate = new Date(checkOut!);
   const nights = Math.ceil((checkOutDate.getTime() - checkInDate.getTime()) / (1000 * 60 * 60 * 24));
-  const totalPrice = room.priceDetails ? room.priceDetails.totalPrice : room.base_price * nights;
+
+  // Child pricing logic (same as babies, children are free)
+  const totalChildPrice = 0;
+
+  const totalRoomPrice = room.priceDetails ? room.priceDetails.totalPrice : room.base_price * nights;
+  const totalPrice = totalRoomPrice + totalChildPrice;
 
   const handleCheckout = async () => {
+    // Validate dates
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    const checkInDateCompare = new Date(checkIn!);
+    checkInDateCompare.setHours(0, 0, 0, 0);
+
+    if (checkInDateCompare < today) {
+      toast.error('Tanggal check-in tidak boleh di masa lalu.');
+      return;
+    }
+
+    // Validate guest counts
+    if (guests.adults < 1) {
+      toast.error('Pemesanan harus menyertakan minimal 1 orang dewasa.');
+      return;
+    }
+    if (guests.adults > room.capacity) {
+      toast.error(`Jumlah orang dewasa tidak boleh melebihi kapasitas kamar (${room.capacity} orang).`);
+      return;
+    }
+    if (guests.children > guests.adults) {
+      toast.error(`Jumlah anak-anak tidak boleh melebihi jumlah orang dewasa (${guests.adults} orang).`);
+      return;
+    }
+    if (guests.babies > guests.adults) {
+      toast.error(`Jumlah bayi tidak boleh melebihi jumlah orang dewasa (${guests.adults} orang).`);
+      return;
+    }
+
     setProcessing(true);
     try {
       const result = await orderService.createOrder({
@@ -83,32 +133,38 @@ const BookingPage: FC = () => {
         roomId: room.id,
         check_in_date: new Date(checkIn!).toISOString(),
         check_out_date: new Date(checkOut!).toISOString(),
-        payment_method: paymentMethod
+        payment_method: paymentMethod,
+        adults: guests.adults,
+        children: guests.children,
+        babies: guests.babies
       });
 
       if (paymentMethod === 'MIDTRANS' && result.snapToken) {
         window.snap.pay(result.snapToken, {
           onSuccess: function() {
+            toast.success('Pemesanan berhasil!');
             navigate('/orders');
           },
           onPending: function() {
+            toast.success('Pemesanan tertunda, silakan selesaikan pembayaran.');
             navigate('/orders');
           },
           onError: function() {
-            alert('Pembayaran gagal');
+            toast.error('Pembayaran gagal');
             navigate('/orders');
           },
           onClose: function() {
-            alert('Anda menutup popup tanpa menyelesaikan pembayaran');
+            toast('Anda menutup popup tanpa menyelesaikan pembayaran', { icon: '⚠️' });
             navigate('/orders');
           }
         });
       } else {
+        toast.success('Pemesanan berhasil dibuat!');
         navigate('/orders'); // Redirect to orders to upload manual proof
       }
     } catch (err) {
       const axiosError = err as AxiosError<ApiResponse<null>>;
-      alert(axiosError.response?.data?.message || 'Checkout gagal');
+      toast.error(axiosError.response?.data?.message || 'Checkout gagal');
     } finally {
       setProcessing(false);
     }
@@ -157,14 +213,20 @@ const BookingPage: FC = () => {
                     >−</button>
                     <span className="w-6 text-center font-semibold text-gray-900 dark:text-white">{guests[key]}</span>
                     <button type="button" onClick={() => updateGuest(key, 1)}
-                      className="w-8 h-8 rounded-full border dark:border-slate-600 flex items-center justify-center text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-slate-700 font-bold text-lg transition"
+                      className="w-8 h-8 rounded-full border dark:border-slate-600 flex items-center justify-center text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-slate-700 disabled:opacity-40 font-bold text-lg transition"
+                      disabled={
+                        (key === 'adults' && guests.adults >= room.capacity) ||
+                        (key === 'children' && guests.children >= guests.adults) ||
+                        (key === 'babies' && guests.babies >= guests.adults)
+                      }
                     >+</button>
                   </div>
                 </div>
               ))}
-              <p className="text-xs text-gray-400 border-t dark:border-slate-700 pt-3">
-                Total tamu: <strong>{totalGuests} orang</strong>{guests.babies > 0 ? ` + ${guests.babies} bayi` : ''}
-              </p>
+              <div className="text-xs text-gray-400 border-t dark:border-slate-700 pt-3 flex flex-col sm:flex-row justify-between gap-2">
+                <span>Total tamu: <strong>{totalGuests} orang</strong>{guests.babies > 0 ? ` + ${guests.babies} bayi` : ''}</span>
+                <span className="text-gray-500">Kapasitas kamar: <strong>{room.capacity} Dewasa</strong> (Maks. Anak & Bayi sesuai jumlah Dewasa)</span>
+              </div>
             </div>
           </div>
 
@@ -207,9 +269,10 @@ const BookingPage: FC = () => {
             </div>
 
             <div className="space-y-3 text-xs mb-6 border-y dark:border-slate-700 py-4 max-h-48 overflow-y-auto">
+              <div className="font-semibold text-gray-700 dark:text-gray-300">Sewa Kamar ({nights} malam):</div>
               {room.priceDetails ? (
                 room.priceDetails.breakdown.map((day, idx) => (
-                  <div key={idx} className="flex justify-between text-gray-600 dark:text-gray-400">
+                  <div key={idx} className="flex justify-between text-gray-600 dark:text-gray-400 pl-2">
                     <span className="flex items-center gap-1">
                       {day.date}
                       {day.isPeak && (
@@ -218,15 +281,29 @@ const BookingPage: FC = () => {
                         </span>
                       )}
                     </span>
-                    <span className="text-gray-955 dark:text-white font-medium">
+                    <span className="text-gray-905 dark:text-white font-medium font-mono">
                       {day.price === 0 ? 'Gratis' : formatPrice(day.price)}
                     </span>
                   </div>
                 ))
               ) : (
-                <div className="flex justify-between">
+                <div className="flex justify-between pl-2">
                   <span className="text-gray-600 dark:text-gray-400">{formatPrice(room.base_price)} x {nights} malam</span>
-                  <span className="text-gray-950 dark:text-white font-medium">{formatPrice(totalPrice)}</span>
+                  <span className="text-gray-905 dark:text-white font-medium font-mono">{formatPrice(totalRoomPrice)}</span>
+                </div>
+              )}
+
+              {guests.children > 0 && (
+                <div className="pt-2 border-t border-gray-100 dark:border-slate-700/50 flex justify-between text-gray-600 dark:text-gray-400">
+                  <span>Tambahan Anak ({guests.children}x):</span>
+                  <span className="text-green-600 dark:text-green-400 font-medium">Gratis</span>
+                </div>
+              )}
+
+              {guests.babies > 0 && (
+                <div className="pt-2 border-t border-gray-100 dark:border-slate-700/50 flex justify-between text-gray-600 dark:text-gray-400">
+                  <span>Tambahan Bayi ({guests.babies}x):</span>
+                  <span className="text-green-600 dark:text-green-400 font-medium">Gratis</span>
                 </div>
               )}
             </div>

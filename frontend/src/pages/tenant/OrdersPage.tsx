@@ -6,6 +6,7 @@ import type { Order, TenantProperty, PaginationMeta } from '@/types';
 import { formatPrice } from '@/lib/formatters';
 import { Check, X, ExternalLink } from 'lucide-react';
 import { Pagination } from '@/components/common/Pagination';
+import { toast } from 'react-hot-toast';
 
 const TenantOrdersPage: FC = () => {
   const [orders, setOrders] = useState<Order[]>([]);
@@ -55,6 +56,20 @@ const TenantOrdersPage: FC = () => {
   }, [fetchOrders]);
 
   const handleUpdateStatus = async (orderId: string, status: string) => {
+    const order = orders.find(o => o.id === orderId);
+    if (!order) return;
+
+    const allowedTransitions: Record<string, string[]> = {
+      'WAITING_CONFIRMATION': ['PROCESSED', 'CANCELLED'],
+      'WAITING_PAYMENT': ['CANCELLED'],
+    };
+
+    const allowed = allowedTransitions[order.status];
+    if (!allowed || !allowed.includes(status)) {
+      toast.error(`Gagal: Transisi status dari ${order.status} ke ${status} tidak diperbolehkan.`);
+      return;
+    }
+
     let confirmMsg = `Ubah status pesanan menjadi ${status}?`;
     if (status === 'PROCESSED') {
       confirmMsg = 'Terima pembayaran dan proses pesanan ini?';
@@ -65,9 +80,10 @@ const TenantOrdersPage: FC = () => {
     setUpdating(orderId);
     try {
       await orderService.updateOrderStatus(orderId, status);
+      toast.success('Status pesanan berhasil diperbarui!');
       fetchOrders(pagination.page);
     } catch {
-      alert('Gagal memperbarui status');
+      toast.error('Gagal memperbarui status');
     } finally {
       setUpdating(null);
     }

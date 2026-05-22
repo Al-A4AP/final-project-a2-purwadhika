@@ -1,6 +1,7 @@
 import { create } from 'zustand';
 import type { User } from '@/types';
 import { STORAGE_KEYS } from '@/lib/constants';
+import { authService } from '@/services/authService';
 
 interface AuthStore {
   user: User | null;
@@ -54,8 +55,21 @@ export const useAuthStore = create<AuthStore>((set) => ({
       try {
         const user = JSON.parse(userStr) as User;
         set({ token, user, isAuthenticated: true, isTenant: user.role === 'TENANT' });
+        
+        // Verifikasi token ke backend di latar belakang untuk menghindari status kedaluwarsa
+        authService.getMe()
+          .then((updatedUser) => {
+            set({ user: updatedUser, isTenant: updatedUser.role === 'TENANT' });
+            localStorage.setItem(STORAGE_KEYS.USER, JSON.stringify(updatedUser));
+          })
+          .catch(() => {
+            // Token tidak valid atau kedaluwarsa, logout user
+            set({ user: null, token: null, isAuthenticated: false, isTenant: false });
+            localStorage.removeItem(STORAGE_KEYS.TOKEN);
+            localStorage.removeItem(STORAGE_KEYS.USER);
+          });
       } catch {
-        // Invalid storage data — intentionally ignored
+        // Data penyimpanan tidak valid — abaikan
       }
     }
   },

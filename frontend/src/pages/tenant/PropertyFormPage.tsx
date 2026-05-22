@@ -10,6 +10,7 @@ import { propertyService } from '@/services/propertyService';
 import type { PropertyCategory } from '@/types';
 import type { AxiosError } from 'axios';
 import type { ApiResponse } from '@/types';
+import { toast } from 'react-hot-toast';
 
 const schema = z.object({
   name: z.string().min(3, 'Minimal 3 karakter'),
@@ -36,13 +37,19 @@ const PropertyFormPage: FC = () => {
   useEffect(() => {
     propertyService.getCategories().then(setCategories);
     if (isEdit && id) {
-      tenantService.getProperty(id).then((p) => reset({
-        name: p.name, description: p.description, categoryId: p.categoryId,
-        address: p.address, city: p.city,
-        latitude: p.latitude?.toString() || '', longitude: p.longitude?.toString() || '',
-      }));
+      tenantService.getProperty(id)
+        .then((p) => reset({
+          name: p.name, description: p.description, categoryId: p.categoryId,
+          address: p.address, city: p.city,
+          latitude: p.latitude?.toString() || '', longitude: p.longitude?.toString() || '',
+        }))
+        .catch((err) => {
+          const axiosErr = err as AxiosError<ApiResponse<null>>;
+          toast.error(axiosErr.response?.data?.message || 'Properti tidak ditemukan atau Anda tidak memiliki akses');
+          navigate('/tenant/properties');
+        });
     }
-  }, [id, isEdit, reset]);
+  }, [id, isEdit, reset, navigate]);
 
   const onSubmit = async (data: FormInput) => {
     const fd = new FormData();
@@ -54,7 +61,7 @@ const PropertyFormPage: FC = () => {
       navigate('/tenant/properties');
     } catch (err) {
       const axiosErr = err as AxiosError<ApiResponse<null>>;
-      alert(axiosErr.response?.data?.message || 'Gagal menyimpan properti');
+      toast.error(axiosErr.response?.data?.message || 'Gagal menyimpan properti');
     }
   };
 

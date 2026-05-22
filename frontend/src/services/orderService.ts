@@ -7,6 +7,9 @@ export interface CreateOrderPayload {
   check_in_date: string;
   check_out_date: string;
   payment_method: 'MANUAL' | 'MIDTRANS'; // blm di test yg midtrans, qr & lain
+  adults: number;
+  children: number;
+  babies: number;
 }
 
 export const orderService = {

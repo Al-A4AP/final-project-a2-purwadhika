@@ -5,7 +5,7 @@ import { tenantService } from '@/services/tenantService';
 import { formatPrice } from '@/lib/formatters';
 import type { TenantProperty } from '@/types';
 import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, PieChart, Pie, Cell } from 'recharts';
-import { Calendar, ChevronLeft, ChevronRight, Info } from 'lucide-react';
+import { Calendar, ChevronLeft, ChevronRight, Info, Home, Key } from 'lucide-react';
 
 const COLORS = ['#0088FE', '#00C49F', '#FFBB28', '#FF8042'];
 
@@ -339,7 +339,10 @@ const ReportsPage: FC = () => {
                     {/* Property header row */}
                     <tr key={property.id} className="bg-gray-100/70 dark:bg-slate-700/20 border-b dark:border-slate-700">
                       <td colSpan={daysInMonth + 1} className="p-2.5 font-bold text-gray-800 dark:text-gray-200 sticky left-0 bg-gray-100/70 dark:bg-slate-800/80 z-10">
-                        🏠 {property.name}
+                        <div className="flex items-center gap-1.5">
+                          <Home size={16} className="text-rose-600 dark:text-rose-400" />
+                          <span>{property.name}</span>
+                        </div>
                       </td>
                     </tr>
 
@@ -347,7 +350,10 @@ const ReportsPage: FC = () => {
                     {property.rooms.map(room => (
                       <tr key={room.id} className="border-b dark:border-slate-700 hover:bg-gray-50/50 dark:hover:bg-slate-700/20">
                         <td className="p-3 font-medium text-gray-700 dark:text-gray-300 border-r dark:border-slate-700 sticky left-0 bg-white dark:bg-slate-800 z-10 truncate max-w-[200px]">
-                          🔑 {room.room_type}
+                          <div className="flex items-center gap-1.5">
+                            <Key size={14} className="text-gray-500" />
+                            <span>{room.room_type}</span>
+                          </div>
                         </td>
                         {dayNumbers.map(day => {
                           const booking = getDayBooking(room, day);

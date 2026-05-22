@@ -12,6 +12,9 @@ interface CreateOrderData {
   check_in_date: string;
   check_out_date: string;
   payment_method: 'MANUAL' | 'MIDTRANS';
+  adults: number;
+  children: number;
+  babies: number;
 }
 
 // Generate unique order number
@@ -20,7 +23,7 @@ const generateOrderNumber = () => {
 };
 
 export const createOrder = async (data: CreateOrderData) => {
-  const { userId, propertyId, roomId, check_in_date, check_out_date, payment_method } = data;
+  const { userId, propertyId, roomId, check_in_date, check_out_date, payment_method, adults, children, babies } = data;
 
   // 1. Validate user verification status
   const user = await prisma.user.findFirst({
@@ -46,11 +49,55 @@ export const createOrder = async (data: CreateOrderData) => {
     throw error;
   }
 
+  const today = new Date();
+  today.setUTCHours(0, 0, 0, 0);
+  
+  const checkInCompare = new Date(checkIn);
+  checkInCompare.setUTCHours(0, 0, 0, 0);
+
+  if (checkInCompare < today) {
+    const error: any = new Error('Tanggal check-in tidak boleh di masa lalu');
+    error.statusCode = 400;
+    throw error;
+  }
+
   // Calculate nights
   const nights = Math.ceil((checkOut.getTime() - checkIn.getTime()) / (1000 * 60 * 60 * 24));
 
   // Create Order in DB inside a transaction to prevent race conditions
   const order = await prisma.$transaction(async (tx) => {
+    // Fetch room to check capacity
+    const room = await tx.room.findFirst({
+      where: { id: roomId, deleted_at: null }
+    });
+    if (!room) {
+      const error: any = new Error('Kamar tidak ditemukan');
+      error.statusCode = 404;
+      throw error;
+    }
+
+    // Validate capacity
+    if (adults < 1) {
+      const error: any = new Error('Pemesanan harus menyertakan minimal 1 orang dewasa');
+      error.statusCode = 400;
+      throw error;
+    }
+    if (adults > room.capacity) {
+      const error: any = new Error(`Jumlah orang dewasa melebihi kapasitas kamar (${room.capacity} orang)`);
+      error.statusCode = 400;
+      throw error;
+    }
+    if (children > adults) {
+      const error: any = new Error(`Jumlah anak-anak tidak boleh melebihi jumlah orang dewasa (${adults} orang)`);
+      error.statusCode = 400;
+      throw error;
+    }
+    if (babies > adults) {
+      const error: any = new Error(`Jumlah bayi tidak boleh melebihi jumlah orang dewasa (${adults} orang)`);
+      error.statusCode = 400;
+      throw error;
+    }
+
     // 2. Validate room availability
     const avail = await checkAvailability(roomId, checkIn, checkOut, tx);
     if (!avail.available) {
@@ -61,6 +108,11 @@ export const createOrder = async (data: CreateOrderData) => {
 
     // 3. Calculate dynamic stay pricing
     const priceDetails = await calculateStayDetails(roomId, checkIn, checkOut, tx);
+
+    // Calculate child pricing (same as babies, children are free)
+    const totalChildPrice = 0;
+
+    const finalTotalPrice = priceDetails.totalPrice + totalChildPrice;
 
     const order_number = generateOrderNumber();
     const expires_at = new Date(Date.now() + 2 * 60 * 60 * 1000); // 2 hours expiration
@@ -73,7 +125,7 @@ export const createOrder = async (data: CreateOrderData) => {
         roomId,
         check_in_date: checkIn,
         check_out_date: checkOut,
-        total_price: priceDetails.totalPrice,
+        total_price: finalTotalPrice,
         payment_method,
         status: 'WAITING_PAYMENT',
         expires_at,

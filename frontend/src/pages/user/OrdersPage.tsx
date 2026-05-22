@@ -4,7 +4,8 @@ import { orderService } from '@/services/orderService';
 import { reviewService } from '@/services/reviewService';
 import type { Order } from '@/types';
 import { formatPrice, formatDate } from '@/lib/formatters';
-import { Clock, CheckCircle2, XCircle, CreditCard, UploadCloud } from 'lucide-react';
+import { Clock, CheckCircle2, XCircle, CreditCard, UploadCloud, Check } from 'lucide-react';
+import { toast } from 'react-hot-toast';
 
 const OrdersPage: FC = () => {
   const [orders, setOrders] = useState<Order[]>([]);
@@ -38,13 +39,20 @@ const OrdersPage: FC = () => {
     const file = e.target.files?.[0];
     if (!file || !selectedOrderId) return;
 
+    const order = orders.find(o => o.id === selectedOrderId);
+    if (!order) return;
+    if (order.status !== 'WAITING_PAYMENT') {
+      toast.error('Bukti pembayaran hanya dapat diunggah untuk pesanan yang menunggu pembayaran.');
+      return;
+    }
+
     setUploading(selectedOrderId);
     try {
       await orderService.uploadPaymentProof(selectedOrderId, file);
-      alert('Bukti pembayaran berhasil diunggah! Menunggu konfirmasi.');
+      toast.success('Bukti pembayaran berhasil diunggah! Menunggu konfirmasi.');
       fetchOrders();
     } catch {
-      alert('Gagal mengunggah bukti pembayaran');
+      toast.error('Gagal mengunggah bukti pembayaran');
     } finally {
       setUploading(null);
       setSelectedOrderId(null);
@@ -55,19 +63,30 @@ const OrdersPage: FC = () => {
   const handleReviewSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!reviewOrderId) return;
+
+    const order = orders.find(o => o.id === reviewOrderId);
+    if (!order) return;
+    if (order.status !== 'PROCESSED' && order.status !== 'COMPLETED') {
+      toast.error('Ulasan hanya dapat diberikan untuk pesanan yang sudah dikonfirmasi atau selesai.');
+      return;
+    }
+    if (order.review) {
+      toast.error('Anda sudah memberikan ulasan untuk pesanan ini.');
+      return;
+    }
+
     setSubmittingReview(true);
     try {
       await reviewService.createReview(reviewOrderId, rating, comment);
-      alert('Review berhasil dikirim!');
+      toast.success('Review berhasil dikirim!');
       setReviewOrderId(null);
       setComment('');
-      setRating(5);
       setRating(5);
       fetchOrders();
     } catch (err: unknown) {
       const e = err as { response?: { data?: { message?: string } } };
       const errorMsg = e.response?.data?.message || 'Gagal mengirim review';
-      alert(errorMsg);
+      toast.error(errorMsg);
     } finally {
       setSubmittingReview(false);
     }
@@ -161,7 +180,9 @@ const OrdersPage: FC = () => {
                     </button>
                   )}
                   {order.review && (
-                    <p className="text-xs text-green-600 mt-2">✓ Sudah diulas</p>
+                    <p className="text-xs text-green-600 mt-2 flex items-center gap-1">
+                      <Check size={12} /> Sudah diulas
+                    </p>
                   )}
                 </div>
               </div>

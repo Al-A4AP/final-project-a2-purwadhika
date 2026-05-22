@@ -2,13 +2,13 @@
 
 Platform aplikasi web *Property Renting* (Penyewaan Properti) yang dibangun untuk menghubungkan Pemilik Properti (*Tenant*) dan Penyewa (*User*). Menawarkan sistem pemesanan kamar lengkap dengan integrasi analitik, kalender harga dinamis (*peak rates*), dan verifikasi *email* otomatis.
 
-## 👥 Tim Pengembang (Group 1)
+## Tim Pengembang (Group 1)
 * **Anggita Zahra Kamila** (Fitur 2)
 * **Muhammad Ali Akbar** (Fitur 1)
 
 ---
 
-## 🚀 Fitur Utama
+## Fitur Utama
 
 ### Untuk Penyewa (*User*)
 * **Pencarian Pintar**: Filter berdasarkan kota, tanggal, rentang harga, dan fasilitas. Didukung deteksi lokasi otomatis via *LocationIQ*.
@@ -23,7 +23,7 @@ Platform aplikasi web *Property Renting* (Penyewaan Properti) yang dibangun untu
 
 ---
 
-## 🛠️ Teknologi & Stack
+## Teknologi & Stack
 
 * **Frontend**: React.js 18, Vite, TypeScript, Tailwind CSS, Zustand (Persist State), React Hook Form, Recharts, React Router Dom (Code Splitting via React.Lazy).
 * **Backend**: Node.js, Express.js, Prisma ORM, PostgreSQL.
@@ -31,7 +31,7 @@ Platform aplikasi web *Property Renting* (Penyewaan Properti) yang dibangun untu
 
 ---
 
-## 💻 Panduan Instalasi (Setup Instructions)
+## Panduan Instalasi (Setup Instructions)
 
 ### Prasyarat
 * Node.js v18+
@@ -80,7 +80,7 @@ npm run dev
 
 ---
 
-## 📝 Aturan Kontribusi (Git Workflow)
+## Aturan Kontribusi (Git Workflow)
 
 Lakukan semua modifikasi via *branch* terpisah atau ikuti panduan berikut bila bekerja langsung pada repositori:
 1. Simpan perubahan ke riwayat Git: `git add .` dan `git commit -m "Deskripsi perubahan"`

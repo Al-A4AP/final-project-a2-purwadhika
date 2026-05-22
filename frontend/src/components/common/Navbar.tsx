@@ -61,8 +61,8 @@ const Navbar: FC = () => {
                   onClick={() => setProfileOpen(!profileOpen)}
                   className="flex items-center gap-2 hover:opacity-80 transition focus:outline-none"
                 >
-                  {user?.avatar ? (
-                    <img src={user.avatar} alt="Profile" className="w-10 h-10 rounded-full object-cover border border-slate-200 dark:border-slate-700" />
+                  {user?.avatar_url ? (
+                    <img src={user.avatar_url} alt="Profile" className="w-10 h-10 rounded-full object-cover border border-slate-200 dark:border-slate-700" />
                   ) : (
                     <div className="w-10 h-10 rounded-full bg-rose-600 text-white flex items-center justify-center font-bold text-sm shadow-sm">
                       {getInitials(user?.name)}
@@ -126,8 +126,8 @@ const Navbar: FC = () => {
           <div className="md:hidden py-6 border-t border-slate-100 dark:border-slate-800 space-y-4 animate-fade-in">
             {isAuthenticated && (
               <div className="px-4 pb-4 border-b border-slate-100 dark:border-slate-800 flex items-center gap-3">
-                {user?.avatar ? (
-                  <img src={user.avatar} alt="Profile" className="w-12 h-12 rounded-full object-cover" />
+                {user?.avatar_url ? (
+                  <img src={user.avatar_url} alt="Profile" className="w-12 h-12 rounded-full object-cover" />
                 ) : (
                   <div className="w-12 h-12 rounded-full bg-rose-600 text-white flex items-center justify-center font-bold text-lg">
                     {getInitials(user?.name)}

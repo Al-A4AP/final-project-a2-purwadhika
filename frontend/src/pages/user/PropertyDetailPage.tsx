@@ -8,9 +8,10 @@ import { availabilityService } from '@/services/availabilityService';
 import type { PropertyDetail, Room, Review } from '@/types';
 import { formatPrice } from '@/lib/formatters';
 import { useAuthStore } from '@/stores/authStore';
-import { BedDouble, ArrowLeft, Calendar as CalendarIcon } from 'lucide-react';
+import { BedDouble, ArrowLeft, Calendar as CalendarIcon, AlertTriangle } from 'lucide-react';
 import { DayPicker } from 'react-day-picker';
 import 'react-day-picker/dist/style.css';
+import { toast } from 'react-hot-toast';
 
 import { PropertyGallery } from '@/components/property/PropertyGallery';
 import { PropertyInfo } from '@/components/property/PropertyInfo';
@@ -68,6 +69,11 @@ const PropertyDetailPage: FC = () => {
       document.getElementById('date-picker-section')?.scrollIntoView({ behavior: 'smooth', block: 'center' });
       return;
     }
+    const todayStr = new Date().toISOString().split('T')[0];
+    if (checkIn < todayStr) {
+      setDateError('Tanggal check-in tidak boleh di masa lalu.');
+      return;
+    }
     if (new Date(checkOut) <= new Date(checkIn)) {
       setDateError('Tanggal check-out harus setelah check-in.');
       return;
@@ -85,7 +91,7 @@ const PropertyDetailPage: FC = () => {
       setBlockedDays(data.filter(a => !a.is_available).map(a => new Date(a.date)));
       setIsAvailModalOpen(true);
     } catch {
-      alert('Gagal mengambil data ketersediaan');
+      toast.error('Gagal mengambil data ketersediaan');
     }
   };
 
@@ -154,7 +160,9 @@ const PropertyDetailPage: FC = () => {
               </div>
             </div>
             {dateError && (
-              <p className="mt-3 text-sm text-red-500 flex items-center gap-1">⚠️ {dateError}</p>
+              <p className="mt-3 text-sm text-red-500 flex items-center gap-1">
+                <AlertTriangle size={16} /> {dateError}
+              </p>
             )}
             {checkIn && checkOut && new Date(checkOut) > new Date(checkIn) && (
               <p className="mt-3 text-sm text-green-600 dark:text-green-400 font-medium">
@@ -223,8 +231,9 @@ const PropertyDetailPage: FC = () => {
                 )}
 
                 {firstRoom.is_available === false && (
-                  <div className="mt-4 p-3 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg text-red-600 dark:text-red-400 text-sm">
-                    ⚠️ {firstRoom.reason || 'Kamar tidak tersedia pada tanggal yang dipilih.'}
+                  <div className="mt-4 p-3 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg text-red-600 dark:text-red-400 text-sm flex items-start gap-1.5">
+                    <AlertTriangle size={16} className="mt-0.5 shrink-0" />
+                    <span>{firstRoom.reason || 'Kamar tidak tersedia pada tanggal yang dipilih.'}</span>
                   </div>
                 )}
 
@@ -291,8 +300,9 @@ const PropertyDetailPage: FC = () => {
                       )}
 
                       {room.is_available === false && (
-                        <div className="mb-4 p-2.5 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg text-red-600 dark:text-red-400 text-xs">
-                          ⚠️ {room.reason || 'Kamar tidak tersedia pada tanggal yang dipilih.'}
+                        <div className="mb-4 p-2.5 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg text-red-600 dark:text-red-400 text-xs flex items-start gap-1.5">
+                          <AlertTriangle size={14} className="mt-0.5 shrink-0" />
+                          <span>{room.reason || 'Kamar tidak tersedia pada tanggal yang dipilih.'}</span>
                         </div>
                       )}
 

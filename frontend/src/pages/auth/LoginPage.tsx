@@ -2,7 +2,7 @@ import { useState, type FC } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { Link, useNavigate } from 'react-router-dom';
-import { LogIn, Loader2, Eye, EyeOff } from 'lucide-react';
+import { LogIn, Loader2, Eye, EyeOff, Check } from 'lucide-react';
 import { useAuthStore } from '@/stores/authStore';
 import { loginSchema, type LoginInput } from '@/validations/auth';
 import { authService } from '@/services/authService';
@@ -118,8 +118,8 @@ const LoginPage: FC = () => {
             </button>
           )}
           {resendStatus === 'success' && (
-            <p className="text-green-600 dark:text-green-400 text-xs mt-1 font-medium">
-              ✓ Email verifikasi baru berhasil dikirim. Silakan periksa inbox Anda.
+            <p className="text-green-600 dark:text-green-400 text-xs mt-1 font-medium flex items-center gap-1">
+              <Check size={12} /> Email verifikasi baru berhasil dikirim. Silakan periksa inbox Anda.
             </p>
           )}
         </div>

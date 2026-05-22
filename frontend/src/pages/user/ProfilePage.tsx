@@ -3,9 +3,10 @@ import { useState, useRef } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
-import { User, Camera, Loader2, CheckCircle, Eye, EyeOff } from 'lucide-react';
+import { User, Camera, Loader2, Eye, EyeOff } from 'lucide-react';
 import { userService } from '@/services/userService';
 import { useAuthStore } from '@/stores/authStore';
+import { toast } from 'react-hot-toast';
 
 const schema = z.object({
   name: z.string().min(3, 'Nama minimal 3 karakter').optional().or(z.literal('')),
@@ -25,9 +26,7 @@ type PasswordFormInput = z.infer<typeof passwordSchema>;
 
 const ProfilePage: FC = () => {
   const { user, setUser } = useAuthStore();
-  const [saved, setSaved] = useState(false);
   const [uploadingAvatar, setUploadingAvatar] = useState(false);
-  const [passwordSaved, setPasswordSaved] = useState(false);
   const [showNewPassword, setShowNewPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const fileRef = useRef<HTMLInputElement>(null);
@@ -39,30 +38,32 @@ const ProfilePage: FC = () => {
     });
 
   const onSubmit = async (data: FormInput) => {
-    const payload = Object.fromEntries(Object.entries(data).filter(([, v]) => v !== ''));
-    const updated = await userService.updateProfile(payload);
-    setUser(updated);
-    setSaved(true);
-    setTimeout(() => setSaved(false), 3000);
+    try {
+      const payload = Object.fromEntries(Object.entries(data).filter(([, v]) => v !== ''));
+      const updated = await userService.updateProfile(payload);
+      setUser(updated);
+      toast.success('Profil berhasil disimpan!');
+    } catch (err: unknown) {
+      const e = err as { response?: { data?: { message?: string } } };
+      toast.error(e.response?.data?.message || 'Gagal menyimpan perubahan');
+    }
   };
 
   const { 
     register: registerPassword, 
     handleSubmit: handlePasswordSubmit, 
     reset: resetPassword,
-    setError: setPasswordError,
     formState: { errors: passwordErrors, isSubmitting: isSubmittingPassword } 
   } = useForm<PasswordFormInput>({ resolver: zodResolver(passwordSchema) });
 
   const onPasswordSubmit = async (data: PasswordFormInput) => {
     try {
       await userService.changePassword({ old_password: data.old_password, new_password: data.new_password });
-      setPasswordSaved(true);
+      toast.success('Password berhasil diubah!');
       resetPassword();
-      setTimeout(() => setPasswordSaved(false), 3000);
     } catch (err: unknown) {
       const e = err as { response?: { data?: { message?: string } } };
-      setPasswordError('root', { message: e.response?.data?.message || 'Gagal mengubah password' });
+      toast.error(e.response?.data?.message || 'Gagal mengubah password');
     }
   };
 
@@ -73,7 +74,10 @@ const ProfilePage: FC = () => {
     try {
       const updated = await userService.updateAvatar(file);
       setUser(updated);
-    } catch { alert('Gagal upload avatar'); }
+      toast.success('Foto profil berhasil diperbarui');
+    } catch { 
+      toast.error('Gagal upload avatar'); 
+    }
     finally { setUploadingAvatar(false); }
   };
 
@@ -115,11 +119,6 @@ const ProfilePage: FC = () => {
         {/* Form */}
         <div className="bg-white dark:bg-slate-800 rounded-xl shadow-sm border dark:border-slate-700 p-6">
           <h2 className="font-semibold text-gray-900 dark:text-white mb-5">Edit Informasi</h2>
-          {saved && (
-            <div className="flex items-center gap-2 bg-green-50 dark:bg-green-900/20 text-green-600 rounded-lg p-3 mb-4 text-sm">
-              <CheckCircle size={16} /> Profil berhasil disimpan!
-            </div>
-          )}
           <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
             <div>
               <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Nama Lengkap</label>
@@ -146,16 +145,6 @@ const ProfilePage: FC = () => {
         {/* Form Ubah Password */}
         <div className="bg-white dark:bg-slate-800 rounded-xl shadow-sm border dark:border-slate-700 p-6 mt-6">
           <h2 className="font-semibold text-gray-900 dark:text-white mb-5">Ubah Password</h2>
-          {passwordSaved && (
-            <div className="flex items-center gap-2 bg-green-50 dark:bg-green-900/20 text-green-600 rounded-lg p-3 mb-4 text-sm">
-              <CheckCircle size={16} /> Password berhasil diubah!
-            </div>
-          )}
-          {passwordErrors.root && (
-            <div className="flex items-center gap-2 bg-red-50 dark:bg-red-900/20 text-red-600 rounded-lg p-3 mb-4 text-sm">
-              {passwordErrors.root.message}
-            </div>
-          )}
           <form onSubmit={handlePasswordSubmit(onPasswordSubmit)} className="space-y-4">
             <div>
               <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Password Lama</label>

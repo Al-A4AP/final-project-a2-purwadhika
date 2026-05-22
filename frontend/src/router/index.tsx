@@ -1,5 +1,6 @@
+/* eslint-disable react-refresh/only-export-components */
 import { lazy, Suspense } from 'react';
-import { createBrowserRouter, Outlet } from 'react-router-dom';
+import { createBrowserRouter } from 'react-router-dom';
 import UserLayout from '@/components/layout/UserLayout';
 import AuthLayout from '@/components/layout/AuthLayout';
 import TenantLayout from '@/components/layout/TenantLayout';
@@ -7,7 +8,7 @@ import ProtectedRoute from './ProtectedRoute';
 import { Loading } from '@/components/common/Loading';
 
 // Helper component for Suspense
-const Loadable = (Component: React.LazyExoticComponent<any>) => (props: any) => (
+const Loadable = <P extends object>(Component: React.ComponentType<P>) => (props: P) => (
   <Suspense fallback={<Loading fullScreen />}>
     <Component {...props} />
   </Suspense>
@@ -36,7 +37,7 @@ const DashboardPage = Loadable(lazy(() => import('@/pages/tenant/DashboardPage')
 const PropertiesListPage = Loadable(lazy(() => import('@/pages/tenant/PropertiesListPage')));
 const PropertyFormPage = Loadable(lazy(() => import('@/pages/tenant/PropertyFormPage')));
 const RoomsPage = Loadable(lazy(() => import('@/pages/tenant/RoomsPage')));
-const TenantOrdersPage = Loadable(lazy(() => import('@/pages/tenant/OrdersPage').then(module => ({ default: module.default || module.OrdersPage }))));
+const TenantOrdersPage = Loadable(lazy(() => import('@/pages/tenant/OrdersPage')));
 const ReportsPage = Loadable(lazy(() => import('@/pages/tenant/ReportsPage')));
 const NotFoundPage = Loadable(lazy(() => import('@/pages/NotFoundPage')));
 

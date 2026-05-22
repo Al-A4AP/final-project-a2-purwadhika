@@ -106,7 +106,7 @@ const SortFilterBar: FC<Props> = ({
               <div 
                 key={group.key} 
                 className="relative inline-block text-left"
-                ref={el => dropdownRefs.current[group.key] = el}
+                ref={el => { dropdownRefs.current[group.key] = el; }}
               >
                 {/* Grup Button */}
                 <button
