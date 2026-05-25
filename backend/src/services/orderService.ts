@@ -1,8 +1,7 @@
 import prisma from '../config/prisma';
 import { createSnapTransaction, handleNotification } from './midtransService';
 import { sendPaymentConfirmationEmail, sendPaymentRejectionEmail, sendOrderConfirmationEmail } from '../utils/emailService';
-import { checkAvailability } from './availabilityService';
-import { calculateStayDetails } from './pricingService';
+import { getValidatedStayDetails } from './pricingService';
 
 interface CreateOrderData {
   userId: string;
@@ -66,10 +65,10 @@ export const createOrder = async (data: CreateOrderData) => {
 
     validateCapacity(adults, children, babies, room!.capacity);
 
-    const avail = await checkAvailability(roomId, checkIn, checkOut, tx);
-    if (!avail.available) throwError(avail.reason || 'Kamar tidak tersedia pada tanggal yang dipilih', 400);
-
-    const priceDetails = await calculateStayDetails(roomId, checkIn, checkOut, tx);
+    let priceDetails;
+    try {
+      priceDetails = await getValidatedStayDetails(roomId, checkIn, checkOut, tx);
+    } catch (e: any) { throwError(e.message, 400); }
     const finalTotalPrice = priceDetails.totalPrice;
 
     return tx.order.create({

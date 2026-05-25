@@ -62,6 +62,7 @@ export const createPeakRate = async (roomId: string, tenantId: string, data: any
   await verifyRoomOwner(roomId, tenantId);
   const start = new Date(data.start_date);
   const end = new Date(data.end_date);
+  if (start >= end) throw new AppError('Tanggal selesai harus setelah tanggal mulai', 400);
 
   const existing = await prisma.peakSeasonRate.findFirst({
     where: {
@@ -94,7 +95,8 @@ export const deletePeakRate = async (id: string, tenantId: string) => {
   return prisma.peakSeasonRate.update({ where: { id }, data: { deleted_at: new Date() } });
 };
 
-export const getRoomAvailabilities = async (roomId: string) => {
+export const getRoomAvailabilities = async (roomId: string, tenantId: string) => {
+  await verifyRoomOwner(roomId, tenantId);
   return prisma.roomAvailability.findMany({
     where: { roomId },
     orderBy: { date: 'asc' },

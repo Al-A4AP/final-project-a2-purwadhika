@@ -1,4 +1,5 @@
 import prisma from '../config/prisma';
+import { checkAvailability } from './availabilityService';
 
 export interface StayDetailBreakdown {
   date: string;
@@ -34,50 +35,40 @@ export const getPriceForDate = (date: Date, basePrice: number, peakRates: any[])
   return { price, isPeak: true, rateName: rate.description || 'Tarif Peak Season' };
 };
 
-export const calculateStayDetails = async (roomId: string, checkInDate: Date, checkOutDate: Date, tx?: any) => {
-  const client = tx || prisma;
+const buildDates = (checkIn: Date, checkOut: Date) => {
+  const ci = new Date(checkIn); ci.setUTCHours(0,0,0,0);
+  const co = new Date(checkOut); co.setUTCHours(0,0,0,0);
+  if (ci >= co) throw new Error('Tanggal check-out harus setelah check-in');
+  return { ci, co };
+};
 
-  const room = await client.room.findFirst({
+const buildBreakdown = (ci: Date, co: Date, room: any) => {
+  const breakdown: StayDetailBreakdown[] = [];
+  let totalPrice = 0;
+  const current = new Date(ci);
+  while (current < co) {
+    const res = getPriceForDate(current, room.base_price, room.peakRates);
+    breakdown.push({ date: current.toISOString().split('T')[0], ...res });
+    totalPrice += res.price;
+    current.setDate(current.getDate() + 1);
+  }
+  return { breakdown, totalPrice };
+};
+
+export const calculateStayDetails = async (roomId: string, checkInDate: Date, checkOutDate: Date, tx?: any) => {
+  const room = await (tx || prisma).room.findFirst({
     where: { id: roomId, deleted_at: null },
     include: { peakRates: { where: { deleted_at: null } } }
   });
+  if (!room) throw new Error('Kamar tidak ditemukan');
+  const { ci, co } = buildDates(checkInDate, checkOutDate);
+  const { breakdown, totalPrice } = buildBreakdown(ci, co, room);
+  const nights = Math.ceil((co.getTime() - ci.getTime()) / 86400000);
+  return { roomId, basePrice: room.base_price, nights, totalPrice, breakdown };
+};
 
-  if (!room) {
-    throw new Error('Kamar tidak ditemukan');
-  }
-
-  const checkIn = new Date(checkInDate);
-  checkIn.setUTCHours(0, 0, 0, 0);
-  const checkOut = new Date(checkOutDate);
-  checkOut.setUTCHours(0, 0, 0, 0);
-
-  if (checkIn >= checkOut) {
-    throw new Error('Tanggal check-out harus setelah tanggal check-in');
-  }
-
-  const nights = Math.ceil((checkOut.getTime() - checkIn.getTime()) / (1000 * 60 * 60 * 24));
-  const breakdown: StayDetailBreakdown[] = [];
-  let totalPrice = 0;
-
-  const current = new Date(checkIn);
-  while (current < checkOut) {
-    const dateStr = current.toISOString().split('T')[0];
-    const { price, isPeak, rateName } = getPriceForDate(current, room.base_price, room.peakRates);
-    breakdown.push({
-      date: dateStr,
-      price,
-      isPeak,
-      rateName
-    });
-    totalPrice += price;
-    current.setDate(current.getDate() + 1);
-  }
-
-  return {
-    roomId,
-    basePrice: room.base_price,
-    nights,
-    totalPrice,
-    breakdown
-  };
+export const getValidatedStayDetails = async (roomId: string, checkInDate: Date, checkOutDate: Date, tx?: any) => {
+  const avail = await checkAvailability(roomId, checkInDate, checkOutDate, tx);
+  if (!avail.available) throw new Error(avail.reason || 'Kamar penuh');
+  return calculateStayDetails(roomId, checkInDate, checkOutDate, tx);
 };
