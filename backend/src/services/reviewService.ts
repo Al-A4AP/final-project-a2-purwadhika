@@ -1,6 +1,10 @@
 import prisma from '../config/prisma';
 
 export const createReview = async (userId: string, orderId: string, rating: number, comment: string) => {
+  if (rating < 1 || rating > 5) {
+    throw new Error('Rating harus berada di antara 1 dan 5');
+  }
+
   const order = await prisma.order.findUnique({
     where: { id: orderId, userId, status: 'PROCESSED' }
   });

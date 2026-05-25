@@ -60,10 +60,26 @@ export const getPeakRates = async (roomId: string, tenantId: string) => {
 
 export const createPeakRate = async (roomId: string, tenantId: string, data: any) => {
   await verifyRoomOwner(roomId, tenantId);
+  const start = new Date(data.start_date);
+  const end = new Date(data.end_date);
+
+  const existing = await prisma.peakSeasonRate.findFirst({
+    where: {
+      roomId,
+      deleted_at: null,
+      start_date: { lte: end },
+      end_date: { gte: start }
+    }
+  });
+
+  if (existing) {
+    throw new AppError('Terdapat jadwal Peak Season yang bentrok pada rentang tanggal tersebut', 400);
+  }
+
   return prisma.peakSeasonRate.create({
     data: {
       roomId, rate_type: data.rate_type,
-      start_date: new Date(data.start_date), end_date: new Date(data.end_date),
+      start_date: start, end_date: end,
       rate_value: Number(data.rate_value), description: data.description || null,
     },
   });

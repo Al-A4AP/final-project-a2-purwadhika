@@ -27,6 +27,9 @@ export const peakRateSchema = z.object({
   rate_type: z.enum(['PERCENTAGE', 'NOMINAL']),
   rate_value: z.string().regex(/^\d+$/, 'Nilai rate harus berupa angka'),
   description: z.string().optional(),
+}).refine((data) => new Date(data.end_date) > new Date(data.start_date), {
+  message: "Tanggal selesai harus setelah tanggal mulai",
+  path: ["end_date"]
 });
 
 export const updateProfileSchema = z.object({

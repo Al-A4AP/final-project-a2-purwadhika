@@ -19,6 +19,8 @@ import {
   getRoomAvailabilitiesCtrl, setRoomAvailabilityCtrl
 } from '../controllers/tenantRoomController';
 import { getDashboardAnalyticsCtrl, getOccupancyCalendarCtrl } from '../controllers/tenantReportController';
+import { getTenantReviewsCtrl } from '../controllers/tenantReviewController';
+import { createCategoryCtrl, updateCategoryCtrl, deleteCategoryCtrl } from '../controllers/categoryController';
 
 const router = Router();
 const isTenant = [requireAuth, requireRole(['TENANT'])];
@@ -55,5 +57,13 @@ router.post('/rooms/:roomId/availability', ...isTenant, verifyRoomOwnership, set
 // Reporting
 router.get('/reports', ...isTenant, getDashboardAnalyticsCtrl);
 router.get('/reports/occupancy', ...isTenant, getOccupancyCalendarCtrl);
+
+// Reviews
+router.get('/reviews', ...isTenant, getTenantReviewsCtrl);
+
+// Categories (CRUD for tenant)
+router.post('/categories', ...isTenant, createCategoryCtrl);
+router.patch('/categories/:id', ...isTenant, updateCategoryCtrl);
+router.delete('/categories/:id', ...isTenant, deleteCategoryCtrl);
 
 export default router;

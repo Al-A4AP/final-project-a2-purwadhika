@@ -32,6 +32,8 @@ export interface Room {
   capacity: number;
   quantity: number;
   availability?: RoomAvailability[];
+  availabilities?: RoomAvailability[]; // from backend
+  peakRates?: PeakSeasonRate[];
   images?: RoomImage[];
   is_available?: boolean;
   reason?: string;

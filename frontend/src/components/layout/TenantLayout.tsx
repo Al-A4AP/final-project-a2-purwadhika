@@ -1,13 +1,15 @@
 import type { FC } from 'react';
 import { useState } from 'react';
 import { NavLink, Outlet, Navigate, Link } from 'react-router-dom';
-import { LayoutDashboard, Building2, ShoppingBag, BarChart2, LogOut, ChevronLeft, ChevronRight, User } from 'lucide-react';
+import { LayoutDashboard, Building2, ShoppingBag, BarChart2, MessageSquare, Tag, LogOut, ChevronLeft, ChevronRight, User } from 'lucide-react';
 import { useAuthStore } from '@/stores/authStore';
 
 const NAV = [
   { to: '/tenant/dashboard', icon: LayoutDashboard, label: 'Dashboard' },
   { to: '/tenant/properties', icon: Building2, label: 'Properti Saya' },
   { to: '/tenant/orders', icon: ShoppingBag, label: 'Pesanan' },
+  { to: '/tenant/reviews', icon: MessageSquare, label: 'Ulasan Tamu' },
+  { to: '/tenant/categories', icon: Tag, label: 'Kategori' },
   { to: '/tenant/reports', icon: BarChart2, label: 'Laporan' },
 ];
 

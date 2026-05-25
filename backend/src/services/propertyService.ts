@@ -11,7 +11,6 @@ interface PropertyFilters {
 export const getProperties = async (filters: PropertyFilters) => {
   const { page = 1, limit = 12, sort = 'created_at', order = 'desc', search, category, city } = filters;
   const skip = (Number(page) - 1) * Number(limit);
-
   const where = buildPropertyWhere(filters);
   const orderBy = buildOrderBy(sort, order);
 
@@ -46,11 +45,9 @@ export const getProperties = async (filters: PropertyFilters) => {
             const priceDetails = await calculateStayDetails(r.id, checkIn, checkOut);
             minPrice = Math.min(minPrice, priceDetails.totalPrice);
             roomsWithStatus.push({ ...r, is_available: true, priceDetails });
-          } else {
-            roomsWithStatus.push({ ...r, is_available: false, reason: avail.reason });
           }
         } catch (e) {
-          roomsWithStatus.push({ ...r, is_available: false });
+          // ignore error, room is just not pushed
         }
       } else {
         roomsWithStatus.push(r);
@@ -78,16 +75,21 @@ export const getProperties = async (filters: PropertyFilters) => {
     });
   }
 
+  // In-memory sort for price & rating (unsupported by Prisma orderBy)
+  if (sort === 'price') {
+    formattedItems.sort((a, b) => order === 'asc' ? a.min_price - b.min_price : b.min_price - a.min_price);
+  } else if (sort === 'rating') {
+    formattedItems.sort((a, b) => order === 'asc' ? (a.rating || 0) - (b.rating || 0) : (b.rating || 0) - (a.rating || 0));
+  }
+
   let finalItems = formattedItems;
   let total = 0;
-
-  if (useInMemoryFilter) {
+  if (useInMemoryFilter || sort === 'price' || sort === 'rating') {
     total = formattedItems.length;
     finalItems = formattedItems.slice(skip, skip + Number(limit));
   } else {
     total = await prisma.property.count({ where });
   }
-
   return {
     items: finalItems,
     pagination: { total, page: Number(page), limit: Number(limit), pages: Math.ceil(total / Number(limit)) },
@@ -119,35 +121,43 @@ export const getPropertyDetail = async (id: string, filters?: { check_in_date?: 
 
   const roomsWithStatus: any[] = [];
   for (const r of property.rooms) {
+    // get peak rates and availabilities for calendar
+    const roomWithRelations = await prisma.room.findUnique({
+      where: { id: r.id },
+      include: {
+        peakRates: { where: { deleted_at: null } },
+        availability: { where: { is_available: false, date: { gte: new Date() } } }
+      }
+    });
+
     if (checkIn && checkOut) {
       try {
         const avail = await checkAvailability(r.id, checkIn, checkOut);
-        const priceDetails = await calculateStayDetails(r.id, checkIn, checkOut);
-        roomsWithStatus.push({
-          ...r,
-          is_available: avail.available,
-          reason: avail.reason,
-          priceDetails,
-        });
+        if (avail.available) {
+          const priceDetails = await calculateStayDetails(r.id, checkIn, checkOut);
+          roomsWithStatus.push({
+            ...r,
+            is_available: avail.available,
+            reason: avail.reason,
+            priceDetails,
+            peakRates: roomWithRelations?.peakRates,
+            availability: roomWithRelations?.availability
+          });
+        }
       } catch (e: any) {
-        roomsWithStatus.push({
-          ...r,
-          is_available: false,
-          reason: e.message,
-        });
+        // ignore error, room is just not pushed
       }
     } else {
-      roomsWithStatus.push(r);
+      roomsWithStatus.push({
+        ...r,
+        peakRates: roomWithRelations?.peakRates,
+        availability: roomWithRelations?.availability
+      });
     }
   }
 
   const formatted = formatProperty(property);
-  return {
-    ...formatted,
-    images: property.images,
-    rooms: roomsWithStatus,
-    reviews: property.reviews,
-  };
+  return { ...formatted, images: property.images, rooms: roomsWithStatus, reviews: property.reviews };
 };
 
 const buildPropertyWhere = (filters: PropertyFilters) => {
@@ -160,14 +170,13 @@ const buildPropertyWhere = (filters: PropertyFilters) => {
 };
 
 const buildOrderBy = (sort: string, order: string) => {
-  const validSorts: Record<string, unknown> = {
+  const dbSorts: Record<string, unknown> = {
     name: { name: order },
     created_at: { created_at: order },
-    price: { rooms: { _min: { base_price: order } } },
     popularity: { orders: { _count: order } },
-    rating: { reviews: { _count: order } },
   };
-  return validSorts[sort] || { created_at: 'desc' };
+  // price & rating are sorted in-memory after formatting
+  return dbSorts[sort] || { created_at: 'desc' };
 };
 
 const formatProperty = (p: any) => {
