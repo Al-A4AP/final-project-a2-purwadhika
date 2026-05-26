@@ -1,47 +1,57 @@
-import type { FC } from 'react';
-import { useState, useEffect } from 'react';
-import { ChevronLeft, ChevronRight, MapPin, Sparkles } from 'lucide-react';
-import SearchForm from './SearchForm';
-import { useFilterStore } from '@/stores/filterStore';
+import type { FC } from "react";
+import { useState, useEffect } from "react";
+import { ChevronLeft, ChevronRight, MapPin, Sparkles } from "lucide-react";
+import SearchForm from "./SearchForm";
+import { useFilterStore } from "@/stores/filterStore";
 
 const HERO_SLIDES = [
   {
-    image: 'https://images.unsplash.com/photo-1540555700478-4be289fbecef?auto=format&fit=crop&w=1600&q=80',
-    title: 'Sewa Penginapan Terbaik untuk Liburan Anda',
-    subtitle: 'Temukan hotel, resort, apartemen, villa dan kost di kota-kota terpopuler Indonesia',
+    image:
+      "https://images.unsplash.com/photo-1540555700478-4be289fbecef?auto=format&fit=crop&w=1600&q=80",
+    title: "Sewa Penginapan Terbaik untuk Liburan Anda",
+    subtitle:
+      "Temukan hotel, resort, apartemen, villa dan kost di kota-kota terpopuler Indonesia",
   },
   {
-    image: 'https://images.unsplash.com/photo-1580587771525-78b9dba3b914?auto=format&fit=crop&w=1600&q=80',
-    title: 'Nikmati Keindahan & Ketenangan Alam',
-    subtitle: 'Vila mewah eksklusif dengan privasi penuh dan fasilitas kolam renang kelas dunia',
+    image:
+      "https://images.unsplash.com/photo-1580587771525-78b9dba3b914?auto=format&fit=crop&w=1600&q=80",
+    title: "Nikmati Keindahan & Ketenangan Alam",
+    subtitle:
+      "Vila mewah eksklusif dengan privasi penuh dan fasilitas kolam renang kelas dunia",
   },
   {
-    image: 'https://images.unsplash.com/photo-1502672260266-1c1ef2d93688?auto=format&fit=crop&w=1600&q=80',
-    title: 'Kemewahan Modern di Pusat Kota',
-    subtitle: 'Apartemen elegan dengan pemandangan cakrawala metropolitan yang menakjubkan',
+    image:
+      "https://images.unsplash.com/photo-1502672260266-1c1ef2d93688?auto=format&fit=crop&w=1600&q=80",
+    title: "Kemewahan Modern di Pusat Kota",
+    subtitle:
+      "Apartemen elegan dengan pemandangan cakrawala metropolitan yang menakjubkan",
   },
 ];
 
 const TRENDING_DESTINATIONS = [
   {
-    city: 'Bali',
-    image: 'https://images.unsplash.com/photo-1537996194471-e657df975ab4?auto=format&fit=crop&w=600&q=80',
-    count: '120+ Properti',
+    city: "Bali",
+    image:
+      "https://images.unsplash.com/photo-1537996194471-e657df975ab4?auto=format&fit=crop&w=600&q=80",
+    count: "120+ Properti",
   },
   {
-    city: 'Jakarta',
-    image: 'https://images.unsplash.com/photo-1506485338023-6ce5f36692df?auto=format&fit=crop&w=600&q=80',
-    count: '85+ Properti',
+    city: "Jakarta",
+    image:
+      "https://images.unsplash.com/photo-1506485338023-6ce5f36692df?auto=format&fit=crop&w=600&q=80",
+    count: "85+ Properti",
   },
   {
-    city: 'Bandung',
-    image: 'https://images.unsplash.com/photo-1626125345510-4603468eedfb?auto=format&fit=crop&w=600&q=80',
-    count: '60+ Properti',
+    city: "Bandung",
+    image:
+      "https://images.unsplash.com/photo-1626125345510-4603468eedfb?auto=format&fit=crop&w=600&q=80",
+    count: "60+ Properti",
   },
   {
-    city: 'Yogyakarta',
-    image: 'https://images.unsplash.com/photo-1584810359583-96fc3448beaa?auto=format&fit=crop&w=600&q=80',
-    count: '45+ Properti',
+    city: "Yogyakarta",
+    image:
+      "https://images.unsplash.com/photo-1584810359583-96fc3448beaa?auto=format&fit=crop&w=600&q=80",
+    count: "45+ Properti",
   },
 ];
 
@@ -57,7 +67,9 @@ export const HeroSection: FC = () => {
   }, []);
 
   const handlePrev = () => {
-    setCurrentSlide((prev) => (prev - 1 + HERO_SLIDES.length) % HERO_SLIDES.length);
+    setCurrentSlide(
+      (prev) => (prev - 1 + HERO_SLIDES.length) % HERO_SLIDES.length,
+    );
   };
 
   const handleNext = () => {
@@ -67,7 +79,9 @@ export const HeroSection: FC = () => {
   const handleSelectCity = (city: string) => {
     filters.setCity(city);
     // Smooth scroll to results
-    document.getElementById('results-section')?.scrollIntoView({ behavior: 'smooth' });
+    document
+      .getElementById("results-section")
+      ?.scrollIntoView({ behavior: "smooth" });
   };
 
   return (
@@ -78,7 +92,9 @@ export const HeroSection: FC = () => {
           <div
             key={idx}
             className={`absolute inset-0 transition-opacity duration-1000 ease-in-out ${
-              idx === currentSlide ? 'opacity-100' : 'opacity-0 pointer-events-none'
+              idx === currentSlide
+                ? "opacity-100"
+                : "opacity-0 pointer-events-none"
             }`}
           >
             {/* Dark Overlay */}
@@ -92,7 +108,9 @@ export const HeroSection: FC = () => {
             <div className="absolute inset-0 z-20 flex flex-col items-center justify-center text-center px-4 mb-20 md:mb-12">
               <span className="flex items-center gap-1.5 text-red-500 font-semibold text-xs md:text-sm tracking-wider uppercase bg-white/10 backdrop-blur-md px-3.5 py-1.5 rounded-full mb-4 animate-fade-in-down border border-white/20">
                 <Sparkles size={14} className="text-red-500 fill-red-500" />
-                <span className="text-rose-600 font-bold">PURWA</span><span className="text-slate-900 font-bold">LOKA</span> Premium Vacation Homes
+                <span className="text-rose-600 font-bold">PURWA</span>
+                <span className="text-slate-900 font-bold">LOKA</span> Premium
+                Vacation Homes
               </span>
               <h1 className="text-3xl md:text-6xl font-bold text-white max-w-4xl leading-tight drop-shadow-lg">
                 {slide.title}
@@ -127,7 +145,9 @@ export const HeroSection: FC = () => {
               key={idx}
               onClick={() => setCurrentSlide(idx)}
               className={`h-2 rounded-full transition-all duration-300 ${
-                idx === currentSlide ? 'w-8 bg-red-600' : 'w-2 bg-white/50 hover:bg-white/80'
+                idx === currentSlide
+                  ? "w-8 bg-red-600"
+                  : "w-2 bg-white/50 hover:bg-white/80"
               }`}
               aria-label={`Pilih slide ${idx + 1}`}
             />
@@ -151,7 +171,8 @@ export const HeroSection: FC = () => {
               Destinasi Populer yang Sedang Tren
             </h2>
             <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">
-              Rekomendasi kota terbaik di Indonesia untuk liburan tak terlupakan Anda berikutnya
+              Rekomendasi kota terbaik di Indonesia untuk liburan tak terlupakan
+              Anda berikutnya
             </p>
           </div>
         </div>

@@ -6,8 +6,248 @@ datasource db {
   provider = "postgresql"
 }
 
+model User {
+  id                 String              @id @default(cuid())
+  email              String              @unique
+  password_hash      String
+  role               Role                @default(USER)
+  name               String
+  phone              String?
+  avatar_url         String?
+  verified_at        DateTime?
+  deleted_at         DateTime?
+  created_at         DateTime            @default(now())
+  updated_at         DateTime            @default(now()) @updatedAt
+  emailVerifications EmailVerification[]
+  orders             Order[]
+  passwordResets     PasswordReset[]
+  tenantProperties   Property[]          @relation("TenantProperties")
+  reviewReplies      ReviewReply[]
+  reviews            Review[]
 
-// ===================== ENUMS =====================
+  @@map("users")
+}
+
+model EmailVerification {
+  id         String    @id @default(cuid())
+  userId     String
+  token      String    @unique
+  expires_at DateTime
+  used_at    DateTime?
+  created_at DateTime  @default(now())
+  updated_at DateTime  @default(now()) @updatedAt
+  user       User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("email_verifications")
+}
+
+model PasswordReset {
+  id         String    @id @default(cuid())
+  userId     String
+  token      String    @unique
+  expires_at DateTime
+  used_at    DateTime?
+  created_at DateTime  @default(now())
+  updated_at DateTime  @default(now()) @updatedAt
+  user       User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("password_resets")
+}
+
+model PropertyCategory {
+  id         String     @id @default(cuid())
+  name       String     @unique
+  updated_at DateTime   @default(now()) @updatedAt
+  properties Property[]
+
+  @@map("property_categories")
+}
+
+model Property {
+  id                 String           @id @default(cuid())
+  tenantId           String
+  categoryId         String
+  name               String
+  description        String
+  featured_image_url String?
+  address            String
+  city               String
+  latitude           Float?
+  longitude          Float?
+  deleted_at         DateTime?
+  created_at         DateTime         @default(now())
+  amenities          String[]
+  province           String?
+  updated_at         DateTime         @default(now()) @updatedAt
+  delete             Boolean?         @default(false)
+  orders             Order[]
+  category           PropertyCategory @relation(fields: [categoryId], references: [id])
+  tenant             User             @relation("TenantProperties", fields: [tenantId], references: [id])
+  images             PropertyImage[]
+  reviews            Review[]
+  rooms              Room[]
+
+  @@index([tenantId])
+  @@index([categoryId])
+  @@index([city])
+  @@index([deleted_at])
+  @@map("properties")
+}
+
+model PropertyImage {
+  id                   String   @id @default(cuid())
+  propertyId           String
+  image_url            String
+  cloudinary_public_id String?
+  order                Int      @default(0)
+  created_at           DateTime @default(now())
+  updated_at           DateTime @default(now()) @updatedAt
+  property             Property @relation(fields: [propertyId], references: [id], onDelete: Cascade)
+
+  @@map("property_images")
+}
+
+model Room {
+  id           String             @id @default(cuid())
+  propertyId   String
+  room_type    String
+  base_price   Int
+  description  String?
+  capacity     Int
+  deleted_at   DateTime?
+  created_at   DateTime           @default(now())
+  child_price  Int?
+  quantity     Int                @default(1)
+  updated_at   DateTime           @default(now()) @updatedAt
+  delete       Boolean?           @default(false)
+  orders       Order[]
+  peakRates    PeakSeasonRate[]
+  availability RoomAvailability[]
+  images       RoomImage[]
+  property     Property           @relation(fields: [propertyId], references: [id], onDelete: Cascade)
+
+  @@index([propertyId])
+  @@index([deleted_at])
+  @@index([capacity])
+  @@map("rooms")
+}
+
+model RoomAvailability {
+  id           String   @id @default(cuid())
+  roomId       String
+  date         DateTime
+  is_available Boolean  @default(true)
+  created_at   DateTime @default(now())
+  updated_at   DateTime @default(now()) @updatedAt
+  room         Room     @relation(fields: [roomId], references: [id], onDelete: Cascade)
+
+  @@unique([roomId, date])
+  @@map("room_availabilities")
+}
+
+model RoomImage {
+  id                   String   @id @default(cuid())
+  roomId               String
+  image_url            String
+  cloudinary_public_id String?
+  order                Int      @default(0)
+  created_at           DateTime @default(now())
+  updated_at           DateTime @default(now()) @updatedAt
+  room                 Room     @relation(fields: [roomId], references: [id], onDelete: Cascade)
+
+  @@map("room_images")
+}
+
+model PeakSeasonRate {
+  id          String    @id @default(cuid())
+  roomId      String
+  start_date  DateTime
+  end_date    DateTime
+  rate_type   RateType
+  rate_value  Int
+  description String?
+  deleted_at  DateTime?
+  created_at  DateTime  @default(now())
+  updated_at  DateTime  @default(now()) @updatedAt
+  delete      Boolean?  @default(false)
+  room        Room      @relation(fields: [roomId], references: [id], onDelete: Cascade)
+
+  @@index([roomId])
+  @@map("peak_season_rates")
+}
+
+model Order {
+  id                      String        @id @default(cuid())
+  order_number            String        @unique
+  userId                  String
+  roomId                  String
+  propertyId              String
+  check_in_date           DateTime
+  check_out_date          DateTime
+  total_price             Int
+  status                  OrderStatus   @default(WAITING_PAYMENT)
+  payment_method          PaymentMethod @default(MANUAL)
+  payment_proof_url       String?
+  midtrans_transaction_id String?
+  payment_verified_at     DateTime?
+  deleted_at              DateTime?
+  canceled_at             DateTime?
+  created_at              DateTime      @default(now())
+  completed_at            DateTime?
+  expires_at              DateTime?
+  updated_at              DateTime      @default(now()) @updatedAt
+  delete                  Boolean?      @default(false)
+  property                Property      @relation(fields: [propertyId], references: [id])
+  room                    Room          @relation(fields: [roomId], references: [id])
+  user                    User          @relation(fields: [userId], references: [id])
+  review                  Review?
+
+  @@index([userId])
+  @@index([roomId])
+  @@index([propertyId])
+  @@index([status])
+  @@index([check_in_date, check_out_date])
+  @@map("orders")
+}
+
+model Review {
+  id         String        @id @default(cuid())
+  orderId    String        @unique
+  propertyId String
+  userId     String
+  rating     Int
+  comment    String
+  deleted_at DateTime?
+  created_at DateTime      @default(now())
+  updated_at DateTime      @default(now()) @updatedAt
+  delete     Boolean?      @default(false)
+  image_url  String?
+  replies    ReviewReply[]
+  order      Order         @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  property   Property      @relation(fields: [propertyId], references: [id])
+  user       User          @relation(fields: [userId], references: [id])
+
+  @@index([propertyId])
+  @@index([userId])
+  @@map("reviews")
+}
+
+model ReviewReply {
+  id         String    @id @default(cuid())
+  reviewId   String
+  tenantId   String
+  reply_text String
+  deleted_at DateTime?
+  created_at DateTime  @default(now())
+  updated_at DateTime  @default(now()) @updatedAt
+  delete     Boolean?  @default(false)
+  review     Review    @relation(fields: [reviewId], references: [id], onDelete: Cascade)
+  tenant     User      @relation(fields: [tenantId], references: [id])
+
+  @@index([reviewId])
+  @@index([tenantId])
+  @@map("review_replies")
+}
 
 enum Role {
   USER
@@ -30,248 +270,4 @@ enum PaymentMethod {
 enum RateType {
   PERCENTAGE
   NOMINAL
-}
-
-// ===================== MODELS =====================
-
-model User {
-  id            String    @id @default(cuid())
-  email         String    @unique
-  password_hash String
-  role          Role      @default(USER)
-  name          String
-  phone         String?
-  avatar_url    String?
-  verified_at   DateTime?
-  deleted_at    DateTime?
-  created_at    DateTime  @default(now())
-  updated_at    DateTime  @default(now()) @updatedAt
-
-  orders          Order[]
-  reviews         Review[]
-  tenantProperties Property[]    @relation("TenantProperties")
-  reviewReplies    ReviewReply[]
-  emailVerifications EmailVerification[]
-  passwordResets   PasswordReset[]
-
-  @@map("users")
-}
-
-model EmailVerification {
-  id         String    @id @default(cuid())
-  userId     String
-  user       User      @relation(fields: [userId], references: [id], onDelete: Cascade)
-  token      String    @unique
-  expires_at DateTime
-  used_at    DateTime?
-  created_at DateTime  @default(now())
-  updated_at DateTime  @default(now()) @updatedAt
-
-  @@map("email_verifications")
-}
-
-model PasswordReset {
-  id         String    @id @default(cuid())
-  userId     String
-  user       User      @relation(fields: [userId], references: [id], onDelete: Cascade)
-  token      String    @unique
-  expires_at DateTime
-  used_at    DateTime?
-  created_at DateTime  @default(now())
-  updated_at DateTime  @default(now()) @updatedAt
-
-  @@map("password_resets")
-}
-
-model PropertyCategory {
-  id         String     @id @default(cuid())
-  name       String     @unique
-  icon       String?
-  properties Property[]
-  updated_at DateTime  @default(now()) @updatedAt
-
-  @@map("property_categories")
-}
-
-model Property {
-  id                  String           @id @default(cuid())
-  tenantId            String
-  tenant              User             @relation("TenantProperties", fields: [tenantId], references: [id])
-  categoryId          String
-  category            PropertyCategory @relation(fields: [categoryId], references: [id])
-  name                String
-  description         String
-  featured_image_url  String?
-  address             String
-  city                String
-  province            String?
-  amenities           String[]
-  latitude            Float?
-  longitude           Float?
-  deleted_at          DateTime?
-  created_at          DateTime         @default(now())
-  updated_at          DateTime         @default(now()) @updatedAt
-
-  images  PropertyImage[]
-  rooms   Room[]
-  orders  Order[]
-  reviews Review[]
-
-  @@index([tenantId])
-  @@index([categoryId])
-  @@index([city])
-  @@index([deleted_at])
-  @@map("properties")
-}
-
-model PropertyImage {
-  id                  String   @id @default(cuid())
-  propertyId          String
-  property            Property @relation(fields: [propertyId], references: [id], onDelete: Cascade)
-  image_url           String
-  cloudinary_public_id String?
-  order               Int      @default(0)
-  created_at          DateTime @default(now())
-  updated_at          DateTime @default(now()) @updatedAt
-
-  @@map("property_images")
-}
-
-model Room {
-  id          String   @id @default(cuid())
-  propertyId  String
-  property    Property @relation(fields: [propertyId], references: [id], onDelete: Cascade)
-  room_type   String
-  base_price  Int
-  child_price Int?
-  description String?
-  capacity    Int
-  quantity    Int      @default(1)
-  deleted_at  DateTime?
-  created_at  DateTime @default(now())
-  updated_at  DateTime @default(now()) @updatedAt
-
-  availability RoomAvailability[]
-  peakRates    PeakSeasonRate[]
-  orders       Order[]
-  images       RoomImage[]
-
-  @@index([propertyId])
-  @@index([deleted_at])
-  @@index([capacity])
-  @@map("rooms")
-}
-
-model RoomAvailability {
-  id           String   @id @default(cuid())
-  roomId       String
-  room         Room     @relation(fields: [roomId], references: [id], onDelete: Cascade)
-  date         DateTime
-  is_available Boolean  @default(true)
-  created_at   DateTime @default(now())
-  updated_at   DateTime @default(now()) @updatedAt
-
-  @@unique([roomId, date])
-  @@map("room_availabilities")
-}
-
-model RoomImage {
-  id                  String   @id @default(cuid())
-  roomId              String
-  room                Room     @relation(fields: [roomId], references: [id], onDelete: Cascade)
-  image_url           String
-  cloudinary_public_id String?
-  order               Int      @default(0)
-  created_at          DateTime @default(now())
-  updated_at          DateTime @default(now()) @updatedAt
-
-  @@map("room_images")
-}
-
-model PeakSeasonRate {
-  id          String    @id @default(cuid())
-  roomId      String
-  room        Room      @relation(fields: [roomId], references: [id], onDelete: Cascade)
-  start_date  DateTime
-  end_date    DateTime
-  rate_type   RateType
-  rate_value  Int
-  description String?
-  deleted_at  DateTime?
-  created_at  DateTime  @default(now())
-  updated_at  DateTime  @default(now()) @updatedAt
-
-  @@index([roomId])
-  @@map("peak_season_rates")
-}
-
-model Order {
-  id                     String        @id @default(cuid())
-  order_number           String        @unique
-  userId                 String
-  user                   User          @relation(fields: [userId], references: [id])
-  roomId                 String
-  room                   Room          @relation(fields: [roomId], references: [id])
-  propertyId             String
-  property               Property      @relation(fields: [propertyId], references: [id])
-  check_in_date          DateTime
-  check_out_date         DateTime
-  total_price            Int
-  status                 OrderStatus   @default(WAITING_PAYMENT)
-  payment_method         PaymentMethod @default(MANUAL)
-  payment_proof_url      String?
-  midtrans_transaction_id String?
-  payment_verified_at    DateTime?
-  expires_at             DateTime?
-  completed_at           DateTime?
-  deleted_at             DateTime?
-  canceled_at            DateTime?
-  created_at             DateTime      @default(now())
-  updated_at             DateTime      @default(now()) @updatedAt
-
-  review Review?
-
-  @@index([userId])
-  @@index([roomId])
-  @@index([propertyId])
-  @@index([status])
-  @@index([check_in_date, check_out_date])
-  @@map("orders")
-}
-
-model Review {
-  id         String    @id @default(cuid())
-  orderId    String    @unique
-  order      Order     @relation(fields: [orderId], references: [id], onDelete: Cascade)
-  propertyId String
-  property   Property  @relation(fields: [propertyId], references: [id])
-  userId     String
-  user       User      @relation(fields: [userId], references: [id])
-  rating     Int
-  comment    String
-  deleted_at DateTime?
-  created_at DateTime  @default(now())
-  updated_at DateTime  @default(now()) @updatedAt
-
-  replies ReviewReply[]
-
-  @@index([propertyId])
-  @@index([userId])
-  @@map("reviews")
-}
-
-model ReviewReply {
-  id         String    @id @default(cuid())
-  reviewId   String
-  review     Review    @relation(fields: [reviewId], references: [id], onDelete: Cascade)
-  tenantId   String
-  tenant     User      @relation(fields: [tenantId], references: [id])
-  reply_text String
-  deleted_at DateTime?
-  created_at DateTime  @default(now())
-  updated_at DateTime  @default(now()) @updatedAt
-
-  @@index([reviewId])
-  @@index([tenantId])
-  @@map("review_replies")
 }

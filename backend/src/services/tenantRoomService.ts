@@ -114,8 +114,6 @@ export const createPeakRate = async (
     },
   });
 };
-// Mekanisme menangani bentrok jika terdapat dua peak season secara bersamaan
-// End_date harus sebelum start_date
 
 export const deletePeakRate = async (id: string, tenantId: string) => {
   const rate = await prisma.peakSeasonRate.findFirst({
@@ -140,7 +138,6 @@ export const getRoomAvailabilities = async (
     orderBy: { date: "asc" },
   });
 };
-// Belum terdapat ownership room untuk kepemilikan tenant, sehingga tenant masih bisa melihat room tenant lain.
 
 export const setRoomAvailability = async (
   roomId: string,

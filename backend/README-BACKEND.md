@@ -1,5 +1,6 @@
 # Final Project Purwadhika
-  jcwdbgpm-11 (Offline Bandung)
+
+jcwdbgpm-11 (Offline Bandung)
 
     Group 1 :
     - Anggita Zahra Kamila  (Anggi)
@@ -8,7 +9,8 @@
 ## Backend Property Renting Web App
 
 ### Tech Stack
-  npm :
+
+npm :
 
     - npm init -y
     - npm install express cors dotenv
@@ -24,7 +26,7 @@
     - npm install -D nodemon
 
 ### Backend Dependencies:
- 
+
     -  Express.js v5     :  Web framework untuk API routing
     -  Prisma ORM v7.8.0 :  Database ORM dan migration tool
     -  TypeScript v6     :  Type safety dan development
@@ -86,16 +88,23 @@ npm start       # Production mode
 ### Service Modules (Total: 16 services)
 
 - propertyService - Property retrieval with filtering
-- orderService  - Order management and Midtrans integration
-- authService  - Authentication and JWT token management
-- tenantPropertyService  - Tenant property CRUD
-- tenantReportService  - Sales reports and analytics
-- tenantRoomService  - Room management
-- emailService  - Email template and sending
-- availabilityService  - Availability checking
-- midtransService  - Payment gateway integration
-- pricingService  - Pricing calculations
-- reviewService  - Review and rating system
-- userService  - User profile management
-- tenantReviewService  - Tenant review operations
+- orderService - Order management and Midtrans integration
+- authService - Authentication and JWT token management
+- tenantPropertyService - Tenant property CRUD
+- tenantReportService - Sales reports and analytics
+- tenantRoomService - Room management
+- emailService - Email template and sending
+- availabilityService - Availability checking
+- midtransService - Payment gateway integration
+- pricingService - Pricing calculations
+- reviewService - Review and rating system
+- userService - User profile management
+- tenantReviewService - Tenant review operations
 - And 3 additional utility services
+
+## Pull schema
+
+- npx prisma db pull
+- npx prisma generate
+- cek perubahan di schema.prisma
+- npm run dev
