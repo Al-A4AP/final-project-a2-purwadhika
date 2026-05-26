@@ -41,6 +41,7 @@ const ResetPasswordPage = Loadable(
 const ProfilePage = Loadable(lazy(() => import("@/pages/user/ProfilePage")));
 const BookingPage = Loadable(lazy(() => import("@/pages/user/BookingPage")));
 const OrdersPage = Loadable(lazy(() => import("@/pages/user/OrdersPage")));
+const PaymentSuccessPage = Loadable(lazy(() => import('@/pages/user/PaymentSuccessPage')));
 
 // Tenant pages
 const DashboardPage = Loadable(
@@ -55,6 +56,12 @@ const PropertyFormPage = Loadable(
 const RoomsPage = Loadable(lazy(() => import("@/pages/tenant/RoomsPage")));
 const TenantOrdersPage = Loadable(
   lazy(() => import("@/pages/tenant/OrdersPage")),
+);
+const TenantReviewsPage = Loadable(
+  lazy(() => import("@/pages/tenant/ReviewsPage")),
+);
+const TenantCategoriesPage = Loadable(
+  lazy(() => import("@/pages/tenant/CategoriesPage")),
 );
 const ReportsPage = Loadable(lazy(() => import("@/pages/tenant/ReportsPage")));
 const NotFoundPage = Loadable(lazy(() => import("@/pages/NotFoundPage")));
@@ -81,6 +88,10 @@ export const router = createBrowserRouter([
       {
         path: "orders",
         element: <ProtectedRoute component={<OrdersPage />} />,
+      },
+      {
+        path: 'payment/success',
+        element: <ProtectedRoute component={<PaymentSuccessPage />} />,
       },
     ],
   },
@@ -113,6 +124,8 @@ export const router = createBrowserRouter([
       { path: "properties/:id/edit", element: <PropertyFormPage /> },
       { path: "properties/:id/rooms", element: <RoomsPage /> },
       { path: "orders", element: <TenantOrdersPage /> },
+      { path: "reviews", element: <TenantReviewsPage /> },
+      { path: "categories", element: <TenantCategoriesPage /> },
       { path: "reports", element: <ReportsPage /> },
     ],
   },

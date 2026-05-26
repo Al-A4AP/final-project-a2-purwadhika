@@ -11,7 +11,7 @@ const NotFoundPage: FC = () => {
           <img 
             src="https://images.unsplash.com/photo-1513360371669-4adf3dd7dff8?w=500&h=500&fit=crop" 
             alt="Kalo tulisan ini muncul berarti link gambar juga 404 ya" 
-            className="w-64 md:w-[450px] h-64 md:h-[450px] object-cover rounded-3xl drop-shadow-xl"
+            className="w-64 md:w-112.5 h-64 md:h-112.5 object-cover rounded-3xl drop-shadow-xl"
           />
         </div>
 

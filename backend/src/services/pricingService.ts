@@ -1,4 +1,9 @@
+<<<<<<< HEAD
 import prisma from "../config/prisma";
+=======
+import prisma from '../config/prisma';
+import { checkAvailability } from './availabilityService';
+>>>>>>> 30c0041d065e8bc771efadcb34d3119f77582369
 
 export interface StayDetailBreakdown {
   date: string;
@@ -42,6 +47,7 @@ export const getPriceForDate = (
   };
 };
 
+<<<<<<< HEAD
 export const calculateStayDetails = async (
   roomId: string,
   checkInDate: Date,
@@ -51,9 +57,34 @@ export const calculateStayDetails = async (
   const client = tx || prisma;
   // harusnya periksa ketersediaan kamarnya dulu sehingga kamarnya malah muncul (tempelkan availabilitySErvice.ts) atau menggunakan prisma memeriksa availabilty room.
   const room = await client.room.findFirst({
+=======
+const buildDates = (checkIn: Date, checkOut: Date) => {
+  const ci = new Date(checkIn); ci.setUTCHours(0,0,0,0);
+  const co = new Date(checkOut); co.setUTCHours(0,0,0,0);
+  if (ci >= co) throw new Error('Tanggal check-out harus setelah check-in');
+  return { ci, co };
+};
+
+const buildBreakdown = (ci: Date, co: Date, room: any) => {
+  const breakdown: StayDetailBreakdown[] = [];
+  let totalPrice = 0;
+  const current = new Date(ci);
+  while (current < co) {
+    const res = getPriceForDate(current, room.base_price, room.peakRates);
+    breakdown.push({ date: current.toISOString().split('T')[0], ...res });
+    totalPrice += res.price;
+    current.setDate(current.getDate() + 1);
+  }
+  return { breakdown, totalPrice };
+};
+
+export const calculateStayDetails = async (roomId: string, checkInDate: Date, checkOutDate: Date, tx?: any) => {
+  const room = await (tx || prisma).room.findFirst({
+>>>>>>> 30c0041d065e8bc771efadcb34d3119f77582369
     where: { id: roomId, deleted_at: null },
     include: { peakRates: { where: { deleted_at: null } } },
   });
+<<<<<<< HEAD
 
   if (!room) {
     throw new Error("Kamar tidak ditemukan");
@@ -99,4 +130,17 @@ export const calculateStayDetails = async (
     totalPrice,
     breakdown,
   };
+=======
+  if (!room) throw new Error('Kamar tidak ditemukan');
+  const { ci, co } = buildDates(checkInDate, checkOutDate);
+  const { breakdown, totalPrice } = buildBreakdown(ci, co, room);
+  const nights = Math.ceil((co.getTime() - ci.getTime()) / 86400000);
+  return { roomId, basePrice: room.base_price, nights, totalPrice, breakdown };
+};
+
+export const getValidatedStayDetails = async (roomId: string, checkInDate: Date, checkOutDate: Date, tx?: any) => {
+  const avail = await checkAvailability(roomId, checkInDate, checkOutDate, tx);
+  if (!avail.available) throw new Error(avail.reason || 'Kamar penuh');
+  return calculateStayDetails(roomId, checkInDate, checkOutDate, tx);
+>>>>>>> 30c0041d065e8bc771efadcb34d3119f77582369
 };

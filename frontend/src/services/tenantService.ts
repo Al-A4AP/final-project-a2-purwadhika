@@ -9,6 +9,18 @@ export const tenantService = {
     const res = await api.get<ApiResponse<DashboardStats>>('/tenant/dashboard');
     return res.data.data;
   },
+  async getOccupancyCalendar() {
+    const response = await api.get('/tenant/reports/occupancy');
+    return response.data.data;
+  },
+  async getReviews(params?: { page?: number; limit?: number }) {
+    const response = await api.get('/tenant/reviews', { params });
+    return response.data.data;
+  },
+  async replyToReview(reviewId: string, reply_text: string) {
+    const response = await api.post(`/reviews/${reviewId}/reply`, { reply_text });
+    return response.data.data;
+  },
   async getProperties(params?: {
     search?: string;
     categoryId?: string;
@@ -70,5 +82,16 @@ export const tenantService = {
   },
   async deletePeakRate(rateId: string): Promise<void> {
     await api.delete(`/tenant/peak-rates/${rateId}`);
+  },
+  async createCategory(data: { name: string; icon?: string }) {
+    const res = await api.post('/tenant/categories', data);
+    return res.data.data;
+  },
+  async updateCategory(id: string, data: { name: string; icon?: string }) {
+    const res = await api.patch(`/tenant/categories/${id}`, data);
+    return res.data.data;
+  },
+  async deleteCategory(id: string): Promise<void> {
+    await api.delete(`/tenant/categories/${id}`);
   },
 };

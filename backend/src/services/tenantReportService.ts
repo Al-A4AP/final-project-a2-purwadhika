@@ -7,6 +7,7 @@ export interface GetDashboardAnalyticsOptions {
   status?: string;
   sortBy?: string;
   sortOrder?: 'asc' | 'desc';
+  userName?: string;
 }
 
 export const getDashboardAnalytics = async (tenantId: string, options: GetDashboardAnalyticsOptions = {}) => {
@@ -17,6 +18,7 @@ export const getDashboardAnalytics = async (tenantId: string, options: GetDashbo
     status,
     sortBy = 'created_at',
     sortOrder = 'desc',
+    userName,
   } = options;
 
   const tenantPropertyIds = (await prisma.property.findMany({ where: { tenantId, deleted_at: null }, select: { id: true } })).map(p => p.id);
@@ -40,6 +42,12 @@ export const getDashboardAnalytics = async (tenantId: string, options: GetDashbo
 
   if (status) {
     where.status = status;
+  }
+
+  if (userName) {
+    where.user = {
+      name: { contains: userName, mode: 'insensitive' }
+    };
   }
 
   if (startDate || endDate) {

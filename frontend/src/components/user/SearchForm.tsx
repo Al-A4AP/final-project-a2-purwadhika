@@ -134,7 +134,7 @@ const SearchForm: FC = () => {
             </button>
 
             {guestOpen && (
-              <div className="absolute top-full left-0 right-0 mt-1 bg-white dark:bg-slate-800 border dark:border-slate-600 rounded-xl shadow-xl z-50 p-4 min-w-[260px]">
+              <div className="absolute top-full left-0 right-0 mt-1 bg-white dark:bg-slate-800 border dark:border-slate-600 rounded-xl shadow-xl z-50 p-4 min-w-65">
                 <GuestCounter
                   label="Dewasa" description="Usia 13 tahun ke atas"
                   value={filters.adults} onChange={filters.setAdults} min={1}

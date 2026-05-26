@@ -68,7 +68,8 @@ export const deletePeakRateCtrl = async (req: Request, res: Response) => {
 export const getRoomAvailabilitiesCtrl = async (req: Request, res: Response) => {
   try {
     const { roomId } = req.params as { roomId: string };
-    const data = await svc.getRoomAvailabilities(roomId);
+    const tenantId = req.user!.id as string;
+    const data = await svc.getRoomAvailabilities(roomId, tenantId);
     return sendSuccess(res, data, 'Ketersediaan kamar berhasil diambil');
   } catch (err: any) { return sendError(res, err.message, err.statusCode || 500); }
 };

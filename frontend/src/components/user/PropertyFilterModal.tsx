@@ -2,7 +2,6 @@ import type { FC } from 'react';
 import { useState } from 'react';
 import { Modal } from '@/components/common/Modal';
 import { useFilterStore } from '@/stores/filterStore';
-import { formatPrice } from '@/lib/formatters';
 import { Wifi, Car, Coffee, Tv, Monitor, Utensils, Waves, Dumbbell } from 'lucide-react';
 
 interface PropertyFilterModalProps {

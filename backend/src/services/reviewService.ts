@@ -1,11 +1,19 @@
 import prisma from "../config/prisma";
 
+<<<<<<< HEAD
 export const createReview = async (
   userId: string,
   orderId: string,
   rating: number,
   comment: string,
 ) => {
+=======
+export const createReview = async (userId: string, orderId: string, rating: number, comment: string) => {
+  if (!Number.isInteger(rating) || rating < 1 || rating > 5) {
+    throw new Error('Rating harus berupa bilangan bulat antara 1 dan 5');
+  }
+
+>>>>>>> 30c0041d065e8bc771efadcb34d3119f77582369
   const order = await prisma.order.findUnique({
     where: { id: orderId, userId, status: "PROCESSED" },
   });

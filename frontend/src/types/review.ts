@@ -9,6 +9,7 @@ export interface Review {
   comment: string;
   created_at: string;
   user?: User;
+  property?: { id: string; name: string };
   replies?: ReviewReply[];
 }
 

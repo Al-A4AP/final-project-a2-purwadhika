@@ -33,6 +33,7 @@ export const tenantReportService = {
     endDate?: string;
     propertyId?: string;
     status?: string;
+    userName?: string;
     sortBy?: string;
     sortOrder?: 'asc' | 'desc';
   }): Promise<DashboardAnalytics> {
