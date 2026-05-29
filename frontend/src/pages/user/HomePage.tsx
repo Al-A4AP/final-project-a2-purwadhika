@@ -8,25 +8,7 @@ import { HeroSection } from "@/components/user/HeroSection";
 import PropertyGrid from "@/components/user/PropertyGrid";
 import SortFilterBar from "@/components/common/SortFilterBar";
 import type { SortGroup } from "@/components/common/SortFilterBar";
-
-type FilterValues = {
-  page: number;
-  limit: number;
-  sort: string;
-  order: "asc" | "desc";
-  search: string;
-  city: string;
-  category: string;
-  check_in_date: string;
-  check_out_date: string;
-  adults: number;
-  children: number;
-  babies: number;
-  capacity?: number;
-  min_price?: number;
-  max_price?: number;
-  amenities: string[];
-};
+import type { FilterValues } from "@/stores/filterStore";
 
 const HomePage: FC = () => {
   const [properties, setProperties] = useState<Property[]>([]);
@@ -37,27 +19,8 @@ const HomePage: FC = () => {
   // SOLUSI: Pisah antara filter draft dan active filter
   const filters = useFilterStore();
 
-  const extractFilterValues = (filterObj: typeof filters): FilterValues => ({
-    page: filterObj.page || 1,
-    limit: filterObj.limit || 12,
-    sort: filterObj.sort || "created_at",
-    order: filterObj.order || "desc",
-    search: filterObj.search || "",
-    city: filterObj.city || "",
-    category: filterObj.category || "",
-    check_in_date: filterObj.check_in_date || "",
-    check_out_date: filterObj.check_out_date || "",
-    adults: filterObj.adults || 1,
-    children: filterObj.children || 0,
-    babies: filterObj.babies || 0,
-    capacity: filterObj.capacity,
-    min_price: filterObj.min_price,
-    max_price: filterObj.max_price,
-    amenities: filterObj.amenities || [],
-  });
-
   const [activeFilters, setActiveFilters] = useState<FilterValues>(
-    extractFilterValues(filters),
+    filters.getFilterValues(),
   );
   const [hasFilterChanges, setHasFilterChanges] = useState(false);
 
@@ -202,13 +165,12 @@ const HomePage: FC = () => {
           hasFilterChanges={hasFilterChanges}
           activeCity={activeFilters.city}
           onApplyFilters={() => {
-            setActiveFilters(extractFilterValues(filters));
+            setActiveFilters(filters.getFilterValues());
             setHasFilterChanges(false);
           }}
           onResetFilters={() => {
             filters.resetFilters();
-            setActiveFilters(extractFilterValues(filters));
-            setHasFilterChanges(false);
+            setActiveFilters(filters.getFilterValues());
           }}
           onClearCity={() => {
             filters.setCity("");
