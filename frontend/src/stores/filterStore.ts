@@ -1,6 +1,25 @@
-import { create } from 'zustand';
-import { persist } from 'zustand/middleware';
-import type { PropertySearchFilters } from '@/types';
+import { create } from "zustand";
+import { persist } from "zustand/middleware";
+import type { PropertySearchFilters } from "@/types";
+
+export type FilterValues = {
+  page: number;
+  limit: number;
+  sort: string;
+  order: "asc" | "desc";
+  search: string;
+  city: string;
+  category: string;
+  check_in_date: string;
+  check_out_date: string;
+  adults: number;
+  children: number;
+  babies: number;
+  capacity?: number;
+  min_price?: number;
+  max_price?: number;
+  amenities: string[];
+};
 
 interface FilterStore extends PropertySearchFilters {
   adults: number;
@@ -17,27 +36,32 @@ interface FilterStore extends PropertySearchFilters {
   setSearch: (search: string) => void;
   setPage: (page: number) => void;
   setSort: (sort: string) => void;
-  setOrder: (order: 'asc' | 'desc') => void;
+  setOrder: (order: "asc" | "desc") => void;
   setMinPrice: (min: number | undefined) => void;
   setMaxPrice: (max: number | undefined) => void;
   setAmenities: (amenities: string[]) => void;
   resetFilters: () => void;
+  getFilterValues: () => FilterValues;
 }
 
-const initialState: PropertySearchFilters & { adults: number; children: number; babies: number } = {
-  city: '',
-  check_in_date: '',
-  check_out_date: '',
+const initialState: PropertySearchFilters & {
+  adults: number;
+  children: number;
+  babies: number;
+} = {
+  city: "",
+  check_in_date: "",
+  check_out_date: "",
   capacity: undefined,
   adults: 1,
   children: 0,
   babies: 0,
-  search: '',
-  category: '',
+  search: "",
+  category: "",
   page: 1,
   limit: 12,
-  sort: 'created_at',
-  order: 'desc',
+  sort: "created_at",
+  order: "desc",
   min_price: undefined,
   max_price: undefined,
   amenities: [],
@@ -45,14 +69,16 @@ const initialState: PropertySearchFilters & { adults: number; children: number; 
 
 export const useFilterStore = create<FilterStore>()(
   persist(
-    (set) => ({
+    (set, get) => ({
       ...initialState,
 
       setCity: (city) => set({ city, page: 1 }),
       setCheckInDate: (date) => set({ check_in_date: date, page: 1 }),
       setCheckOutDate: (date) => set({ check_out_date: date, page: 1 }),
-      setAdults: (adults) => set((s) => ({ adults, capacity: adults + s.children, page: 1 })),
-      setChildren: (children) => set((s) => ({ children, capacity: s.adults + children, page: 1 })),
+      setAdults: (adults) =>
+        set((s) => ({ adults, capacity: adults + s.children, page: 1 })),
+      setChildren: (children) =>
+        set((s) => ({ children, capacity: s.adults + children, page: 1 })),
       setBabies: (babies) => set({ babies }),
       setCapacity: (capacity) => set({ capacity, page: 1 }),
       setCategory: (category) => set({ category, page: 1 }),
@@ -63,11 +89,33 @@ export const useFilterStore = create<FilterStore>()(
       setMinPrice: (min_price) => set({ min_price, page: 1 }),
       setMaxPrice: (max_price) => set({ max_price, page: 1 }),
       setAmenities: (amenities) => set({ amenities, page: 1 }),
-      
+
       resetFilters: () => set(initialState),
+
+      getFilterValues: (): FilterValues => {
+        const s = get();
+        return {
+          page: s.page || 1,
+          limit: s.limit || 12,
+          sort: s.sort || "created_at",
+          order: s.order || "desc",
+          search: s.search || "",
+          city: s.city || "",
+          category: s.category || "",
+          check_in_date: s.check_in_date || "",
+          check_out_date: s.check_out_date || "",
+          adults: s.adults || 1,
+          children: s.children || 0,
+          babies: s.babies || 0,
+          capacity: s.capacity,
+          min_price: s.min_price,
+          max_price: s.max_price,
+          amenities: s.amenities || [],
+        };
+      },
     }),
     {
-      name: 'property-filter-storage', // name of the item in the storage (must be unique)
-    }
-  )
+      name: "property-filter-storage", // name of the item in the storage (must be unique)
+    },
+  ),
 );
