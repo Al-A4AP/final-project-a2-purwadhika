@@ -8,6 +8,7 @@
     "start": "node dist/server.js",
     "build": "tsc",
     "seed": "ts-node-dev --transpile-only prisma/seed.ts",
+    "backfill:amenities": "ts-node --transpile-only prisma/scripts/backfillAmenities.ts",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "keywords": [],
