@@ -11,12 +11,9 @@ import type { ApiResponse } from '@/types';
 import { toast } from 'react-hot-toast';
 import { useGoogleLogin } from '@react-oauth/google';
 
-// udh di fix, muncul sekarang kl di run dev, token dismpn lokal strg
-
 const LoginPage: FC = () => {
   const navigate = useNavigate();
   const [showPassword, setShowPassword] = useState(false);
-  const setToken = useAuthStore((state) => state.setToken);
   const setUser = useAuthStore((state) => state.setUser);
 
   const [showResend, setShowResend] = useState(false);
@@ -34,8 +31,7 @@ const LoginPage: FC = () => {
       // 1. Panggil API Login
       const result = await authService.login(data.email, data.password);
 
-      // Simpan ke global store
-      setToken(result.token);
+      // Simpan user ke global store (token sudah di cookies by server)
       setUser(result.user);
 
       // 2. Redirect berdasarkan Role (Role-Based Routing)
@@ -74,7 +70,7 @@ const LoginPage: FC = () => {
       try {
         const userInfo = await axios.get('https://www.googleapis.com/oauth2/v3/userinfo', { headers: { Authorization: `Bearer ${tokenResponse.access_token}` } });
         const result = await authService.googleLogin({ email: userInfo.data.email, name: userInfo.data.name, avatarUrl: userInfo.data.picture });
-        setToken(result.token); setUser(result.user); toast.success('Berhasil login menggunakan Google'); navigate('/');
+        setUser(result.user); toast.success('Berhasil login menggunakan Google'); navigate('/');
       } catch { setError('root', { message: 'Gagal memproses login Google' }); toast.error('Gagal login menggunakan Google'); }
     },
     onError: () => toast.error('Gagal terhubung ke Google')

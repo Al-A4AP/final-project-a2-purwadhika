@@ -19,7 +19,6 @@ const RegisterPage: FC = () => {
   const isUserRegister = window.location.pathname.includes('/user');
   const defaultRole = isTenantRegister ? 'TENANT' : 'USER';
   const navigate = useNavigate();
-  const setToken = useAuthStore((s) => s.setToken);
   const setUser = useAuthStore((s) => s.setUser);
 
   const handleGoogleLogin = useGoogleLogin({
@@ -34,7 +33,6 @@ const RegisterPage: FC = () => {
           name: userInfo.data.name,
           avatarUrl: userInfo.data.picture,
         });
-        setToken(result.token);
         setUser(result.user);
         toast.success('Pendaftaran / Login Google berhasil');
         navigate('/');

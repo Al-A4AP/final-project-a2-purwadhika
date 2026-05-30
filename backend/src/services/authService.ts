@@ -175,6 +175,11 @@ export const getMe = async (userId: string) => {
   return sanitizeUser(user);
 };
 
+export const logout = async (token: string) => {
+  const { revokeToken } = await import('./tokenBlacklistService');
+  revokeToken(token);
+};
+
 const sanitizeUser = (user: any) => {
   const { password_hash, ...safe } = user;
   return safe;

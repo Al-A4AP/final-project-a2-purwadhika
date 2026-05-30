@@ -1,6 +1,7 @@
 import 'dotenv/config';
 import express from 'express';
 import cors from 'cors';
+import cookieParser from 'cookie-parser';
 
 import { errorHandler } from './src/middlewares/errorHandler';
 import authRoutes from './src/routes/authRoutes';
@@ -24,6 +25,7 @@ const ALLOWED_ORIGINS = [
 app.use(cors({ origin: ALLOWED_ORIGINS, credentials: true }));
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
+app.use(cookieParser());
 
 // Health check
 app.get('/api/health', (_req, res) => {

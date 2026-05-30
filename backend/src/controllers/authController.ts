@@ -14,6 +14,12 @@ export const registerController = async (req: Request, res: Response) => {
 export const loginController = async (req: Request, res: Response) => {
   try {
     const result = await authService.loginUser(req.body.email, req.body.password);
+    res.cookie('auth_token', result.token, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === 'production',
+      sameSite: 'strict',
+      maxAge: 7 * 24 * 60 * 60 * 1000,
+    });
     return sendSuccess(res, result, 'Login berhasil');
   } catch (err: any) {
     return sendError(res, err.message, err.statusCode || 500);
@@ -68,7 +74,24 @@ export const resendVerificationController = async (req: Request, res: Response) 
 export const googleLoginController = async (req: Request, res: Response) => {
   try {
     const result = await authService.googleLogin(req.body);
+    res.cookie('auth_token', result.token, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === 'production',
+      sameSite: 'strict',
+      maxAge: 7 * 24 * 60 * 60 * 1000,
+    });
     return sendSuccess(res, result, 'Login Google berhasil');
+  } catch (err: any) {
+    return sendError(res, err.message, err.statusCode || 500);
+  }
+};
+
+export const logoutController = async (req: Request, res: Response) => {
+  try {
+    const token = req.headers.authorization?.split(' ')[1] || req.cookies?.auth_token;
+    if (token) await authService.logout(token);
+    res.clearCookie('auth_token', { httpOnly: true, sameSite: 'strict' });
+    return sendSuccess(res, null, 'Logout berhasil');
   } catch (err: any) {
     return sendError(res, err.message, err.statusCode || 500);
   }

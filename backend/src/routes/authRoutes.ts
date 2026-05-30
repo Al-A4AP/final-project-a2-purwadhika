@@ -10,6 +10,7 @@ import {
   verifyEmailController,
   resendVerificationController,
   googleLoginController,
+  logoutController,
 } from '../controllers/authController';
 import {
   registerSchema,
@@ -25,6 +26,7 @@ const router = Router();
 router.post('/register', validate(registerSchema), registerController);
 router.post('/login', validate(loginSchema), loginController);
 router.post('/google-login', googleLoginController);
+router.post('/logout', requireAuth, logoutController);
 router.post('/forgot-password', validate(forgotPasswordSchema), forgotPasswordController);
 router.post('/reset-password', validate(resetPasswordSchema), resetPasswordController);
 router.post('/verify-email', validate(verifyEmailSchema), verifyEmailController);
