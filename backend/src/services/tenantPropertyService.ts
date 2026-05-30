@@ -138,13 +138,23 @@ export const addPropertyImage = async (propertyId: string, tenantId: string, fil
   });
 };
 
-export const deletePropertyImage = async (propertyId: string, imageId: string, tenantId: string) => {
-  const p = await prisma.property.findFirst({ where: { id: propertyId, tenantId } });
+const verifyAndDeleteImageRecord = async (tx: any, propertyId: string, imageId: string, tenantId: string) => {
+  const p = await tx.property.findFirst({ where: { id: propertyId, tenantId } });
   if (!p) throw new AppError('Properti tidak ditemukan', 404);
-  const img = await prisma.propertyImage.findFirst({ where: { id: imageId, propertyId } });
+  const img = await tx.propertyImage.findFirst({ where: { id: imageId, propertyId } });
   if (!img) throw new AppError('Gambar tidak ditemukan', 404);
-  if (img.cloudinary_public_id) await deleteFromCloudinary(img.cloudinary_public_id);
-  return prisma.propertyImage.delete({ where: { id: imageId } });
+  return tx.propertyImage.delete({ where: { id: imageId } });
+};
+
+export const deletePropertyImage = async (propertyId: string, imageId: string, tenantId: string) => {
+  const deleted = await prisma.$transaction((tx) =>
+    verifyAndDeleteImageRecord(tx, propertyId, imageId, tenantId)
+  );
+  if (deleted.cloudinary_public_id) {
+    try { await deleteFromCloudinary(deleted.cloudinary_public_id); }
+    catch { /* Log manual cleanup needed, don't fail operation */ }
+  }
+  return deleted;
 };
 
 export const getDashboardStats = async (tenantId: string) => {

@@ -1,6 +1,6 @@
 import type { FC } from "react";
-import { useEffect, useState } from "react";
-import axios from "axios";
+import { useEffect, useState, useMemo } from "react";
+import { useGeolocation } from '@/hooks/useGeolocation';
 import { propertyService } from "@/services/propertyService";
 import { useFilterStore } from "@/stores/filterStore";
 import type { Property } from "@/types";
@@ -22,7 +22,7 @@ const HomePage: FC = () => {
   const [activeFilters, setActiveFilters] = useState<FilterValues>(
     filters.getFilterValues(),
   );
-  const [hasFilterChanges, setHasFilterChanges] = useState(false);
+  const { detectCity } = useGeolocation();
 
   const sortGroups: SortGroup[] = [
     {
@@ -65,52 +65,26 @@ const HomePage: FC = () => {
 
   // 1. Deteksi lokasi via LocationIQ saat pertama kali dimuat
   useEffect(() => {
-    if (navigator.geolocation && !filters.city && !filters.search) {
-      navigator.geolocation.getCurrentPosition(async (pos) => {
-        try {
-          const { latitude, longitude } = pos.coords;
-          const apiKey = import.meta.env.VITE_LOCATIONIQ_API_KEY;
-          if (!apiKey) return;
-
-          const res = await axios.get(
-            `https://us1.locationiq.com/v1/reverse?key=${apiKey}&lat=${latitude}&lon=${longitude}&format=json`,
-          );
-          const address = res.data.address;
-          const detectedCity =
-            address.city || address.town || address.county || address.state;
-
-          if (detectedCity) {
-            filters.setCity(detectedCity);
-            // Update activeFilters juga untuk initial load
-            setActiveFilters((prev) => ({
-              ...prev,
-              city: detectedCity,
-            }));
-          }
-        } catch (error) {
-          console.error(
-            "Gagal mendeteksi lokasi atau limit API LocationIQ habis",
-            error,
-          );
+    if (!filters.city && !filters.search) {
+      detectCity().then((city) => {
+        if (city) {
+          filters.setCity(city);
+          setActiveFilters((prev) => ({ ...prev, city }));
         }
       });
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  useEffect(() => {
-    // Bandingkan filter draft dengan active filter
-    const hasChanges =
-      filters.city !== activeFilters.city ||
-      filters.search !== activeFilters.search ||
-      filters.check_in_date !== activeFilters.check_in_date ||
-      filters.check_out_date !== activeFilters.check_out_date ||
-      filters.sort !== activeFilters.sort ||
-      filters.order !== activeFilters.order ||
-      filters.page !== activeFilters.page;
-
-    setHasFilterChanges(hasChanges);
-  }, [filters, activeFilters]);
+  const hasFilterChanges = useMemo(() =>
+    filters.city !== activeFilters.city ||
+    filters.search !== activeFilters.search ||
+    filters.check_in_date !== activeFilters.check_in_date ||
+    filters.check_out_date !== activeFilters.check_out_date ||
+    filters.sort !== activeFilters.sort ||
+    filters.order !== activeFilters.order ||
+    filters.page !== activeFilters.page,
+  [filters, activeFilters]);
 
   // 3. PERUBAHAN: Fetch hanya ketika activeFilters berubah (bukan filters)
   useEffect(() => {
@@ -129,7 +103,7 @@ const HomePage: FC = () => {
         setProperties(result.items);
         setTotalCount(result.pagination?.total || 0);
         setTotalPages(result.pagination?.pages || 1);
-      } catch (error) {
+      } catch {
         setProperties([]);
       } finally {
         setLoading(false);
@@ -166,7 +140,6 @@ const HomePage: FC = () => {
           activeCity={activeFilters.city}
           onApplyFilters={() => {
             setActiveFilters(filters.getFilterValues());
-            setHasFilterChanges(false);
           }}
           onResetFilters={() => {
             filters.resetFilters();

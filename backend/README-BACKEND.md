@@ -1,110 +1,189 @@
-# Final Project Purwadhika
+# README — Backend PURWALOKA
 
-jcwdbgpm-11 (Offline Bandung)
+**Final Project Purwadhika — jcwdbgpm-11 (Offline Bandung)**
 
-    Group 1 :
-    - Anggita Zahra Kamila  (Anggi)
-    - Muhammad Ali Akbar    (Ali)
+```
+Group 1:
+- Anggita Zahra Kamila  (Anggi)
+- Muhammad Ali Akbar    (Ali)
+```
 
-## Backend Property Renting Web App
+## Backend — Property Renting Web App
 
-### Tech Stack
+---
 
-npm :
+### Tech Stack (Instalasi)
 
-    - npm init -y
-    - npm install express cors dotenv
-    - npm install @prisma/client
-    - npm install -D prisma typescript ts-node @types/express @types/node
-    - npm install jsonwebtoken bcryptjs nodemailer
-    - npm install -D @types/jsonwebtoken @types/bcryptjs @types/nodemailer
-    - npm install zod
-    - npm install multer
-    - npm install cloudinary
-    - npm install midtrans-client
-    - npm install node-cron
-    - npm install -D nodemon
+```bash
+npm init -y
+npm install express cors dotenv cookie-parser
+npm install @prisma/client
+npm install -D prisma typescript ts-node @types/express @types/node
+npm install jsonwebtoken bcryptjs nodemailer
+npm install -D @types/jsonwebtoken @types/bcryptjs @types/nodemailer
+npm install zod
+npm install multer
+npm install cloudinary
+npm install midtrans-client
+npm install node-cron
+npm install -D nodemon
+```
 
-### Backend Dependencies:
+---
 
-    -  Express.js v5     :  Web framework untuk API routing
-    -  Prisma ORM v7.8.0 :  Database ORM dan migration tool
-    -  TypeScript v6     :  Type safety dan development
-    -  JWT              :  Authentication dan authorization
-    -  Bcryptjs         :  Password hashing dengan salt rounds 10
-    -  Nodemailer       :  Email notifications (verification, reminders, etc.)
-    -  Multer           :  File upload handling
-    -  Cloudinary       :  Image storage dan management
-    -  Midtrans Client  :  Payment gateway integration
-    -  Node Cron        :  Scheduled background jobs
-    -  Zod              :  Request validation schemas
-    -  CORS             :  Cross-origin requests
-    -  Dotenv           :  Environment variables management
+### Backend Dependencies
+
+| Package | Fungsi |
+|---------|--------|
+| Express.js v5 | Web framework untuk API routing |
+| Prisma ORM v7.8.0 | Database ORM dan migration tool |
+| TypeScript v6 | Type safety dan development |
+| JWT | Authentication dan authorization |
+| Bcryptjs | Password hashing (salt rounds 10) |
+| Cookie-parser | Parsing HttpOnly cookie dari request |
+| Nodemailer | Email notifications (verification, reminders) |
+| Multer | File upload handling |
+| Cloudinary | Image storage dan management |
+| Midtrans Client | Payment gateway integration |
+| Node Cron | Scheduled background jobs |
+| Zod | Request validation schemas |
+| CORS | Cross-origin requests |
+| Dotenv | Environment variables management |
+
+---
 
 ### Project Structure
 
 ```
 backend/src/
 ├── config/            # Configuration files (database, Cloudinary, Midtrans)
-├── controllers/       # Request handlers (16 controllers)
+├── controllers/       # Request handlers
 ├── middlewares/       # Authentication, error handling, validation
 ├── routes/            # API route definitions
-├── services/          # Business logic layer (16 services)
+├── services/          # Business logic layer (13 services)
+│   ├── authService.ts            # Auth, JWT, email verify, Google OAuth
+│   ├── availabilityService.ts    # Room availability checking
+│   ├── midtransService.ts        # Payment gateway integration
+│   ├── orderService.ts           # Order management & Midtrans
+│   ├── pricingService.ts         # Pricing + getValidatedStayDetails (Facade)
+│   ├── propertyService.ts        # Property listing dengan filter
+│   ├── reviewService.ts          # Review & rating (integer validation)
+│   ├── tenantPropertyService.ts  # Tenant property CRUD + transactional image delete
+│   ├── tenantReportService.ts    # Sales reports dan analytics
+│   ├── tenantReviewService.ts    # Tenant review operations
+│   ├── tenantRoomService.ts      # Room management + IDOR protection
+│   ├── tokenBlacklistService.ts  # JWT token revocation (server-side logout)
+│   └── userService.ts            # User profile management
 ├── types/             # TypeScript type definitions
 ├── utils/             # Helper functions (email, upload, response formatting)
 └── validations/       # Zod validation schemas
 ```
 
-### Key Features
+---
 
-1. Multi-role Authentication (USER/TENANT)
-2. Email Verification with JWT tokens
-3. Google OAuth integration
-4. Property Management CRUD with categories
-5. Dynamic Pricing with peak season rates
-6. Room Availability Management
-7. Order/Booking System with 2-hour payment window
-8. Payment Processing (Manual transfer + Midtrans)
-9. Reviews and Ratings with reply system
-10. Analytics and Reports Dashboard
-11. Automated Email Notifications
-12. Cron Jobs for scheduled tasks
+### Key Features & Security
+
+1. Multi-role Authentication (USER/TENANT) via HttpOnly Cookie
+2. Server-side token revocation pada logout (Token Blacklist)
+3. Email Verification dengan JWT token
+4. Google OAuth integration
+5. Property Management CRUD dengan kategori
+6. Dynamic Pricing dengan peak season rates (PERCENTAGE/NOMINAL)
+   - Validasi tumpang tindih tanggal Peak Season
+   - Facade pattern: `getValidatedStayDetails` (cek ketersediaan + harga atomik)
+7. Room Availability Management dengan proteksi IDOR (`verifyRoomOwner`)
+8. Order/Booking System dengan 2-hour payment window
+9. Payment Processing (Manual transfer + Midtrans)
+10. Transactional Image Delete (DB-first, Cloudinary-after)
+11. Reviews dengan validasi integer rating 1–5
+12. Analytics dan Reports Dashboard
+13. Automated Email Notifications
+14. Cron Jobs untuk scheduled tasks (order expiry, reminders)
+
+---
 
 ### Database Setup
 
-1. Create .env file with DATABASE_URL and credentials
-2. Run: npx prisma migrate dev
-3. Optional: npx prisma db seed (for dummy data)
-4. Access Prisma Studio: npx prisma studio
+```bash
+# 1. Buat file .env dengan DATABASE_URL (lihat .env.example)
+# 2. Jalankan migrasi
+npx prisma migrate dev
+
+# 3. Opsional: isi dummy data
+npx prisma db seed
+
+# 4. Akses Prisma Studio
+npx prisma studio
+```
+
+**Jika ada schema drift (development only):**
+```bash
+npx prisma migrate reset --force
+```
+
+**Pull schema dari database yang sudah ada:**
+```bash
+npx prisma db pull
+npx prisma generate
+```
+
+---
 
 ### Running the Server
 
 ```bash
-npm run dev     # Development mode with nodemon
-npm run build   # Build TypeScript
-npm start       # Production mode
+npm run dev     # Development mode dengan nodemon
+npm run build   # Build TypeScript ke dist/
+npm start       # Production mode (jalankan dist/server.js)
 ```
 
-### Service Modules (Total: 16 services)
+---
 
-- propertyService - Property retrieval with filtering
-- orderService - Order management and Midtrans integration
-- authService - Authentication and JWT token management
-- tenantPropertyService - Tenant property CRUD
-- tenantReportService - Sales reports and analytics
-- tenantRoomService - Room management
-- emailService - Email template and sending
-- availabilityService - Availability checking
-- midtransService - Payment gateway integration
-- pricingService - Pricing calculations
-- reviewService - Review and rating system
-- userService - User profile management
-- tenantReviewService - Tenant review operations
-- And 3 additional utility services
+### Environment Variables
 
-## Pull schema
+Buat file `.env` di folder `backend/`:
 
-- npx prisma db pull
-- npx prisma generate
-- cek perubahan di schema.prisma
-- npm run dev
+```env
+DATABASE_URL=postgresql://user:password@host:5432/dbname
+JWT_SECRET=your_jwt_secret_key
+JWT_EXPIRES_IN=7d
+NODE_ENV=development
+
+# Email (SMTP)
+SMTP_HOST=smtp.gmail.com
+SMTP_PORT=587
+SMTP_USER=your@email.com
+SMTP_PASS=your_app_password
+
+# Cloudinary
+CLOUDINARY_CLOUD_NAME=your_cloud_name
+CLOUDINARY_API_KEY=your_api_key
+CLOUDINARY_API_SECRET=your_api_secret
+
+# Midtrans
+MIDTRANS_SERVER_KEY=your_server_key
+MIDTRANS_CLIENT_KEY=your_client_key
+
+# App
+FRONTEND_URL=http://localhost:5173
+```
+
+Lihat `.env.example` untuk referensi lengkap.
+
+---
+
+### API Endpoints Overview
+
+| Domain | Method | Endpoint |
+|--------|--------|----------|
+| Auth | POST | `/api/auth/login` `/api/auth/register` `/api/auth/logout` |
+| Auth | GET | `/api/auth/me` |
+| Property | GET | `/api/properties` `/api/properties/:id` |
+| Order | POST | `/api/orders` |
+| Review | POST | `/api/reviews/:orderId` |
+| Tenant | GET/POST/PUT/DELETE | `/api/tenant/properties` `/api/tenant/rooms` |
+| Tenant | GET/POST | `/api/tenant/peak-rates` `/api/tenant/availability` |
+
+---
+
+*Last Updated: May 30, 2026*
