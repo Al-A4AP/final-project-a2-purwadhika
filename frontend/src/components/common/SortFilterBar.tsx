@@ -7,9 +7,9 @@ import {
   DollarSign,
   Clock,
   BedDouble,
-  ChevronDown,
 } from "lucide-react";
 import { PropertyFilterDropdown } from "../user/PropertyFilterDropdown";
+import { SortDropdown } from "./SortDropdown";
 
 export interface SortSubOption {
   order: "asc" | "desc";
@@ -146,65 +146,21 @@ const SortFilterBar: FC<Props> = ({
             <ArrowUpDown size={13} /> Urutkan:
           </span>
 
-          {sortGroups.map((group) => {
-            const isActive = currentSort === group.key;
-            const isOpen = openGroup === group.key;
-            const activeSubLabel = isActive
-              ? group.options.find((o) => o.order === currentOrder)?.label
-              : null;
-
-            return (
-              <div
-                key={group.key}
-                className="relative inline-block text-left"
-                ref={(el) => {
-                  dropdownRefs.current[group.key] = el;
-                }}
-              >
-                {/* Grup Button */}
-                <button
-                  onClick={() => handleGroupClick(group)}
-                  className={`flex items-center gap-1.5 px-3.5 py-2 rounded-full text-xs font-semibold transition border ${
-                    isActive
-                      ? "bg-rose-600 text-white border-rose-600 shadow-sm"
-                      : isOpen
-                        ? "bg-slate-100 dark:bg-slate-800 text-slate-800 dark:text-slate-200 border-slate-300 dark:border-slate-600"
-                        : "bg-white dark:bg-slate-900 text-slate-600 dark:text-slate-400 border-slate-200 dark:border-slate-850 hover:border-rose-450 hover:text-rose-600"
-                  }`}
-                >
-                  {group.icon && iconMap[group.icon]}
-                  {isActive && activeSubLabel ? activeSubLabel : group.label}
-                  <ChevronDown
-                    size={11}
-                    className={`transition-transform duration-200 ${isOpen ? "rotate-180" : ""}`}
-                  />
-                </button>
-
-                {/* Sub-opsi: Dropdown Menu */}
-                {isOpen && (
-                  <div className="absolute left-0 mt-2 w-48 bg-white dark:bg-slate-900 border border-slate-100 dark:border-slate-800 rounded-2xl shadow-xl py-2 z-40 origin-top-left animate-fade-in">
-                    {group.options.map((sub) => {
-                      const isSubActive =
-                        isActive && currentOrder === sub.order;
-                      return (
-                        <button
-                          key={sub.order}
-                          onClick={() => handleSubOption(group, sub)}
-                          className={`w-full text-left px-5 py-2.5 text-xs font-semibold transition ${
-                            isSubActive
-                              ? "bg-rose-50 dark:bg-rose-500/10 text-rose-700 dark:text-rose-400"
-                              : "text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-800"
-                          }`}
-                        >
-                          {sub.label}
-                        </button>
-                      );
-                    })}
-                  </div>
-                )}
-              </div>
-            );
-          })}
+          {sortGroups.map((group) => (
+            <SortDropdown
+              key={group.key}
+              group={group}
+              isActive={currentSort === group.key}
+              isOpen={openGroup === group.key}
+              currentOrder={currentOrder}
+              icon={group.icon && iconMap[group.icon]}
+              onGroupClick={handleGroupClick}
+              onSubOptionClick={handleSubOption}
+              setRef={(el) => {
+                dropdownRefs.current[group.key] = el;
+              }}
+            />
+          ))}
         </div>
       </div>
     </div>

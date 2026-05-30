@@ -1,5 +1,5 @@
 import type { FC } from "react";
-import { useMemo } from "react";
+import { usePricingCalendar } from "@/hooks/usePricingCalendar";
 import { DayPicker } from "react-day-picker";
 import "react-day-picker/dist/style.css";
 import { CalendarIcon, AlertTriangle } from "lucide-react";
@@ -22,108 +22,14 @@ export const PricingCalendarSection: FC<Props> = ({
   onCheckInChange,
   onCheckOutChange,
 }) => {
-  const today = new Date();
-  today.setHours(0, 0, 0, 0);
-
-  // We assume the user is looking at the cheapest room available for the dates.
-  // Or, we find the absolute minimum price across all rooms for a specific date.
-  const getPriceForDate = (date: Date) => {
-    const dStr = date.toISOString().split("T")[0];
-    let minPrice = 0;
-    let isPeak = false;
-    let availableRooms = 0;
-
-    for (const room of rooms) {
-      // Check if room is blocked
-      const isBlocked = room.availabilities?.some(
-        (a: { is_available: boolean; date: string }) =>
-          !a.is_available && a.date.startsWith(dStr),
-      );
-      if (isBlocked) continue;
-
-      availableRooms++;
-
-      let price = room.base_price;
-      const rate = room.peakRates?.find(
-        (r: {
-          start_date: Date | string;
-          end_date: Date | string;
-          rate_type: string;
-          rate_value: number;
-        }) => {
-          const start = new Date(r.start_date);
-          start.setHours(0, 0, 0, 0);
-          const end = new Date(r.end_date);
-          end.setHours(0, 0, 0, 0);
-          return date >= start && date <= end;
-        },
-      );
-
-      if (rate) {
-        if (rate.rate_type === "PERCENTAGE") {
-          price =
-            room.base_price +
-            Math.round((room.base_price * rate.rate_value) / 100);
-        } else {
-          price = room.base_price + rate.rate_value;
-        }
-      }
-
-      if (price < minPrice) {
-        minPrice = price;
-        isPeak = !!rate;
-      }
-    }
-
-    if (availableRooms === 0 || minPrice === 0) return null;
-    return { price: minPrice, isPeak };
-  };
-
-  const selectedRange = useMemo(() => {
-    return {
-      from: checkIn ? new Date(checkIn) : undefined,
-      to: checkOut ? new Date(checkOut) : undefined,
-    };
-  }, [checkIn, checkOut]);
-
-  const handleSelect = (range: { from?: Date; to?: Date } | undefined) => {
-    if (!range) {
-      onCheckInChange("");
-      onCheckOutChange("");
-      return;
-    }
-
-    if (range.from) {
-      // Make sure we format to local string YYYY-MM-DD
-      const fromStr = new Date(
-        range.from.getTime() - range.from.getTimezoneOffset() * 60000,
-      )
-        .toISOString()
-        .split("T")[0];
-      onCheckInChange(fromStr);
-    } else {
-      onCheckInChange("");
-    }
-
-    if (range.to) {
-      const toStr = new Date(
-        range.to.getTime() - range.to.getTimezoneOffset() * 60000,
-      )
-        .toISOString()
-        .split("T")[0];
-      onCheckOutChange(toStr);
-    } else {
-      onCheckOutChange("");
-    }
-  };
-
-  const nights =
-    checkIn && checkOut && new Date(checkOut) > new Date(checkIn)
-      ? Math.ceil(
-          (new Date(checkOut).getTime() - new Date(checkIn).getTime()) /
-            86400000,
-        )
-      : 0;
+  const { today, getPriceForDate, selectedRange, handleSelect, nights } =
+    usePricingCalendar(
+      rooms,
+      checkIn,
+      checkOut,
+      onCheckInChange,
+      onCheckOutChange,
+    );
 
   return (
     <div
@@ -158,8 +64,7 @@ export const PricingCalendarSection: FC<Props> = ({
                 modifiers?: unknown;
               },
             ) => {
-              // eslint-disable-next-line @typescript-eslint/no-unused-vars
-              const { day, modifiers, ...buttonProps } = props;
+              const { day, ...buttonProps } = props;
               const date = day.date;
               const isPast = date < today;
               const pricing = isPast ? null : getPriceForDate(date);
