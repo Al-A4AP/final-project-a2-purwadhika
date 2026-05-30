@@ -1,7 +1,7 @@
-import { create } from 'zustand';
-import type { User } from '@/types';
-import { STORAGE_KEYS } from '@/lib/constants';
-import { authService } from '@/services/authService';
+import { create } from "zustand";
+import type { User } from "@/types";
+import { STORAGE_KEYS } from "@/lib/constants";
+import { authService } from "@/services/authService";
 
 interface AuthStore {
   user: User | null;
@@ -25,10 +25,8 @@ export const useAuthStore = create<AuthStore>((set) => ({
   isTenant: false,
 
   setUser: (user) => {
-    set({ user, isAuthenticated: !!user, isTenant: user?.role === 'TENANT' });
-    if (user) {
-      localStorage.setItem(STORAGE_KEYS.USER, JSON.stringify(user));
-    } else {
+    set({ user, isAuthenticated: !!user, isTenant: user?.role === "TENANT" });
+    if (!user) {
       localStorage.removeItem(STORAGE_KEYS.USER);
     }
   },
@@ -50,27 +48,31 @@ export const useAuthStore = create<AuthStore>((set) => ({
 
   hydrate: () => {
     const token = localStorage.getItem(STORAGE_KEYS.TOKEN);
-    const userStr = localStorage.getItem(STORAGE_KEYS.USER);
-    if (token && userStr) {
-      try {
-        const user = JSON.parse(userStr) as User;
-        set({ token, user, isAuthenticated: true, isTenant: user.role === 'TENANT' });
-        
-        // Verifikasi token ke backend di latar belakang untuk menghindari status kedaluwarsa
-        authService.getMe()
-          .then((updatedUser) => {
-            set({ user: updatedUser, isTenant: updatedUser.role === 'TENANT' });
-            localStorage.setItem(STORAGE_KEYS.USER, JSON.stringify(updatedUser));
-          })
-          .catch(() => {
-            // Token tidak valid atau kedaluwarsa, logout user
-            set({ user: null, token: null, isAuthenticated: false, isTenant: false });
-            localStorage.removeItem(STORAGE_KEYS.TOKEN);
-            localStorage.removeItem(STORAGE_KEYS.USER);
+
+    localStorage.removeItem(STORAGE_KEYS.USER);
+
+    if (token) {
+      set({ token });
+
+      authService
+        .getMe()
+        .then((updatedUser) => {
+          set({
+            user: updatedUser,
+            isAuthenticated: true,
+            isTenant: updatedUser.role === "TENANT",
           });
-      } catch {
-        // Data penyimpanan tidak valid — abaikan
-      }
+        })
+        .catch(() => {
+          set({
+            user: null,
+            token: null,
+            isAuthenticated: false,
+            isTenant: false,
+          });
+          localStorage.removeItem(STORAGE_KEYS.TOKEN);
+          localStorage.removeItem(STORAGE_KEYS.USER);
+        });
     }
   },
 }));
