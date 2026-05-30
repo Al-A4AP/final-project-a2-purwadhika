@@ -22,7 +22,6 @@ export const buildOrderBy = (sort: string, order: string) => {
   const dbSorts: Record<string, unknown> = {
     name: { name: order },
     created_at: { created_at: order },
-    popularity: { orders: { _count: order } },
   };
   return dbSorts[sort] || { created_at: 'desc' };
 };
@@ -30,12 +29,19 @@ export const buildOrderBy = (sort: string, order: string) => {
 const buildRoomFilter = (filters: PropertyFilters) => {
   const roomWhere: any = {};
   const capacity = Number(filters.capacity || Number(filters.adults || 0) + Number(filters.children || 0));
+  const minPrice = toNonNegative(filters.min_price);
+  const maxPrice = toNonNegative(filters.max_price);
   if (capacity > 0) roomWhere.capacity = { gte: capacity };
-  if (filters.min_price || filters.max_price) roomWhere.base_price = {};
-  if (filters.min_price) roomWhere.base_price.gte = Number(filters.min_price);
-  if (filters.max_price) roomWhere.base_price.lte = Number(filters.max_price);
+  if (minPrice !== undefined || maxPrice !== undefined) roomWhere.base_price = {};
+  if (minPrice !== undefined) roomWhere.base_price.gte = minPrice;
+  if (maxPrice !== undefined) roomWhere.base_price.lte = maxPrice;
   if (Object.keys(roomWhere).length) roomWhere.deleted_at = null;
   return roomWhere;
+};
+
+const toNonNegative = (value?: number) => {
+  if (value === undefined || Number.isNaN(Number(value))) return undefined;
+  return Math.max(0, Number(value));
 };
 
 const parseAmenities = (amenities?: string | string[]) => {

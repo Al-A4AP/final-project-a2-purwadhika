@@ -17,6 +17,7 @@ import { PropertyReviews } from '@/components/property/PropertyReviews';
 import { PricingCalendarSection } from '@/components/property/PricingCalendarSection';
 import { AvailabilityModal } from '@/components/property/AvailabilityModal';
 import { RoomCard } from '@/components/property/RoomCard';
+import { AmenitiesList } from '@/components/property/AmenitiesList';
 
 const PropertyDetailPage: FC = () => {
   const { id } = useParams<{ id: string }>();
@@ -102,7 +103,7 @@ const PropertyDetailPage: FC = () => {
         </button>
 
         <PropertyGallery featuredImageUrl={property.featured_image_url || ''} name={property.name} images={property.images} />
-        <PropertyInfo categoryName={property.category?.name} name={property.name} address={property.address} city={property.city} minPrice={property.min_price} description={property.description} />
+        <PropertyInfo categoryName={property.category?.name} name={property.name} address={property.address} city={property.city} minPrice={property.min_price} description={property.description} amenities={property.amenities} />
 
         {!isTenant && (
           <PricingCalendarSection checkIn={checkIn} checkOut={checkOut} dateError={dateError} rooms={property.rooms || []}
@@ -118,13 +119,13 @@ const PropertyDetailPage: FC = () => {
             <p>Maaf, properti ini tidak memiliki kamar yang tersedia pada tanggal yang Anda pilih. Silakan ubah rentang tanggal check-in dan check-out Anda.</p>
           </div>
         ) : isWholeUnit && firstRoom ? (
-          <WholeUnitCard room={firstRoom} isTenant={isTenant} onBooking={handleBooking} onCheckAvail={handleCheckAvail} categoryName={property.category?.name || ''} />
+          <WholeUnitCard room={firstRoom} amenities={property.amenities} isTenant={isTenant} onBooking={handleBooking} onCheckAvail={handleCheckAvail} categoryName={property.category?.name || ''} />
         ) : (
           <>
             <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-6">Pilihan Kamar</h2>
             <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
               {property.rooms?.map((room) => (
-                <RoomCard key={room.id} room={room} isTenant={isTenant} onBooking={handleBooking} onCheckAvail={handleCheckAvail} />
+                <RoomCard key={room.id} room={room} amenities={property.amenities} isTenant={isTenant} onBooking={handleBooking} onCheckAvail={handleCheckAvail} />
               ))}
             </div>
           </>
@@ -139,7 +140,7 @@ const PropertyDetailPage: FC = () => {
 };
 
 /* Whole-unit card for Villa / Rumah */
-const WholeUnitCard: FC<{ room: Room; isTenant: boolean; categoryName: string; onBooking: (r: Room) => void; onCheckAvail: (r: Room) => void }> = ({ room, isTenant, categoryName, onBooking, onCheckAvail }) => {
+const WholeUnitCard: FC<{ room: Room; amenities?: string[]; isTenant: boolean; categoryName: string; onBooking: (r: Room) => void; onCheckAvail: (r: Room) => void }> = ({ room, amenities, isTenant, categoryName, onBooking, onCheckAvail }) => {
   const price = room.priceDetails ? room.priceDetails.totalPrice : room.base_price;
   return (
     <div className="bg-white dark:bg-slate-800 rounded-xl p-8 shadow-sm border dark:border-slate-700">
@@ -150,6 +151,7 @@ const WholeUnitCard: FC<{ room: Room; isTenant: boolean; categoryName: string; o
           <span className="flex items-center gap-1 text-sm text-gray-600 dark:text-gray-400"><BedDouble size={16} /> Kapasitas: {room.capacity} orang</span>
           {room.description && <p className="text-sm text-gray-500">{room.description}</p>}
         </div>
+        <AmenitiesList amenities={amenities} compact />
         <div className="text-right">
           {price === 0 ? <p className="text-3xl font-bold text-green-600">Gratis</p> : <p className="text-3xl font-bold text-red-600">{formatPrice(price)}</p>}
           <p className="text-sm text-gray-500">{room.priceDetails ? `total (${room.priceDetails.nights} malam)` : '/ malam (seluruh unit)'}</p>

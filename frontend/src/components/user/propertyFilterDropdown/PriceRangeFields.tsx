@@ -8,12 +8,12 @@ interface PriceRangeFieldsProps {
   setMaxPrice: Dispatch<SetStateAction<PriceDraft>>;
 }
 
-const readPrice = (value: string): PriceDraft => (value === '' ? '' : Number(value));
+const readPrice = (value: string): PriceDraft => (value === '' ? '' : Math.max(0, Number(value)));
 
 const PriceInput: FC<{ placeholder: string; value: PriceDraft; onChange: (value: PriceDraft) => void }> = ({ placeholder, value, onChange }) => (
   <div className="flex-1"><div className="relative">
     <span className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 text-xs font-medium">Rp</span>
-    <input type="number" placeholder={placeholder} value={value} onChange={(event) => onChange(readPrice(event.target.value))} className="w-full pl-8 pr-3 py-2 border border-slate-100 dark:border-slate-800 rounded-xl bg-slate-50 dark:bg-slate-950 text-xs focus:outline-none focus:ring-1 focus:ring-rose-500 dark:text-white" />
+    <input type="number" min="0" placeholder={placeholder} value={value} onChange={(event) => onChange(readPrice(event.target.value))} className="w-full pl-8 pr-3 py-2 border border-slate-100 dark:border-slate-800 rounded-xl bg-slate-50 dark:bg-slate-950 text-xs focus:outline-none focus:ring-1 focus:ring-rose-500 dark:text-white" />
   </div></div>
 );
 

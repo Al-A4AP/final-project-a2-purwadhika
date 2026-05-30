@@ -2,6 +2,7 @@ import type { FC } from 'react';
 import type { Room } from '@/types';
 import { BedDouble, Calendar as CalendarIcon, AlertTriangle } from 'lucide-react';
 import { formatPrice } from '@/lib/formatters';
+import { AmenitiesList } from './AmenitiesList';
 
 interface PriceBreakdownProps {
   breakdown: { date: string; price: number; isPeak: boolean; rateName?: string }[];
@@ -30,11 +31,12 @@ const PriceBreakdown: FC<PriceBreakdownProps> = ({ breakdown, small }) => (
 interface RoomCardProps {
   room: Room;
   isTenant: boolean;
+  amenities?: string[];
   onBooking: (room: Room) => void;
   onCheckAvail: (room: Room) => void;
 }
 
-export const RoomCard: FC<RoomCardProps> = ({ room, isTenant, onBooking, onCheckAvail }) => {
+export const RoomCard: FC<RoomCardProps> = ({ room, isTenant, amenities, onBooking, onCheckAvail }) => {
   const roomPrice = room.priceDetails ? room.priceDetails.totalPrice : room.base_price;
 
   return (
@@ -48,6 +50,7 @@ export const RoomCard: FC<RoomCardProps> = ({ room, isTenant, onBooking, onCheck
           <span className="flex items-center gap-1"><BedDouble size={16} /> Kapasitas: {room.capacity}</span>
         </div>
         {room.description && <p className="text-sm text-gray-500 mb-4">{room.description}</p>}
+        <AmenitiesList amenities={amenities} compact />
       </div>
 
       {room.priceDetails && <div className="mt-4 mb-4"><PriceBreakdown breakdown={room.priceDetails.breakdown} small /></div>}

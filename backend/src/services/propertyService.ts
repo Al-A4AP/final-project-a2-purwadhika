@@ -11,15 +11,16 @@ export const getProperties = async (filters: PropertyFilters) => {
   const checkIn = filters.check_in_date ? new Date(filters.check_in_date) : null;
   const checkOut = filters.check_out_date ? new Date(filters.check_out_date) : null;
   const useMemFilter = !!(checkIn && checkOut);
+  const useMemSort = ['price', 'rating', 'popularity'].includes(sort);
 
   const items = await prisma.property.findMany({
     where, orderBy,
     include: { category: true, rooms: { where: { deleted_at: null } }, reviews: { where: { deleted_at: null }, select: { rating: true } }, _count: { select: { orders: true } } },
-    ...(useMemFilter ? {} : { skip, take: Number(limit) })
+    ...(useMemFilter || useMemSort ? {} : { skip, take: Number(limit) })
   });
 
   const formattedItems = await processPropertyItems(items, checkIn, checkOut, useMemFilter);
-  const { finalItems, total } = await getFinalSortedItems(formattedItems, sort, order, skip, Number(limit), useMemFilter, where);
+  const { finalItems, total } = await getFinalSortedItems(formattedItems, sort, order, skip, Number(limit), useMemFilter || useMemSort, where);
 
   return { items: finalItems, pagination: { total, page: Number(page), limit: Number(limit), pages: Math.ceil(total / Number(limit)) } };
 };
@@ -74,6 +75,8 @@ const getFinalSortedItems = async (formattedItems: any[], sort: string, order: s
     formattedItems.sort((a, b) => order === 'asc' ? a.min_price - b.min_price : b.min_price - a.min_price);
   } else if (sort === 'rating') {
     formattedItems.sort((a, b) => order === 'asc' ? (a.rating || 0) - (b.rating || 0) : (b.rating || 0) - (a.rating || 0));
+  } else if (sort === 'popularity') {
+    formattedItems.sort((a, b) => order === 'asc' ? a.order_count - b.order_count : b.order_count - a.order_count);
   }
   
   if (useMemFilter || sort === 'price' || sort === 'rating') {

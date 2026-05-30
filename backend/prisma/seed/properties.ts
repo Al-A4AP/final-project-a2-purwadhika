@@ -2,6 +2,7 @@ import type { PrismaClient, Property } from '@prisma/client';
 import { PROPERTY_SEEDS } from './data';
 import type { UploadedImages } from './assets';
 import type { CategoryMap } from './categories';
+import { getPropertyAmenities } from './amenities';
 
 type PropertySeed = (typeof PROPERTY_SEEDS)[number];
 
@@ -22,7 +23,7 @@ const buildPropertyData = (
   tenantId,
   categoryId: categories[category].id,
   featured_image_url: images[featured].url,
-  amenities: [],
+  amenities: getPropertyAmenities(property.name),
   images: { create: mapImages(imageKeys, images) },
 });
 

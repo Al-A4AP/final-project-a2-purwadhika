@@ -62,8 +62,8 @@ const initialState: PropertySearchFilters & {
   search: "",
   category: "",
   page: 1,
-  limit: 12,
-  sort: "created_at",
+  limit: 8,
+  sort: "popularity",
   order: "desc",
   min_price: undefined,
   max_price: undefined,
@@ -72,8 +72,8 @@ const initialState: PropertySearchFilters & {
 
 const initialFilterValues: FilterValues = {
   page: 1,
-  limit: 12,
-  sort: "created_at",
+  limit: 8,
+  sort: "popularity",
   order: "desc",
   search: "",
   city: "",
@@ -88,6 +88,9 @@ const initialFilterValues: FilterValues = {
   max_price: undefined,
   amenities: [],
 };
+
+const normalizePrice = (value?: number) =>
+  value === undefined ? undefined : Math.max(0, Number(value));
 
 export const useFilterStore = create<FilterStore>()(
   persist(
@@ -110,8 +113,8 @@ export const useFilterStore = create<FilterStore>()(
       setPage: (page) => set({ page }),
       setSort: (sort) => set({ sort, page: 1 }),
       setOrder: (order) => set({ order, page: 1 }),
-      setMinPrice: (min_price) => set({ min_price, page: 1 }),
-      setMaxPrice: (max_price) => set({ max_price, page: 1 }),
+      setMinPrice: (min_price) => set({ min_price: normalizePrice(min_price), page: 1 }),
+      setMaxPrice: (max_price) => set({ max_price: normalizePrice(max_price), page: 1 }),
       setAmenities: (amenities) => set({ amenities, page: 1 }),
       applyFilters: () => set({ activeFilters: get().getFilterValues(), appliedAt: Date.now() }),
 
@@ -121,8 +124,8 @@ export const useFilterStore = create<FilterStore>()(
         const s = get();
         return {
           page: s.page || 1,
-          limit: s.limit || 12,
-          sort: s.sort || "created_at",
+          limit: s.limit || 8,
+          sort: s.sort || "popularity",
           order: s.order || "desc",
           search: s.search || "",
           city: s.city || "",
@@ -133,8 +136,8 @@ export const useFilterStore = create<FilterStore>()(
           children: s.children || 0,
           babies: s.babies || 0,
           capacity: s.capacity,
-          min_price: s.min_price,
-          max_price: s.max_price,
+          min_price: normalizePrice(s.min_price),
+          max_price: normalizePrice(s.max_price),
           amenities: s.amenities || [],
         };
       },

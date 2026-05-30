@@ -18,12 +18,13 @@ interface Props {
   onPageChange?: (page: number) => void;
   currentPage?: number;
   totalPages?: number;
+  pageSize?: number;
 }
 
 const PropertyGrid: FC<Props> = ({
   properties, loading, totalCount, city, checkIn, checkOut,
   sort = 'popularity', order = 'desc',
-  onPageChange, currentPage = 1, totalPages = 1,
+  onPageChange, currentPage = 1, totalPages = 1, pageSize = ITEMS_PER_PAGE,
 }) => {
   const nights = checkIn && checkOut ? getDaysBetween(checkIn, checkOut) : null;
 
@@ -67,7 +68,7 @@ const PropertyGrid: FC<Props> = ({
 
       {loading ? (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-          {[...Array(ITEMS_PER_PAGE)].map((_, i) => <PropertyCardSkeleton key={i} />)}
+          {[...Array(pageSize)].map((_, i) => <PropertyCardSkeleton key={i} />)}
         </div>
       ) : properties.length > 0 ? (
         <>

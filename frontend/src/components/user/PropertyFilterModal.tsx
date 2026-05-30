@@ -9,6 +9,9 @@ interface PropertyFilterModalProps {
   onClose: () => void;
 }
 
+const readPrice = (value: string) => (value === '' ? '' : Math.max(0, Number(value)));
+const priceValue = (value: number | '') => (value === '' ? undefined : Math.max(0, Number(value)));
+
 export const PropertyFilterModal: FC<PropertyFilterModalProps> = ({ isOpen, onClose }) => {
   const filters = useFilterStore();
   
@@ -18,8 +21,8 @@ export const PropertyFilterModal: FC<PropertyFilterModalProps> = ({ isOpen, onCl
   const [selectedAmenities, setSelectedAmenities] = useState<string[]>(filters.amenities || []);
 
   const handleApply = () => {
-    filters.setMinPrice(minPrice === '' ? undefined : Number(minPrice));
-    filters.setMaxPrice(maxPrice === '' ? undefined : Number(maxPrice));
+    filters.setMinPrice(priceValue(minPrice));
+    filters.setMaxPrice(priceValue(maxPrice));
     filters.setAmenities(selectedAmenities);
     filters.applyFilters();
     onClose();
@@ -54,9 +57,10 @@ export const PropertyFilterModal: FC<PropertyFilterModalProps> = ({ isOpen, onCl
                 <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500 text-sm">Rp</span>
                 <input
                   type="number"
+                  min="0"
                   placeholder="0"
                   value={minPrice}
-                  onChange={(e) => setMinPrice(e.target.value === '' ? '' : Number(e.target.value))}
+                  onChange={(e) => setMinPrice(readPrice(e.target.value))}
                   className="w-full pl-9 pr-3 py-2 border dark:border-slate-700 rounded-lg bg-white dark:bg-slate-800 text-sm focus:ring-2 focus:ring-red-500 dark:text-white"
                 />
               </div>
@@ -67,9 +71,10 @@ export const PropertyFilterModal: FC<PropertyFilterModalProps> = ({ isOpen, onCl
                 <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500 text-sm">Rp</span>
                 <input
                   type="number"
+                  min="0"
                   placeholder="Tak terbatas"
                   value={maxPrice}
-                  onChange={(e) => setMaxPrice(e.target.value === '' ? '' : Number(e.target.value))}
+                  onChange={(e) => setMaxPrice(readPrice(e.target.value))}
                   className="w-full pl-9 pr-3 py-2 border dark:border-slate-700 rounded-lg bg-white dark:bg-slate-800 text-sm focus:ring-2 focus:ring-red-500 dark:text-white"
                 />
               </div>

@@ -1,6 +1,7 @@
 import type { FC } from 'react';
 import { MapPin } from 'lucide-react';
 import { formatPrice } from '@/lib/formatters';
+import { AmenitiesList } from './AmenitiesList';
 
 interface PropertyInfoProps {
   categoryName?: string;
@@ -9,6 +10,7 @@ interface PropertyInfoProps {
   city: string;
   minPrice: number;
   description: string;
+  amenities?: string[];
 }
 
 export const PropertyInfo: FC<PropertyInfoProps> = ({
@@ -17,7 +19,8 @@ export const PropertyInfo: FC<PropertyInfoProps> = ({
   address,
   city,
   minPrice,
-  description
+  description,
+  amenities,
 }) => {
   return (
     <div className="bg-white dark:bg-slate-800 rounded-xl p-8 shadow-sm border dark:border-slate-700 mb-8">
@@ -39,6 +42,12 @@ export const PropertyInfo: FC<PropertyInfoProps> = ({
           <p className="text-sm text-gray-500">/ malam</p>
         </div>
       </div>
+      {amenities?.length ? (
+        <div className="mt-6">
+          <h2 className="text-xl font-bold text-gray-900 dark:text-white mb-4">Fasilitas</h2>
+          <AmenitiesList amenities={amenities} />
+        </div>
+      ) : null}
       <div className="mt-8">
         <h2 className="text-xl font-bold text-gray-900 dark:text-white mb-4">Tentang Properti</h2>
         <p className="text-gray-600 dark:text-gray-300 leading-relaxed whitespace-pre-line">

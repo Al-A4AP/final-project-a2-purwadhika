@@ -3,6 +3,7 @@ import { useEffect, useState, useMemo, useRef } from "react";
 import { useGeolocation } from '@/hooks/useGeolocation';
 import { propertyService } from "@/services/propertyService";
 import { useFilterStore } from "@/stores/filterStore";
+import { usePropertyPageLimit } from "@/hooks/usePropertyPageLimit";
 import type { Property } from "@/types";
 import { HeroSection } from "@/components/user/HeroSection";
 import PropertyGrid from "@/components/user/PropertyGrid";
@@ -18,9 +19,16 @@ const HomePage: FC = () => {
   // SOLUSI: Pisah antara filter draft dan active filter
   const filters = useFilterStore();
 
-  const activeFilters = filters.activeFilters || filters.getFilterValues();
+  const activeFilters = useMemo(() => {
+    const raw = filters.activeFilters || filters.getFilterValues();
+    if (filters.appliedAt === 0 && raw.sort === "created_at") {
+      return { ...raw, sort: "popularity", order: "desc" as const };
+    }
+    return raw;
+  }, [filters]);
   const { detectCity } = useGeolocation();
   const hasRequestedCity = useRef(false);
+  const propertyLimit = usePropertyPageLimit();
 
   const sortGroups: SortGroup[] = [
     {
@@ -86,13 +94,7 @@ const HomePage: FC = () => {
     const fetchProperties = async () => {
       setLoading(true);
       try {
-        const fetchParams =
-          !activeFilters.city && !activeFilters.search
-            ? {
-                ...activeFilters,
-                limit: 10,
-              }
-            : activeFilters;
+        const fetchParams = { ...activeFilters, limit: propertyLimit };
 
         const result = await propertyService.getProperties(fetchParams);
         setProperties(result.items);
@@ -105,7 +107,7 @@ const HomePage: FC = () => {
       }
     };
     fetchProperties();
-  }, [activeFilters]);
+  }, [activeFilters, propertyLimit]);
 
   return (
     <div className="min-h-screen bg-white dark:bg-slate-900">
@@ -157,6 +159,7 @@ const HomePage: FC = () => {
           order={(activeFilters.order as "asc" | "desc") || "desc"}
           currentPage={activeFilters.page}
           totalPages={totalPages}
+          pageSize={propertyLimit}
           onPageChange={(page) => {
             filters.setPage(page);
             filters.applyFilters();
