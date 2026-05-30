@@ -2,6 +2,7 @@ import { Router } from 'express';
 import { requireAuth, requireRole } from '../middlewares/authMiddleware';
 import { validate } from '../middlewares/validateMiddleware';
 import { upload, uploadPaymentProof } from '../middlewares/uploadMiddleware';
+import { orderLimiter, webhookLimiter } from '../middlewares/rateLimitMiddleware';
 import {
   createOrderCtrl,
   getUserOrdersCtrl,
@@ -15,10 +16,10 @@ import { createOrderSchema, updateOrderStatusSchema } from '../validations/order
 const router = Router();
 
 // Public webhook (Midtrans)
-router.post('/midtrans-notification', midtransNotificationCtrl);
+router.post('/midtrans-notification', webhookLimiter, midtransNotificationCtrl);
 
 // User Routes
-router.post('/', requireAuth, requireRole(['USER']), validate(createOrderSchema), createOrderCtrl);
+router.post('/', requireAuth, requireRole(['USER']), orderLimiter, validate(createOrderSchema), createOrderCtrl);
 router.get('/user', requireAuth, requireRole(['USER']), getUserOrdersCtrl);
 router.post('/:id/payment-proof', requireAuth, requireRole(['USER']), uploadPaymentProof.single('payment_proof'), uploadPaymentProofCtrl);
 
