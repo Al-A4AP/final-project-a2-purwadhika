@@ -21,8 +21,8 @@ const HomePage: FC = () => {
 
   const activeFilters = useMemo(() => {
     const raw = filters.activeFilters || filters.getFilterValues();
-    if (filters.appliedAt === 0 && raw.sort === "created_at") {
-      return { ...raw, sort: "popularity", order: "desc" as const };
+    if (filters.appliedAt === 0 && raw.sort === "popularity") {
+      return { ...raw, sort: "created_at", order: "desc" as const };
     }
     return raw;
   }, [filters]);
@@ -121,8 +121,8 @@ const HomePage: FC = () => {
       >
         <SortFilterBar
           sortGroups={sortGroups}
-          currentSort={filters.sort || "popularity"}
-          currentOrder={(filters.order as "asc" | "desc") || "desc"}
+          currentSort={activeFilters.sort || "created_at"}
+          currentOrder={(activeFilters.order as "asc" | "desc") || "desc"}
           onChange={(sort, order) => {
             filters.setSort(sort);
             filters.setOrder(order);
@@ -132,7 +132,7 @@ const HomePage: FC = () => {
           resultLabel={
             activeFilters.city
               ? `properti di ${activeFilters.city}`
-              : "properti terpopuler"
+              : "properti terbaru"
           }
           hasFilterChanges={hasFilterChanges}
           activeCity={activeFilters.city}
@@ -155,7 +155,7 @@ const HomePage: FC = () => {
           city={activeFilters.city || ""}
           checkIn={activeFilters.check_in_date}
           checkOut={activeFilters.check_out_date}
-          sort={activeFilters.sort || "popularity"}
+          sort={activeFilters.sort || "created_at"}
           order={(activeFilters.order as "asc" | "desc") || "desc"}
           currentPage={activeFilters.page}
           totalPages={totalPages}

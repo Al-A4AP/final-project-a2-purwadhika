@@ -2,6 +2,8 @@ import type { FC } from "react";
 import type { Order } from "@/types";
 import { formatPrice, formatDate } from "@/lib/formatters";
 import { Check, X, ExternalLink } from "lucide-react";
+import { OrderMobileCard } from "./OrderMobileCard";
+import { OrderStatusBadge } from "./OrderStatusBadge";
 
 interface OrdersTableProps {
   orders: Order[];
@@ -11,8 +13,18 @@ interface OrdersTableProps {
 
 export const OrdersTable: FC<OrdersTableProps> = ({ orders, updating, handleUpdateStatus }) => {
   return (
-    <div className="overflow-x-auto">
-      <table className="w-full text-sm text-left text-gray-500 dark:text-gray-400">
+    <>
+      <div className="space-y-3 p-3 md:hidden">
+        {orders.length === 0 ? (
+          <p className="py-8 text-center text-sm text-gray-500">Belum ada pesanan masuk.</p>
+        ) : (
+          orders.map((order) => (
+            <OrderMobileCard key={order.id} order={order} updating={updating} handleUpdateStatus={handleUpdateStatus} />
+          ))
+        )}
+      </div>
+      <div className="hidden overflow-x-auto md:block">
+        <table className="w-full text-sm text-left text-gray-500 dark:text-gray-400">
         <thead className="text-xs text-gray-700 uppercase bg-gray-50 dark:bg-slate-700 dark:text-gray-300">
           <tr>
             <th className="px-6 py-4">Order ID & Tamu</th>
@@ -60,27 +72,7 @@ export const OrdersTable: FC<OrdersTableProps> = ({ orders, updating, handleUpda
                   <p className="text-xs">{order.payment_method}</p>
                 </td>
                 <td className="px-6 py-4">
-                  <span
-                    className={`px-2 py-1 rounded-md text-xs font-medium
-                  ${order.status === "WAITING_PAYMENT" ? "bg-yellow-100 text-yellow-800" : ""}
-                  ${order.status === "WAITING_CONFIRMATION" ? "bg-blue-100 text-blue-800" : ""}
-                  ${order.status === "PROCESSED" ? "bg-green-100 text-green-800" : ""}
-                  ${order.status === "COMPLETED" ? "bg-emerald-100 text-emerald-800" : ""}
-                  ${order.status === "CANCELLED" ? "bg-red-100 text-red-800" : ""}
-                `}
-                  >
-                    {order.status === "PROCESSED"
-                      ? "Dikonfirmasi"
-                      : order.status === "COMPLETED"
-                        ? "Selesai Menginap"
-                        : order.status === "WAITING_PAYMENT"
-                          ? "Menunggu Pembayaran"
-                          : order.status === "WAITING_CONFIRMATION"
-                            ? "Menunggu Konfirmasi"
-                            : order.status === "CANCELLED"
-                              ? "Dibatalkan"
-                              : order.status}
-                  </span>
+                  <OrderStatusBadge status={order.status} />
                   {order.payment_proof_url && (
                     <a
                       href={order.payment_proof_url}
@@ -129,6 +121,7 @@ export const OrdersTable: FC<OrdersTableProps> = ({ orders, updating, handleUpda
           )}
         </tbody>
       </table>
-    </div>
+      </div>
+    </>
   );
 };

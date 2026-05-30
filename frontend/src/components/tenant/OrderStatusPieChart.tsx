@@ -15,7 +15,7 @@ const COLORS = ['#0088FE', '#00C49F', '#FFBB28', '#FF8042', '#EF4444'];
 const LegendItem: FC<{ item: StatusItem; color: string }> = ({ item, color }) => (
   <div className="flex min-w-0 items-center gap-2 rounded-lg bg-slate-50 px-2.5 py-1.5 text-xs dark:bg-slate-900">
     <span className="h-3 w-3 shrink-0 rounded-full" style={{ backgroundColor: color }} />
-    <span className="min-w-0 break-words text-gray-600 dark:text-gray-400">
+    <span className="min-w-0 wrap-break-word text-gray-600 dark:text-gray-400">
       {item.name} ({item.count})
     </span>
   </div>

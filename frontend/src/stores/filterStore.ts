@@ -63,7 +63,7 @@ const initialState: PropertySearchFilters & {
   category: "",
   page: 1,
   limit: 8,
-  sort: "popularity",
+  sort: "created_at",
   order: "desc",
   min_price: undefined,
   max_price: undefined,
@@ -73,7 +73,7 @@ const initialState: PropertySearchFilters & {
 const initialFilterValues: FilterValues = {
   page: 1,
   limit: 8,
-  sort: "popularity",
+  sort: "created_at",
   order: "desc",
   search: "",
   city: "",
@@ -125,7 +125,7 @@ export const useFilterStore = create<FilterStore>()(
         return {
           page: s.page || 1,
           limit: s.limit || 8,
-          sort: s.sort || "popularity",
+          sort: s.sort || "created_at",
           order: s.order || "desc",
           search: s.search || "",
           city: s.city || "",

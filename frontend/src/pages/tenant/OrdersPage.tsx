@@ -25,7 +25,7 @@ const TenantOrdersPage: FC = () => {
     page: 1, limit: 10, total: 0, totalPages: 1,
   });
   const [confirmModal, setConfirmModal] = useState({
-    isOpen: false, title: "", message: "", onConfirm: () => {},
+    isOpen: false, title: "", message: "", confirmText: "Ya", onConfirm: () => {},
   });
 
   useEffect(() => {
@@ -69,7 +69,7 @@ const TenantOrdersPage: FC = () => {
     else if (status === "CANCELLED") confirmMsg = "Batalkan pesanan ini?";
     
     setConfirmModal({
-      isOpen: true, title: "Konfirmasi Aksi", message: confirmMsg,
+      isOpen: true, title: "Konfirmasi Aksi", message: confirmMsg, confirmText: "Ya",
       onConfirm: async () => {
         setUpdating(orderId);
         try {
@@ -118,6 +118,7 @@ const TenantOrdersPage: FC = () => {
       )}
       <ConfirmModal
         isOpen={confirmModal.isOpen} title={confirmModal.title} message={confirmModal.message}
+        confirmText={confirmModal.confirmText}
         onConfirm={confirmModal.onConfirm}
         onCancel={() => setConfirmModal((prev) => ({ ...prev, isOpen: false }))}
       />

@@ -14,25 +14,25 @@ export const PropertyCard: FC<PropertyCardProps> = ({ property: p, deletingId, o
   const minPrice = p.rooms && p.rooms.length > 0 ? Math.min(...p.rooms.map((r) => r.base_price)) : null;
 
   return (
-    <div className="bg-white dark:bg-slate-800 rounded-xl border dark:border-slate-700 shadow-sm overflow-hidden flex">
-      {p.featured_image_url && <img src={p.featured_image_url} alt={p.name} className="w-36 h-full object-cover shrink-0" />}
-      <div className="p-4 flex-1 flex items-center justify-between gap-4">
+    <div className="flex flex-col overflow-hidden rounded-xl border bg-white shadow-sm dark:border-slate-700 dark:bg-slate-800 sm:flex-row">
+      {p.featured_image_url && <img src={p.featured_image_url} alt={p.name} className="h-44 w-full object-cover sm:h-auto sm:w-36 sm:shrink-0" />}
+      <div className="flex flex-1 flex-col gap-4 p-4 sm:flex-row sm:items-center sm:justify-between">
         <div className="min-w-0">
-          <div className="flex items-center gap-2 mb-1">
-            <span className="text-xs bg-red-50 text-red-600 dark:bg-red-900/20 px-2 py-0.5 rounded-full">{p.category?.name}</span>
+          <div className="mb-1 flex flex-wrap items-center gap-2">
+            <span className="rounded-full bg-red-50 px-2 py-0.5 text-xs text-red-600 dark:bg-red-900/20">{p.category?.name}</span>
             <span className="text-xs text-gray-400">{p.city}</span>
           </div>
           <h3 className="font-semibold text-gray-900 dark:text-white truncate">{p.name}</h3>
-          <div className="flex items-center gap-3 mt-1 text-xs text-gray-500">
+          <div className="mt-1 flex flex-wrap items-center gap-3 text-xs text-gray-500">
             <span className="flex items-center gap-1"><BedDouble size={12} /> {p._count?.rooms || 0} Kamar</span>
             <span className="flex items-center gap-1"><Star size={12} /> {p._count?.reviews || 0} Review</span>
             {minPrice && <span className="font-semibold text-red-600">{formatPrice(minPrice)}/malam</span>}
           </div>
         </div>
-        <div className="flex items-center gap-2 shrink-0">
-          <Link to={`/tenant/properties/${p.id}/rooms`} className="text-xs px-3 py-1.5 border dark:border-slate-600 rounded-lg text-gray-600 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-slate-700 transition">Kamar</Link>
-          <Link to={`/tenant/properties/${p.id}/edit`} className="p-2 text-blue-600 hover:bg-blue-50 dark:hover:bg-blue-900/20 rounded-lg transition"><Pencil size={16} /></Link>
-          <button onClick={() => onDelete(p.id, p.name)} disabled={deletingId === p.id} className="p-2 text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg transition disabled:opacity-50"><Trash2 size={16} /></button>
+        <div className="grid grid-cols-[1fr_44px_44px] items-center gap-2 sm:flex sm:shrink-0">
+          <Link to={`/tenant/properties/${p.id}/rooms`} className="flex h-11 items-center justify-center rounded-lg border px-3 text-sm text-gray-600 transition hover:bg-gray-50 dark:border-slate-600 dark:text-gray-300 dark:hover:bg-slate-700">Kamar</Link>
+          <Link to={`/tenant/properties/${p.id}/edit`} className="flex h-11 w-11 items-center justify-center rounded-lg text-blue-600 transition hover:bg-blue-50 dark:hover:bg-blue-900/20" aria-label="Edit properti"><Pencil size={17} /></Link>
+          <button onClick={() => onDelete(p.id, p.name)} disabled={deletingId === p.id} className="flex h-11 w-11 items-center justify-center rounded-lg text-red-600 transition hover:bg-red-50 disabled:opacity-50 dark:hover:bg-red-900/20" aria-label="Hapus properti"><Trash2 size={17} /></button>
         </div>
       </div>
     </div>
