@@ -38,7 +38,7 @@ export const propertyService = {
         value !== null &&
         value !== ""
       ) {
-        params.append(key, String(value));
+        params.append(key, Array.isArray(value) ? value.join(",") : String(value));
       }
     });
 

@@ -1,5 +1,6 @@
 import { Request, Response } from 'express';
 import * as orderService from '../services/orderService';
+import * as userOrderService from '../services/userOrderService';
 import { sendSuccess, sendError } from '../utils/response';
 import { uploadBuffer } from '../utils/cloudinaryUpload';
 
@@ -14,7 +15,17 @@ export const createOrderCtrl = async (req: Request, res: Response) => {
 export const getUserOrdersCtrl = async (req: Request, res: Response) => {
   try {
     const userId = req.user!.id as string;
-    const data = await orderService.getUserOrders(userId);
+    const { orderNumber, status, startDate, endDate, sortBy, sortOrder, page, limit } = req.query;
+    const data = await userOrderService.getUserOrders(userId, {
+      orderNumber: orderNumber as string,
+      status: status as string,
+      startDate: startDate as string,
+      endDate: endDate as string,
+      sortBy: sortBy as string,
+      sortOrder: sortOrder as 'asc' | 'desc',
+      page: page ? Number(page) : undefined,
+      limit: limit ? Number(limit) : undefined,
+    });
     return sendSuccess(res, data, 'Daftar pesanan pengguna');
   } catch (err: any) { return sendError(res, err.message, err.statusCode || 500); }
 };

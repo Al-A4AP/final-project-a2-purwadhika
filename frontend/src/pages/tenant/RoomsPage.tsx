@@ -74,7 +74,7 @@ const RoomsPage: FC = () => {
         <button
           onClick={() => {
             setShowForm(!showForm); setEditingRoom(null);
-            setForm({ room_type: "", base_price: "", child_price: "", capacity: "", description: "" });
+            setForm({ room_type: "", base_price: "", child_price: "", capacity: "", quantity: "1", description: "", image: null });
           }}
           className="flex items-center gap-2 bg-red-600 text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-red-700 transition"
         >

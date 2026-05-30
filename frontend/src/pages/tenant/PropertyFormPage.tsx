@@ -18,6 +18,8 @@ const schema = z.object({
   categoryId: z.string().min(1, 'Pilih kategori'),
   address: z.string().min(5, 'Alamat wajib diisi'),
   city: z.string().min(2, 'Kota wajib diisi'),
+  province: z.string().optional(),
+  amenities: z.string().optional(),
   latitude: z.string().optional(),
   longitude: z.string().optional(),
 });
@@ -40,7 +42,8 @@ const PropertyFormPage: FC = () => {
       tenantService.getProperty(id)
         .then((p) => reset({
           name: p.name, description: p.description, categoryId: p.categoryId,
-          address: p.address, city: p.city,
+          address: p.address, city: p.city, province: p.province || '',
+          amenities: p.amenities?.join(',') || '',
           latitude: p.latitude?.toString() || '', longitude: p.longitude?.toString() || '',
         }))
         .catch((err) => {
@@ -110,10 +113,20 @@ const PropertyFormPage: FC = () => {
             {errors.city && <p className="text-red-500 text-xs mt-1">{errors.city.message}</p>}
           </div>
           <div>
+            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Provinsi</label>
+            <input {...register('province')} placeholder="cth. DKI Jakarta" className={inputClass} />
+          </div>
+          <div className="col-span-2">
             <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Alamat</label>
             <input {...register('address')} placeholder="Jl. Contoh No. 1" className={inputClass} />
             {errors.address && <p className="text-red-500 text-xs mt-1">{errors.address.message}</p>}
           </div>
+        </div>
+
+        <div>
+          <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Fasilitas</label>
+          <input {...register('amenities')} placeholder="wifi,parking,pool" className={inputClass} />
+          <p className="text-xs text-gray-400 mt-1">Pisahkan dengan koma. Contoh: wifi,parking,breakfast</p>
         </div>
 
         <div>

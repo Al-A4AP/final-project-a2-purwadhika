@@ -1,5 +1,6 @@
 import { Request, Response } from 'express';
 import * as propertyService from '../services/propertyService';
+import { getPublicRoomAvailability } from '../services/publicAvailabilityService';
 import { sendSuccess, sendError } from '../utils/response';
 
 export const listPropertiesController = async (req: Request, res: Response) => {
@@ -27,5 +28,15 @@ export const getCategoriesController = async (_req: Request, res: Response) => {
     return sendSuccess(res, categories, 'Kategori berhasil diambil');
   } catch (err: any) {
     return sendError(res, err.message, 500);
+  }
+};
+
+export const getPublicRoomAvailabilityController = async (req: Request, res: Response) => {
+  try {
+    const { roomId } = req.params as { roomId: string };
+    const data = await getPublicRoomAvailability(roomId, req.query);
+    return sendSuccess(res, data, 'Ketersediaan kamar berhasil diambil');
+  } catch (err: any) {
+    return sendError(res, err.message, err.statusCode || 500);
   }
 };

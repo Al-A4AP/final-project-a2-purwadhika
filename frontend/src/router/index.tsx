@@ -79,19 +79,19 @@ export const router = createBrowserRouter([
       { path: "contact", element: <ContactPage /> },
       {
         path: "profile",
-        element: <ProtectedRoute component={<ProfilePage />} />,
+        element: <ProtectedRoute component={<ProfilePage />} role="USER" />,
       },
       {
         path: "booking",
-        element: <ProtectedRoute component={<BookingPage />} />,
+        element: <ProtectedRoute component={<BookingPage />} role="USER" />,
       },
       {
         path: "orders",
-        element: <ProtectedRoute component={<OrdersPage />} />,
+        element: <ProtectedRoute component={<OrdersPage />} role="USER" />,
       },
       {
         path: 'payment/success',
-        element: <ProtectedRoute component={<PaymentSuccessPage />} />,
+        element: <ProtectedRoute component={<PaymentSuccessPage />} role="USER" />,
       },
     ],
   },

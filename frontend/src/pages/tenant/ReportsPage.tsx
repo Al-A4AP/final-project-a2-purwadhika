@@ -6,6 +6,7 @@ import { formatPrice } from '@/lib/formatters';
 import type { TenantProperty } from '@/types';
 import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, PieChart, Pie, Cell } from 'recharts';
 import { OccupancyCalendar } from '@/components/tenant/OccupancyCalendar';
+import { Pagination } from '@/components/common/Pagination';
 
 const COLORS = ['#0088FE', '#00C49F', '#FFBB28', '#FF8042'];
 
@@ -21,6 +22,7 @@ const ReportsPage: FC = () => {
   const [userName, setUserName] = useState('');
   const [sortBy, setSortBy] = useState('created_at');
   const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('desc');
+  const [reportPage, setReportPage] = useState(1);
 
   useEffect(() => {
     tenantService.getProperties({ limit: 100 }).then((data) => setProperties(data.properties)).catch(() => {});
@@ -29,9 +31,9 @@ const ReportsPage: FC = () => {
 
   const fetchAnalytics = useCallback(() => {
     setLoading(true);
-    tenantReportService.getDashboardAnalytics({ propertyId: selectedPropertyId || undefined, status: selectedStatus || undefined, userName: userName || undefined, startDate: startDate || undefined, endDate: endDate || undefined, sortBy, sortOrder })
+    tenantReportService.getDashboardAnalytics({ propertyId: selectedPropertyId || undefined, status: selectedStatus || undefined, userName: userName || undefined, startDate: startDate || undefined, endDate: endDate || undefined, sortBy, sortOrder, page: reportPage, limit: 10 })
       .then(setAnalytics).finally(() => setLoading(false));
-  }, [selectedPropertyId, selectedStatus, userName, startDate, endDate, sortBy, sortOrder]);
+  }, [selectedPropertyId, selectedStatus, userName, startDate, endDate, sortBy, sortOrder, reportPage]);
 
   useEffect(() => { Promise.resolve().then(() => fetchAnalytics()); }, [fetchAnalytics]);
 
@@ -102,6 +104,12 @@ const ReportsPage: FC = () => {
                   </div>
                 ))}
               </div>
+              <Pagination
+                currentPage={analytics.pagination?.page || 1}
+                totalPages={analytics.pagination?.totalPages || 1}
+                totalItems={analytics.pagination?.total}
+                onPageChange={setReportPage}
+              />
             </div>
           </div>
         </>

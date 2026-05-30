@@ -8,7 +8,6 @@ import { authService } from '@/services/authService';
 import type { AxiosError } from 'axios';
 import type { ApiResponse } from '@/types';
 import { toast } from 'react-hot-toast';
-import axios from 'axios';
 import { useGoogleLogin } from '@react-oauth/google';
 import { useAuthStore } from '@/stores/authStore';
 import { useNavigate } from 'react-router-dom';
@@ -24,26 +23,18 @@ const RegisterPage: FC = () => {
   const handleGoogleLogin = useGoogleLogin({
     onSuccess: async (tokenResponse) => {
       try {
-        const userInfo = await axios.get('https://www.googleapis.com/oauth2/v3/userinfo', {
-          headers: { Authorization: `Bearer ${tokenResponse.access_token}` },
-        });
-        
         const result = await authService.googleLogin({
-          email: userInfo.data.email,
-          name: userInfo.data.name,
-          avatarUrl: userInfo.data.picture,
+          accessToken: tokenResponse.access_token,
         });
         setUser(result.user);
         toast.success('Pendaftaran / Login Google berhasil');
         navigate('/');
-      } catch (err) {
-        console.error('Google login error:', err);
+      } catch {
         setError('root', { message: 'Gagal memproses pendaftaran Google' });
         toast.error('Gagal menggunakan Google');
       }
     },
-    onError: (error) => {
-      console.error('Google login error:', error);
+    onError: () => {
       toast.error('Gagal terhubung ke Google');
     }
   });

@@ -18,7 +18,7 @@ export const useRoomsLogic = (id?: string) => {
   const [selectedRoomId, setSelectedRoomId] = useState<string | null>(null);
   const [editingRoom, setEditingRoom] = useState<RoomWithPeakRates | null>(null);
   const [form, setForm] = useState<RoomFormInput>({
-    room_type: "", base_price: "", child_price: "", capacity: "", description: "",
+    room_type: "", base_price: "", child_price: "", capacity: "", quantity: "1", description: "", image: null,
   });
   const [peakForm, setPeakForm] = useState({
     start_date: "", end_date: "", rate_type: "PERCENTAGE", rate_value: "", description: "",
@@ -50,7 +50,7 @@ export const useRoomsLogic = (id?: string) => {
       }
       setShowForm(false);
       setEditingRoom(null);
-      setForm({ room_type: "", base_price: "", child_price: "", capacity: "", description: "" });
+      setForm({ room_type: "", base_price: "", child_price: "", capacity: "", quantity: "1", description: "", image: null });
       fetchRooms();
     } catch { toast.error("Gagal menyimpan kamar"); }
   };
@@ -58,7 +58,7 @@ export const useRoomsLogic = (id?: string) => {
   const handleOpenAvailModal = async (roomId: string) => {
     setSelectedRoomId(roomId); setIsAvailModalOpen(true);
     try {
-      const data = await availabilityService.getRoomAvailability(roomId);
+      const data = await availabilityService.getTenantRoomAvailability(roomId);
       setAvailabilities(data);
     } catch { toast.error("Gagal memuat ketersediaan kamar"); }
   };
@@ -101,7 +101,7 @@ export const useRoomsLogic = (id?: string) => {
     const newIsAvailable = existing ? !existing.is_available : false;
     try {
       await availabilityService.setRoomAvailability(selectedRoomId, dateStr, newIsAvailable);
-      const data = await availabilityService.getRoomAvailability(selectedRoomId);
+      const data = await availabilityService.getTenantRoomAvailability(selectedRoomId);
       setAvailabilities(data);
       toast.success("Status ketersediaan diubah");
     } catch (err: unknown) {
@@ -120,7 +120,7 @@ export const useRoomsLogic = (id?: string) => {
     setForm({
       room_type: room.room_type, base_price: String(room.base_price),
       child_price: room.child_price != null ? String(room.child_price) : "",
-      capacity: String(room.capacity), description: room.description || "",
+      capacity: String(room.capacity), quantity: String(room.quantity || 1), description: room.description || "", image: null,
     });
     setShowForm(true);
   };

@@ -1,5 +1,5 @@
 import { api } from './api';
-import type { ApiResponse } from '@/types';
+import type { ApiResponse, PaginationMeta } from '@/types';
 import type { Order } from '@/types';
 
 export interface DashboardAnalytics {
@@ -7,6 +7,7 @@ export interface DashboardAnalytics {
   totalOrders: number;
   ordersByStatus: { name: string; count: number }[];
   recentOrders: Order[];
+  pagination: PaginationMeta;
 }
 
 export interface OccupancyRoom {
@@ -36,6 +37,8 @@ export const tenantReportService = {
     userName?: string;
     sortBy?: string;
     sortOrder?: 'asc' | 'desc';
+    page?: number;
+    limit?: number;
   }): Promise<DashboardAnalytics> {
     const query = new URLSearchParams();
     if (params) {

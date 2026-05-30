@@ -2,6 +2,7 @@ import type { FC } from 'react';
 import { CreditCard, UploadCloud, Check } from 'lucide-react';
 import { formatPrice, formatDate } from '@/lib/formatters';
 import type { Order } from '@/types';
+import { canReviewOrder } from '@/lib/orderStatus';
 
 interface OrderCardProps {
   order: Order;
@@ -63,7 +64,7 @@ export const OrderCard: FC<OrderCardProps> = ({
           {order.status === 'WAITING_PAYMENT' && order.payment_method === 'MIDTRANS' && !order.midtrans_transaction_id && (
             <p className="text-yellow-600 text-xs mt-2 italic">Menunggu pembayaran Midtrans diselesaikan.</p>
           )}
-          {order.status === 'PROCESSED' && !order.review && (
+          {canReviewOrder(order) && (
             <button 
               onClick={() => setReviewOrderId(reviewOrderId === order.id ? null : order.id)}
               className="text-sm text-blue-600 hover:underline mt-2"

@@ -64,8 +64,10 @@ export interface TenantProperty {
   tenantId: string;
   name: string;
   city: string;
+  province?: string;
   address: string;
   description: string;
+  amenities?: string[];
   featured_image_url: string | null;
   categoryId: string;
   latitude: number | null;

@@ -15,7 +15,7 @@ export const createRoomCtrl = async (req: Request, res: Response) => {
   try {
     const { propertyId } = req.params as { propertyId: string };
     const tenantId = req.user!.id as string;
-    const data = await svc.createRoom(propertyId, tenantId, req.body);
+    const data = await svc.createRoom(propertyId, tenantId, req.body, req.file);
     return sendSuccess(res, data, 'Kamar berhasil dibuat', 201);
   } catch (err: any) { return sendError(res, err.message, err.statusCode || 500); }
 };
@@ -24,7 +24,7 @@ export const updateRoomCtrl = async (req: Request, res: Response) => {
   try {
     const { roomId } = req.params as { roomId: string };
     const tenantId = req.user!.id as string;
-    const data = await svc.updateRoom(roomId, tenantId, req.body);
+    const data = await svc.updateRoom(roomId, tenantId, req.body, req.file);
     return sendSuccess(res, data, 'Kamar berhasil diperbarui');
   } catch (err: any) { return sendError(res, err.message, err.statusCode || 500); }
 };

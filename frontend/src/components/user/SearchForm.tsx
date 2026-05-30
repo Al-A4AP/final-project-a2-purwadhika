@@ -1,6 +1,6 @@
 import type { FC } from "react";
 import { useMemo, useState } from "react";
-import { useForm } from "react-hook-form";
+import { useForm, useWatch } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Search, MapPin, Calendar, Users, ChevronDown } from "lucide-react";
 import { searchFormSchema, type SearchFormInput } from "@/validations/search";
@@ -17,6 +17,7 @@ const SearchForm: FC = () => {
   const {
     register,
     handleSubmit,
+    control,
     formState: { errors },
   } = useForm<SearchFormInput>({
     resolver: zodResolver(searchFormSchema),
@@ -38,6 +39,13 @@ const SearchForm: FC = () => {
     };
   }, []);
 
+  const checkInVal = useWatch({ control, name: "check_in_date" });
+  const checkoutMinDate = useMemo(() => {
+    if (!checkInVal) return tomorrow;
+    const cid = new Date(checkInVal);
+    return formatDateForInput(new Date(cid.getTime() + 86400000));
+  }, [checkInVal, tomorrow]);
+
   const totalGuests = filters.adults + filters.children;
   const guestSummary = [
     `${filters.adults} Dewasa`,
@@ -48,14 +56,16 @@ const SearchForm: FC = () => {
     .join(", ");
 
   const onSubmit = (data: SearchFormInput) => {
-    if (data.city) filters.setCity(data.city);
-    if (data.check_in_date) filters.setCheckInDate(data.check_in_date);
-    if (data.check_out_date) filters.setCheckOutDate(data.check_out_date);
+    filters.setCity(data.city || "");
+    filters.setCheckInDate(data.check_in_date || "");
+    filters.setCheckOutDate(data.check_out_date || "");
     filters.setAdults(filters.adults);
     filters.setChildren(filters.children);
     filters.setBabies(filters.babies);
     filters.setCapacity(totalGuests || 1);
+    filters.applyFilters();
     setGuestOpen(false);
+    document.getElementById("results-section")?.scrollIntoView({ behavior: "smooth" });
   };
 
   const inputClass =
@@ -109,7 +119,7 @@ const SearchForm: FC = () => {
             <input
               type="date"
               {...register("check_out_date")}
-              min={tomorrow}
+              min={checkoutMinDate}
               className={inputClass}
             />
             {errors.check_out_date && (
@@ -152,12 +162,14 @@ const SearchForm: FC = () => {
                   description="Usia 2 – 12 tahun"
                   value={filters.children}
                   onChange={filters.setChildren}
+                  max={filters.adults}
                 />
                 <GuestCounter
                   label="Bayi"
                   description="Di bawah 2 tahun"
                   value={filters.babies}
                   onChange={filters.setBabies}
+                  max={filters.adults}
                 />
                 <button
                   type="button"

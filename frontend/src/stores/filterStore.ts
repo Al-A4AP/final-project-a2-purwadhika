@@ -22,6 +22,8 @@ export type FilterValues = {
 };
 
 interface FilterStore extends PropertySearchFilters {
+  appliedAt: number;
+  activeFilters: FilterValues;
   adults: number;
   children: number;
   babies: number;
@@ -40,6 +42,7 @@ interface FilterStore extends PropertySearchFilters {
   setMinPrice: (min: number | undefined) => void;
   setMaxPrice: (max: number | undefined) => void;
   setAmenities: (amenities: string[]) => void;
+  applyFilters: () => void;
   resetFilters: () => void;
   getFilterValues: () => FilterValues;
 }
@@ -67,10 +70,31 @@ const initialState: PropertySearchFilters & {
   amenities: [],
 };
 
+const initialFilterValues: FilterValues = {
+  page: 1,
+  limit: 12,
+  sort: "created_at",
+  order: "desc",
+  search: "",
+  city: "",
+  category: "",
+  check_in_date: "",
+  check_out_date: "",
+  adults: 1,
+  children: 0,
+  babies: 0,
+  capacity: undefined,
+  min_price: undefined,
+  max_price: undefined,
+  amenities: [],
+};
+
 export const useFilterStore = create<FilterStore>()(
   persist(
     (set, get) => ({
       ...initialState,
+      appliedAt: 0,
+      activeFilters: initialFilterValues,
 
       setCity: (city) => set({ city, page: 1 }),
       setCheckInDate: (date) => set({ check_in_date: date, page: 1 }),
@@ -89,8 +113,9 @@ export const useFilterStore = create<FilterStore>()(
       setMinPrice: (min_price) => set({ min_price, page: 1 }),
       setMaxPrice: (max_price) => set({ max_price, page: 1 }),
       setAmenities: (amenities) => set({ amenities, page: 1 }),
+      applyFilters: () => set({ activeFilters: get().getFilterValues(), appliedAt: Date.now() }),
 
-      resetFilters: () => set(initialState),
+      resetFilters: () => set({ ...initialState, activeFilters: initialFilterValues, appliedAt: Date.now() }),
 
       getFilterValues: (): FilterValues => {
         const s = get();

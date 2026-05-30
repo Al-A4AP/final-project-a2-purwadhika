@@ -1,12 +1,7 @@
 import prisma from '../config/prisma';
 import { calculateStayDetails } from './pricingService';
 import { checkAvailability } from './availabilityService';
-
-interface PropertyFilters {
-  page?: number; limit?: number; sort?: string; order?: string;
-  search?: string; category?: string; city?: string;
-  check_in_date?: string; check_out_date?: string; capacity?: number;
-}
+import { buildOrderBy, buildPropertyWhere, type PropertyFilters } from './propertyQueryService';
 
 export const getProperties = async (filters: PropertyFilters) => {
   const { page = 1, limit = 12, sort = 'created_at', order = 'desc' } = filters;
@@ -110,16 +105,26 @@ export const getPropertyDetail = async (id: string, filters?: { check_in_date?: 
 
 const fetchDetailedRoomsStatus = async (rooms: any[], checkIn: Date | null, checkOut: Date | null) => {
   const roomsWithStatus: any[] = [];
+  const availabilityRange = getDefaultCalendarRange();
   for (const r of rooms) {
     const roomRel = await prisma.room.findUnique({
       where: { id: r.id },
-      include: { peakRates: { where: { deleted_at: null } }, availability: { where: { is_available: false, date: { gte: new Date() } } } }
+      include: {
+        peakRates: { where: { deleted_at: null } },
+        images: { orderBy: { order: 'asc' } },
+        availability: {
+          where: {
+            is_available: false,
+            date: { gte: availabilityRange.start, lte: availabilityRange.end },
+          },
+        },
+      }
     });
 
     if (checkIn && checkOut) {
       roomsWithStatus.push(await buildAvailableRoomStatus(r, roomRel, checkIn, checkOut));
     } else {
-      roomsWithStatus.push({ ...r, peakRates: roomRel?.peakRates, availability: roomRel?.availability });
+      roomsWithStatus.push(buildRoomCalendarPayload(r, roomRel));
     }
   }
   return roomsWithStatus;
@@ -130,29 +135,22 @@ const buildAvailableRoomStatus = async (room: any, roomRel: any, checkIn: Date, 
     const avail = await checkAvailability(room.id, checkIn, checkOut);
     if (avail.available) {
       const priceDetails = await calculateStayDetails(room.id, checkIn, checkOut);
-      return { ...room, is_available: avail.available, reason: avail.reason, priceDetails, peakRates: roomRel?.peakRates, availability: roomRel?.availability };
+      return { ...buildRoomCalendarPayload(room, roomRel), is_available: avail.available, reason: avail.reason, priceDetails };
     }
   } catch { /* ignore */ }
-  return { ...room, peakRates: roomRel?.peakRates, availability: roomRel?.availability };
+  return buildRoomCalendarPayload(room, roomRel);
 };
 
-const buildPropertyWhere = (filters: PropertyFilters) => {
-  const where: any = { deleted_at: null };
-  if (filters.search) where.name = { contains: filters.search, mode: 'insensitive' };
-  if (filters.city) where.city = { contains: filters.city, mode: 'insensitive' };
-  if (filters.category) where.category = { name: { contains: filters.category, mode: 'insensitive' } };
-  if (filters.capacity) where.rooms = { some: { capacity: { gte: Number(filters.capacity) }, deleted_at: null } };
-  return where;
+const buildRoomCalendarPayload = (room: any, roomRel: any) => {
+  const availability = roomRel?.availability || [];
+  return { ...room, images: roomRel?.images, peakRates: roomRel?.peakRates, availability, availabilities: availability };
 };
 
-const buildOrderBy = (sort: string, order: string) => {
-  const dbSorts: Record<string, unknown> = {
-    name: { name: order },
-    created_at: { created_at: order },
-    popularity: { orders: { _count: order } },
-  };
-  // price & rating are sorted in-memory after formatting
-  return dbSorts[sort] || { created_at: 'desc' };
+const getDefaultCalendarRange = () => {
+  const now = new Date();
+  const start = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), 1));
+  const end = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth() + 2, 0));
+  return { start, end };
 };
 
 const formatProperty = (p: any) => {

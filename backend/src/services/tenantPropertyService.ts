@@ -81,7 +81,10 @@ export const getTenantPropertyById = async (id: string, tenantId: string) => {
     include: {
       category: true,
       images: { orderBy: { order: 'asc' } },
-      rooms: { where: { deleted_at: null }, include: { peakRates: { where: { deleted_at: null } } } },
+      rooms: {
+        where: { deleted_at: null },
+        include: { images: { orderBy: { order: 'asc' } }, peakRates: { where: { deleted_at: null } } },
+      },
     },
   });
   if (!p) throw new AppError('Properti tidak ditemukan', 404);
@@ -94,6 +97,8 @@ export const createProperty = async (tenantId: string, data: any, file?: Express
     data: {
       tenantId, categoryId: data.categoryId, name: data.name,
       description: data.description, address: data.address, city: data.city,
+      province: data.province || undefined,
+      amenities: parseAmenities(data.amenities),
       latitude: data.latitude ? Number(data.latitude) : undefined,
       longitude: data.longitude ? Number(data.longitude) : undefined,
       featured_image_url,
@@ -115,11 +120,19 @@ export const updateProperty = async (id: string, tenantId: string, data: any, fi
       description: data.description || existing.description,
       address: data.address || existing.address,
       city: data.city || existing.city,
+      province: data.province ?? existing.province,
+      amenities: data.amenities !== undefined ? parseAmenities(data.amenities) : existing.amenities,
       latitude: data.latitude ? Number(data.latitude) : existing.latitude,
       longitude: data.longitude ? Number(data.longitude) : existing.longitude,
       featured_image_url,
     },
   });
+};
+
+const parseAmenities = (value?: string | string[]) => {
+  if (!value) return [];
+  const values = Array.isArray(value) ? value : value.split(',');
+  return values.map((item) => item.trim()).filter(Boolean);
 };
 
 export const deleteProperty = async (id: string, tenantId: string) => {

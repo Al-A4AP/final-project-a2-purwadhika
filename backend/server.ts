@@ -22,12 +22,13 @@ app.use(cors({ origin: ALLOWED_ORIGINS, credentials: true }));
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(cookieParser());
-app.use('/api', globalLimiter);
 
 // Health check
 app.get('/api/health', (_req, res) => {
   res.json({ success: true, message: 'Server berjalan', timestamp: new Date() });
 });
+
+app.use('/api', globalLimiter);
 
 // Routes
 app.use('/api/auth', authRoutes);
@@ -51,7 +52,7 @@ if (process.env.ENABLE_CRON === 'true') {
 }
 
 // Server listen — hanya di local/development, tidak di Vercel Serverless
-if (process.env.NODE_ENV !== 'production') {
+if (process.env.NODE_ENV !== 'test') {
   app.listen(PORT, () => {
     console.log(`Server berjalan di http://localhost:${PORT}`);
   });

@@ -12,5 +12,5 @@ export const createOrderSchema = z.object({
 });
 
 export const updateOrderStatusSchema = z.object({
-  status: z.enum(['WAITING_PAYMENT', 'WAITING_CONFIRMATION', 'PROCESSED', 'CANCELLED', 'COMPLETED']),
+  status: z.enum(['PROCESSED', 'CANCELLED']),
 });

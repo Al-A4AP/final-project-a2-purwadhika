@@ -32,6 +32,7 @@ export const PropertyFilterModal: FC<PropertyFilterModalProps> = ({ isOpen, onCl
     filters.setMinPrice(minPrice === '' ? undefined : Number(minPrice));
     filters.setMaxPrice(maxPrice === '' ? undefined : Number(maxPrice));
     filters.setAmenities(selectedAmenities);
+    filters.applyFilters();
     onClose();
   };
 
@@ -42,6 +43,7 @@ export const PropertyFilterModal: FC<PropertyFilterModalProps> = ({ isOpen, onCl
     filters.setMinPrice(undefined);
     filters.setMaxPrice(undefined);
     filters.setAmenities([]);
+    filters.applyFilters();
   };
 
   const toggleAmenity = (id: string) => {

@@ -41,8 +41,8 @@ router.delete('/properties/:id/images/:imageId', ...isTenant, verifyPropertyOwne
 
 // Rooms
 router.get('/properties/:propertyId/rooms', ...isTenant, verifyPropertyOwnership, getRoomsCtrl);
-router.post('/properties/:propertyId/rooms', ...isTenant, verifyPropertyOwnership, validate(createRoomSchema), createRoomCtrl);
-router.patch('/rooms/:roomId', ...isTenant, verifyRoomOwnership, validate(updateRoomSchema), updateRoomCtrl);
+router.post('/properties/:propertyId/rooms', ...isTenant, verifyPropertyOwnership, upload.single('image'), validate(createRoomSchema), createRoomCtrl);
+router.patch('/rooms/:roomId', ...isTenant, verifyRoomOwnership, upload.single('image'), validate(updateRoomSchema), updateRoomCtrl);
 router.delete('/rooms/:roomId', ...isTenant, verifyRoomOwnership, deleteRoomCtrl);
 
 // Peak Season Rates

@@ -10,8 +10,13 @@ export interface RoomAvailability {
 }
 
 export const availabilityService = {
-  async getRoomAvailability(roomId: string): Promise<RoomAvailability[]> {
-    const res = await api.get<ApiResponse<RoomAvailability[]>>(`/properties/rooms/${roomId}/availability`);
+  async getRoomAvailability(roomId: string, params?: { start_date?: string; end_date?: string }): Promise<RoomAvailability[]> {
+    const res = await api.get<ApiResponse<RoomAvailability[]>>(`/properties/rooms/${roomId}/availability`, { params });
+    return res.data.data;
+  },
+
+  async getTenantRoomAvailability(roomId: string): Promise<RoomAvailability[]> {
+    const res = await api.get<ApiResponse<RoomAvailability[]>>(`/tenant/rooms/${roomId}/availability`);
     return res.data.data;
   },
 

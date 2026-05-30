@@ -1,5 +1,5 @@
 import type { FC } from "react";
-import { useEffect, useState, useMemo } from "react";
+import { useEffect, useState, useMemo, useRef } from "react";
 import { useGeolocation } from '@/hooks/useGeolocation';
 import { propertyService } from "@/services/propertyService";
 import { useFilterStore } from "@/stores/filterStore";
@@ -8,7 +8,6 @@ import { HeroSection } from "@/components/user/HeroSection";
 import PropertyGrid from "@/components/user/PropertyGrid";
 import SortFilterBar from "@/components/common/SortFilterBar";
 import type { SortGroup } from "@/components/common/SortFilterBar";
-import type { FilterValues } from "@/stores/filterStore";
 
 const HomePage: FC = () => {
   const [properties, setProperties] = useState<Property[]>([]);
@@ -19,10 +18,9 @@ const HomePage: FC = () => {
   // SOLUSI: Pisah antara filter draft dan active filter
   const filters = useFilterStore();
 
-  const [activeFilters, setActiveFilters] = useState<FilterValues>(
-    filters.getFilterValues(),
-  );
+  const activeFilters = filters.activeFilters || filters.getFilterValues();
   const { detectCity } = useGeolocation();
+  const hasRequestedCity = useRef(false);
 
   const sortGroups: SortGroup[] = [
     {
@@ -65,26 +63,23 @@ const HomePage: FC = () => {
 
   // 1. Deteksi lokasi via LocationIQ saat pertama kali dimuat
   useEffect(() => {
-    if (!filters.city && !filters.search) {
+    if (hasRequestedCity.current) return;
+    hasRequestedCity.current = true;
+
+    const currentFilters = useFilterStore.getState();
+    if (!currentFilters.city && !currentFilters.search) {
       detectCity().then((city) => {
         if (city) {
-          filters.setCity(city);
-          setActiveFilters((prev) => ({ ...prev, city }));
+          currentFilters.setCity(city);
+          currentFilters.applyFilters();
         }
       });
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [detectCity]);
 
-  const hasFilterChanges = useMemo(() =>
-    filters.city !== activeFilters.city ||
-    filters.search !== activeFilters.search ||
-    filters.check_in_date !== activeFilters.check_in_date ||
-    filters.check_out_date !== activeFilters.check_out_date ||
-    filters.sort !== activeFilters.sort ||
-    filters.order !== activeFilters.order ||
-    filters.page !== activeFilters.page,
-  [filters, activeFilters]);
+  const hasFilterChanges = useMemo(() => {
+    return JSON.stringify(filters.getFilterValues()) !== JSON.stringify(activeFilters);
+  }, [filters, activeFilters]);
 
   // 3. PERUBAHAN: Fetch hanya ketika activeFilters berubah (bukan filters)
   useEffect(() => {
@@ -129,6 +124,7 @@ const HomePage: FC = () => {
           onChange={(sort, order) => {
             filters.setSort(sort);
             filters.setOrder(order);
+            filters.applyFilters();
           }}
           resultCount={totalCount}
           resultLabel={
@@ -139,15 +135,14 @@ const HomePage: FC = () => {
           hasFilterChanges={hasFilterChanges}
           activeCity={activeFilters.city}
           onApplyFilters={() => {
-            setActiveFilters(filters.getFilterValues());
+            filters.applyFilters();
           }}
           onResetFilters={() => {
             filters.resetFilters();
-            setActiveFilters(filters.getFilterValues());
           }}
           onClearCity={() => {
             filters.setCity("");
-            setActiveFilters((prev) => ({ ...prev, city: "" }));
+            filters.applyFilters();
           }}
         />
 
@@ -164,7 +159,7 @@ const HomePage: FC = () => {
           totalPages={totalPages}
           onPageChange={(page) => {
             filters.setPage(page);
-            setActiveFilters((prev) => ({ ...prev, page }));
+            filters.applyFilters();
           }}
         />
       </section>

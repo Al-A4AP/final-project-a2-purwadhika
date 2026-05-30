@@ -4,6 +4,16 @@ import type {
   RoomWithPeakRates, PeakSeasonRate, RoomFormInput, PaginationMeta,
 } from '@/types';
 
+const buildRoomFormData = (data: Partial<RoomFormInput>) => {
+  const formData = new FormData();
+  Object.entries(data).forEach(([key, value]) => {
+    if (key === 'image' || value === undefined || value === null) return;
+    formData.append(key, String(value));
+  });
+  if (data.image) formData.append('image', data.image);
+  return formData;
+};
+
 export const tenantService = {
   async getDashboard(): Promise<DashboardStats> {
     const res = await api.get<ApiResponse<DashboardStats>>('/tenant/dashboard');
@@ -62,11 +72,15 @@ export const tenantService = {
     return res.data.data;
   },
   async createRoom(propertyId: string, data: RoomFormInput): Promise<RoomWithPeakRates> {
-    const res = await api.post<ApiResponse<RoomWithPeakRates>>(`/tenant/properties/${propertyId}/rooms`, data);
+    const res = await api.post<ApiResponse<RoomWithPeakRates>>(`/tenant/properties/${propertyId}/rooms`, buildRoomFormData(data), {
+      headers: { 'Content-Type': 'multipart/form-data' },
+    });
     return res.data.data;
   },
   async updateRoom(roomId: string, data: Partial<RoomFormInput>): Promise<RoomWithPeakRates> {
-    const res = await api.patch<ApiResponse<RoomWithPeakRates>>(`/tenant/rooms/${roomId}`, data);
+    const res = await api.patch<ApiResponse<RoomWithPeakRates>>(`/tenant/rooms/${roomId}`, buildRoomFormData(data), {
+      headers: { 'Content-Type': 'multipart/form-data' },
+    });
     return res.data.data;
   },
   async deleteRoom(roomId: string): Promise<void> {

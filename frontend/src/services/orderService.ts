@@ -18,8 +18,21 @@ export const orderService = {
     return res.data.data;
   },
 
-  async getUserOrders(): Promise<Order[]> {
-    const res = await api.get<ApiResponse<Order[]>>('/orders/user');
+  async getUserOrders(params?: {
+    orderNumber?: string;
+    status?: string;
+    startDate?: string;
+    endDate?: string;
+    page?: number;
+    limit?: number;
+  }): Promise<{ orders: Order[]; pagination: PaginationMeta }> {
+    const query = new URLSearchParams();
+    if (params) {
+      Object.entries(params).forEach(([key, val]) => {
+        if (val !== undefined && val !== '') query.append(key, String(val));
+      });
+    }
+    const res = await api.get<ApiResponse<{ orders: Order[]; pagination: PaginationMeta }>>(`/orders/user?${query.toString()}`);
     return res.data.data;
   },
 

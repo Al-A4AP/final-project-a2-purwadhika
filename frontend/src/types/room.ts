@@ -62,5 +62,7 @@ export interface RoomFormInput {
   base_price: string;
   child_price?: string;
   capacity: string;
+  quantity?: string;
   description?: string;
+  image?: File | null;
 }

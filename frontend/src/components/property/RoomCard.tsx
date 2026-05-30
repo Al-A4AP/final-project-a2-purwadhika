@@ -39,6 +39,9 @@ export const RoomCard: FC<RoomCardProps> = ({ room, isTenant, onBooking, onCheck
 
   return (
     <div className="bg-white dark:bg-slate-800 rounded-xl p-6 shadow-sm border dark:border-slate-700 flex flex-col">
+      {room.images?.[0] && (
+        <img src={room.images[0].image_url} alt={room.room_type} className="w-full h-40 object-cover rounded-lg mb-4" />
+      )}
       <div className="flex-1">
         <h3 className="text-xl font-bold text-gray-900 dark:text-white mb-2">{room.room_type}</h3>
         <div className="flex gap-4 text-sm text-gray-600 dark:text-gray-400 mb-4">

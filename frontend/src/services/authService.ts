@@ -7,7 +7,7 @@ export const authService = {
     return res.data.data;
   },
 
-  async googleLogin(data: { email: string; name: string; avatarUrl?: string }) {
+  async googleLogin(data: { accessToken: string }) {
     const res = await api.post<ApiResponse<AuthResponse>>('/auth/google-login', data);
     return res.data.data;
   },

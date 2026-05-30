@@ -6,7 +6,7 @@ import { LogIn, Loader2, Eye, EyeOff, Check } from 'lucide-react';
 import { useAuthStore } from '@/stores/authStore';
 import { loginSchema, type LoginInput } from '@/validations/auth';
 import { authService } from '@/services/authService';
-import axios, { type AxiosError } from 'axios';
+import type { AxiosError } from 'axios';
 import type { ApiResponse } from '@/types';
 import { toast } from 'react-hot-toast';
 import { useGoogleLogin } from '@react-oauth/google';
@@ -68,8 +68,7 @@ const LoginPage: FC = () => {
   const handleGoogleLogin = useGoogleLogin({
     onSuccess: async (tokenResponse) => {
       try {
-        const userInfo = await axios.get('https://www.googleapis.com/oauth2/v3/userinfo', { headers: { Authorization: `Bearer ${tokenResponse.access_token}` } });
-        const result = await authService.googleLogin({ email: userInfo.data.email, name: userInfo.data.name, avatarUrl: userInfo.data.picture });
+        const result = await authService.googleLogin({ accessToken: tokenResponse.access_token });
         setUser(result.user); toast.success('Berhasil login menggunakan Google'); navigate('/');
       } catch { setError('root', { message: 'Gagal memproses login Google' }); toast.error('Gagal login menggunakan Google'); }
     },

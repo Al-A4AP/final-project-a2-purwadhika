@@ -29,9 +29,18 @@ export const RoomForm: FC<RoomFormProps> = ({ isEditing, form, onChange, onSubmi
         </div>
         <div>
           <label className="block text-xs font-medium text-gray-600 dark:text-gray-400 mb-1">Kapasitas (orang)</label>
-          <input type="number" value={form.capacity} onChange={(e) => onChange({ ...form, capacity: e.target.value })} placeholder="2" className={inputClass} required />
+          <input type="number" min="1" value={form.capacity} onChange={(e) => onChange({ ...form, capacity: e.target.value })} placeholder="2" className={inputClass} required />
         </div>
         <div>
+          <label className="block text-xs font-medium text-gray-600 dark:text-gray-400 mb-1">Jumlah Unit</label>
+          <input type="number" min="1" value={form.quantity || "1"} onChange={(e) => onChange({ ...form, quantity: e.target.value })} placeholder="1" className={inputClass} required />
+        </div>
+        <div className="col-span-2">
+          <label className="block text-xs font-medium text-gray-600 dark:text-gray-400 mb-1">Foto Kamar</label>
+          <input type="file" accept="image/*" onChange={(e) => onChange({ ...form, image: e.target.files?.[0] || null })} className={inputClass} required={!isEditing} />
+          <p className="text-xs text-gray-400 mt-0.5">{isEditing ? "Kosongkan jika tidak ingin menambah foto baru" : "Minimal 1 foto kamar wajib diupload"}</p>
+        </div>
+        <div className="col-span-2">
           <label className="block text-xs font-medium text-gray-600 dark:text-gray-400 mb-1">Deskripsi (opsional)</label>
           <input value={form.description || ''} onChange={(e) => onChange({ ...form, description: e.target.value })} className={inputClass} />
         </div>

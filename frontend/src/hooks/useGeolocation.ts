@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useCallback, useState } from 'react';
 import { detectCityFromPosition } from '@/services/geolocationService';
 
 interface UseGeolocationReturn {
@@ -9,7 +9,7 @@ interface UseGeolocationReturn {
 export const useGeolocation = (): UseGeolocationReturn => {
   const [isDetecting, setIsDetecting] = useState(false);
 
-  const detectCity = (): Promise<string | null> => {
+  const detectCity = useCallback((): Promise<string | null> => {
     if (!navigator.geolocation) return Promise.resolve(null);
     setIsDetecting(true);
     return new Promise((resolve) => {
@@ -22,7 +22,7 @@ export const useGeolocation = (): UseGeolocationReturn => {
         () => { setIsDetecting(false); resolve(null); }
       );
     });
-  };
+  }, []);
 
   return { detectCity, isDetecting };
 };

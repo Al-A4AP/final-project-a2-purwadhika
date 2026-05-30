@@ -5,6 +5,8 @@ export const createPropertySchema = z.object({
   description: z.string().min(20, 'Deskripsi minimal 20 karakter'),
   address: z.string().min(5, 'Alamat wajib diisi'),
   city: z.string().min(2, 'Kota wajib diisi'),
+  province: z.string().optional(),
+  amenities: z.string().optional(),
   categoryId: z.string().min(1, 'Kategori wajib dipilih'),
   latitude: z.string().optional(),
   longitude: z.string().optional(),
@@ -15,7 +17,9 @@ export const updatePropertySchema = createPropertySchema.partial();
 export const createRoomSchema = z.object({
   room_type: z.string().min(3, 'Tipe kamar minimal 3 karakter'),
   base_price: z.string().regex(/^\d+$/, 'Harga harus berupa angka'),
+  child_price: z.string().regex(/^\d+$/, 'Harga anak harus berupa angka').optional().or(z.literal('')),
   capacity: z.string().regex(/^\d+$/, 'Kapasitas harus berupa angka'),
+  quantity: z.string().regex(/^\d+$/, 'Jumlah kamar harus berupa angka').optional(),
   description: z.string().optional(),
 });
 

@@ -10,11 +10,13 @@ export const createReview = async (
     throw new Error("Rating harus berupa bilangan bulat antara 1 dan 5");
   }
 
-  const order = await prisma.order.findUnique({
-    where: { id: orderId, userId, status: "PROCESSED" },
+  const order = await prisma.order.findFirst({
+    where: { id: orderId, userId },
   });
-  // Perlu diberi rentang untuk rating
   if (!order) throw new Error("Order tidak ditemukan atau belum selesai");
+  if (!canReviewOrder(order.status, order.check_out_date)) {
+    throw new Error("Ulasan hanya dapat diberikan setelah checkout selesai");
+  }
 
   const existingReview = await prisma.review.findUnique({ where: { orderId } });
   if (existingReview)
@@ -29,6 +31,11 @@ export const createReview = async (
       comment,
     },
   });
+};
+
+const canReviewOrder = (status: string, checkOutDate: Date) => {
+  if (status === "COMPLETED") return true;
+  return status === "PROCESSED" && checkOutDate < new Date();
 };
 
 export const getPropertyReviews = async (propertyId: string) => {

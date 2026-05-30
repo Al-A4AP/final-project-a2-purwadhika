@@ -4,6 +4,7 @@ import crypto from 'crypto';
 import prisma from '../config/prisma';
 import { AppError } from '../middlewares/errorHandler';
 import { sendPasswordResetEmail, sendVerificationEmail } from '../utils/emailService';
+import { getGoogleProfile } from './googleAuthService';
 
 const JWT_SECRET = process.env.JWT_SECRET!;
 const JWT_EXPIRES = process.env.JWT_EXPIRES_IN || '7d';
@@ -46,7 +47,7 @@ export const registerUser = async (data: {
     },
   });
 
-  await sendVerificationEmail(user.email, rawToken).catch(() => console.error('Gagal mengirim email verifikasi'));
+  await sendVerificationEmail(user.email, rawToken).catch(() => {});
 
   return { email: user.email };
 };
@@ -103,9 +104,10 @@ export const resendVerification = async (email: string) => {
   await sendVerificationEmail(email, rawToken);
 };
 
-export const googleLogin = async (data: { email: string; name: string; avatarUrl?: string }) => {
+export const googleLogin = async (data: { accessToken: string }) => {
+  const profile = await getGoogleProfile(data.accessToken);
   let user = await prisma.user.findFirst({
-    where: { email: data.email, deleted_at: null },
+    where: { email: profile.email!, deleted_at: null },
   });
 
   if (!user) {
@@ -113,12 +115,12 @@ export const googleLogin = async (data: { email: string; name: string; avatarUrl
     const password_hash = await bcryptjs.hash(dummyPassword, 10);
     user = await prisma.user.create({
       data: {
-        email: data.email,
-        name: data.name,
+        email: profile.email!,
+        name: profile.name || profile.email!,
         password_hash,
         role: 'USER',
         verified_at: new Date(),
-        avatar_url: data.avatarUrl,
+        avatar_url: profile.picture,
       },
     });
   } else {

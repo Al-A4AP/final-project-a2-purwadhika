@@ -36,7 +36,7 @@ export const webhookLimiter = createLimiter(
 );
 
 export const globalLimiter = createLimiter(
-  isDev ? 5000 : 200, // Production default: 200 request / 15 menit
+  isDev ? 5000 : 600, // Production default: 600 request / 15 menit
   15,
   'Terlalu banyak permintaan. Silakan coba lagi nanti.'
 );

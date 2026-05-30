@@ -29,6 +29,7 @@ export const HeroSection: FC = () => {
 
   const handleSelectCity = (city: string) => {
     filters.setCity(city);
+    filters.applyFilters();
     // Smooth scroll to results
     document
       .getElementById("results-section")

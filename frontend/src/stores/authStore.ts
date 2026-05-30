@@ -26,11 +26,7 @@ export const useAuthStore = create<AuthStore>((set) => ({
   },
 
   logout: async () => {
-    try {
-      await authService.logout();
-    } catch {
-      console.error("Logout API failed, clearing local state");
-    }
+    await authService.logout().catch(() => undefined);
     set({ user: null, isAuthenticated: false, isTenant: false });
     localStorage.removeItem(STORAGE_KEYS.USER);
   },

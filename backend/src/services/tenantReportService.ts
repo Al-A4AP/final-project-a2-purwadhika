@@ -8,6 +8,8 @@ export interface GetDashboardAnalyticsOptions {
   sortBy?: string;
   sortOrder?: 'asc' | 'desc';
   userName?: string;
+  page?: number;
+  limit?: number;
 }
 
 export const getDashboardAnalytics = async (tenantId: string, options: GetDashboardAnalyticsOptions = {}) => {
@@ -19,6 +21,8 @@ export const getDashboardAnalytics = async (tenantId: string, options: GetDashbo
     sortBy = 'created_at',
     sortOrder = 'desc',
     userName,
+    page = 1,
+    limit = 10,
   } = options;
 
   const tenantPropertyIds = (await prisma.property.findMany({ where: { tenantId, deleted_at: null }, select: { id: true } })).map(p => p.id);
@@ -87,7 +91,8 @@ export const getDashboardAnalytics = async (tenantId: string, options: GetDashbo
   const recentOrders = await prisma.order.findMany({
     where,
     orderBy: { [sortBy]: sortOrder },
-    take: 50,
+    skip: (page - 1) * limit,
+    take: limit,
     include: {
       property: { select: { name: true } },
       user: { select: { name: true } }
@@ -98,7 +103,8 @@ export const getDashboardAnalytics = async (tenantId: string, options: GetDashbo
     totalRevenue: revenueAgg._sum.total_price || 0,
     totalOrders,
     ordersByStatus: ordersByStatus.map(s => ({ name: s.status, count: s._count.id })),
-    recentOrders
+    recentOrders,
+    pagination: { page, limit, total: totalOrders, totalPages: Math.ceil(totalOrders / limit) },
   };
 };
 

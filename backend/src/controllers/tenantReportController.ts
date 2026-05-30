@@ -3,7 +3,7 @@ import * as tenantReportService from '../services/tenantReportService';
 
 export const getDashboardAnalyticsCtrl = async (req: Request, res: Response) => {
   try {
-    const { startDate, endDate, propertyId, status, sortBy, sortOrder, userName } = req.query;
+    const { startDate, endDate, propertyId, status, sortBy, sortOrder, userName, page, limit } = req.query;
     const analytics = await tenantReportService.getDashboardAnalytics(req.user!.id, {
       startDate: startDate as string,
       endDate: endDate as string,
@@ -12,6 +12,8 @@ export const getDashboardAnalyticsCtrl = async (req: Request, res: Response) => 
       userName: userName as string,
       sortBy: sortBy as string,
       sortOrder: sortOrder as 'asc' | 'desc',
+      page: page ? Number(page) : undefined,
+      limit: limit ? Number(limit) : undefined,
     });
     res.status(200).json({ data: analytics });
   } catch (err: any) {

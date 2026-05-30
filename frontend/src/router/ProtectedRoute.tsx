@@ -11,11 +11,11 @@ const ProtectedRoute: FC<ProtectedRouteProps> = ({ component, role }) => {
   const { isAuthenticated, user } = useAuthStore();
 
   if (!isAuthenticated || !user) {
-    return <Navigate to="/auth/login" />;
+    return <Navigate to="/auth/login" replace />;
   }
 
   if (role && user.role !== role) {
-    return <Navigate to="/" />;
+    return <Navigate to="/" replace />;
   }
 
   return <>{component}</>;

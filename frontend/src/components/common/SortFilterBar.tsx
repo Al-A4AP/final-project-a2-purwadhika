@@ -4,7 +4,7 @@ import {
   ArrowUpDown,
   TrendingUp,
   Star,
-  DollarSign,
+  Banknote,
   Clock,
   BedDouble,
 } from "lucide-react";
@@ -40,7 +40,7 @@ interface Props {
 const iconMap: Record<string, React.ReactNode> = {
   trending: <TrendingUp size={13} />,
   star: <Star size={13} />,
-  price: <DollarSign size={13} />,
+  price: <Banknote size={13} />,
   clock: <Clock size={13} />,
   bed: <BedDouble size={13} />,
   alpha: <span className="text-xs font-bold leading-none">Az</span>,
