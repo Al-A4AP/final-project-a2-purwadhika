@@ -9,27 +9,34 @@ const createLimiter = (max: number, windowMinutes: number, message: string) =>
     message: { success: false, message },
   });
 
+const isDev = process.env.NODE_ENV !== 'production';
+
 export const authLimiter = createLimiter(
-  10, 15,
+  isDev ? 1000 : 10, // Production default: 10 request / 15 menit
+  15,
   'Terlalu banyak percobaan. Silakan coba lagi dalam 15 menit.'
 );
 
 export const resendLimiter = createLimiter(
-  20, 15,
+  isDev ? 1000 : 20, // Production default: 20 request / 15 menit
+  15,
   'Terlalu banyak permintaan. Silakan coba lagi dalam 15 menit.'
 );
 
 export const orderLimiter = createLimiter(
-  5, 1,
+  isDev ? 1000 : 5, // Production default: 5 request / 1 menit
+  1,
   'Terlalu banyak permintaan pesanan. Silakan coba lagi dalam 1 menit.'
 );
 
 export const webhookLimiter = createLimiter(
-  30, 1,
+  isDev ? 1000 : 30, // Production default: 30 request / 1 menit
+  1,
   'Terlalu banyak permintaan webhook.'
 );
 
 export const globalLimiter = createLimiter(
-  200, 15,
+  isDev ? 5000 : 200, // Production default: 200 request / 15 menit
+  15,
   'Terlalu banyak permintaan. Silakan coba lagi nanti.'
 );

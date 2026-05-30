@@ -51,64 +51,38 @@ const validateCapacity = (adults: number, children: number, babies: number, capa
 
 export const createOrder = async (data: CreateOrderData) => {
   const { userId, propertyId, roomId, check_in_date, check_out_date, payment_method, adults, children, babies } = data;
-
   await validateUser(userId);
   const checkIn = new Date(check_in_date);
   const checkOut = new Date(check_out_date);
   validateDates(checkIn, checkOut);
+  const nights = Math.ceil((checkOut.getTime() - checkIn.getTime()) / 86400000);
+  const order: any = await executeOrderTransaction(userId, propertyId, roomId, checkIn, checkOut, payment_method, { adults, children, babies });
+  const snapData = payment_method === 'MIDTRANS' ? await processMidtransPayment(order, nights) : { snapToken: null, snapRedirectUrl: null };
+  sendOrderConfirmationEmail(order.user.email, order.order_number, order.property.name, order.room.room_type, order.check_in_date, order.check_out_date, order.total_price).catch(() => {});
+  return { order, ...snapData };
+};
 
-  const nights = Math.ceil((checkOut.getTime() - checkIn.getTime()) / (1000 * 60 * 60 * 24));
-
-  const order = await prisma.$transaction(async (tx) => {
+const executeOrderTransaction = async (userId: string, propertyId: string, roomId: string, checkIn: Date, checkOut: Date, payment_method: 'MANUAL' | 'MIDTRANS', capacityData: any) => {
+  return prisma.$transaction(async (tx) => {
     const room = await tx.room.findFirst({ where: { id: roomId, deleted_at: null } });
     if (!room) throwError('Kamar tidak ditemukan', 404);
-
-    validateCapacity(adults, children, babies, room!.capacity);
-
-    let priceDetails;
-    try {
-      priceDetails = await getValidatedStayDetails(roomId, checkIn, checkOut, tx);
-    } catch (e: any) { throwError(e.message, 400); }
-    const finalTotalPrice = priceDetails.totalPrice;
-
+    validateCapacity(capacityData.adults, capacityData.children, capacityData.babies, room.capacity);
+    let pd;
+    try { pd = await getValidatedStayDetails(roomId, checkIn, checkOut, tx); } catch (e: any) { throwError(e.message, 400); }
     return tx.order.create({
-      data: {
-        order_number: generateOrderNumber(),
-        userId, propertyId, roomId,
-        check_in_date: checkIn,
-        check_out_date: checkOut,
-        total_price: finalTotalPrice,
-        payment_method,
-        status: 'WAITING_PAYMENT',
-        expires_at: new Date(Date.now() + 2 * 60 * 60 * 1000),
-      },
-      include: {
-        user: { select: { name: true, email: true, phone: true } },
-        property: { select: { name: true } },
-        room: { select: { room_type: true } },
-      },
+      data: { order_number: generateOrderNumber(), userId, propertyId, roomId, check_in_date: checkIn, check_out_date: checkOut, total_price: pd.totalPrice, payment_method, status: 'WAITING_PAYMENT', expires_at: new Date(Date.now() + 7200000) },
+      include: { user: { select: { name: true, email: true, phone: true } }, property: { select: { name: true } }, room: { select: { room_type: true } } },
     });
   });
+};
 
-  let snapToken = null;
-  let snapRedirectUrl = null;
-
-  if (payment_method === 'MIDTRANS') {
-    const snap = await createSnapTransaction(
-      order.id, order.total_price, nights,
-      order.user.name, order.user.email, order.user.phone || '',
-      order.property.name, order.room.room_type, order.roomId,
-    );
-    snapToken = snap.token;
-    snapRedirectUrl = snap.redirectUrl;
-  }
-
-  sendOrderConfirmationEmail(
-    order.user.email, order.order_number, order.property.name,
-    order.room.room_type, order.check_in_date, order.check_out_date, order.total_price,
-  ).catch(() => {});
-
-  return { order, snapToken, snapRedirectUrl };
+const processMidtransPayment = async (order: any, nights: number) => {
+  const snap = await createSnapTransaction(
+    order.id, order.total_price, nights,
+    order.user.name, order.user.email, order.user.phone || '',
+    order.property.name, order.room.room_type, order.roomId,
+  );
+  return { snapToken: snap.token, snapRedirectUrl: snap.redirectUrl };
 };
 
 export const getUserOrders = async (userId: string) => {
@@ -131,16 +105,9 @@ export interface GetTenantOrdersOptions {
 }
 
 export const getTenantOrders = async (tenantId: string, options: GetTenantOrdersOptions = {}) => {
-  const { propertyId, status, startDate, endDate, sortBy = 'created_at', sortOrder = 'desc', page = 1, limit = 10 } = options;
+  const { sortBy = 'created_at', sortOrder = 'desc', page = 1, limit = 10 } = options;
   const skip = (page - 1) * limit;
-  const where: any = { property: { tenantId } };
-  if (propertyId) where.propertyId = propertyId;
-  if (status) where.status = status;
-  if (startDate || endDate) {
-    where.created_at = {};
-    if (startDate) where.created_at.gte = new Date(startDate);
-    if (endDate) { const endOf = new Date(endDate); endOf.setHours(23, 59, 59, 999); where.created_at.lte = endOf; }
-  }
+  const where = buildTenantOrdersWhere(tenantId, options);
 
   const [orders, total] = await Promise.all([
     prisma.order.findMany({
@@ -154,26 +121,38 @@ export const getTenantOrders = async (tenantId: string, options: GetTenantOrders
   return { orders, pagination: { page, limit, total, totalPages: Math.ceil(total / limit) } };
 };
 
+const buildTenantOrdersWhere = (tenantId: string, options: GetTenantOrdersOptions) => {
+  const { propertyId, status, startDate, endDate } = options;
+  const where: any = { property: { tenantId } };
+  if (propertyId) where.propertyId = propertyId;
+  if (status) where.status = status;
+  if (startDate || endDate) {
+    where.created_at = {};
+    if (startDate) where.created_at.gte = new Date(startDate);
+    if (endDate) { const endOf = new Date(endDate); endOf.setHours(23, 59, 59, 999); where.created_at.lte = endOf; }
+  }
+  return where;
+};
+
 export const updateOrderStatus = async (orderId: string, tenantId: string, status: any) => {
   const order = await prisma.order.findUnique({ where: { id: orderId }, include: { property: true, user: true } });
-  if (!order || order.property.tenantId !== tenantId) throwError('Pesanan tidak ditemukan atau akses ditolak', 404);
-
-  let finalStatus = status;
-  let updateData: any = { status: finalStatus };
-
+  if (!order || order.property.tenantId !== tenantId) throwError('Akses ditolak', 404);
+  let finalStatus = status, updateData: any = { status };
   if (order.status === 'WAITING_CONFIRMATION' && status === 'CANCELLED') {
     finalStatus = 'WAITING_PAYMENT';
-    updateData = { status: 'WAITING_PAYMENT', payment_proof_url: null, expires_at: new Date(Date.now() + 2 * 60 * 60 * 1000) };
+    updateData = { status: 'WAITING_PAYMENT', payment_proof_url: null, expires_at: new Date(Date.now() + 7200000) };
   }
-
   const updatedOrder = await prisma.order.update({ where: { id: orderId }, data: updateData });
+  await handleOrderStatusEmail(order, finalStatus, status);
+  return updatedOrder;
+};
 
+const handleOrderStatusEmail = async (order: any, finalStatus: string, originalStatus: string) => {
   if (finalStatus === 'PROCESSED') {
     await sendPaymentConfirmationEmail(order.user.email, order.order_number).catch(() => {});
-  } else if (order.status === 'WAITING_CONFIRMATION' && status === 'CANCELLED') {
+  } else if (order.status === 'WAITING_CONFIRMATION' && originalStatus === 'CANCELLED') {
     await sendPaymentRejectionEmail(order.user.email, order.order_number).catch(() => {});
   }
-  return updatedOrder;
 };
 
 export const uploadPaymentProof = async (orderId: string, userId: string, imageUrl: string) => {

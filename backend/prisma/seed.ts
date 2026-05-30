@@ -61,10 +61,10 @@ const IMG = {
 
 // ==================== MAIN SEED ====================
 async function main() {
-  console.log('\n🌱 Memulai seeding database...\n');
+  console.log('\n Memulai seeding database...\n');
 
   // 1. Clean up existing data (urutan penting!)
-  console.log('🗑️  Membersihkan data lama...');
+  console.log(' Membersihkan data lama...');
   await prisma.reviewReply.deleteMany();
   await prisma.review.deleteMany();
   await prisma.order.deleteMany();
@@ -80,13 +80,13 @@ async function main() {
   console.log('  ✓ Data lama dihapus\n');
 
   // 2. CATEGORIES
-  console.log('📂 Membuat kategori properti...');
+  console.log(' Membuat kategori properti...');
   const [catHotel, catApt, catRumah, catVilla, catKost] = await Promise.all([
-    prisma.propertyCategory.create({ data: { name: 'Hotel', icon: '🏨' } }),
-    prisma.propertyCategory.create({ data: { name: 'Apartemen', icon: '🏢' } }),
-    prisma.propertyCategory.create({ data: { name: 'Rumah', icon: '🏠' } }),
-    prisma.propertyCategory.create({ data: { name: 'Villa', icon: '🏡' } }),
-    prisma.propertyCategory.create({ data: { name: 'Kost', icon: '🏘️' } }),
+    prisma.propertyCategory.create({ data: { name: 'Hotel' } }),
+    prisma.propertyCategory.create({ data: { name: 'Apartemen' } }),
+    prisma.propertyCategory.create({ data: { name: 'Rumah' } }),
+    prisma.propertyCategory.create({ data: { name: 'Villa' } }),
+    prisma.propertyCategory.create({ data: { name: 'Kost' } }),
   ]);
   console.log('  ✓ 5 kategori dibuat\n');
 
@@ -254,7 +254,7 @@ async function main() {
   console.log(`  ✓ ${properties.length} properti dibuat\n`);
 
   // 6. ROOMS (25 total)
-  console.log('🛏️  Membuat kamar...');
+  console.log(' Membuat kamar...');
   const roomsData = [
     // Grand Menteng Hotel (idx 0)
     { propIdx: 0, type: 'Superior Room', price: 850000, cap: 2, desc: 'Kamar superior dengan pemandangan kota, TV LED 43 inch, minibar' },
@@ -382,8 +382,8 @@ async function main() {
   if (reviews.length >= 2) {
     await prisma.reviewReply.createMany({
       data: [
-        { reviewId: reviews[0].id, tenantId: tenant.id, reply_text: 'Terima kasih atas reviewnya! Kami sangat senang Anda puas. Sampai jumpa kembali 🙏' },
-        { reviewId: reviews[2].id, tenantId: tenant.id, reply_text: 'Terima kasih sudah memilih Villa Ubud Hijau! Senang Anda menikmati kolam renang kami. Salam dari Ubud 🌿' },
+        { reviewId: reviews[0].id, tenantId: tenant.id, reply_text: 'Terima kasih atas reviewnya! Kami sangat senang Anda puas. Sampai jumpa kembali' },
+        { reviewId: reviews[2].id, tenantId: tenant.id, reply_text: 'Terima kasih sudah memilih Villa Ubud Hijau! Senang Anda menikmati kolam renang kami. Salam dari Ubud' },
       ],
     });
     console.log('  ✓ 2 review replies dibuat\n');
