@@ -12,10 +12,11 @@ const Navbar: FC = () => {
   
   const { isAuthenticated, user, logout } = useAuthStore();
   const navigate = useNavigate();
+  const profilePath = user?.role === 'TENANT' ? '/tenant/profile' : '/profile';
 
-  const handleLogout = () => {
-    logout();
-    navigate('/');
+  const handleLogout = async () => {
+    await logout();
+    navigate('/auth/login', { replace: true });
     setIsOpen(false);
     setProfileOpen(false);
   };
@@ -78,7 +79,7 @@ const Navbar: FC = () => {
                       <p className="text-xs text-slate-500 truncate mt-0.5">{user?.email}</p>
                     </div>
                     <div className="py-2">
-                      <Link to="/profile" className="flex items-center gap-3 px-5 py-2.5 text-sm font-medium text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800 transition" onClick={() => setProfileOpen(false)}>
+                      <Link to={profilePath} className="flex items-center gap-3 px-5 py-2.5 text-sm font-medium text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800 transition" onClick={() => setProfileOpen(false)}>
                         <User size={16} className="text-slate-400" /> Profil Saya
                       </Link>
                       {user?.role === 'USER' && (
@@ -148,7 +149,7 @@ const Navbar: FC = () => {
 
             {isAuthenticated ? (
               <div className="px-2 pt-2 border-t border-slate-100 dark:border-slate-800 space-y-1">
-                <Link to="/profile" onClick={() => setIsOpen(false)} className="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800">
+                <Link to={profilePath} onClick={() => setIsOpen(false)} className="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800">
                   <User size={18} className="text-slate-400" /> Profil Saya
                 </Link>
                 {user?.role === 'USER' && (

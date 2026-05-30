@@ -4,7 +4,7 @@ import { Link } from 'react-router-dom';
 import { Building2, BedDouble, Clock, TrendingUp, Plus } from 'lucide-react';
 import { tenantService } from '@/services/tenantService';
 import type { DashboardStats, RecentOrder } from '@/types';
-import { formatPrice, formatDate } from '@/lib/formatters';
+import { formatCurrency, formatPrice, formatDate } from '@/lib/formatters';
 
 const STATUS_MAP: Record<string, { label: string; color: string }> = {
   WAITING_PAYMENT: { label: 'Menunggu Pembayaran', color: 'text-yellow-600 bg-yellow-50' },
@@ -69,7 +69,7 @@ const DashboardPage: FC = () => {
         <StatCard icon={Building2} label="Total Properti" value={stats?.propertyCount || 0} color="text-blue-600 bg-blue-50 dark:bg-blue-900/20" />
         <StatCard icon={BedDouble} label="Total Kamar" value={stats?.roomCount || 0} color="text-purple-600 bg-purple-50 dark:bg-purple-900/20" />
         <StatCard icon={Clock} label="Perlu Konfirmasi" value={stats?.pendingOrders || 0} color="text-yellow-600 bg-yellow-50 dark:bg-yellow-900/20" />
-        <StatCard icon={TrendingUp} label="Pendapatan Bulan Ini" value={formatPrice(stats?.monthlyRevenue || 0)} color="text-green-600 bg-green-50 dark:bg-green-900/20" />
+        <StatCard icon={TrendingUp} label="Pendapatan Bulan Ini" value={formatCurrency(stats?.monthlyRevenue || 0)} color="text-green-600 bg-green-50 dark:bg-green-900/20" />
       </div>
 
       <div className="bg-white dark:bg-slate-800 rounded-xl shadow-sm border dark:border-slate-700 overflow-hidden">

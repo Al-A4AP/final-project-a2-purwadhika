@@ -11,6 +11,7 @@ import type { PropertyCategory } from '@/types';
 import type { AxiosError } from 'axios';
 import type { ApiResponse } from '@/types';
 import { toast } from 'react-hot-toast';
+import { AmenitiesSelector } from '@/components/tenant/AmenitiesSelector';
 
 const schema = z.object({
   name: z.string().min(3, 'Minimal 3 karakter'),
@@ -32,6 +33,7 @@ const PropertyFormPage: FC = () => {
   const [categories, setCategories] = useState<PropertyCategory[]>([]);
   const [preview, setPreview] = useState<string | null>(null);
   const [file, setFile] = useState<File | null>(null);
+  const [selectedAmenities, setSelectedAmenities] = useState<string[]>([]);
 
   const { register, handleSubmit, reset, formState: { errors, isSubmitting } } =
     useForm<FormInput>({ resolver: zodResolver(schema) });
@@ -40,12 +42,15 @@ const PropertyFormPage: FC = () => {
     propertyService.getCategories().then(setCategories);
     if (isEdit && id) {
       tenantService.getProperty(id)
-        .then((p) => reset({
-          name: p.name, description: p.description, categoryId: p.categoryId,
-          address: p.address, city: p.city, province: p.province || '',
-          amenities: p.amenities?.join(',') || '',
-          latitude: p.latitude?.toString() || '', longitude: p.longitude?.toString() || '',
-        }))
+        .then((p) => {
+          setSelectedAmenities(p.amenities || []);
+          reset({
+            name: p.name, description: p.description, categoryId: p.categoryId,
+            address: p.address, city: p.city, province: p.province || '',
+            amenities: p.amenities?.join(',') || '',
+            latitude: p.latitude?.toString() || '', longitude: p.longitude?.toString() || '',
+          });
+        })
         .catch((err) => {
           const axiosErr = err as AxiosError<ApiResponse<null>>;
           toast.error(axiosErr.response?.data?.message || 'Properti tidak ditemukan atau Anda tidak memiliki akses');
@@ -56,7 +61,8 @@ const PropertyFormPage: FC = () => {
 
   const onSubmit = async (data: FormInput) => {
     const fd = new FormData();
-    Object.entries(data).forEach(([k, v]) => { if (v) fd.append(k, v); });
+    Object.entries(data).forEach(([k, v]) => { if (k !== 'amenities' && v) fd.append(k, v); });
+    fd.append('amenities', selectedAmenities.join(','));
     if (file) fd.append('featured_image', file);
     try {
       if (isEdit && id) { await tenantService.updateProperty(id, fd); }
@@ -73,6 +79,12 @@ const PropertyFormPage: FC = () => {
     if (!f) return;
     setFile(f);
     setPreview(URL.createObjectURL(f));
+  };
+
+  const toggleAmenity = (id: string) => {
+    setSelectedAmenities((items) =>
+      items.includes(id) ? items.filter((item) => item !== id) : [...items, id]
+    );
   };
 
   const inputClass = "w-full px-4 py-2.5 border border-gray-300 dark:border-slate-600 dark:bg-slate-700 dark:text-white rounded-lg focus:ring-2 focus:ring-red-500 outline-none";
@@ -125,8 +137,7 @@ const PropertyFormPage: FC = () => {
 
         <div>
           <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Fasilitas</label>
-          <input {...register('amenities')} placeholder="wifi,parking,pool" className={inputClass} />
-          <p className="text-xs text-gray-400 mt-1">Pisahkan dengan koma. Contoh: wifi,parking,breakfast</p>
+          <AmenitiesSelector selected={selectedAmenities} onToggle={toggleAmenity} />
         </div>
 
         <div>

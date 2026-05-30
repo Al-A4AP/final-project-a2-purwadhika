@@ -97,15 +97,4 @@ export const tenantService = {
   async deletePeakRate(rateId: string): Promise<void> {
     await api.delete(`/tenant/peak-rates/${rateId}`);
   },
-  async createCategory(data: { name: string; icon?: string }) {
-    const res = await api.post('/tenant/categories', data);
-    return res.data.data;
-  },
-  async updateCategory(id: string, data: { name: string; icon?: string }) {
-    const res = await api.patch(`/tenant/categories/${id}`, data);
-    return res.data.data;
-  },
-  async deleteCategory(id: string): Promise<void> {
-    await api.delete(`/tenant/categories/${id}`);
-  },
 };

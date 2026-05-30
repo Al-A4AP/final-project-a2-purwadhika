@@ -2,23 +2,12 @@ import type { FC } from 'react';
 import { useState } from 'react';
 import { Modal } from '@/components/common/Modal';
 import { useFilterStore } from '@/stores/filterStore';
-import { Wifi, Car, Coffee, Tv, Monitor, Utensils, Waves, Dumbbell } from 'lucide-react';
+import { AMENITIES_LIST } from '@/lib/amenities';
 
 interface PropertyFilterModalProps {
   isOpen: boolean;
   onClose: () => void;
 }
-
-const AMENITIES_LIST = [
-  { id: 'wifi', label: 'WiFi Gratis', icon: Wifi },
-  { id: 'parking', label: 'Tempat Parkir', icon: Car },
-  { id: 'breakfast', label: 'Sarapan', icon: Coffee },
-  { id: 'tv', label: 'TV', icon: Tv },
-  { id: 'workspace', label: 'Ruang Kerja', icon: Monitor },
-  { id: 'kitchen', label: 'Dapur', icon: Utensils },
-  { id: 'pool', label: 'Kolam Renang', icon: Waves },
-  { id: 'gym', label: 'Pusat Kebugaran', icon: Dumbbell },
-];
 
 export const PropertyFilterModal: FC<PropertyFilterModalProps> = ({ isOpen, onClose }) => {
   const filters = useFilterStore();

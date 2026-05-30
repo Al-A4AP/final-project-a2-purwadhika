@@ -135,6 +135,12 @@ const parseAmenities = (value?: string | string[]) => {
   return values.map((item) => item.trim()).filter(Boolean);
 };
 
+const getCurrentMonthRange = () => {
+  const start = new Date(); start.setDate(1); start.setHours(0, 0, 0, 0);
+  const end = new Date(start); end.setMonth(end.getMonth() + 1);
+  return { start, end };
+};
+
 export const deleteProperty = async (id: string, tenantId: string) => {
   const existing = await prisma.property.findFirst({ where: { id, tenantId, deleted_at: null } });
   if (!existing) throw new AppError('Properti tidak ditemukan', 404);
@@ -171,6 +177,7 @@ export const deletePropertyImage = async (propertyId: string, imageId: string, t
 };
 
 export const getDashboardStats = async (tenantId: string) => {
+  const { start, end } = getCurrentMonthRange();
   const [propertyCount, roomCount, pendingOrders, recentOrders, revenue] = await Promise.all([
     prisma.property.count({ where: { tenantId, deleted_at: null } }),
     prisma.room.count({ where: { property: { tenantId }, deleted_at: null } }),
@@ -181,7 +188,11 @@ export const getDashboardStats = async (tenantId: string) => {
       orderBy: { created_at: 'desc' }, take: 5,
     }),
     prisma.order.aggregate({
-      where: { property: { tenantId }, status: 'PROCESSED', payment_verified_at: { gte: new Date(new Date().setDate(1)) } },
+      where: {
+        property: { tenantId },
+        status: { in: ['PROCESSED', 'COMPLETED'] },
+        payment_verified_at: { gte: start, lt: end },
+      },
       _sum: { total_price: true },
     }),
   ]);

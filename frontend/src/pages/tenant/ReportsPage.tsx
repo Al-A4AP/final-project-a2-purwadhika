@@ -4,11 +4,10 @@ import { tenantReportService, type DashboardAnalytics, type OccupancyProperty } 
 import { tenantService } from '@/services/tenantService';
 import { formatPrice } from '@/lib/formatters';
 import type { TenantProperty } from '@/types';
-import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, PieChart, Pie, Cell } from 'recharts';
+import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer } from 'recharts';
 import { OccupancyCalendar } from '@/components/tenant/OccupancyCalendar';
 import { Pagination } from '@/components/common/Pagination';
-
-const COLORS = ['#0088FE', '#00C49F', '#FFBB28', '#FF8042'];
+import { OrderStatusPieChart } from '@/components/tenant/OrderStatusPieChart';
 
 const ReportsPage: FC = () => {
   const [analytics, setAnalytics] = useState<DashboardAnalytics | null>(null);
@@ -72,19 +71,7 @@ const ReportsPage: FC = () => {
           </div>
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
             <ChartCard title="Status Pesanan">
-              <ResponsiveContainer width="100%" height={256}>
-                <PieChart><Pie data={analytics.ordersByStatus} cx="50%" cy="50%" outerRadius={80} fill="#8884d8" dataKey="count" label>
-                  {analytics.ordersByStatus.map((_, i) => <Cell key={`cell-${i}`} fill={COLORS[i % COLORS.length]} />)}
-                </Pie><Tooltip /></PieChart>
-              </ResponsiveContainer>
-              <div className="flex flex-wrap justify-center gap-4 mt-4 text-sm">
-                {analytics.ordersByStatus.map((entry, i) => (
-                  <div key={entry.name} className="flex items-center gap-2">
-                    <div className="w-3 h-3 rounded-full" style={{ backgroundColor: COLORS[i % COLORS.length] }}></div>
-                    <span className="text-gray-600 dark:text-gray-400">{entry.name} ({entry.count})</span>
-                  </div>
-                ))}
-              </div>
+              <OrderStatusPieChart data={analytics.ordersByStatus} />
             </ChartCard>
             <ChartCard title="Perbandingan Transaksi">
               <ResponsiveContainer width="100%" height={256}>
@@ -147,7 +134,7 @@ const KPICard: FC<{ label: string; value: string }> = ({ label, value }) => (
 const ChartCard: FC<{ title: string; children: React.ReactNode }> = ({ title, children }) => (
   <div className="bg-white dark:bg-slate-800 p-6 rounded-xl shadow-sm border dark:border-slate-700">
     <h2 className="text-lg font-semibold mb-6 text-gray-900 dark:text-white">{title}</h2>
-    <div className="h-64">{children}</div>
+    {children}
   </div>
 );
 

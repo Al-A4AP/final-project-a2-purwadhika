@@ -8,6 +8,13 @@ export const formatPrice = (price: number): string => {
   }).format(price);
 };
 
+export const formatCurrency = (price: number): string =>
+  new Intl.NumberFormat("id-ID", {
+    style: "currency",
+    currency: "IDR",
+    minimumFractionDigits: 0,
+  }).format(price);
+
 // Format date to "DD-MM-YYYY" (e.g., 18-05-2026)
 // Input: string format YYYY-MM-DD (UTC) atau Date object
 export const formatDate = (date: Date | string): string => {

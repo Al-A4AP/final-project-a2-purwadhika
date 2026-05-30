@@ -60,9 +60,6 @@ const TenantOrdersPage = Loadable(
 const TenantReviewsPage = Loadable(
   lazy(() => import("@/pages/tenant/ReviewsPage")),
 );
-const TenantCategoriesPage = Loadable(
-  lazy(() => import("@/pages/tenant/CategoriesPage")),
-);
 const ReportsPage = Loadable(lazy(() => import("@/pages/tenant/ReportsPage")));
 const NotFoundPage = Loadable(lazy(() => import("@/pages/NotFoundPage")));
 
@@ -125,7 +122,7 @@ export const router = createBrowserRouter([
       { path: "properties/:id/rooms", element: <RoomsPage /> },
       { path: "orders", element: <TenantOrdersPage /> },
       { path: "reviews", element: <TenantReviewsPage /> },
-      { path: "categories", element: <TenantCategoriesPage /> },
+      { path: "profile", element: <ProfilePage /> },
       { path: "reports", element: <ReportsPage /> },
     ],
   },
