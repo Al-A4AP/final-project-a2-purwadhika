@@ -261,7 +261,7 @@ Harap perhatikan poin poin dibawah ini, dan wajib untuk di implementasi. Akan ad
 * Title dan favicon disesuaikan dengan project yang dikerjakan
 
 ### Backend
-* Penggunaan method rest api yang sesuai dengan kaidah nya merujuk ke sini
+* Penggunaan method rest api yang sesuai dengan kaidah nya merujuk ke sini https://restfulapi.net/resource-naming/
 * Terapkan authorization pada api yang hanya bisa diakses oleh user tertentu
 
 ### Clean Code
