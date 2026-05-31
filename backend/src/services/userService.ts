@@ -24,12 +24,18 @@ export const updateAvatar = async (userId: string, file: Express.Multer.File) =>
   return safe;
 };
 
-export const changePassword = async (userId: string, data: any) => {
+export const changePassword = async (
+  userId: string,
+  data: { old_password?: string; new_password?: string },
+) => {
   const { old_password, new_password } = data;
   if (!old_password || !new_password) throw new AppError('Password lama dan baru wajib diisi', 400);
 
   const user = await prisma.user.findUnique({ where: { id: userId, deleted_at: null } });
   if (!user) throw new AppError('User tidak ditemukan', 404);
+  if (user.auth_provider !== 'EMAIL' || !user.password_set_at) {
+    throw new AppError('Password hanya dapat diubah untuk akun email dan password', 400);
+  }
 
   const isMatch = await bcrypt.compare(old_password, user.password_hash);
   if (!isMatch) throw new AppError('Password lama salah', 400);
@@ -37,7 +43,7 @@ export const changePassword = async (userId: string, data: any) => {
   const newHash = await bcrypt.hash(new_password, 10);
   await prisma.user.update({
     where: { id: userId },
-    data: { password_hash: newHash }
+    data: { password_hash: newHash, password_set_at: new Date() }
   });
 
   return { success: true };

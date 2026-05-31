@@ -26,9 +26,16 @@ const ContactPage = Loadable(lazy(() => import("@/pages/ContactPage")));
 
 // Auth pages
 const LoginPage = Loadable(lazy(() => import("@/pages/auth/LoginPage")));
+const UserLoginPage = Loadable(lazy(() => import("@/pages/auth/UserLoginPage")));
+const TenantLoginPage = Loadable(lazy(() => import("@/pages/auth/TenantLoginPage")));
 const RegisterPage = Loadable(lazy(() => import("@/pages/auth/RegisterPage")));
+const UserRegisterPage = Loadable(lazy(() => import("@/pages/auth/UserRegisterPage")));
+const TenantRegisterPage = Loadable(lazy(() => import("@/pages/auth/TenantRegisterPage")));
 const VerifyEmailPage = Loadable(
   lazy(() => import("@/pages/auth/VerifyEmailPage")),
+);
+const VerifyEmailChangePage = Loadable(
+  lazy(() => import("@/pages/auth/VerifyEmailChangePage")),
 );
 const ForgotPasswordPage = Loadable(
   lazy(() => import("@/pages/auth/ForgotPasswordPage")),
@@ -54,6 +61,7 @@ const PropertyFormPage = Loadable(
   lazy(() => import("@/pages/tenant/PropertyFormPage")),
 );
 const RoomsPage = Loadable(lazy(() => import("@/pages/tenant/RoomsPage")));
+const CategoriesPage = Loadable(lazy(() => import("@/pages/tenant/CategoriesPage")));
 const TenantOrdersPage = Loadable(
   lazy(() => import("@/pages/tenant/OrdersPage")),
 );
@@ -99,12 +107,13 @@ export const router = createBrowserRouter([
     element: <AuthLayout />,
     children: [
       { path: "login", element: <LoginPage /> },
-      { path: "login/user", element: <LoginPage /> },
-      { path: "login/tenant", element: <LoginPage /> },
+      { path: "login/user", element: <UserLoginPage /> },
+      { path: "login/tenant", element: <TenantLoginPage /> },
       { path: "register", element: <RegisterPage /> },
-      { path: "register/user", element: <RegisterPage /> },
-      { path: "register/tenant", element: <RegisterPage /> },
+      { path: "register/user", element: <UserRegisterPage /> },
+      { path: "register/tenant", element: <TenantRegisterPage /> },
       { path: "verify-email/:token", element: <VerifyEmailPage /> },
+      { path: "verify-email-change/:token", element: <VerifyEmailChangePage /> },
       { path: "forgot-password", element: <ForgotPasswordPage /> },
       { path: "reset-password", element: <ResetPasswordPage /> },
     ],
@@ -120,6 +129,7 @@ export const router = createBrowserRouter([
       { path: "properties/new", element: <PropertyFormPage /> },
       { path: "properties/:id/edit", element: <PropertyFormPage /> },
       { path: "properties/:id/rooms", element: <RoomsPage /> },
+      { path: "categories", element: <CategoriesPage /> },
       { path: "orders", element: <TenantOrdersPage /> },
       { path: "reviews", element: <TenantReviewsPage /> },
       { path: "profile", element: <ProfilePage /> },

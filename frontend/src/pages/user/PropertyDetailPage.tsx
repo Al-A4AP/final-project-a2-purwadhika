@@ -7,9 +7,8 @@ import { reviewService } from '@/services/reviewService';
 import { availabilityService } from '@/services/availabilityService';
 import type { PropertyDetail, Room, Review } from '@/types';
 import { useAuthStore } from '@/stores/authStore';
-import { ArrowLeft, AlertTriangle, BedDouble, Calendar as CalendarIcon } from 'lucide-react';
+import { ArrowLeft, AlertTriangle } from 'lucide-react';
 import { toast } from 'react-hot-toast';
-import { formatPrice } from '@/lib/formatters';
 
 import { PropertyGallery } from '@/components/property/PropertyGallery';
 import { PropertyInfo } from '@/components/property/PropertyInfo';
@@ -17,13 +16,34 @@ import { PropertyReviews } from '@/components/property/PropertyReviews';
 import { PricingCalendarSection } from '@/components/property/PricingCalendarSection';
 import { AvailabilityModal } from '@/components/property/AvailabilityModal';
 import { RoomCard } from '@/components/property/RoomCard';
-import { AmenitiesList } from '@/components/property/AmenitiesList';
+import { BookingAccessNotice } from '@/components/property/BookingAccessNotice';
+import { WholeUnitCard } from '@/components/property/WholeUnitCard';
+
+const formatDateToUTC = (localDateStr: string) => {
+  const parts = localDateStr.split('-');
+  if (parts.length !== 3) return '';
+  const date = new Date(Number(parts[0]), Number(parts[1]) - 1, Number(parts[2]));
+  return new Date(date.getTime() - date.getTimezoneOffset() * 60000).toISOString().split('T')[0];
+};
+
+const validateBookingDates = (checkIn: string, checkOut: string) => {
+  if (!checkIn || !checkOut) return { message: 'Silakan pilih tanggal check-in dan check-out terlebih dahulu.', focusDate: true };
+  const ciUTC = formatDateToUTC(checkIn);
+  const coUTC = formatDateToUTC(checkOut);
+  if (ciUTC < new Date().toISOString().split('T')[0]) return { message: 'Tanggal check-in tidak boleh di masa lalu.' };
+  if (coUTC <= ciUTC) return { message: 'Tanggal check-out harus setelah check-in.' };
+  return { ciUTC, coUTC };
+};
+
+const focusDatePicker = () => {
+  document.getElementById('date-picker-section')?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+};
 
 const PropertyDetailPage: FC = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const filters = useFilterStore();
-  const { isTenant } = useAuthStore();
+  const { isAuthenticated, isTenant, user } = useAuthStore();
   const [property, setProperty] = useState<PropertyDetail | null>(null);
   const [reviews, setReviews] = useState<Review[]>([]);
   const [loading, setLoading] = useState(true);
@@ -33,15 +53,9 @@ const PropertyDetailPage: FC = () => {
   const [isAvailModalOpen, setIsAvailModalOpen] = useState(false);
   const [selectedRoomName, setSelectedRoomName] = useState('');
   const [blockedDays, setBlockedDays] = useState<Date[]>([]);
-
-  const formatDateToUTC = (localDateStr: string): string => {
-    const parts = localDateStr.split('-');
-    if (parts.length !== 3) return '';
-    const date = new Date(parseInt(parts[0]), parseInt(parts[1]) - 1, parseInt(parts[2]));
-    const offsetMs = date.getTimezoneOffset() * 60000;
-    return new Date(date.getTime() - offsetMs).toISOString().split('T')[0];
-  };
-
+  const bookingBlockedReason = !isAuthenticated
+    ? 'Login dan verifikasi email diperlukan sebelum membuat pesanan.'
+    : !user?.verified_at ? 'Silakan verifikasi email Anda sebelum membuat pesanan.' : undefined;
 
   useEffect(() => {
     if (!id) { navigate('/'); return; }
@@ -58,19 +72,16 @@ const PropertyDetailPage: FC = () => {
 
   const handleBooking = (room: Room) => {
     setDateError('');
-    if (!checkIn || !checkOut) {
-      setDateError('Silakan pilih tanggal check-in dan check-out terlebih dahulu.');
-      document.getElementById('date-picker-section')?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    const result = validateBookingDates(checkIn, checkOut);
+    if (result.message) {
+      setDateError(result.message);
+      if (result.focusDate) focusDatePicker();
       return;
     }
-    const ciUTC = formatDateToUTC(checkIn);
-    const todayStr = new Date().toISOString().split('T')[0];
-    if (ciUTC < todayStr) { setDateError('Tanggal check-in tidak boleh di masa lalu.'); return; }
-    const coUTC = formatDateToUTC(checkOut);
-    if (coUTC <= ciUTC) { setDateError('Tanggal check-out harus setelah check-in.'); return; }
+    if (!result.ciUTC || !result.coUTC) return focusDatePicker();
     filters.setCheckInDate(checkIn);
     filters.setCheckOutDate(checkOut);
-    navigate(`/booking?propertyId=${id}&roomId=${room.id}&checkIn=${ciUTC}&checkOut=${coUTC}`);
+    navigate(`/booking?propertyId=${id}&roomId=${room.id}&checkIn=${result.ciUTC}&checkOut=${result.coUTC}`);
   };
 
   const handleCheckAvail = async (room: Room) => {
@@ -119,13 +130,17 @@ const PropertyDetailPage: FC = () => {
             <p>Maaf, properti ini tidak memiliki kamar yang tersedia pada tanggal yang Anda pilih. Silakan ubah rentang tanggal check-in dan check-out Anda.</p>
           </div>
         ) : isWholeUnit && firstRoom ? (
-          <WholeUnitCard room={firstRoom} amenities={property.amenities} isTenant={isTenant} onBooking={handleBooking} onCheckAvail={handleCheckAvail} categoryName={property.category?.name || ''} />
+          <>
+            <BookingAccessNotice message={!isTenant ? bookingBlockedReason : undefined} />
+            <WholeUnitCard room={firstRoom} amenities={property.amenities} isTenant={isTenant} bookingBlockedReason={bookingBlockedReason} onBooking={handleBooking} onCheckAvail={handleCheckAvail} categoryName={property.category?.name || ''} />
+          </>
         ) : (
           <>
+            <BookingAccessNotice message={!isTenant ? bookingBlockedReason : undefined} />
             <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-6">Pilihan Kamar</h2>
             <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
               {property.rooms?.map((room) => (
-                <RoomCard key={room.id} room={room} amenities={property.amenities} isTenant={isTenant} onBooking={handleBooking} onCheckAvail={handleCheckAvail} />
+                <RoomCard key={room.id} room={room} amenities={property.amenities} isTenant={isTenant} bookingBlockedReason={bookingBlockedReason} onBooking={handleBooking} onCheckAvail={handleCheckAvail} />
               ))}
             </div>
           </>
@@ -135,45 +150,6 @@ const PropertyDetailPage: FC = () => {
       </div>
 
       <AvailabilityModal isOpen={isAvailModalOpen} roomName={selectedRoomName} blockedDays={blockedDays} onClose={() => setIsAvailModalOpen(false)} />
-    </div>
-  );
-};
-
-/* Whole-unit card for Villa / Rumah */
-const WholeUnitCard: FC<{ room: Room; amenities?: string[]; isTenant: boolean; categoryName: string; onBooking: (r: Room) => void; onCheckAvail: (r: Room) => void }> = ({ room, amenities, isTenant, categoryName, onBooking, onCheckAvail }) => {
-  const price = room.priceDetails ? room.priceDetails.totalPrice : room.base_price;
-  return (
-    <div className="bg-white dark:bg-slate-800 rounded-xl p-8 shadow-sm border dark:border-slate-700">
-      <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-2">{categoryName === 'Villa' ? 'Sewa Seluruh Villa' : 'Sewa Seluruh Rumah'}</h2>
-      <p className="text-gray-500 dark:text-gray-400 text-sm mb-6">Anda akan menyewa seluruh {categoryName?.toLowerCase()} ini secara eksklusif.</p>
-      <div className="flex flex-wrap gap-6 items-center justify-between">
-        <div className="space-y-1">
-          <span className="flex items-center gap-1 text-sm text-gray-600 dark:text-gray-400"><BedDouble size={16} /> Kapasitas: {room.capacity} orang</span>
-          {room.description && <p className="text-sm text-gray-500">{room.description}</p>}
-        </div>
-        <AmenitiesList amenities={amenities} compact />
-        <div className="text-right">
-          {price === 0 ? <p className="text-3xl font-bold text-green-600">Gratis</p> : <p className="text-3xl font-bold text-red-600">{formatPrice(price)}</p>}
-          <p className="text-sm text-gray-500">{room.priceDetails ? `total (${room.priceDetails.nights} malam)` : '/ malam (seluruh unit)'}</p>
-        </div>
-      </div>
-      {room.is_available === false && (
-        <div className="mt-4 p-3 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg text-red-600 dark:text-red-400 text-sm flex items-start gap-1.5">
-          <AlertTriangle size={16} className="mt-0.5 shrink-0" />
-          <span>{room.reason || 'Kamar tidak tersedia pada tanggal yang dipilih.'}</span>
-        </div>
-      )}
-      {!isTenant && (
-        <div className="flex gap-3 mt-6 border-t dark:border-slate-700 pt-6">
-          <button onClick={() => onCheckAvail(room)} className="flex items-center gap-2 px-4 py-2.5 border dark:border-slate-600 rounded-lg text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-slate-700 transition text-sm">
-            <CalendarIcon size={16} /> Cek Ketersediaan
-          </button>
-          <button onClick={() => onBooking(room)} disabled={room.is_available === false}
-            className={`flex-1 text-white px-6 py-2.5 rounded-lg font-semibold transition text-sm ${room.is_available === false ? 'bg-gray-400 dark:bg-slate-700 cursor-not-allowed text-gray-200' : 'bg-red-600 hover:bg-red-700'}`}>
-            {room.is_available === false ? 'Tidak Tersedia' : 'Pesan Sekarang'}
-          </button>
-        </div>
-      )}
     </div>
   );
 };

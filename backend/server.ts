@@ -53,9 +53,7 @@ if (process.env.ENABLE_CRON === 'true') {
 
 // Server listen — hanya di local/development, tidak di Vercel Serverless
 if (process.env.NODE_ENV !== 'test') {
-  app.listen(PORT, () => {
-    console.log(`Server berjalan di http://localhost:${PORT}`);
-  });
+  app.listen(PORT);
 }
 
 export default app;

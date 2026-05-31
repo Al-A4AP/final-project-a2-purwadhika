@@ -20,7 +20,7 @@ import {
 } from '../controllers/tenantRoomController';
 import { getDashboardAnalyticsCtrl, getOccupancyCalendarCtrl } from '../controllers/tenantReportController';
 import { getTenantReviewsCtrl } from '../controllers/tenantReviewController';
-import { createCategoryCtrl, updateCategoryCtrl, deleteCategoryCtrl } from '../controllers/categoryController';
+import { createCategoryCtrl, deleteCategoryCtrl, getCategoriesCtrl, updateCategoryCtrl } from '../controllers/categoryController';
 
 const router = Router();
 const isTenant = [requireAuth, requireRole(['TENANT'])];
@@ -62,6 +62,7 @@ router.get('/reports/occupancy', ...isTenant, getOccupancyCalendarCtrl);
 router.get('/reviews', ...isTenant, getTenantReviewsCtrl);
 
 // Categories (CRUD for tenant)
+router.get('/categories', ...isTenant, getCategoriesCtrl);
 router.post('/categories', ...isTenant, createCategoryCtrl);
 router.patch('/categories/:id', ...isTenant, updateCategoryCtrl);
 router.delete('/categories/:id', ...isTenant, deleteCategoryCtrl);

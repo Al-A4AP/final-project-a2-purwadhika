@@ -1,189 +1,232 @@
-# README — Backend PURWALOKA
+# README - Backend PURWALOKA
 
-**Final Project Purwadhika — jcwdbgpm-11 (Offline Bandung)**
+Backend PURWALOKA adalah REST API berbasis Node.js, Express.js, TypeScript, dan
+Prisma ORM untuk aplikasi Property Renting Web App. Backend menangani auth,
+property, room, booking, payment, review, report tenant, image upload, dan
+scheduled tasks.
 
-```
-Group 1:
-- Anggita Zahra Kamila  (Anggi)
-- Muhammad Ali Akbar    (Ali)
-```
+Final Project Purwadhika JCWDBGPM-11, Group 1:
 
-## Backend — Property Renting Web App
+- Muhammad Ali Akbar - Fitur 1
+- Anggita Zahra Kamila - Fitur 2
 
----
+## Tech Stack
 
-### Tech Stack (Instalasi)
+- Node.js
+- Express.js 5
+- TypeScript 6
+- Prisma ORM 7
+- PostgreSQL/Supabase
+- Cloudinary
+- Midtrans
+- Nodemailer
+- node-cron
+- Zod
+- JWT
+- bcryptjs
+- cookie-parser
+- multer
+- express-rate-limit
 
-```bash
-npm init -y
-npm install express cors dotenv cookie-parser
-npm install @prisma/client
-npm install -D prisma typescript ts-node @types/express @types/node
-npm install jsonwebtoken bcryptjs nodemailer
-npm install -D @types/jsonwebtoken @types/bcryptjs @types/nodemailer
-npm install zod
-npm install multer
-npm install cloudinary
-npm install midtrans-client
-npm install node-cron
-npm install -D nodemon
-```
+## Struktur Folder
 
----
-
-### Backend Dependencies
-
-| Package | Fungsi |
-|---------|--------|
-| Express.js v5 | Web framework untuk API routing |
-| Prisma ORM v7.8.0 | Database ORM dan migration tool |
-| TypeScript v6 | Type safety dan development |
-| JWT | Authentication dan authorization |
-| Bcryptjs | Password hashing (salt rounds 10) |
-| Cookie-parser | Parsing HttpOnly cookie dari request |
-| Nodemailer | Email notifications (verification, reminders) |
-| Multer | File upload handling |
-| Cloudinary | Image storage dan management |
-| Midtrans Client | Payment gateway integration |
-| Node Cron | Scheduled background jobs |
-| Zod | Request validation schemas |
-| CORS | Cross-origin requests |
-| Dotenv | Environment variables management |
-
----
-
-### Project Structure
-
-```
-backend/src/
-├── config/            # Configuration files (database, Cloudinary, Midtrans)
-├── controllers/       # Request handlers
-├── middlewares/       # Authentication, error handling, validation
-├── routes/            # API route definitions
-├── services/          # Business logic layer (13 services)
-│   ├── authService.ts            # Auth, JWT, email verify, Google OAuth
-│   ├── availabilityService.ts    # Room availability checking
-│   ├── midtransService.ts        # Payment gateway integration
-│   ├── orderService.ts           # Order management & Midtrans
-│   ├── pricingService.ts         # Pricing + getValidatedStayDetails (Facade)
-│   ├── propertyService.ts        # Property listing dengan filter
-│   ├── reviewService.ts          # Review & rating (integer validation)
-│   ├── tenantPropertyService.ts  # Tenant property CRUD + transactional image delete
-│   ├── tenantReportService.ts    # Sales reports dan analytics
-│   ├── tenantReviewService.ts    # Tenant review operations
-│   ├── tenantRoomService.ts      # Room management + IDOR protection
-│   ├── tokenBlacklistService.ts  # JWT token revocation (server-side logout)
-│   └── userService.ts            # User profile management
-├── types/             # TypeScript type definitions
-├── utils/             # Helper functions (email, upload, response formatting)
-└── validations/       # Zod validation schemas
+```text
+backend/
+  prisma/
+    migrations/
+    scripts/
+      backfillAmenities.ts
+    seed/
+      amenities.ts
+      cleanup.ts
+      data.ts
+      images.ts
+      log.ts
+      orders.ts
+      properties.ts
+      rooms.ts
+      summary.ts
+      users.ts
+    schema.prisma
+    seed.ts
+  src/
+    config/
+      cloudinary.ts
+      midtrans.ts
+      prisma.ts
+    constants/
+      orderConstants.ts
+    controllers/
+    middlewares/
+    routes/
+    services/
+    types/
+    utils/
+    validations/
+    cron.ts
+  server.ts
+  package.json
+  README-BACKEND.md
 ```
 
----
+## Domain API
 
-### Key Features & Security
+| Domain | Route utama | File terkait |
+| --- | --- | --- |
+| Auth | `/api/auth` | `src/routes/authRoutes.ts`, `src/controllers/authController.ts`, `src/services/authService.ts` |
+| Properties public | `/api/properties` | `src/routes/propertyRoutes.ts`, `src/controllers/propertyController.ts`, `src/services/propertyService.ts` |
+| Orders user | `/api/orders` | `src/routes/orderRoutes.ts`, `src/controllers/orderController.ts`, `src/services/orderService.ts`, `src/services/userOrderService.ts` |
+| User profile | `/api/users` | `src/routes/userRoutes.ts`, `src/controllers/userController.ts`, `src/services/userService.ts` |
+| Reviews | `/api/orders/:orderId/reviews`, tenant review routes | `src/controllers/reviewController.ts`, `src/services/reviewService.ts`, `src/services/tenantReviewService.ts` |
+| Tenant | `/api/tenant` | `src/routes/tenantRoutes.ts`, tenant controllers, tenant services |
 
-1. Multi-role Authentication (USER/TENANT) via HttpOnly Cookie
-2. Server-side token revocation pada logout (Token Blacklist)
-3. Email Verification dengan JWT token
-4. Google OAuth integration
-5. Property Management CRUD dengan kategori
-6. Dynamic Pricing dengan peak season rates (PERCENTAGE/NOMINAL)
-   - Validasi tumpang tindih tanggal Peak Season
-   - Facade pattern: `getValidatedStayDetails` (cek ketersediaan + harga atomik)
-7. Room Availability Management dengan proteksi IDOR (`verifyRoomOwner`)
-8. Order/Booking System dengan 2-hour payment window
-9. Payment Processing (Manual transfer + Midtrans)
-10. Transactional Image Delete (DB-first, Cloudinary-after)
-11. Reviews dengan validasi integer rating 1–5
-12. Analytics dan Reports Dashboard
-13. Automated Email Notifications
-14. Cron Jobs untuk scheduled tasks (order expiry, reminders)
+## Fitur 1 di Backend
 
----
+| Requirement | Status | Folder/file |
+| --- | --- | --- |
+| Auth USER/TENANT | Selesai | `src/services/authService.ts`, `src/controllers/authController.ts`, `src/middlewares/authMiddleware.ts` |
+| Email verification, email change, dan reset password | Selesai | `src/services/authService.ts`, `src/services/userEmailService.ts`, `src/utils/emailService.ts`, `src/utils/emailTemplate.ts` |
+| Google OAuth | Selesai | `src/services/googleAuthService.ts`, `src/services/authGoogleService.ts` |
+| Public property list dan detail | Selesai | `src/services/propertyService.ts`, `src/services/propertyQueryService.ts` |
+| Server-side filter harga, kota, kategori, fasilitas | Selesai | `src/services/propertyQueryService.ts` |
+| Sort dan pagination property | Selesai | `src/services/propertyService.ts`, `src/services/propertyPriceSortService.ts`; sort requirement `name` dan `price` sudah tersedia dengan pagination server-side. |
+| Public calendar availability | Selesai | `src/services/publicAvailabilityService.ts`; maksimal 90 hari per request. |
+| Tenant property CRUD | Selesai | `src/services/tenantPropertyService.ts`, `src/controllers/tenantPropertyController.ts` |
+| Tenant room CRUD dan room images | Selesai | `src/services/tenantRoomService.ts`, `src/controllers/tenantRoomController.ts` |
+| Peak rates dan room availability | Selesai | `src/services/tenantRoomService.ts`, `src/services/availabilityService.ts` |
+| Tenant category CRUD | Selesai | `src/controllers/categoryController.ts`, `src/services/categoryService.ts`, `src/routes/tenantRoutes.ts` |
 
-### Database Setup
+## Fitur 2 di Backend
 
-```bash
-# 1. Buat file .env dengan DATABASE_URL (lihat .env.example)
-# 2. Jalankan migrasi
-npx prisma migrate dev
+| Requirement | Status | Folder/file |
+| --- | --- | --- |
+| Booking dan validasi ketersediaan | Selesai | `src/services/orderService.ts`, `src/services/pricingService.ts`, `src/services/availabilityService.ts` |
+| Payment manual dan Midtrans | Selesai | `src/services/orderService.ts`, `src/services/midtransService.ts`, `src/config/midtrans.ts` |
+| Payment proof deadline 1 jam | Selesai | `src/constants/orderConstants.ts` |
+| Tenant update status order | Selesai | `src/services/orderService.ts`, `src/controllers/orderController.ts` |
+| Auto-cancel unpaid reservations | Selesai | `src/cron.ts`, `src/services/orderService.ts` |
+| Auto-complete PROCESSED setelah checkout | Selesai | `src/cron.ts` |
+| Reminder checkout H-1 | Selesai | `src/cron.ts`, `src/utils/emailService.ts` |
+| Review setelah checkout | Selesai | `src/services/reviewService.ts` |
+| Tenant reply review | Selesai | `src/services/tenantReviewService.ts` |
+| Report dan analytics tenant | Selesai | `src/services/tenantReportService.ts`, `src/controllers/tenantReportController.ts` |
 
-# 3. Opsional: isi dummy data
-npx prisma db seed
+## Environment
 
-# 4. Akses Prisma Studio
-npx prisma studio
-```
-
-**Jika ada schema drift (development only):**
-```bash
-npx prisma migrate reset --force
-```
-
-**Pull schema dari database yang sudah ada:**
-```bash
-npx prisma db pull
-npx prisma generate
-```
-
----
-
-### Running the Server
-
-```bash
-npm run dev     # Development mode dengan nodemon
-npm run build   # Build TypeScript ke dist/
-npm start       # Production mode (jalankan dist/server.js)
-```
-
----
-
-### Environment Variables
-
-Buat file `.env` di folder `backend/`:
+Buat file `.env` di folder `backend/` dengan acuan `backend/.env.example`.
 
 ```env
-DATABASE_URL=postgresql://user:password@host:5432/dbname
-JWT_SECRET=your_jwt_secret_key
+DATABASE_URL=
+DIRECT_URL=
+
+JWT_SECRET=
 JWT_EXPIRES_IN=7d
+
+EMAIL_USER=
+EMAIL_PASSWORD=
+EMAIL_HOST=smtp.gmail.com
+EMAIL_PORT=587
+
+CLOUDINARY_NAME=
+CLOUDINARY_API_KEY=
+CLOUDINARY_API_SECRET=
+
+MIDTRANS_SERVER_KEY=
+MIDTRANS_CLIENT_KEY=
+MIDTRANS_IS_PRODUCTION=false
+
+PORT=5000
 NODE_ENV=development
-
-# Email (SMTP)
-SMTP_HOST=smtp.gmail.com
-SMTP_PORT=587
-SMTP_USER=your@email.com
-SMTP_PASS=your_app_password
-
-# Cloudinary
-CLOUDINARY_CLOUD_NAME=your_cloud_name
-CLOUDINARY_API_KEY=your_api_key
-CLOUDINARY_API_SECRET=your_api_secret
-
-# Midtrans
-MIDTRANS_SERVER_KEY=your_server_key
-MIDTRANS_CLIENT_KEY=your_client_key
-
-# App
+ENABLE_CRON=true
+ALLOWED_ORIGINS=
 FRONTEND_URL=http://localhost:5173
 ```
 
-Lihat `.env.example` untuk referensi lengkap.
+## Database
 
----
+Generate Prisma client:
 
-### API Endpoints Overview
+```bash
+npx prisma generate
+```
 
-| Domain | Method | Endpoint |
-|--------|--------|----------|
-| Auth | POST | `/api/auth/login` `/api/auth/register` `/api/auth/logout` |
-| Auth | GET | `/api/auth/me` |
-| Property | GET | `/api/properties` `/api/properties/:id` |
-| Order | POST | `/api/orders` |
-| Review | POST | `/api/reviews/:orderId` |
-| Tenant | GET/POST/PUT/DELETE | `/api/tenant/properties` `/api/tenant/rooms` |
-| Tenant | GET/POST | `/api/tenant/peak-rates` `/api/tenant/availability` |
+Jalankan migration development:
 
----
+```bash
+npx prisma migrate dev
+```
 
-*Last Updated: May 30, 2026*
+Jalankan seed dummy data:
+
+```bash
+npx prisma db seed
+```
+
+Jalankan Prisma Studio:
+
+```bash
+npx prisma studio
+```
+
+Script fasilitas untuk data existing:
+
+```bash
+npm run backfill:amenities
+```
+
+Mode dry-run adalah default. Untuk menulis perubahan ke database:
+
+```bash
+set APPLY_AMENITIES=true
+npm run backfill:amenities
+```
+
+Gunakan script backfill hanya setelah memastikan `DATABASE_URL` mengarah ke
+database yang benar.
+
+## Menjalankan Backend
+
+```bash
+npm install
+npm run dev
+```
+
+Perintah lain:
+
+```bash
+npm run build
+npm start
+npm run seed
+npm run backfill:amenities
+```
+
+Default local backend:
+
+- API base: `http://localhost:5000/api`
+- Health check: `http://localhost:5000/api/health`
+
+## Deployment
+
+Backend harus dideploy sebagai persistent Node.js server, bukan serverless.
+Alasannya:
+
+- Express API perlu berjalan terus.
+- Cron job di `src/cron.ts` memproses auto-cancel unpaid reservations.
+- Cron job juga memproses reminder dan auto-complete order.
+- Booking management dan auth membutuhkan proses server yang stabil.
+- Upload Cloudinary dan Midtrans notification membutuhkan endpoint backend aktif.
+
+Platform yang cocok: Render, Railway, VPS, atau platform lain yang menjalankan
+long-running Node process. Set `ENABLE_CRON=true` hanya di environment yang
+memang menjalankan persistent process.
+
+## Catatan Audit Backend
+
+- `node_modules/.bin/tsc --noEmit` lulus tanpa error pada audit 31 Mei 2026.
+- Tidak ada file di `src` atau `prisma` yang melebihi 200 baris.
+- Masih ada fungsi/service panjang yang perlu refactor untuk memenuhi aturan
+  maksimal 15 baris.
+- Scan source tidak menemukan `console.log/debug/info/warn/error` aktif.
+- `npm test` masih placeholder, sehingga automated test belum tersedia.
+- File `.env` lokal tidak ikut Git jika `.gitignore` tetap dipatuhi; jangan
+  commit credential Supabase, Cloudinary, Midtrans, atau email.

@@ -59,6 +59,15 @@ const HomePage: FC = () => {
       ],
     },
     {
+      key: "name",
+      label: "Nama",
+      icon: "alpha",
+      options: [
+        { order: "asc", label: "A-Z" },
+        { order: "desc", label: "Z-A" },
+      ],
+    },
+    {
       key: "created_at",
       label: "Tanggal",
       icon: "clock",

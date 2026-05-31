@@ -11,24 +11,33 @@ import { toast } from 'react-hot-toast';
 import { useGoogleLogin } from '@react-oauth/google';
 import { useAuthStore } from '@/stores/authStore';
 import { useNavigate } from 'react-router-dom';
+import type { Role, User } from '@/types';
+import { getAuthRoleFromPath, getRoleHome, getRoleLoginPath, getRoleName, type TargetAuthRole } from '@/lib/authRole';
+import { GoogleAuthButton } from '@/components/auth/GoogleAuthButton';
 
-const RegisterPage: FC = () => {
+interface RegisterPageProps {
+  targetRole?: TargetAuthRole;
+}
+
+const selectSetUser = (state: { setUser: (user: User | null) => void }) => state.setUser;
+
+const RegisterPage: FC<RegisterPageProps> = ({ targetRole }) => {
   const [registeredEmail, setRegisteredEmail] = useState<string | null>(null);
-  const isTenantRegister = window.location.pathname.includes('/tenant');
-  const isUserRegister = window.location.pathname.includes('/user');
-  const defaultRole = isTenantRegister ? 'TENANT' : 'USER';
+  const role = targetRole || getAuthRoleFromPath(window.location.pathname);
+  const defaultRole: Role = role || 'USER';
   const navigate = useNavigate();
-  const setUser = useAuthStore((s) => s.setUser);
+  const setUser = useAuthStore(selectSetUser);
 
   const handleGoogleLogin = useGoogleLogin({
     onSuccess: async (tokenResponse) => {
       try {
         const result = await authService.googleLogin({
           accessToken: tokenResponse.access_token,
+          role: defaultRole,
         });
         setUser(result.user);
         toast.success('Pendaftaran / Login Google berhasil');
-        navigate('/');
+        navigate(getRoleHome(result.user.role));
       } catch {
         setError('root', { message: 'Gagal memproses pendaftaran Google' });
         toast.error('Gagal menggunakan Google');
@@ -78,9 +87,7 @@ const RegisterPage: FC = () => {
 
   return (
     <>
-      <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-2">
-        Daftar Sebagai {isTenantRegister ? 'Tenant' : 'Penyewa'}
-      </h2>
+      <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-2">Daftar Sebagai {getRoleName(defaultRole)}</h2>
       <p className="text-gray-600 dark:text-gray-400 text-sm mb-6">Bergabung dengan <span className="text-rose-600 font-bold">PURWA</span><span className="text-slate-900 dark:text-white font-bold">LOKA</span></p>
 
       {errors.root && (
@@ -111,7 +118,7 @@ const RegisterPage: FC = () => {
           {errors.email && <p className="text-red-500 text-xs mt-1">{errors.email.message}</p>}
         </div>
 
-        {!isTenantRegister && !isUserRegister && (
+        {!role && (
           <div>
             <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Daftar sebagai</label>
             <select
@@ -139,36 +146,12 @@ const RegisterPage: FC = () => {
           <div className="grow border-t border-gray-300 dark:border-slate-600"></div>
         </div>
 
-        <button
-          type="button"
-          onClick={() => handleGoogleLogin()}
-          className="w-full bg-white dark:bg-slate-800 border border-gray-300 dark:border-slate-600 text-gray-700 dark:text-gray-200 py-2.5 rounded-lg font-semibold hover:bg-gray-50 dark:hover:bg-slate-700 transition flex items-center justify-center gap-2 cursor-pointer"
-        >
-          <svg className="w-5 h-5" viewBox="0 0 24 24">
-            <path
-              fill="#EA4335"
-              d="M12 5.04c1.66 0 3.2.57 4.38 1.69l3.27-3.27C17.67 1.48 14.98 1 12 1 7.28 1 3.28 3.73 1.34 7.73l3.87 3a7.16 7.16 0 0 1 6.79-5.69z"
-            />
-            <path
-              fill="#4285F4"
-              d="M23.49 12.27c0-.81-.07-1.59-.2-2.34H12v4.44h6.44a5.51 5.51 0 0 1-2.39 3.62l3.71 2.87c2.17-2 3.43-4.94 3.43-8.59z"
-            />
-            <path
-              fill="#FBBC05"
-              d="M5.21 14.73A7.13 7.13 0 0 1 4.8 12c0-.96.16-1.9.41-2.73L1.34 6.27A11.96 11.96 0 0 0 0 12c0 2.12.55 4.12 1.5 5.88l3.71-3.15z"
-            />
-            <path
-              fill="#34A853"
-              d="M12 23c3.24 0 5.97-1.07 7.96-2.91l-3.71-2.87c-1.03.69-2.35 1.1-4.25 1.1-3.69 0-6.8-2.49-7.91-5.83l-3.87 3A11.97 11.97 0 0 0 12 23z"
-            />
-          </svg>
-          Daftar dengan Google
-        </button>
+        <GoogleAuthButton label="Daftar dengan Google" onClick={() => handleGoogleLogin()} />
       </form>
 
       <p className="text-center text-sm text-gray-600 dark:text-gray-400 mt-6">
         Sudah punya akun?{' '}
-        <Link to="/auth/login" className="text-red-600 font-semibold hover:underline">Masuk</Link>
+        <Link to={getRoleLoginPath(defaultRole)} className="text-red-600 font-semibold hover:underline">Masuk</Link>
       </p>
     </>
   );

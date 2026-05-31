@@ -4,7 +4,6 @@ import crypto from 'crypto';
 import prisma from '../config/prisma';
 import { AppError } from '../middlewares/errorHandler';
 import { sendPasswordResetEmail, sendVerificationEmail } from '../utils/emailService';
-import { getGoogleProfile } from './googleAuthService';
 
 const JWT_SECRET = process.env.JWT_SECRET!;
 const JWT_EXPIRES = process.env.JWT_EXPIRES_IN || '7d';
@@ -15,6 +14,18 @@ const generateToken = (payload: object) =>
 
 const hashToken = (token: string) =>
   crypto.createHash('sha256').update(token).digest('hex');
+
+const canUsePasswordReset = (user: { auth_provider: string; password_set_at: Date | null }) =>
+  user.auth_provider === 'EMAIL' && !!user.password_set_at;
+
+const buildPasswordUpdate = async (newPassword?: string) => {
+  if (!newPassword) return { verified_at: new Date() };
+  return {
+    password_hash: await bcryptjs.hash(newPassword, 10),
+    password_set_at: new Date(),
+    verified_at: new Date(),
+  };
+};
 
 export const registerUser = async (data: {
   name: string; email: string; role?: 'USER' | 'TENANT';
@@ -31,6 +42,7 @@ export const registerUser = async (data: {
       name: data.name,
       email: data.email,
       password_hash,
+      auth_provider: 'EMAIL',
       role: data.role || 'USER',
       verified_at: null, // Verifikasi lewat email
     },
@@ -43,6 +55,7 @@ export const registerUser = async (data: {
     data: {
       userId: user.id,
       token: hashedToken,
+      purpose: 'ACCOUNT_ACTIVATION',
       expires_at: new Date(Date.now() + ONE_HOUR),
     },
   });
@@ -70,14 +83,16 @@ export const loginUser = async (email: string, password: string) => {
 export const verifyEmail = async (rawToken: string, newPassword?: string) => {
   const hashedToken = hashToken(rawToken);
   const record = await prisma.emailVerification.findFirst({
-    where: { token: hashedToken, used_at: null, expires_at: { gt: new Date() } },
+    where: {
+      token: hashedToken,
+      purpose: 'ACCOUNT_ACTIVATION',
+      used_at: null,
+      expires_at: { gt: new Date() },
+    },
   });
   if (!record) throw new AppError('Token tidak valid atau kadaluarsa', 400);
 
-  const updateData: any = { verified_at: new Date() };
-  if (newPassword) {
-    updateData.password_hash = await bcryptjs.hash(newPassword, 10);
-  }
+  const updateData = await buildPasswordUpdate(newPassword);
 
   await Promise.all([
     prisma.user.update({ where: { id: record.userId }, data: updateData }),
@@ -97,6 +112,7 @@ export const resendVerification = async (email: string) => {
     data: {
       userId: user.id,
       token: hashedToken,
+      purpose: 'ACCOUNT_ACTIVATION',
       expires_at: new Date(Date.now() + ONE_HOUR),
     },
   });
@@ -104,42 +120,10 @@ export const resendVerification = async (email: string) => {
   await sendVerificationEmail(email, rawToken);
 };
 
-export const googleLogin = async (data: { accessToken: string }) => {
-  const profile = await getGoogleProfile(data.accessToken);
-  let user = await prisma.user.findFirst({
-    where: { email: profile.email!, deleted_at: null },
-  });
-
-  if (!user) {
-    const dummyPassword = crypto.randomBytes(16).toString('hex');
-    const password_hash = await bcryptjs.hash(dummyPassword, 10);
-    user = await prisma.user.create({
-      data: {
-        email: profile.email!,
-        name: profile.name || profile.email!,
-        password_hash,
-        role: 'USER',
-        verified_at: new Date(),
-        avatar_url: profile.picture,
-      },
-    });
-  } else {
-    if (!user.verified_at) {
-      await prisma.user.update({
-        where: { id: user.id },
-        data: { verified_at: new Date() },
-      });
-      user.verified_at = new Date();
-    }
-  }
-
-  const token = generateToken({ id: user.id, email: user.email, role: user.role });
-  return { user: sanitizeUser(user), token };
-};
-
 export const forgotPassword = async (email: string) => {
   const user = await prisma.user.findUnique({ where: { email, deleted_at: null } });
   if (!user) return; // Silent fail untuk keamanan
+  if (!canUsePasswordReset(user)) return;
 
   const rawToken = crypto.randomBytes(32).toString('hex');
   const hashedToken = hashToken(rawToken);
@@ -159,12 +143,14 @@ export const resetPassword = async (rawToken: string, newPassword: string) => {
   const hashedToken = hashToken(rawToken);
   const record = await prisma.passwordReset.findFirst({
     where: { token: hashedToken, used_at: null, expires_at: { gt: new Date() } },
+    include: { user: true },
   });
   if (!record) throw new AppError('Token tidak valid atau kadaluarsa', 400);
+  if (!canUsePasswordReset(record.user)) throw new AppError('Reset password hanya untuk akun email dan password', 400);
 
   const password_hash = await bcryptjs.hash(newPassword, 10);
   await Promise.all([
-    prisma.user.update({ where: { id: record.userId }, data: { password_hash } }),
+    prisma.user.update({ where: { id: record.userId }, data: { password_hash, password_set_at: new Date() } }),
     prisma.passwordReset.update({ where: { id: record.id }, data: { used_at: new Date() } }),
   ]);
 };

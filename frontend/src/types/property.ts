@@ -3,7 +3,7 @@ import type { Room, RoomWithPeakRates } from './room';
 export interface PropertyCategory {
   id: string;
   name: string;
-  icon?: string;
+  updated_at?: string;
 }
 
 export interface Property {
@@ -42,6 +42,9 @@ export interface PropertySearchFilters {
   check_in_date?: string;
   check_out_date?: string;
   capacity?: number;
+  adults?: number;
+  children?: number;
+  babies?: number;
   min_price?: number;
   max_price?: number;
   amenities?: string[];

@@ -35,8 +35,3 @@ export const peakRateSchema = z.object({
   message: "Tanggal selesai harus setelah tanggal mulai",
   path: ["end_date"]
 });
-
-export const updateProfileSchema = z.object({
-  name: z.string().min(3, 'Nama minimal 3 karakter').optional(),
-  phone: z.string().optional(),
-});

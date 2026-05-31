@@ -1,8 +1,17 @@
 import { api } from './api';
 import type {
   ApiResponse, DashboardStats, TenantProperty, TenantPropertyDetail,
-  RoomWithPeakRates, PeakSeasonRate, RoomFormInput, PaginationMeta,
+  RoomWithPeakRates, PeakSeasonRate, RoomFormInput, PaginationMeta, PropertyCategory,
 } from '@/types';
+
+const buildUrl = (path: string, params?: Record<string, unknown>) => {
+  const query = new URLSearchParams();
+  Object.entries(params || {}).forEach(([key, value]) => {
+    if (value !== undefined && value !== null && value !== '') query.append(key, String(value));
+  });
+  const queryString = query.toString();
+  return queryString ? `${path}?${queryString}` : path;
+};
 
 const buildRoomFormData = (data: Partial<RoomFormInput>) => {
   const formData = new FormData();
@@ -39,14 +48,29 @@ export const tenantService = {
     page?: number;
     limit?: number;
   }): Promise<{ properties: TenantProperty[]; pagination: PaginationMeta }> {
-    const query = new URLSearchParams();
-    if (params) {
-      Object.entries(params).forEach(([key, val]) => {
-        if (val !== undefined) query.append(key, String(val));
-      });
-    }
-    const res = await api.get<ApiResponse<{ properties: TenantProperty[]; pagination: PaginationMeta }>>(`/tenant/properties?${query.toString()}`);
+    const res = await api.get<ApiResponse<{ properties: TenantProperty[]; pagination: PaginationMeta }>>(buildUrl('/tenant/properties', params));
     return res.data.data;
+  },
+  async getCategories(params?: {
+    search?: string;
+    sortBy?: string;
+    sortOrder?: 'asc' | 'desc';
+    page?: number;
+    limit?: number;
+  }): Promise<{ categories: PropertyCategory[]; pagination: PaginationMeta }> {
+    const res = await api.get<ApiResponse<{ categories: PropertyCategory[]; pagination: PaginationMeta }>>(buildUrl('/tenant/categories', params));
+    return res.data.data;
+  },
+  async createCategory(name: string): Promise<PropertyCategory> {
+    const res = await api.post<ApiResponse<PropertyCategory>>('/tenant/categories', { name });
+    return res.data.data;
+  },
+  async updateCategory(id: string, name: string): Promise<PropertyCategory> {
+    const res = await api.patch<ApiResponse<PropertyCategory>>(`/tenant/categories/${id}`, { name });
+    return res.data.data;
+  },
+  async deleteCategory(id: string): Promise<void> {
+    await api.delete(`/tenant/categories/${id}`);
   },
   async getProperty(id: string): Promise<TenantPropertyDetail> {
     const res = await api.get<ApiResponse<TenantPropertyDetail>>(`/tenant/properties/${id}`);

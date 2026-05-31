@@ -1,146 +1,242 @@
-# PURWALOKA - Final Project Property Renting Web App
+# PURWALOKA - Property Renting Web App
 
-Platform aplikasi web *Property Renting* (Penyewaan Properti) yang dibangun untuk menghubungkan Pemilik Properti (*Tenant*) dan Penyewa (*User*). Menawarkan sistem pemesanan kamar lengkap dengan integrasi analitik, kalender harga dinamis (*peak rates*), verifikasi *email* otomatis, dan keamanan berbasis *HttpOnly Cookie*.
+PURWALOKA adalah aplikasi web penyewaan properti untuk menghubungkan penyewa
+(`USER`) dan pemilik properti (`TENANT`). Aplikasi mencakup pencarian properti,
+detail harga dan ketersediaan kamar, pemesanan, pembayaran manual/Midtrans,
+dashboard tenant, laporan penjualan, serta review setelah masa inap.
 
-## Tim Pengembang (Group 1)
-* **Anggita Zahra Kamila** (Fitur 2)
-* **Muhammad Ali Akbar** (Fitur 1)
+Final Project Purwadhika JCWDBGPM-11, Group 1:
 
----
+- Muhammad Ali Akbar - Fitur 1
+- Anggita Zahra Kamila - Fitur 2
 
-## Fitur Utama
+## Status Audit Terakhir
 
-### Untuk Penyewa (*User*)
-* **Pencarian Pintar**: Filter berdasarkan kota, tanggal, rentang harga, dan fasilitas. Didukung deteksi lokasi otomatis via *LocationIQ* (diisolasi dalam custom hook `useGeolocation`).
-* **Manajemen Pemesanan**: Kalender pemesanan terintegrasi dengan ketersediaan properti secara *real-time*, dua metode pembayaran (Transfer Manual & Midtrans), upload bukti transfer.
-* **Autentikasi Aman**: Login dan Pendaftaran tradisional beserta integrasi *Google OAuth* dengan verifikasi email otomatis. Token JWT disimpan dalam *HttpOnly Cookie* (aman dari XSS).
-* **Ulasan & Rating**: Memberikan ulasan pasca-*checkout* dengan nilai integer 1–5, melihat balasan dari pemilik properti, mempengaruhi *rating* sistem.
-* **Dashboard Pengguna**: Riwayat pesanan dengan tracking status, profil pengguna, perubahan password, upload avatar.
+Audit dokumentasi dan source dilakukan pada 31 Mei 2026 dengan acuan
+`PURWADHIKA.md`.
 
-### Untuk Pemilik Properti (*Tenant*)
-* **Dasbor & Analitik Lanjut**: Visualisasi performa penjualan dengan grafik (*Recharts*), kalender okupansi (*Gantt Chart*), statistik pendapatan real-time.
-* **Manajemen Properti & Kamar**: CRUD properti, kategori, kamar dengan harga dasar. Pengaturan *Peak Season Rates* (PERCENTAGE/NOMINAL) dengan validasi tumpang tindih tanggal otomatis.
-* **Manajemen Ketersediaan**: Pemblokiran tanggal, kapasitas kamar, pencegahan *double booking* otomatis. Endpoint dilindungi verifikasi kepemilikan (IDOR-safe).
-* **Sistem Ulasan**: Melihat ulasan pelanggan, fitur balasan ulasan dengan form textarea.
-* **Sistem Laporan Otomatis**: Integrasi *Payment Gateway* Midtrans dan Midtrans Notification, penyesuaian pesanan otomatis via *cron job*, email notifikasi otomatis.
+| Area | Status | Catatan |
+| --- | --- | --- |
+| Fitur utama | Mayoritas selesai | Fitur USER, TENANT, booking, payment, review, report, dan calendar sudah ada. |
+| Fitur 1 | Selesai | Auth/profile, katalog properti, property detail, tenant property/room/category management, dan public calendar sudah tersedia. |
+| Fitur 2 | Selesai dengan catatan | Alur transaksi, konfirmasi tenant, review, dan report sudah tersedia; automated test belum ada. |
+| Batas file 200 baris | Sesuai | Scan `frontend/src`, `backend/src`, dan `backend/prisma` menemukan `OVER_200=0`. |
+| Function maksimal 15 baris | Belum sepenuhnya sesuai | Masih ada fungsi/komponen/hook panjang yang perlu refactor bertahap. |
+| Log production | Sesuai | Scan source tidak menemukan `console.log/debug/info/warn/error` aktif. |
+| Frontend lint | Lulus | `npm run lint` di frontend selesai tanpa error. |
+| TypeScript no emit | Lulus | `node_modules/.bin/tsc --noEmit` backend dan frontend selesai tanpa error. |
+| Test suite | Belum ada | Backend `npm test` masih placeholder. |
 
----
+Laporan lengkap tersedia di
+[`AUDIT_PURWADHIKA_FINAL_REPORT.md`](./AUDIT_PURWADHIKA_FINAL_REPORT.md).
 
-## Teknologi & Stack
+## Fitur 1 - Property Renting Core
 
-* **Frontend**: React.js 19, Vite, TypeScript v6, Tailwind CSS v4, Zustand (State Management), React Hook Form, Zod (Validation), Recharts, React Router v7 (Code Splitting via React.Lazy), Framer Motion, Lucide React, Leaflet (Maps), React Day Picker.
-* **Backend**: Node.js, Express.js v5, TypeScript v6, Prisma ORM v7.8.0, PostgreSQL/Supabase.
-* **Infrastruktur / Layanan**: Midtrans (Payment Gateway), Cloudinary (Image Hosting), Nodemailer (Email Notification), Google OAuth, LocationIQ, node-cron (Job Scheduling).
+| Requirement | Status | Folder/file terkait |
+| --- | --- | --- |
+| Homepage/Landing page | Selesai | `frontend/src/pages/user/HomePage.tsx`, `frontend/src/components/user/HeroSection.tsx`, `frontend/src/components/user/PropertyGrid.tsx`, `frontend/src/components/common/Navbar.tsx` |
+| Search destination, date, guest, price, amenities | Selesai | `frontend/src/components/user/SearchForm.tsx`, `frontend/src/components/user/propertyFilterDropdown/`, `frontend/src/stores/filterStore.ts`, `backend/src/services/propertyQueryService.ts` |
+| Sort dan pagination properti | Selesai | `frontend/src/pages/user/HomePage.tsx`, `backend/src/services/propertyService.ts`, `backend/src/services/propertyPriceSortService.ts`; sort name/created_at dan price tanpa tanggal diproses server-side, price bertanggal memakai availability/pricing dinamis. |
+| Auth, register, verify email, login, logout | Selesai | `frontend/src/pages/auth/`, `frontend/src/stores/authStore.ts`, `backend/src/controllers/authController.ts`, `backend/src/services/authService.ts`, `backend/src/routes/authRoutes.ts` |
+| Profile USER/TENANT | Selesai | `frontend/src/pages/user/ProfilePage.tsx`, `frontend/src/components/user/profile/`, route `/profile` dan `/tenant/profile`, `backend/src/controllers/userController.ts`, `backend/src/services/userService.ts`, `backend/src/services/userEmailService.ts` |
+| Property detail, gallery, facilities, review display | Selesai | `frontend/src/pages/user/PropertyDetailPage.tsx`, `frontend/src/components/property/`, `backend/src/services/propertyService.ts` |
+| Public calendar dan availability | Selesai | `frontend/src/components/property/PricingCalendarSection.tsx`, `frontend/src/services/availabilityService.ts`, `backend/src/services/publicAvailabilityService.ts`; backend membatasi maksimal 90 hari per request. |
+| Tenant property CRUD | Selesai | `frontend/src/pages/tenant/PropertiesListPage.tsx`, `frontend/src/pages/tenant/PropertyFormPage.tsx`, `backend/src/services/tenantPropertyService.ts`, `backend/src/routes/tenantRoutes.ts` |
+| Tenant room CRUD, images, availability, peak rates | Selesai | `frontend/src/pages/tenant/RoomsPage.tsx`, `frontend/src/components/tenant/RoomForm.tsx`, `frontend/src/components/tenant/RoomPeakRatesModal.tsx`, `backend/src/services/tenantRoomService.ts` |
+| Tenant category management | Selesai | `frontend/src/pages/tenant/CategoriesPage.tsx`, `frontend/src/components/tenant/category/`, `backend/src/controllers/categoryController.ts`, `backend/src/routes/tenantRoutes.ts` |
 
----
+## Fitur 2 - Transaction, Review, Report
 
-## Status Proyek (Project Status)
+| Requirement | Status | Folder/file terkait |
+| --- | --- | --- |
+| User booking flow | Selesai | `frontend/src/pages/user/BookingPage.tsx`, `frontend/src/components/user/BookingSummary.tsx`, `backend/src/services/orderService.ts`, `backend/src/routes/orderRoutes.ts` |
+| Payment manual dan Midtrans | Selesai dengan catatan | `frontend/src/components/user/PaymentMethodSelector.tsx`, `frontend/src/services/orderService.ts`, `backend/src/services/midtransService.ts`, `backend/src/config/midtrans.ts`; perlu E2E test Midtrans. |
+| Payment proof 1 jam | Selesai | `backend/src/constants/orderConstants.ts` menggunakan `60 * 60 * 1000`. |
+| Tenant transaction management | Selesai | `frontend/src/pages/tenant/OrdersPage.tsx`, `frontend/src/components/tenant/OrdersTable.tsx`, `frontend/src/components/tenant/OrderMobileCard.tsx`, `backend/src/services/orderService.ts` |
+| Auto-cancel unpaid reservations | Selesai | `backend/src/cron.ts`, `backend/src/services/orderService.ts`, `ENABLE_CRON=true` untuk persistent process. |
+| Auto-complete processed orders setelah checkout | Selesai | `backend/src/cron.ts` mengubah `PROCESSED` menjadi `COMPLETED` setelah checkout. |
+| Review setelah menginap | Selesai | `frontend/src/pages/user/OrdersPage.tsx`, `frontend/src/components/user/ReviewModal.tsx`, `backend/src/services/reviewService.ts`; `PROCESSED` dengan checkout terlewat juga boleh review. |
+| Tenant reply review | Selesai | `frontend/src/pages/tenant/ReviewsPage.tsx`, `backend/src/services/tenantReviewService.ts` |
+| Report dan analytics tenant | Selesai | `frontend/src/pages/tenant/ReportsPage.tsx`, `frontend/src/pages/tenant/DashboardPage.tsx`, `backend/src/services/tenantReportService.ts` |
 
-| Metrik | Status | Detail |
-|--------|--------|--------|
-| **Completion Score** | 95/100 | Production Ready |
-| **Features Implemented** | 100% | All major features complete |
-| **Code Compliance** | 100% | All files < 200 lines, functions < 15 lines |
-| **Security** | Hardened | HttpOnly Cookie, Token Blacklist, IDOR Protection |
-| **Test Coverage** | 0% | Needs implementation |
-| **Documentation** | 85% | README updated, API docs inline |
+## Struktur Project
 
-**Frontend**: 22 pages + 39 components + 2 custom hooks + 10 services  
-**Backend**: 13 services (~1,400 lines total)  
-**Code Organization**: Excellent — MVC + Service Layer + Facade pattern
-
----
-
-## Panduan Instalasi (Setup Instructions)
-
-### Prasyarat
-* Node.js v18+
-* PostgreSQL v14+ ter-install lokal atau gunakan layanan Cloud SQL (Supabase/Neon).
-
-### 1. Kloning Repositori
-Lakukan *clone* terhadap repositori ini:
-```bash
-git clone <url-repo-anda>
-cd final-pro-a2
+```text
+final-pro-a2/
+  backend/
+    prisma/
+      migrations/
+      scripts/
+      seed/
+      schema.prisma
+    src/
+      config/
+      constants/
+      controllers/
+      middlewares/
+      routes/
+      services/
+      types/
+      utils/
+      validations/
+    server.ts
+    README-BACKEND.md
+  frontend/
+    src/
+      assets/
+      components/
+      hooks/
+      lib/
+      pages/
+      router/
+      services/
+      stores/
+      types/
+      validations/
+    README-FRONTEND.md
+  PURWADHIKA.md
+  README.md
 ```
 
-### 2. Setup Lingkungan Backend
-Buka terminal baru untuk setup server *backend*:
+## Tech Stack
+
+Frontend:
+
+- React 19, Vite, TypeScript, React Router 7
+- Tailwind CSS 4
+- Zustand
+- React Hook Form dan Zod
+- Recharts
+- React Day Picker
+- Lucide React
+- Leaflet/React Leaflet
+- Google OAuth client
+
+Backend:
+
+- Node.js
+- Express.js
+- TypeScript
+- Prisma ORM
+- Supabase PostgreSQL
+- Cloudinary
+- Midtrans
+- Nodemailer
+- node-cron
+- Zod
+- express-rate-limit
+
+## Setup Local
+
+Install dependency backend:
+
 ```bash
 cd backend
 npm install
 ```
-Buat file `.env` di folder `backend/` — lihat `backend/.env.example` sebagai panduan.
 
-Jalankan migrasi Prisma untuk membangun struktur database:
+Siapkan environment backend dari `backend/.env.example`, lalu jalankan:
+
 ```bash
 npx prisma migrate dev
-```
-Bila diperlukan, jalankan *seed* untuk mendapatkan *dummy data* awal:
-```bash
 npx prisma db seed
-```
-Jalankan server *backend*:
-```bash
 npm run dev
 ```
 
-### 3. Setup Lingkungan Frontend
-Buka terminal baru untuk setup klien *frontend*:
+Install dependency frontend:
+
 ```bash
 cd frontend
 npm install
 ```
-Buat file `.env` di folder `frontend/` — lihat `frontend/.env.example` sebagai panduan.
 
-Jalankan *frontend*:
+Siapkan environment frontend dari `frontend/.env.example`, lalu jalankan:
+
 ```bash
 npm run dev
 ```
 
----
+Default local URL:
 
-## Aturan Kontribusi (Git Workflow)
+- Frontend: `http://localhost:5173`
+- Backend API: `http://localhost:5000/api`
 
-1. Simpan perubahan: `git add .` dan `git commit -m "Deskripsi perubahan"`
-2. Perbarui dari sumber utama: `git pull origin main`
-3. Terapkan pembaruan lokal jika ada migrasi baru: `npx prisma migrate dev`
-4. *Push* ke repositori: `git push origin main`
+## Environment Penting
 
-**Catatan**: Selalu buat *backup folder* sebelum *pull* besar. Konfirmasi sebelum menjalankan `npx prisma db seed` agar data tidak tertimpa berulang kali.
+Backend:
 
----
+- `DATABASE_URL`
+- `DIRECT_URL`
+- `JWT_SECRET`
+- `JWT_EXPIRES_IN`
+- `EMAIL_USER`, `EMAIL_PASSWORD`, `EMAIL_HOST`, `EMAIL_PORT`
+- `CLOUDINARY_NAME`, `CLOUDINARY_API_KEY`, `CLOUDINARY_API_SECRET`
+- `MIDTRANS_SERVER_KEY`, `MIDTRANS_CLIENT_KEY`, `MIDTRANS_IS_PRODUCTION`
+- `PORT`
+- `NODE_ENV`
+- `ENABLE_CRON`
+- `ALLOWED_ORIGINS`
+- `FRONTEND_URL`
 
-## Testing (Status Pengujian)
+Frontend:
 
-Saat ini belum ada test suite yang diimplementasikan. Untuk deployment ke production, sangat disarankan untuk menambahkan:
+- `VITE_API_BASE_URL`
+- `VITE_APP_NAME`
+- `VITE_GOOGLE_CLIENT_ID`
+- `VITE_LOCATIONIQ_API_KEY`
+- `VITE_MIDTRANS_CLIENT_KEY`
 
-- **Unit Tests**: Jest untuk backend services (auth, order, payment logic)
-- **Integration Tests**: API endpoint testing dengan Jest/Supertest
-- **E2E Tests**: User flow testing (registration, booking, payment)
+Catatan audit: `frontend/.env.example` saat ini belum mencantumkan
+`VITE_MIDTRANS_CLIENT_KEY`, sementara `BookingPage.tsx` memakai variabel ini
+untuk memuat Midtrans Snap.
 
-Target coverage: **60%+ untuk critical paths**
+## Database dan Seed
 
----
+Perintah seed akan mengisi ulang data dummy sesuai script Prisma:
 
-## Rekomendasi & Known Issues
+```bash
+cd backend
+npx prisma db seed
+```
 
-### Priority: HIGH (Segera Dilakukan)
-- **Rate Limiting**: Tambahkan middleware `express-rate-limit` untuk keamanan API
-- **Test Suite**: Implementasi unit & integration tests untuk critical services
-- **API Documentation**: Tambahkan Swagger/OpenAPI specification
+Untuk melengkapi fasilitas properti existing tanpa menghapus data, gunakan script
+backfill yang sudah tersedia:
 
-### Priority: MEDIUM (Untuk Completeness)
-- **Performance Optimization**: Profile database queries, caching strategies
-- **Security Headers**: Implementasi Helmet.js middleware
+```bash
+cd backend
+npm run backfill:amenities
+```
 
----
+Mode apply membutuhkan environment:
 
-## Kontak & Dukungan
+```bash
+set APPLY_AMENITIES=true
+npm run backfill:amenities
+```
 
-Untuk pertanyaan atau dukungan teknis, silakan hubungi tim pengembang melalui WhatsApp atau email yang tersedia di aplikasi.
+Pastikan koneksi database mengarah ke Supabase yang benar sebelum menjalankan
+script yang menulis data.
 
----
+## Deployment
 
-*Last Updated: May 30, 2026*  
-*Project Status: Production Ready — Security Hardened*
+Backend sebaiknya dideploy sebagai persistent Node.js process, bukan serverless,
+karena aplikasi membutuhkan:
+
+- Long-running Express API server
+- Booking management
+- Scheduled tasks untuk auto-cancel unpaid reservations
+- Auto-complete order setelah checkout
+- Authentication dan role management
+- Upload file ke Cloudinary
+
+Frontend dapat dideploy sebagai static Vite app. Backend harus memiliki
+environment production, CORS production, dan `ENABLE_CRON=true` pada platform
+yang mendukung persistent process seperti Render, Railway, VPS, atau layanan
+setara.
+
+## Rekomendasi Lanjutan
+
+- Tambahkan unit dan integration test untuk auth, katalog properti, booking, payment, review, dan report.
+- Refactor fungsi/komponen panjang agar memenuhi aturan maksimal 15 baris.
+- Optimalkan sort tambahan seperti `rating` dan `popularity` agar lebih database-side untuk dataset besar.
+- Tambahkan `VITE_MIDTRANS_CLIENT_KEY` ke `frontend/.env.example`.

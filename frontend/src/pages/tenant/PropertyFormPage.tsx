@@ -107,7 +107,7 @@ const PropertyFormPage: FC = () => {
           <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Kategori</label>
           <select {...register('categoryId')} className={inputClass}>
             <option value="">Pilih kategori...</option>
-            {categories.map((c) => <option key={c.id} value={c.id}>{c.icon} {c.name}</option>)}
+            {categories.map((c) => <option key={c.id} value={c.id}>{c.name}</option>)}
           </select>
           {errors.categoryId && <p className="text-red-500 text-xs mt-1">{errors.categoryId.message}</p>}
         </div>

@@ -6,6 +6,10 @@ export const userService = {
     const res = await api.patch<ApiResponse<User>>('/users/profile', data);
     return res.data.data;
   },
+  async requestEmailChange(email: string) {
+    const res = await api.patch<ApiResponse<User>>('/users/email-change', { email });
+    return res.data.data;
+  },
   async updateAvatar(file: File) {
     const fd = new FormData();
     fd.append('avatar', file);
@@ -17,5 +21,5 @@ export const userService = {
   async changePassword(data: { old_password?: string; new_password?: string }) {
     const res = await api.patch<ApiResponse<null>>('/users/change-password', data);
     return res.data;
-  }
+  },
 };

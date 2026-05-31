@@ -13,8 +13,7 @@ export const buildPropertyWhere = (filters: PropertyFilters) => {
   if (filters.category) where.category = { name: { contains: filters.category, mode: 'insensitive' } };
   const amenities = parseAmenities(filters.amenities);
   if (amenities.length) where.amenities = { hasEvery: amenities };
-  const roomWhere = buildRoomFilter(filters);
-  if (Object.keys(roomWhere).length) where.rooms = { some: roomWhere };
+  where.rooms = { some: buildRoomFilter(filters) };
   return where;
 };
 
@@ -27,7 +26,7 @@ export const buildOrderBy = (sort: string, order: string) => {
 };
 
 const buildRoomFilter = (filters: PropertyFilters) => {
-  const roomWhere: any = {};
+  const roomWhere: any = { deleted_at: null };
   const capacity = Number(filters.capacity || Number(filters.adults || 0) + Number(filters.children || 0));
   const minPrice = toNonNegative(filters.min_price);
   const maxPrice = toNonNegative(filters.max_price);
@@ -35,7 +34,6 @@ const buildRoomFilter = (filters: PropertyFilters) => {
   if (minPrice !== undefined || maxPrice !== undefined) roomWhere.base_price = {};
   if (minPrice !== undefined) roomWhere.base_price.gte = minPrice;
   if (maxPrice !== undefined) roomWhere.base_price.lte = maxPrice;
-  if (Object.keys(roomWhere).length) roomWhere.deleted_at = null;
   return roomWhere;
 };
 

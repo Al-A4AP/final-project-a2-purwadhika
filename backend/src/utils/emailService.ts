@@ -28,6 +28,20 @@ export const sendVerificationEmail = async (email: string, token: string) => {
   await sendMail(email, 'Verifikasi Email Anda - PropRent', html);
 };
 
+export const sendEmailChangeVerificationEmail = async (email: string, token: string) => {
+  const url = `${process.env.FRONTEND_URL || 'http://localhost:5173'}/auth/verify-email-change/${token}`;
+  const html = getEmailWrapper('Verifikasi Email Baru - PropRent', `
+    <h2>Verifikasi Email Baru</h2>
+    <p>Halo,</p>
+    <p>Kami menerima permintaan perubahan email akun PropRent Anda. Klik tombol di bawah ini untuk mengaktifkan email baru ini:</p>
+    <p style="text-align: center;"><a href="${url}" class="btn" style="color: #ffffff;">Verifikasi Email Baru</a></p>
+    <p>Atau salin tautan berikut ke browser Anda jika tombol di atas tidak berfungsi:</p>
+    <p style="word-break: break-all; font-size: 13px; color: #64748b;">${url}</p>
+    <p><strong>Catatan:</strong> Tautan ini hanya berlaku selama 1 jam.</p>
+  `);
+  await sendMail(email, 'Verifikasi Email Baru - PropRent', html);
+};
+
 export const sendPasswordResetEmail = async (email: string, token: string) => {
   const url = `${process.env.FRONTEND_URL || 'http://localhost:5173'}/auth/reset-password?token=${token}`;
   const html = getEmailWrapper('Reset Password Anda - PropRent', `

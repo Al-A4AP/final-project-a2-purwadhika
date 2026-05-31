@@ -1,5 +1,5 @@
 import { useState, type FC } from 'react';
-import { useForm } from 'react-hook-form';
+import { useForm, type UseFormSetError } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { Link, useNavigate } from 'react-router-dom';
 import { LogIn, Loader2, Eye, EyeOff, Check } from 'lucide-react';
@@ -10,11 +10,37 @@ import type { AxiosError } from 'axios';
 import type { ApiResponse } from '@/types';
 import { toast } from 'react-hot-toast';
 import { useGoogleLogin } from '@react-oauth/google';
+import type { Role, User } from '@/types';
+import { getAuthRoleFromPath, getRoleHome, getRoleMismatchMessage, getRoleName, getRoleRegisterPath, type TargetAuthRole } from '@/lib/authRole';
+import { GoogleAuthButton } from '@/components/auth/GoogleAuthButton';
 
-const LoginPage: FC = () => {
+interface LoginPageProps {
+  targetRole?: TargetAuthRole;
+}
+
+const selectSetUser = (state: { setUser: (user: User | null) => void }) => state.setUser;
+
+const loginWithPassword = async (data: LoginInput, acceptLogin: (role: Role) => Promise<boolean>, setUser: (user: User) => void, navigate: (path: string) => void) => {
+  const result = await authService.login(data.email, data.password);
+  if (!(await acceptLogin(result.user.role))) return;
+  setUser(result.user);
+  toast.success('Login berhasil!');
+  navigate(getRoleHome(result.user.role));
+};
+
+const handleLoginError = (err: unknown, email: string, setError: UseFormSetError<LoginInput>, setShowResend: (value: boolean) => void, setResendEmail: (value: string) => void) => {
+  const axiosErr = err as AxiosError<ApiResponse<null>>;
+  const msg = axiosErr.response?.data?.message || 'Login gagal';
+  toast.error(msg);
+  setError('root', { message: msg });
+  if (axiosErr.response?.status === 403) { setShowResend(true); setResendEmail(email); }
+};
+
+const LoginPage: FC<LoginPageProps> = ({ targetRole }) => {
   const navigate = useNavigate();
+  const role = targetRole || getAuthRoleFromPath(window.location.pathname);
   const [showPassword, setShowPassword] = useState(false);
-  const setUser = useAuthStore((state) => state.setUser);
+  const setUser = useAuthStore(selectSetUser);
 
   const [showResend, setShowResend] = useState(false);
   const [resendEmail, setResendEmail] = useState('');
@@ -24,32 +50,22 @@ const LoginPage: FC = () => {
   const { register, handleSubmit, formState: { errors, isSubmitting }, setError } =
     useForm<LoginInput>({ resolver: zodResolver(loginSchema) });
 
+  const acceptLogin = async (userRole: Role) => {
+    if (!role || userRole === role) return true;
+    await authService.logout().catch(() => undefined);
+    const msg = getRoleMismatchMessage(role);
+    toast.error(msg);
+    setError('root', { message: msg });
+    return false;
+  };
+
   const onSubmit = async (data: LoginInput) => {
+    setShowResend(false);
+    setResendStatus('idle');
     try {
-      setShowResend(false);
-      setResendStatus('idle');
-      // 1. Panggil API Login
-      const result = await authService.login(data.email, data.password);
-
-      // Simpan user ke global store (token sudah di cookies by server)
-      setUser(result.user);
-
-      // 2. Redirect berdasarkan Role (Role-Based Routing)
-      toast.success('Login berhasil!');
-      navigate(result.user.role === 'TENANT' ? '/tenant/dashboard' : '/');
+      await loginWithPassword(data, acceptLogin, setUser, navigate);
     } catch (err) {
-      // 3. Error Handling untuk Axios
-      const axiosErr = err as AxiosError<ApiResponse<null>>;
-      const msg = axiosErr.response?.data?.message || 'Login gagal';
-      
-      toast.error(msg);
-      // Set pesan error ke level 'root' agar bisa ditampilkan di atas form
-      setError('root', { message: msg });
-
-      if (axiosErr.response?.status === 403) {
-        setShowResend(true);
-        setResendEmail(data.email);
-      }
+      handleLoginError(err, data.email, setError, setShowResend, setResendEmail);
     }
   };
 
@@ -68,8 +84,9 @@ const LoginPage: FC = () => {
   const handleGoogleLogin = useGoogleLogin({
     onSuccess: async (tokenResponse) => {
       try {
-        const result = await authService.googleLogin({ accessToken: tokenResponse.access_token });
-        setUser(result.user); toast.success('Berhasil login menggunakan Google'); navigate('/');
+        const result = await authService.googleLogin({ accessToken: tokenResponse.access_token, role });
+        if (!(await acceptLogin(result.user.role))) return;
+        setUser(result.user); toast.success('Berhasil login menggunakan Google'); navigate(getRoleHome(result.user.role));
       } catch { setError('root', { message: 'Gagal memproses login Google' }); toast.error('Gagal login menggunakan Google'); }
     },
     onError: () => toast.error('Gagal terhubung ke Google')
@@ -78,8 +95,8 @@ const LoginPage: FC = () => {
   return (
     <>
       {/* Header Form */}
-      <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-2">Selamat Datang</h2>
-      <p className="text-gray-600 dark:text-gray-400 text-sm mb-6">Masuk ke akun Anda</p>
+      <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-2">Masuk {getRoleName(role)}</h2>
+      <p className="text-gray-600 dark:text-gray-400 text-sm mb-6">Gunakan akun {getRoleName(role).toLowerCase()} Anda</p>
 
       {/* Tampilan Error Root (Dari API) */}
       {errors.root && (
@@ -161,25 +178,13 @@ const LoginPage: FC = () => {
           <div className="grow border-t border-gray-300 dark:border-slate-600"></div>
         </div>
 
-        <button
-          type="button"
-          onClick={() => handleGoogleLogin()}
-          className="w-full bg-white dark:bg-slate-800 border border-gray-300 dark:border-slate-600 text-gray-700 dark:text-gray-200 py-2.5 rounded-lg font-semibold hover:bg-gray-50 dark:hover:bg-slate-700 transition flex items-center justify-center gap-2 cursor-pointer"
-        >
-          <svg className="w-5 h-5" viewBox="0 0 24 24">
-            <path fill="#EA4335" d="M12 5.04c1.66 0 3.2.57 4.38 1.69l3.27-3.27C17.67 1.48 14.98 1 12 1 7.28 1 3.28 3.73 1.34 7.73l3.87 3a7.16 7.16 0 0 1 6.79-5.69z" />
-            <path fill="#4285F4" d="M23.49 12.27c0-.81-.07-1.59-.2-2.34H12v4.44h6.44a5.51 5.51 0 0 1-2.39 3.62l3.71 2.87c2.17-2 3.43-4.94 3.43-8.59z" />
-            <path fill="#FBBC05" d="M5.21 14.73A7.13 7.13 0 0 1 4.8 12c0-.96.16-1.9.41-2.73L1.34 6.27A11.96 11.96 0 0 0 0 12c0 2.12.55 4.12 1.5 5.88l3.71-3.15z" />
-            <path fill="#34A853" d="M12 23c3.24 0 5.97-1.07 7.96-2.91l-3.71-2.87c-1.03.69-2.35 1.1-4.25 1.1-3.69 0-6.8-2.49-7.91-5.83l-3.87 3A11.97 11.97 0 0 0 12 23z" />
-          </svg>
-          Masuk dengan Google
-        </button>
+        <GoogleAuthButton label="Masuk dengan Google" onClick={() => handleGoogleLogin()} />
       </form>
 
       {/* Register Link */}
       <p className="text-center text-sm text-gray-600 dark:text-gray-400 mt-6">
         Belum punya akun?{' '}
-        <Link to="/auth/register" className="text-red-600 font-semibold hover:underline">Daftar sekarang</Link>
+        <Link to={getRoleRegisterPath(role)} className="text-red-600 font-semibold hover:underline">Daftar sekarang</Link>
       </p>
     </>
   );

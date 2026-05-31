@@ -11,6 +11,11 @@ export const loginSchema = z.object({
   password: z.string().min(1, 'Password wajib diisi'),
 });
 
+export const googleLoginSchema = z.object({
+  accessToken: z.string().min(1, 'Token Google wajib diisi'),
+  role: z.enum(['USER', 'TENANT']).optional(),
+});
+
 export const verifyEmailSchema = z.object({
   token: z.string().min(1, 'Token wajib diisi'),
   password: z.string().min(8, 'Password minimal 8 karakter'),
@@ -29,7 +34,6 @@ export const resetPasswordSchema = z.object({
   password: z.string().min(8, 'Password minimal 8 karakter'),
 });
 
-export const updateProfileSchema = z.object({
-  name: z.string().min(3).optional(),
-  phone: z.string().optional(),
+export const verifyEmailChangeSchema = z.object({
+  token: z.string().min(1, 'Token wajib diisi'),
 });

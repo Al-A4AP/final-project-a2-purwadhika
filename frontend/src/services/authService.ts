@@ -1,5 +1,5 @@
 import { api } from './api';
-import type { ApiResponse, AuthResponse, User } from '@/types';
+import type { ApiResponse, AuthResponse, Role, User } from '@/types';
 
 export const authService = {
   async login(email: string, password: string) {
@@ -7,7 +7,7 @@ export const authService = {
     return res.data.data;
   },
 
-  async googleLogin(data: { accessToken: string }) {
+  async googleLogin(data: { accessToken: string; role?: Role }) {
     const res = await api.post<ApiResponse<AuthResponse>>('/auth/google-login', data);
     return res.data.data;
   },
@@ -20,6 +20,11 @@ export const authService = {
   async verifyEmail(token: string, password: string) {
     const res = await api.post<ApiResponse<null>>('/auth/verify-email', { token, password });
     return res.data;
+  },
+
+  async verifyEmailChange(token: string) {
+    const res = await api.post<ApiResponse<{ email: string }>>('/auth/verify-email-change', { token });
+    return res.data.data;
   },
 
   async resendVerification(email: string) {

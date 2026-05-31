@@ -9,7 +9,9 @@ export const createUsers = async (prisma: PrismaClient): Promise<SeedUsers> => {
   const verifiedAt = new Date();
   const users = await Promise.all(
     USER_SEEDS.map(({ key: _key, ...user }) =>
-      prisma.user.create({ data: { ...user, password_hash: passwordHash, verified_at: verifiedAt } }),
+      prisma.user.create({
+        data: { ...user, password_hash: passwordHash, verified_at: verifiedAt, password_set_at: verifiedAt },
+      }),
     ),
   );
 

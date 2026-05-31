@@ -32,12 +32,20 @@ interface RoomCardProps {
   room: Room;
   isTenant: boolean;
   amenities?: string[];
+  bookingBlockedReason?: string;
   onBooking: (room: Room) => void;
   onCheckAvail: (room: Room) => void;
 }
 
-export const RoomCard: FC<RoomCardProps> = ({ room, isTenant, amenities, onBooking, onCheckAvail }) => {
+const getBookingLabel = (room: Room, reason?: string) => {
+  if (room.is_available === false) return 'Penuh';
+  if (reason) return reason.includes('verifikasi') ? 'Verifikasi Email' : 'Login';
+  return 'Pesan';
+};
+
+export const RoomCard: FC<RoomCardProps> = ({ room, isTenant, amenities, bookingBlockedReason, onBooking, onCheckAvail }) => {
   const roomPrice = room.priceDetails ? room.priceDetails.totalPrice : room.base_price;
+  const bookingDisabled = room.is_available === false || Boolean(bookingBlockedReason);
 
   return (
     <div className="bg-white dark:bg-slate-800 rounded-xl p-6 shadow-sm border dark:border-slate-700 flex flex-col">
@@ -80,9 +88,9 @@ export const RoomCard: FC<RoomCardProps> = ({ room, isTenant, amenities, onBooki
             </button>
           )}
           {!isTenant && (
-            <button onClick={() => onBooking(room)} disabled={room.is_available === false}
-              className={`px-6 py-2 rounded-lg font-medium transition text-sm ${room.is_available === false ? 'bg-gray-400 dark:bg-slate-700 text-gray-200 cursor-not-allowed' : 'bg-red-600 text-white hover:bg-red-700'}`}>
-              {room.is_available === false ? 'Penuh' : 'Pesan'}
+            <button onClick={() => onBooking(room)} disabled={bookingDisabled}
+              className={`px-6 py-2 rounded-lg font-medium transition text-sm ${bookingDisabled ? 'bg-gray-400 dark:bg-slate-700 text-gray-200 cursor-not-allowed' : 'bg-red-600 text-white hover:bg-red-700'}`}>
+              {getBookingLabel(room, bookingBlockedReason)}
             </button>
           )}
         </div>

@@ -1,5 +1,6 @@
 import { Request, Response } from 'express';
 import * as svc from '../services/userService';
+import { requestEmailChange } from '../services/userEmailService';
 import { sendSuccess, sendError } from '../utils/response';
 
 export const updateProfileCtrl = async (req: Request, res: Response) => {
@@ -21,5 +22,12 @@ export const changePasswordCtrl = async (req: Request, res: Response) => {
   try {
     const data = await svc.changePassword(req.user!.id, req.body);
     return sendSuccess(res, data, 'Password berhasil diubah');
+  } catch (err: any) { return sendError(res, err.message, err.statusCode || 500); }
+};
+
+export const requestEmailChangeCtrl = async (req: Request, res: Response) => {
+  try {
+    const data = await requestEmailChange(req.user!.id, req.body.email);
+    return sendSuccess(res, data, 'Email verifikasi sudah dikirim ke email baru');
   } catch (err: any) { return sendError(res, err.message, err.statusCode || 500); }
 };

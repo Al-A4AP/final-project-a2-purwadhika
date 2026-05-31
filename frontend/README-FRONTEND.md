@@ -1,153 +1,181 @@
-# README — Frontend PURWALOKA
+# README - Frontend PURWALOKA
 
-**Final Project Purwadhika — jcwdbgpm-11 (Offline Bandung)**
+Frontend PURWALOKA adalah aplikasi React/Vite untuk Property Renting Web App.
+Aplikasi ini melayani halaman publik, alur auth, dashboard user, dan dashboard
+tenant.
 
-```
-Group 1:
-- Anggita Zahra Kamila  (Anggi)
-- Muhammad Ali Akbar    (Ali)
-```
+Final Project Purwadhika JCWDBGPM-11, Group 1:
 
-## Frontend — Property Renting Web App
+- Muhammad Ali Akbar - Fitur 1
+- Anggita Zahra Kamila - Fitur 2
 
----
+## Tech Stack
 
-### Tech Stack (Instalasi)
+- React 19
+- Vite 8
+- TypeScript 6
+- React Router 7
+- Tailwind CSS 4
+- Axios
+- Zustand
+- React Hook Form
+- Zod
+- Recharts
+- React Day Picker
+- Lucide React
+- React Hot Toast
+- Leaflet dan React Leaflet
+- Google OAuth client
 
-```bash
-npm create vite@latest . -- --template react-ts
-npm install react@19 react-dom@19
-npm install tailwindcss @tailwindcss/vite
-npm install axios
-npm install zod react-hook-form
-npm install zustand
-npm install framer-motion
-npm install lucide-react
-npm install react-router-dom
-npm install react-hot-toast
-npm install react-day-picker
-npm install recharts
-npm install leaflet react-leaflet
-npm install -D @types/leaflet
-```
+## Struktur Folder
 
----
-
-### Frontend Dependencies
-
-| Package | Versi | Fungsi |
-|---------|-------|--------|
-| React | 19 | UI framework utama |
-| React Router | v7 | Routing dan navigation (Code Splitting via React.Lazy) |
-| Tailwind CSS | v4 | Utility-first CSS framework |
-| Vite | latest | Build tool dan dev server |
-| TypeScript | v6 | Type safety |
-| Axios | latest | HTTP client untuk API calls |
-| Zustand | latest | State management (authStore, filterStore) |
-| Zod | latest | Schema validation |
-| React Hook Form | latest | Form state management |
-| Framer Motion | latest | Animations dan transitions |
-| Lucide React | latest | Icon library |
-| React Day Picker | latest | Date range picker kalender |
-| Recharts | latest | Charts and graphs (Analytics) |
-| Leaflet | latest | Interactive maps |
-| React Hot Toast | latest | Notifications system |
-
----
-
-### Project Structure
-
-```
-frontend/src/
-├── assets/            # Images, SVG, static files
-├── components/        # Reusable UI components (39 total)
-│   ├── common/        # Navbar, Footer, Modal, Pagination, etc.
-│   ├── layout/        # Page layout wrappers
-│   ├── property/      # Property-specific components
-│   ├── tenant/        # Tenant dashboard components
-│   └── user/          # User feature components
-├── hooks/             # Custom React hooks (2 hooks)
-│   ├── useGeolocation.ts   # LocationIQ geolocation detection
-│   └── useRoomsLogic.ts    # Room management logic
-├── lib/               # Utilities, constants, formatters
-├── pages/             # Page components (22 pages)
-│   ├── auth/          # Authentication pages
-│   ├── tenant/        # Tenant dashboard pages
-│   └── user/          # User-facing pages
-├── router/            # Route configuration and protection
-├── services/          # API service layer (10 services)
-│   ├── api.ts              # Axios instance (HttpOnly Cookie, withCredentials)
-│   ├── authService.ts      # Auth API calls
-│   ├── geolocationService.ts  # LocationIQ reverse geocode
-│   ├── propertyService.ts  # Property listing & details
-│   ├── orderService.ts     # Order management
-│   ├── reviewService.ts    # Review & rating
-│   ├── tenantService.ts    # Tenant operations
-│   ├── tenantReportService.ts # Analytics & reports
-│   ├── availabilityService.ts # Room availability
-│   └── userService.ts      # User profile
-├── stores/            # Zustand state management
-│   ├── authStore.ts        # Auth state (HttpOnly Cookie-based)
-│   └── filterStore.ts      # Property filter state
-├── types/             # TypeScript interfaces and types
-└── validations/       # Zod form validation schemas
+```text
+frontend/
+  public/
+  src/
+    assets/
+    components/
+      common/
+      layout/
+      property/
+      tenant/
+      user/
+      ui/
+    hooks/
+    lib/
+    pages/
+      auth/
+      tenant/
+      user/
+    router/
+    services/
+    stores/
+    types/
+    validations/
+    App.tsx
+    main.tsx
+  README-FRONTEND.md
+  package.json
 ```
 
----
+## Route dan Halaman
 
-### Pages (Total: 22)
+Public dan user:
 
-**Authentication (5):** LoginPage, RegisterPage, VerifyEmailPage, ResetPasswordPage, ForgotPasswordPage
+- `/` - `src/pages/user/HomePage.tsx`
+- `/properties/:id` - `src/pages/user/PropertyDetailPage.tsx`
+- `/about` - `src/pages/AboutPage.tsx`
+- `/contact` - `src/pages/ContactPage.tsx`
+- `/profile` - `src/pages/user/ProfilePage.tsx`
+- `/booking` - `src/pages/user/BookingPage.tsx`
+- `/orders` - `src/pages/user/OrdersPage.tsx`
+- `/payment/success` - `src/pages/user/PaymentSuccessPage.tsx`
 
-**User Pages (6):** HomePage, PropertyDetailPage, BookingPage, OrdersPage, ProfilePage, PaymentSuccessPage
+Auth:
 
-**Tenant Pages (8):** DashboardPage, PropertiesListPage, PropertyFormPage, RoomsPage, CategoriesPage, ReviewsPage, OrdersPage, ReportsPage
+- `/auth/login`
+- `/auth/login/user`
+- `/auth/login/tenant`
+- `/auth/register`
+- `/auth/register/user`
+- `/auth/register/tenant`
+- `/auth/verify-email/:token`
+- `/auth/forgot-password`
+- `/auth/reset-password`
 
-**Public Pages (3):** AboutPage, ContactPage, NotFoundPage
+Tenant:
 
----
+- `/tenant/dashboard` - `src/pages/tenant/DashboardPage.tsx`
+- `/tenant/properties` - `src/pages/tenant/PropertiesListPage.tsx`
+- `/tenant/properties/new` - `src/pages/tenant/PropertyFormPage.tsx`
+- `/tenant/properties/:id/edit` - `src/pages/tenant/PropertyFormPage.tsx`
+- `/tenant/properties/:id/rooms` - `src/pages/tenant/RoomsPage.tsx`
+- `/tenant/orders` - `src/pages/tenant/OrdersPage.tsx`
+- `/tenant/reviews` - `src/pages/tenant/ReviewsPage.tsx`
+- `/tenant/profile` - `src/pages/user/ProfilePage.tsx`
+- `/tenant/reports` - `src/pages/tenant/ReportsPage.tsx`
 
-### Key Features
+Routing utama ada di `src/router/index.tsx` dan proteksi role ada di
+`src/router/ProtectedRoute.tsx`.
 
-1. Advanced Property Search dengan filter harga, kota, tanggal, fasilitas
-2. Deteksi lokasi otomatis via LocationIQ (custom hook `useGeolocation`)
-3. Responsive design (mobile to desktop)
-4. Real-time availability checking
-5. Dual payment (Manual transfer + Midtrans)
-6. Dynamic pricing dengan peak season rates
-7. User reviews dan ratings (integer 1–5)
-8. Tenant property dan category management
-9. Sales dashboard dengan analytics (Recharts)
-10. Occupancy calendar visualization
-11. Email verification dan password reset
-12. Google OAuth social login
-13. JWT disimpan di HttpOnly Cookie (XSS-safe)
-14. Dark/light theme toggle
+## Fitur 1 di Frontend
 
----
+| Requirement | Status | Folder/file |
+| --- | --- | --- |
+| Homepage dan landing content | Selesai | `src/pages/user/HomePage.tsx`, `src/components/user/HeroSection.tsx` |
+| Search properti | Selesai | `src/components/user/SearchForm.tsx`, `src/components/user/propertyFilterDropdown/`, `src/stores/filterStore.ts` |
+| Filter harga minimal 0 dan fasilitas | Selesai | `src/stores/filterStore.ts`, `src/components/user/PropertyFilterModal.tsx`, `src/components/user/propertyFilterDropdown/PriceRangeFields.tsx` |
+| Property list default terbaru | Selesai | `src/pages/user/HomePage.tsx` |
+| Property detail, fasilitas, review | Selesai | `src/pages/user/PropertyDetailPage.tsx`, `src/components/property/` |
+| Auth dan profile | Selesai | `src/pages/auth/`, `src/pages/user/ProfilePage.tsx`, `src/components/user/profile/`, `src/stores/authStore.ts` |
+| Tenant property dan room management | Selesai | `src/pages/tenant/PropertiesListPage.tsx`, `src/pages/tenant/PropertyFormPage.tsx`, `src/pages/tenant/RoomsPage.tsx` |
+| Tenant category management | Selesai | `src/pages/tenant/CategoriesPage.tsx`, `src/components/tenant/category/`, `src/components/layout/tenantNavigation.ts` |
 
-### Running the Frontend
+## Fitur 2 di Frontend
 
-```bash
-npm run dev     # Development server dengan hot reload
-npm run build   # Build untuk production
-npm run preview # Preview production build
-```
+| Requirement | Status | Folder/file |
+| --- | --- | --- |
+| Booking user | Selesai | `src/pages/user/BookingPage.tsx`, `src/components/user/BookingSummary.tsx` |
+| Payment manual dan Midtrans | Selesai dengan catatan | `src/components/user/PaymentMethodSelector.tsx`, `src/services/orderService.ts`; perlu E2E test Midtrans. |
+| Riwayat order user | Selesai | `src/pages/user/OrdersPage.tsx`, `src/components/user/OrderCard.tsx` |
+| Review user | Selesai | `src/components/user/ReviewModal.tsx`, `src/services/reviewService.ts` |
+| Tenant order management | Selesai | `src/pages/tenant/OrdersPage.tsx`, `src/components/tenant/OrdersTable.tsx`, `src/components/tenant/OrderMobileCard.tsx` |
+| Tenant review reply | Selesai | `src/pages/tenant/ReviewsPage.tsx` |
+| Tenant report dan analytics | Selesai | `src/pages/tenant/ReportsPage.tsx`, `src/pages/tenant/DashboardPage.tsx`, `src/components/tenant/OrderStatusPieChart.tsx`, `src/components/tenant/OccupancyCalendar.tsx` |
 
----
+## Services
 
-### Environment Variables
+- `src/services/api.ts` - Axios instance dengan `withCredentials`.
+- `src/services/authService.ts` - Login, register, logout, auth session.
+- `src/services/propertyService.ts` - Property list, detail, categories.
+- `src/services/availabilityService.ts` - Public dan tenant room availability.
+- `src/services/orderService.ts` - Create order, order list, upload proof, update status.
+- `src/services/reviewService.ts` - Create review.
+- `src/services/tenantService.ts` - Tenant property, room, image, peak rate, availability.
+- `src/services/tenantReportService.ts` - Dashboard analytics dan report.
+- `src/services/tenantReviewService.ts` - Review tenant dan reply.
+- `src/services/userService.ts` - Profile user/tenant.
 
-Buat file `.env` di folder `frontend/`:
+## Environment
+
+Buat file `.env` di folder `frontend/` dengan acuan `frontend/.env.example`.
 
 ```env
-VITE_API_BASE_URL=http://localhost:3000/api
-VITE_GOOGLE_CLIENT_ID=your_google_client_id
-VITE_LOCATIONIQ_API_KEY=your_locationiq_key
+VITE_API_BASE_URL=http://localhost:5000/api
+VITE_APP_NAME=PURWALOKA - Boutique Vacation Homes
+VITE_GOOGLE_CLIENT_ID=
+VITE_LOCATIONIQ_API_KEY=
+VITE_MIDTRANS_CLIENT_KEY=
 ```
 
-Lihat `.env.example` untuk referensi lengkap.
+Catatan: `VITE_MIDTRANS_CLIENT_KEY` dipakai di
+`src/pages/user/BookingPage.tsx`. Variabel ini belum tercantum di
+`.env.example`, sehingga perlu ditambahkan pada perbaikan berikutnya.
 
----
+## Menjalankan Frontend
 
-*Last Updated: May 30, 2026*
+```bash
+npm install
+npm run dev
+```
+
+Perintah lain:
+
+```bash
+npm run lint
+npm run build
+npm run preview
+```
+
+Default local frontend: `http://localhost:5173`.
+
+## Catatan Audit Frontend
+
+- `npm run lint` lulus tanpa error pada audit 31 Mei 2026.
+- `node_modules/.bin/tsc -b --noEmit` lulus tanpa error.
+- Tidak ada file di `src` yang melebihi 200 baris.
+- Masih ada fungsi/komponen/hook yang melebihi batas 15 baris menurut aturan
+  clean code Purwadhika, sehingga perlu refactor bertahap.
+- Route tenant profile sudah diarahkan ke `src/pages/user/ProfilePage.tsx`.
+- Dashboard tenant mobile sudah memakai `TenantMobileTopbar` dan
+  `TenantSidebar`.

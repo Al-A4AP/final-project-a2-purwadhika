@@ -1,5 +1,7 @@
 import { Request, Response } from 'express';
 import * as authService from '../services/authService';
+import { googleLogin } from '../services/authGoogleService';
+import { verifyEmailChange } from '../services/userEmailService';
 import { sendSuccess, sendError } from '../utils/response';
 
 export const registerController = async (req: Request, res: Response) => {
@@ -71,9 +73,18 @@ export const resendVerificationController = async (req: Request, res: Response) 
   }
 };
 
+export const verifyEmailChangeController = async (req: Request, res: Response) => {
+  try {
+    const data = await verifyEmailChange(req.body.token);
+    return sendSuccess(res, data, 'Email baru berhasil diverifikasi');
+  } catch (err: any) {
+    return sendError(res, err.message, err.statusCode || 500);
+  }
+};
+
 export const googleLoginController = async (req: Request, res: Response) => {
   try {
-    const result = await authService.googleLogin(req.body);
+    const result = await googleLogin(req.body);
     res.cookie('auth_token', result.token, {
       httpOnly: true,
       secure: process.env.NODE_ENV === 'production',
