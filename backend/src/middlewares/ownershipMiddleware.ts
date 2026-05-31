@@ -1,132 +1,65 @@
 import { Request, Response, NextFunction } from 'express';
-import prisma from '../config/prisma';
 import { sendError } from '../utils/response';
+import { sendServerOwnershipError } from './ownership/ownershipErrors';
+import { getPropertyIdOrSend, getRateIdOrSend, getRoomIdOrSend, getTenantIdOrSend } from './ownership/ownershipParams';
+import { findOwnedPeakRate, findOwnedProperty, findOwnedRoom } from './ownership/ownershipQueries';
+
+type OwnershipTask = () => Promise<boolean>;
 
 export const verifyPropertyOwnership = async (req: Request, res: Response, next: NextFunction) => {
-  const propertyId = (req.params.id || req.params.propertyId) as string;
-  const tenantId = req.user?.id;
-
-  if (!tenantId) {
-    return sendError(res, 'Akses ditolak', 401);
-  }
-
-  if (!propertyId) {
-    return sendError(res, 'ID Properti tidak ditemukan', 400);
-  }
-
-  try {
-    const property = await prisma.property.findFirst({
-      where: {
-        id: propertyId,
-        tenantId: tenantId,
-        deleted_at: null
-      }
-    });
-
-    if (!property) {
-      return sendError(res, 'Properti tidak ditemukan atau Anda tidak memiliki akses', 404);
-    }
-
-    req.property = property;
-    next();
-  } catch (error: any) {
-    return sendError(res, error.message || 'Terjadi kesalahan pada server', 500);
-  }
+  const tenantId = getTenantIdOrSend(req, res);
+  if (!tenantId) return;
+  const propertyId = getPropertyIdOrSend(req, res);
+  if (!propertyId) return;
+  return runOwnershipCheck(res, next, async () => assignOwnedProperty(req, res, propertyId, tenantId));
 };
 
 export const verifyRoomOwnership = async (req: Request, res: Response, next: NextFunction) => {
-  const roomId = req.params.roomId as string;
-  const tenantId = req.user?.id;
-
-  if (!tenantId) {
-    return sendError(res, 'Akses ditolak', 401);
-  }
-
-  if (!roomId) {
-    return sendError(res, 'ID Kamar tidak ditemukan', 400);
-  }
-
-  try {
-    const room = await prisma.room.findFirst({
-      where: {
-        id: roomId,
-        deleted_at: null
-      }
-    });
-
-    if (!room) {
-      return sendError(res, 'Kamar tidak ditemukan', 404);
-    }
-
-    const property = await prisma.property.findFirst({
-      where: {
-        id: room.propertyId,
-        tenantId: tenantId,
-        deleted_at: null
-      }
-    });
-
-    if (!property) {
-      return sendError(res, 'Kamar tidak ditemukan atau Anda tidak memiliki akses', 404);
-    }
-
-    req.room = room;
-    next();
-  } catch (error: any) {
-    return sendError(res, error.message || 'Terjadi kesalahan pada server', 500);
-  }
+  const tenantId = getTenantIdOrSend(req, res);
+  if (!tenantId) return;
+  const roomId = getRoomIdOrSend(req, res);
+  if (!roomId) return;
+  return runOwnershipCheck(res, next, async () => assignOwnedRoom(req, res, roomId, tenantId));
 };
 
 export const verifyPeakRateOwnership = async (req: Request, res: Response, next: NextFunction) => {
-  const rateId = req.params.rateId as string;
-  const tenantId = req.user?.id;
+  const tenantId = getTenantIdOrSend(req, res);
+  if (!tenantId) return;
+  const rateId = getRateIdOrSend(req, res);
+  if (!rateId) return;
+  return runOwnershipCheck(res, next, async () => assignOwnedPeakRate(req, res, rateId, tenantId));
+};
 
-  if (!tenantId) {
-    return sendError(res, 'Akses ditolak', 401);
-  }
-
-  if (!rateId) {
-    return sendError(res, 'ID Peak Rate tidak ditemukan', 400);
-  }
-
+const runOwnershipCheck = async (res: Response, next: NextFunction, task: OwnershipTask) => {
   try {
-    const rate = await prisma.peakSeasonRate.findFirst({
-      where: {
-        id: rateId,
-        deleted_at: null
-      }
-    });
-
-    if (!rate) {
-      return sendError(res, 'Aturan harga peak season tidak ditemukan', 404);
-    }
-
-    const room = await prisma.room.findFirst({
-      where: {
-        id: rate.roomId,
-        deleted_at: null
-      }
-    });
-
-    if (!room) {
-      return sendError(res, 'Kamar terkait tidak ditemukan', 404);
-    }
-
-    const property = await prisma.property.findFirst({
-      where: {
-        id: room.propertyId,
-        tenantId: tenantId,
-        deleted_at: null
-      }
-    });
-
-    if (!property) {
-      return sendError(res, 'Aturan harga peak season tidak ditemukan atau Anda tidak memiliki akses', 404);
-    }
-
-    req.peakRate = rate;
-    next();
-  } catch (error: any) {
-    return sendError(res, error.message || 'Terjadi kesalahan pada server', 500);
+    if (await task()) next();
+  } catch (error) {
+    return sendServerOwnershipError(res, error);
   }
+};
+
+const assignOwnedProperty = async (req: Request, res: Response, propertyId: string, tenantId: string) => {
+  const property = await findOwnedProperty(propertyId, tenantId);
+  if (!property) return sendNotFound(res, 'Properti tidak ditemukan atau Anda tidak memiliki akses');
+  req.property = property;
+  return true;
+};
+
+const assignOwnedRoom = async (req: Request, res: Response, roomId: string, tenantId: string) => {
+  const room = await findOwnedRoom(roomId, tenantId);
+  if (!room) return sendNotFound(res, 'Kamar tidak ditemukan atau Anda tidak memiliki akses');
+  req.room = room;
+  return true;
+};
+
+const assignOwnedPeakRate = async (req: Request, res: Response, rateId: string, tenantId: string) => {
+  const rate = await findOwnedPeakRate(rateId, tenantId);
+  if (!rate) return sendNotFound(res, 'Aturan harga peak season tidak ditemukan atau Anda tidak memiliki akses');
+  req.peakRate = rate;
+  return true;
+};
+
+const sendNotFound = (res: Response, message: string) => {
+  sendError(res, message, 404);
+  return false;
 };

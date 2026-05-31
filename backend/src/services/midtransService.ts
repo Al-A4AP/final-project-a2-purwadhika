@@ -1,79 +1,27 @@
 import { snap } from '../config/midtrans';
-import prisma from '../config/prisma';
 import { sendPaymentConfirmationEmail } from '../utils/emailService';
+import { findOrderForPayment, updatePaymentStatus } from './midtrans/midtransQueries';
+import { resolveOrderStatus } from './midtrans/midtransStatus';
+import { buildSnapParameter } from './midtrans/snapPayload';
+import type { MidtransStatusResponse, NotificationData } from './midtrans/midtransTypes';
 
-export const createSnapTransaction = async (
-  orderId: string,
-  totalPrice: number,
-  nights: number,
-  userName: string,
-  userEmail: string,
-  userPhone: string,
-  propertyName: string,
-  roomType: string,
-  roomId: string,
-) => {
-  const parameter = {
-    transaction_details: {
-      order_id: orderId,
-      gross_amount: totalPrice,
-    },
-    customer_details: {
-      first_name: userName,
-      email: userEmail,
-      phone: userPhone || '',
-    },
-    item_details: [{
-      id: roomId,
-      price: Math.round(totalPrice / nights),
-      quantity: nights,
-      name: `${propertyName} - ${roomType} (${nights} Malam)`,
-    }],
-  };
-
-  const transaction = await snap.createTransaction(parameter);
-  return {
-    token: transaction.token,
-    redirectUrl: transaction.redirect_url,
-  };
+export const createSnapTransaction = async (orderId: string, totalPrice: number, nights: number, userName: string, userEmail: string, userPhone: string, propertyName: string, roomType: string, roomId: string) => {
+  const input = { orderId, totalPrice, nights, userName, userEmail, userPhone, propertyName, roomType, roomId };
+  const transaction = await snap.createTransaction(buildSnapParameter(input));
+  return { token: transaction.token, redirectUrl: transaction.redirect_url };
 };
 
-export const handleNotification = async (notificationData: any) => {
-  const statusResponse = await snap.transaction.notification(notificationData);
-  const orderId = statusResponse.order_id;
-  const txStatus = statusResponse.transaction_status;
-  const fraudStatus = statusResponse.fraud_status;
-
-  const order = await prisma.order.findUnique({
-    where: { id: orderId },
-    include: { user: true },
-  });
+export const handleNotification = async (notificationData: NotificationData) => {
+  const statusResponse = await getMidtransStatus(notificationData);
+  const order = await findOrderForPayment(statusResponse.order_id);
   if (!order) return;
-
-  let newStatus = order.status;
-
-  if (txStatus === 'capture') {
-    newStatus = fraudStatus === 'accept' ? 'PROCESSED' : 'WAITING_CONFIRMATION';
-  } else if (txStatus === 'settlement') {
-    newStatus = 'PROCESSED';
-  } else if (['cancel', 'deny', 'expire'].includes(txStatus)) {
-    newStatus = 'CANCELLED';
-  } else if (txStatus === 'pending') {
-    newStatus = 'WAITING_PAYMENT';
-  }
-
-  if (newStatus !== order.status) {
-    await prisma.order.update({
-      where: { id: orderId },
-      data: {
-        status: newStatus as any,
-        midtrans_transaction_id: statusResponse.transaction_id,
-        payment_verified_at: newStatus === 'PROCESSED' ? new Date() : null,
-      },
-    });
-
-    if (newStatus === 'PROCESSED') {
-      await sendPaymentConfirmationEmail(order.user.email, order.order_number).catch(() => {});
-    }
-  }
+  const newStatus = resolveOrderStatus(order.status, statusResponse);
+  if (newStatus === order.status) return;
+  await updatePaymentStatus(order.id, newStatus, statusResponse.transaction_id);
+  if (newStatus === 'PROCESSED') await notifyPaymentConfirmed(order.user.email, order.order_number);
 };
+
+const getMidtransStatus = (notificationData: NotificationData): Promise<MidtransStatusResponse> =>
+  snap.transaction.notification(notificationData);
+const notifyPaymentConfirmed = (email: string, orderNumber: string) =>
+  sendPaymentConfirmationEmail(email, orderNumber).catch(() => {});
