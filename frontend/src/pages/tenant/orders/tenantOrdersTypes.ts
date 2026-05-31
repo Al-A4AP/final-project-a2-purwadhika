@@ -29,6 +29,7 @@ export interface ConfirmModalState {
 
 export interface TenantOrdersState {
   confirmModal: ConfirmModalState;
+  error: string | null;
   fetchOrders: (page?: number) => void;
   filterActions: TenantOrderFilterActions;
   filters: TenantOrderFilters;

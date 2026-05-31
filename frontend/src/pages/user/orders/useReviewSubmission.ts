@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { toast } from "react-hot-toast";
 import { reviewService } from "@/services/reviewService";
+import { getApiErrorMessage } from "@/lib/errorMessage";
 import { canReviewOrder } from "@/lib/orderStatus";
 import type { Order } from "@/types";
 
@@ -41,7 +42,7 @@ const canSubmitReview = (order: Order) => {
 const submitReview = async (options: ReviewSubmitOptions) => {
   options.setSubmittingReview(true);
   try { await reviewService.createReview(options.reviewOrderId!, options.rating, options.comment); onReviewSuccess(options); }
-  catch (err: unknown) { toast.error(getReviewErrorMessage(err)); }
+  catch (err) { toast.error(getApiErrorMessage(err, "Ulasan gagal dikirim. Periksa rating dan komentar lalu coba lagi.")); }
   finally { options.setSubmittingReview(false); }
 };
 
@@ -52,6 +53,3 @@ const onReviewSuccess = (options: ReviewSubmitOptions) => {
   options.setRating(5);
   options.refetch();
 };
-
-const getReviewErrorMessage = (err: unknown) =>
-  (err as { response?: { data?: { message?: string } } }).response?.data?.message || "Gagal mengirim review";

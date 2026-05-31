@@ -1,5 +1,6 @@
 import { useRef, useState } from "react";
 import { toast } from "react-hot-toast";
+import { getApiErrorMessage } from "@/lib/errorMessage";
 import { orderService } from "@/services/orderService";
 import type { Order } from "@/types";
 
@@ -42,7 +43,7 @@ const uploadPaymentProof = async (
 ) => {
   setUploading(orderId);
   try { await orderService.uploadPaymentProof(orderId, file); toast.success("Bukti pembayaran berhasil diunggah! Menunggu konfirmasi."); refetch(); }
-  catch { toast.error("Gagal mengunggah bukti pembayaran"); }
+  catch (err) { toast.error(getApiErrorMessage(err, "Bukti pembayaran gagal diunggah. Pastikan file valid lalu coba lagi.")); }
   finally { setUploading(null); }
 };
 

@@ -30,9 +30,9 @@ export const PropertyCard: FC<PropertyCardProps> = ({ property: p, deletingId, o
           </div>
         </div>
         <div className="grid grid-cols-[1fr_44px_44px] items-center gap-2 sm:flex sm:shrink-0">
-          <Link to={`/tenant/properties/${p.id}/rooms`} className="flex h-11 items-center justify-center rounded-lg border px-3 text-sm text-gray-600 transition hover:bg-gray-50 dark:border-slate-600 dark:text-gray-300 dark:hover:bg-slate-700">Kamar</Link>
-          <Link to={`/tenant/properties/${p.id}/edit`} className="flex h-11 w-11 items-center justify-center rounded-lg text-blue-600 transition hover:bg-blue-50 dark:hover:bg-blue-900/20" aria-label="Edit properti"><Pencil size={17} /></Link>
-          <button onClick={() => onDelete(p.id, p.name)} disabled={deletingId === p.id} className="flex h-11 w-11 items-center justify-center rounded-lg text-red-600 transition hover:bg-red-50 disabled:opacity-50 dark:hover:bg-red-900/20" aria-label="Hapus properti"><Trash2 size={17} /></button>
+          <Link to={`/tenant/properties/${p.id}/rooms`} className="flex h-11 items-center justify-center rounded-lg border px-3 text-sm text-gray-600 transition hover:bg-gray-50 dark:border-slate-600 dark:text-gray-300 dark:hover:bg-slate-700" title="Kelola kamar">Kamar</Link>
+          <Link to={`/tenant/properties/${p.id}/edit`} className="flex h-11 w-11 items-center justify-center rounded-lg text-blue-600 transition hover:bg-blue-50 dark:hover:bg-blue-900/20" title="Edit properti" aria-label={`Edit properti ${p.name}`}><Pencil size={17} /></Link>
+          <button onClick={() => onDelete(p.id, p.name)} disabled={deletingId === p.id} className="flex h-11 w-11 items-center justify-center rounded-lg text-red-600 transition hover:bg-red-50 disabled:opacity-50 dark:hover:bg-red-900/20" title="Hapus properti" aria-label={`Hapus properti ${p.name}`}><Trash2 size={17} /></button>
         </div>
       </div>
     </div>

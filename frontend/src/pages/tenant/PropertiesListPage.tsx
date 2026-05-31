@@ -4,16 +4,20 @@ import { Link } from 'react-router-dom';
 import { Plus } from 'lucide-react';
 import { tenantService } from '@/services/tenantService';
 import type { TenantProperty, PaginationMeta } from '@/types';
+import { getApiErrorMessage } from '@/lib/errorMessage';
 import SortFilterBar from '@/components/common/SortFilterBar';
 import type { SortGroup } from '@/components/common/SortFilterBar';
 import { toast } from 'react-hot-toast';
 import { ConfirmModal } from '@/components/common/ConfirmModal';
+import { EmptyState } from '@/components/common/EmptyState';
+import { ErrorState } from '@/components/common/ErrorState';
 import { Pagination } from '@/components/common/Pagination';
 import { PropertyCard } from '@/components/tenant/PropertyCard';
 
 const PropertiesListPage: FC = () => {
   const [properties, setProperties] = useState<TenantProperty[]>([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
   const [deletingId, setDeletingId] = useState<string | null>(null);
   const [sortKey, setSortKey] = useState('created_at');
   const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('desc');
@@ -30,9 +34,10 @@ const PropertiesListPage: FC = () => {
 
   const fetchProperties = useCallback((pageNumber = 1) => {
     setLoading(true);
+    setError(null);
     tenantService.getProperties({ search: activeSearch || undefined, sortBy: sortKey, sortOrder, page: pageNumber, limit: 10 })
-      .then((data) => { setProperties(data.properties); setPagination(data.pagination); })
-      .catch(() => toast.error('Gagal memuat properti'))
+      .then((data) => { setError(null); setProperties(data.properties); setPagination(data.pagination); })
+      .catch((err) => handlePropertiesError(err, setError, setProperties))
       .finally(() => setLoading(false));
   }, [activeSearch, sortKey, sortOrder]);
 
@@ -48,7 +53,7 @@ const PropertiesListPage: FC = () => {
           await tenantService.deleteProperty(id);
           setProperties((prev) => prev.filter((p) => p.id !== id));
           toast.success('Properti berhasil dihapus');
-        } catch { toast.error('Gagal menghapus properti'); }
+        } catch (err) { toast.error(getApiErrorMessage(err, `Properti "${name}" gagal dihapus. Pastikan tidak ada pesanan aktif.`)); }
         finally { setDeletingId(null); setConfirmModal(prev => ({ ...prev, isOpen: false })); }
       }
     });
@@ -73,21 +78,35 @@ const PropertiesListPage: FC = () => {
         {properties.length > 0 && <SortFilterBar sortGroups={tenantSortGroups} currentSort={sortKey} currentOrder={sortOrder} onChange={(sort, order) => { setSortKey(sort); setSortOrder(order); }} resultCount={pagination.total} resultLabel="properti" />}
       </div>
 
-      {properties.length === 0 ? (
-        <div className="text-center py-20">
-          <p className="text-gray-500 mb-4">Tidak ada properti ditemukan</p>
-          <Link to="/tenant/properties/new" className="bg-red-600 text-white px-6 py-2 rounded-lg hover:bg-red-700 transition">Tambah Properti Pertama</Link>
-        </div>
+      {error ? (
+        <ErrorState title="Properti belum bisa dimuat" message={error} onRetry={() => fetchProperties(pagination.page || 1)} />
+      ) : properties.length === 0 ? (
+        <EmptyProperties />
       ) : (
         <div className="space-y-4">
           {properties.map((p) => <PropertyCard key={p.id} property={p} deletingId={deletingId} onDelete={handleDelete} />)}
         </div>
       )}
 
-      <Pagination currentPage={pagination.page || 1} totalPages={totalPages} totalItems={pagination.total} onPageChange={fetchProperties} />
+      {!error && properties.length > 0 && <Pagination currentPage={pagination.page || 1} totalPages={totalPages} totalItems={pagination.total} onPageChange={fetchProperties} />}
       <ConfirmModal isOpen={confirmModal.isOpen} title={confirmModal.title} message={confirmModal.message} onConfirm={confirmModal.onConfirm} onCancel={() => setConfirmModal(prev => ({ ...prev, isOpen: false }))} />
     </div>
   );
+};
+
+const EmptyProperties: FC = () => (
+  <EmptyState title="Tidak ada properti ditemukan" description="Tambahkan properti pertama atau ubah kata kunci pencarian." action={<Link to="/tenant/properties/new" className="bg-red-600 text-white px-6 py-2 rounded-lg hover:bg-red-700 transition">Tambah Properti Pertama</Link>} />
+);
+
+const handlePropertiesError = (
+  err: unknown,
+  setError: (message: string) => void,
+  setProperties: (properties: TenantProperty[]) => void,
+) => {
+  const message = getApiErrorMessage(err, 'Properti belum bisa dimuat. Periksa koneksi lalu coba lagi.');
+  setError(message);
+  setProperties([]);
+  toast.error(message);
 };
 
 export default PropertiesListPage;

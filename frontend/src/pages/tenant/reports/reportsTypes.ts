@@ -27,8 +27,10 @@ export interface ReportsFilterActions {
 export interface ReportsPageState {
   actions: ReportsFilterActions;
   analytics: DashboardAnalytics | null;
+  error: string | null;
   filters: ReportsFilters;
   loading: boolean;
   occupancyData: OccupancyProperty[];
   properties: TenantProperty[];
+  refetchReports: () => void;
 }

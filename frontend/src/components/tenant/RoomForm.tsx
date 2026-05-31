@@ -1,4 +1,5 @@
 import type { FC } from 'react';
+import { HelpText } from '@/components/common/HelpText';
 import type { RoomFormInput } from '@/types';
 
 interface RoomFormProps {
@@ -13,6 +14,7 @@ export const RoomForm: FC<RoomFormProps> = ({ isEditing, form, onChange, onSubmi
   return (
     <form onSubmit={onSubmit} className="bg-white dark:bg-slate-800 border dark:border-slate-700 rounded-xl p-5 space-y-4">
       <h3 className="font-semibold text-gray-900 dark:text-white">{isEditing ? 'Edit Kamar' : 'Kamar Baru'}</h3>
+      <HelpText>Jumlah unit menentukan stok kamar per tanggal; gunakan kalender ketersediaan untuk menutup tanggal tertentu.</HelpText>
       <div className="grid grid-cols-2 gap-3">
         <div className="col-span-2">
           <label className="block text-xs font-medium text-gray-600 dark:text-gray-400 mb-1">Tipe Kamar</label>

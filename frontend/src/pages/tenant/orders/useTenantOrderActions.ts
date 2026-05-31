@@ -1,5 +1,7 @@
 import { useState } from "react";
 import { toast } from "react-hot-toast";
+import { getApiErrorMessage } from "@/lib/errorMessage";
+import { getOrderStatusLabel } from "@/lib/orderStatus";
 import { orderService } from "@/services/orderService";
 import type { Order } from "@/types";
 import { canTransitionOrder, getConfirmMessage } from "./orderTransitions";
@@ -37,7 +39,7 @@ const requestStatusUpdate = (
 
 const validateTransition = (order: Order, status: string) => {
   if (canTransitionOrder(order.status, status)) return true;
-  toast.error(`Gagal: Transisi status dari ${order.status} ke ${status} tidak diperbolehkan.`);
+  toast.error(`Transisi status dari ${getOrderStatusLabel(order.status)} ke ${getOrderStatusLabel(status)} tidak diperbolehkan.`);
   return false;
 };
 
@@ -62,6 +64,6 @@ const confirmStatusUpdate = async (
 ) => {
   setUpdating(orderId);
   try { await orderService.updateOrderStatus(orderId, status); toast.success("Status pesanan berhasil diperbarui!"); refetch(); }
-  catch { toast.error("Gagal memperbarui status"); }
+  catch (err) { toast.error(getApiErrorMessage(err, "Status pesanan gagal diperbarui. Muat ulang daftar pesanan lalu coba lagi.")); }
   finally { setUpdating(null); }
 };

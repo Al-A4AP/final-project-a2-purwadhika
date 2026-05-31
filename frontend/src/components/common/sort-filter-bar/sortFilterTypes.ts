@@ -24,10 +24,8 @@ export type SortFilterBarProps = {
   resultCount?: number;
   resultLabel?: string;
   hasFilterChanges?: boolean;
-  activeCity?: string;
   onApplyFilters?: () => void;
   onResetFilters?: () => void;
-  onClearCity?: () => void;
 };
 
 export type SortDropdownProps = {

@@ -16,6 +16,7 @@ export interface UserOrderFilterActions {
 
 export interface UserOrdersState {
   comment: string;
+  error: string | null;
   fetchOrders: (page?: number) => void;
   filters: UserOrderFilters;
   filterActions: UserOrderFilterActions;

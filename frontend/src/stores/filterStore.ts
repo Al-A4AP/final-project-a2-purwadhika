@@ -43,6 +43,7 @@ interface FilterStore extends PropertySearchFilters {
   setMaxPrice: (max: number | undefined) => void;
   setAmenities: (amenities: string[]) => void;
   applyFilters: () => void;
+  applyFilterValues: (values: FilterValues) => void;
   resetFilters: () => void;
   getFilterValues: () => FilterValues;
 }
@@ -92,6 +93,16 @@ const initialFilterValues: FilterValues = {
 const normalizePrice = (value?: number) =>
   value === undefined ? undefined : Math.max(0, Number(value));
 
+const normalizeFilters = (values: FilterValues): FilterValues => ({
+  ...values,
+  amenities: values.amenities || [],
+  max_price: normalizePrice(values.max_price),
+  min_price: normalizePrice(values.min_price),
+  order: values.order || "desc",
+  page: values.page || 1,
+  sort: values.sort || "created_at",
+});
+
 export const useFilterStore = create<FilterStore>()(
   persist(
     (set, get) => ({
@@ -117,6 +128,10 @@ export const useFilterStore = create<FilterStore>()(
       setMaxPrice: (max_price) => set({ max_price: normalizePrice(max_price), page: 1 }),
       setAmenities: (amenities) => set({ amenities, page: 1 }),
       applyFilters: () => set({ activeFilters: get().getFilterValues(), appliedAt: Date.now() }),
+      applyFilterValues: (values) => {
+        const next = normalizeFilters(values);
+        set({ ...next, activeFilters: next, appliedAt: Date.now() });
+      },
 
       resetFilters: () => set({ ...initialState, activeFilters: initialFilterValues, appliedAt: Date.now() }),
 
@@ -143,7 +158,7 @@ export const useFilterStore = create<FilterStore>()(
       },
     }),
     {
-      name: "property-filter-storage", // name of the item in the storage (must be unique)
+      name: "property-filter-storage",
     },
   ),
 );

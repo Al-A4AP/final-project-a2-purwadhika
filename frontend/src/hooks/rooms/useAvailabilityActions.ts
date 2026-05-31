@@ -1,8 +1,8 @@
 import { useCallback, useState } from "react";
 import { toast } from "react-hot-toast";
+import { getApiErrorMessage } from "@/lib/errorMessage";
 import { availabilityService, type RoomAvailability } from "@/services/availabilityService";
 import { findAvailabilityForDate, getBlockedDays, getDateKey } from "./roomAvailabilityDates";
-import { getApiErrorMessage } from "./roomError";
 import type { AvailabilitySetter, RoomModalState } from "./roomsTypes";
 
 export const useAvailabilityActions = (modals: RoomModalState) => {
@@ -20,7 +20,7 @@ const useOpenAvailabilityModal = (modals: RoomModalState, setAvailabilities: Ava
 
 const loadAvailability = async (roomId: string, setAvailabilities: AvailabilitySetter) => {
   try { setAvailabilities(await availabilityService.getTenantRoomAvailability(roomId)); }
-  catch { toast.error("Gagal memuat ketersediaan kamar"); }
+  catch (err) { toast.error(getApiErrorMessage(err, "Ketersediaan kamar belum bisa dimuat. Coba buka ulang modal.")); }
 };
 
 const useDayClick = (
@@ -43,5 +43,5 @@ const toggleAvailability = async (
     await availabilityService.setRoomAvailability(roomId, getDateKey(date), existing ? !existing.is_available : false);
     await loadAvailability(roomId, setAvailabilities);
     toast.success("Status ketersediaan diubah");
-  } catch (err) { toast.error(getApiErrorMessage(err, "Gagal mengupdate")); }
+  } catch (err) { toast.error(getApiErrorMessage(err, "Status ketersediaan gagal diperbarui. Coba lagi beberapa saat.")); }
 };

@@ -2,16 +2,12 @@ import type { FC } from 'react';
 import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { Building2, BedDouble, Clock, TrendingUp, Plus } from 'lucide-react';
+import { HelpText } from '@/components/common/HelpText';
 import { tenantService } from '@/services/tenantService';
 import type { DashboardStats, RecentOrder } from '@/types';
+import { ORDER_STATUS_SOFT_CLASSES } from '@/lib/constants';
 import { formatCurrency, formatPrice, formatDate } from '@/lib/formatters';
-
-const STATUS_MAP: Record<string, { label: string; color: string }> = {
-  WAITING_PAYMENT: { label: 'Menunggu Pembayaran', color: 'text-yellow-600 bg-yellow-50' },
-  WAITING_CONFIRMATION: { label: 'Menunggu Konfirmasi', color: 'text-blue-600 bg-blue-50' },
-  PROCESSED: { label: 'Diproses', color: 'text-green-600 bg-green-50' },
-  CANCELLED: { label: 'Dibatalkan', color: 'text-red-600 bg-red-50' },
-};
+import { getOrderStatusLabel } from '@/lib/orderStatus';
 
 interface StatCardProps {
   icon: FC<{ size?: number; className?: string }>;
@@ -51,7 +47,6 @@ const DashboardPage: FC = () => {
 
   return (
     <div className="p-4 md:p-8 space-y-6 md:space-y-8">
-      {/* Header Responsif */}
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div>
           <h1 className="text-2xl font-bold text-gray-900 dark:text-white">Dashboard</h1>
@@ -63,8 +58,8 @@ const DashboardPage: FC = () => {
           <Plus size={16} /> Tambah Properti
         </Link>
       </div>
+      <HelpText>Angka perlu konfirmasi membantu Anda menemukan pembayaran manual yang harus ditinjau lebih dulu.</HelpText>
 
-      {/* Grid StatCard Responsif */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6">
         <StatCard icon={Building2} label="Total Properti" value={stats?.propertyCount || 0} color="text-blue-600 bg-blue-50 dark:bg-blue-900/20" />
         <StatCard icon={BedDouble} label="Total Kamar" value={stats?.roomCount || 0} color="text-purple-600 bg-purple-50 dark:bg-purple-900/20" />
@@ -88,8 +83,8 @@ const DashboardPage: FC = () => {
               </div>
               
               <div className="flex flex-row-reverse sm:flex-col items-center sm:items-end justify-between sm:justify-center gap-2 w-full sm:w-auto mt-2 sm:mt-0 pt-3 sm:pt-0 border-t border-dashed sm:border-none border-gray-200 dark:border-slate-700">
-                <span className={`text-[10px] md:text-xs font-semibold px-2.5 py-1 rounded-full ${STATUS_MAP[ord.status]?.color}`}>
-                  {STATUS_MAP[ord.status]?.label}
+                <span className={`inline-flex justify-center text-center text-[10px] md:text-xs font-semibold px-2.5 py-1 rounded-full ${ORDER_STATUS_SOFT_CLASSES[ord.status]}`}>
+                  {getOrderStatusLabel(ord.status)}
                 </span>
                 <p className="text-sm font-bold text-gray-900 dark:text-white whitespace-nowrap">
                   {formatPrice(ord.total_price)}

@@ -3,6 +3,7 @@ import { useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { Plus, ArrowLeft } from "lucide-react";
 import { tenantService } from "@/services/tenantService";
+import { getApiErrorMessage } from "@/lib/errorMessage";
 import { toast } from "react-hot-toast";
 
 import { RoomCard } from "@/components/tenant/RoomCard";
@@ -10,6 +11,7 @@ import { RoomForm } from "@/components/tenant/RoomForm";
 import { RoomAvailabilityModal } from "@/components/tenant/RoomAvailabilityModal";
 import { RoomPeakRatesModal } from "@/components/tenant/RoomPeakRatesModal";
 import { ConfirmModal } from "@/components/common/ConfirmModal";
+import { HelpText } from "@/components/common/HelpText";
 import { useRoomsLogic } from "@/hooks/useRoomsLogic";
 
 const RoomsPage: FC = () => {
@@ -35,7 +37,7 @@ const RoomsPage: FC = () => {
           await tenantService.deleteRoom(roomId);
           toast.success("Kamar berhasil dihapus");
           fetchRooms();
-        } catch { toast.error("Gagal menghapus kamar"); }
+        } catch (err) { toast.error(getApiErrorMessage(err, "Kamar gagal dihapus. Pastikan tidak ada pesanan aktif untuk kamar ini.")); }
         setConfirmModal((prev) => ({ ...prev, isOpen: false }));
       },
     });
@@ -53,7 +55,7 @@ const RoomsPage: FC = () => {
           }
           toast.success("Peak rate berhasil dihapus");
           fetchRooms();
-        } catch { toast.error("Gagal menghapus peak rate"); }
+        } catch (err) { toast.error(getApiErrorMessage(err, "Peak rate gagal dihapus. Coba muat ulang data kamar lalu ulangi.")); }
         setConfirmModal((prev) => ({ ...prev, isOpen: false }));
       },
     });
@@ -69,6 +71,7 @@ const RoomsPage: FC = () => {
         </button>
         <h1 className="text-2xl font-bold text-gray-900 dark:text-white">Manajemen Kamar</h1>
       </div>
+      <HelpText>Kamar membutuhkan harga, kapasitas, dan minimal satu foto agar properti siap dipesan oleh user.</HelpText>
 
       {!isWholeUnit && (
         <button

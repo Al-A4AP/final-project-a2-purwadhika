@@ -1,5 +1,6 @@
 import type { FC } from 'react';
 import { CreditCard, UploadCloud, Check } from 'lucide-react';
+import { HelpText } from '@/components/common/HelpText';
 import { formatPrice, formatDate } from '@/lib/formatters';
 import type { Order } from '@/types';
 import { canReviewOrder } from '@/lib/orderStatus';
@@ -53,13 +54,16 @@ export const OrderCard: FC<OrderCardProps> = ({
         
         <div>
           {order.status === 'WAITING_PAYMENT' && order.payment_method === 'MANUAL' && (
-            <button 
-              onClick={() => handleUploadClick(order.id)}
-              disabled={uploading === order.id}
-              className="flex items-center gap-2 bg-blue-600 text-white px-4 py-2 rounded-lg font-medium hover:bg-blue-700 transition"
-            >
-              {uploading === order.id ? 'Mengunggah...' : <><UploadCloud size={16}/> Unggah Bukti Bayar</>}
-            </button>
+            <div>
+              <button 
+                onClick={() => handleUploadClick(order.id)}
+                disabled={uploading === order.id}
+                className="flex items-center gap-2 bg-blue-600 text-white px-4 py-2 rounded-lg font-medium hover:bg-blue-700 transition"
+              >
+                {uploading === order.id ? 'Mengunggah...' : <><UploadCloud size={16}/> Unggah Bukti Bayar</>}
+              </button>
+              <HelpText className="mt-2 max-w-xs">Unggah gambar bukti transfer yang jelas agar tenant bisa mengonfirmasi pesanan.</HelpText>
+            </div>
           )}
           {order.status === 'WAITING_PAYMENT' && order.payment_method === 'MIDTRANS' && !order.midtrans_transaction_id && (
             <p className="text-yellow-600 text-xs mt-2 italic">Menunggu pembayaran Midtrans diselesaikan.</p>

@@ -4,6 +4,8 @@ export type ReplyTextMap = Record<string, string>;
 export type SubmittingMap = Record<string, boolean>;
 
 export interface TenantReviewsState {
+  error: string | null;
+  fetchReviews: (page?: number) => Promise<void>;
   handlePageChange: (page: number) => void;
   handleReplyChange: (reviewId: string, text: string) => void;
   handleReplySubmit: (reviewId: string) => Promise<void>;

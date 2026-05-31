@@ -14,7 +14,7 @@ interface OrdersTableProps {
 export const OrdersTable: FC<OrdersTableProps> = ({ orders, updating, handleUpdateStatus }) => {
   return (
     <>
-      <div className="space-y-3 p-3 md:hidden">
+      <div className="space-y-3 md:hidden">
         {orders.length === 0 ? (
           <p className="py-8 text-center text-sm text-gray-500">Belum ada pesanan masuk.</p>
         ) : (
@@ -78,7 +78,8 @@ export const OrdersTable: FC<OrdersTableProps> = ({ orders, updating, handleUpda
                       href={order.payment_proof_url}
                       target="_blank"
                       rel="noreferrer"
-                      className="block mt-2 text-xs text-blue-600 hover:underline items-center gap-1"
+                      className="mt-2 inline-flex items-center gap-1 text-xs text-blue-600 hover:underline"
+                      aria-label={`Lihat bukti bayar ${order.order_number}`}
                     >
                       Lihat Bukti <ExternalLink size={12} />
                     </a>
@@ -90,16 +91,18 @@ export const OrdersTable: FC<OrdersTableProps> = ({ orders, updating, handleUpda
                       <button
                         onClick={() => handleUpdateStatus(order.id, "PROCESSED")}
                         disabled={updating === order.id}
-                        className="p-2 bg-green-50 text-green-600 rounded hover:bg-green-100"
+                        className="flex h-9 w-9 items-center justify-center rounded bg-green-50 text-green-600 hover:bg-green-100 disabled:opacity-50"
                         title="Terima"
+                        aria-label={`Terima pesanan ${order.order_number}`}
                       >
                         <Check size={16} />
                       </button>
                       <button
                         onClick={() => handleUpdateStatus(order.id, "CANCELLED")}
                         disabled={updating === order.id}
-                        className="p-2 bg-red-50 text-red-600 rounded hover:bg-red-100"
+                        className="flex h-9 w-9 items-center justify-center rounded bg-red-50 text-red-600 hover:bg-red-100 disabled:opacity-50"
                         title="Tolak"
+                        aria-label={`Tolak pesanan ${order.order_number}`}
                       >
                         <X size={16} />
                       </button>
@@ -111,6 +114,8 @@ export const OrdersTable: FC<OrdersTableProps> = ({ orders, updating, handleUpda
                         onClick={() => handleUpdateStatus(order.id, "CANCELLED")}
                         disabled={updating === order.id}
                         className="text-xs text-red-600 hover:underline"
+                        title="Batalkan pesanan manual"
+                        aria-label={`Batalkan pesanan ${order.order_number}`}
                       >
                         Batalkan Pesanan
                       </button>

@@ -1,6 +1,7 @@
 import type { FC } from "react";
+import { ORDER_STATUS_FILTER_OPTIONS } from "@/lib/constants";
 import type { TenantProperty } from "@/types";
-import { REPORT_SORT_OPTIONS, REPORT_STATUS_OPTIONS } from "./reportOptions";
+import { REPORT_SORT_OPTIONS } from "./reportOptions";
 import type { ReportsFilterActions, ReportsFilters } from "./reportsTypes";
 import { FilterDate, FilterSelect, TextFilter } from "./FilterControls";
 
@@ -11,7 +12,7 @@ interface ReportsFilterPanelProps {
 }
 
 export const ReportsFilterPanel: FC<ReportsFilterPanelProps> = ({ actions, filters, properties }) => (
-  <div className="bg-white dark:bg-slate-800 p-4 rounded-xl border dark:border-slate-700 flex flex-wrap gap-4 items-end shadow-sm"><FilterSelect label="Properti" value={filters.selectedPropertyId} onChange={actions.setSelectedPropertyId} options={getPropertyOptions(properties)} /><FilterSelect label="Status Transaksi" value={filters.selectedStatus} onChange={actions.setSelectedStatus} options={REPORT_STATUS_OPTIONS} /><TextFilter label="Nama Pemesan" value={filters.userName} onChange={actions.setUserName} placeholder="Cari nama..." /><FilterDate label="Mulai Tanggal" value={filters.startDate} onChange={actions.setStartDate} /><FilterDate label="Sampai Tanggal" value={filters.endDate} onChange={actions.setEndDate} /><FilterSelect label="Urutan Transaksi" value={`${filters.sortBy}-${filters.sortOrder}`} onChange={(value) => applySort(value, actions)} options={REPORT_SORT_OPTIONS} /><button onClick={actions.resetFilters} className="px-4 py-2 border dark:border-slate-700 rounded-lg text-sm text-gray-600 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-slate-700 bg-white dark:bg-slate-900">Reset</button></div>
+  <div className="grid grid-cols-1 gap-4 rounded-xl border bg-white p-4 shadow-sm dark:border-slate-700 dark:bg-slate-800 sm:grid-cols-2 xl:grid-cols-7"><FilterSelect label="Properti" value={filters.selectedPropertyId} onChange={actions.setSelectedPropertyId} options={getPropertyOptions(properties)} /><FilterSelect label="Status Transaksi" value={filters.selectedStatus} onChange={actions.setSelectedStatus} options={ORDER_STATUS_FILTER_OPTIONS} /><TextFilter label="Nama Pemesan" value={filters.userName} onChange={actions.setUserName} placeholder="Cari nama..." /><FilterDate label="Mulai Tanggal" value={filters.startDate} onChange={actions.setStartDate} /><FilterDate label="Sampai Tanggal" value={filters.endDate} onChange={actions.setEndDate} /><FilterSelect label="Urutan Transaksi" value={`${filters.sortBy}-${filters.sortOrder}`} onChange={(value) => applySort(value, actions)} options={REPORT_SORT_OPTIONS} /><button onClick={actions.resetFilters} className="h-10 self-end rounded-lg border bg-white px-4 text-sm text-gray-600 hover:bg-gray-50 dark:border-slate-700 dark:bg-slate-900 dark:text-gray-300 dark:hover:bg-slate-700">Reset</button></div>
 );
 
 const getPropertyOptions = (properties: TenantProperty[]) => [

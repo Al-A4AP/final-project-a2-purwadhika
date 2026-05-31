@@ -2,14 +2,11 @@ import type { FC } from 'react';
 import { useEffect, useState } from 'react';
 import { Link, useParams } from 'react-router-dom';
 import { CheckCircle, Loader2, XCircle } from 'lucide-react';
-import type { AxiosError } from 'axios';
+import { getApiErrorMessage } from '@/lib/errorMessage';
 import { authService } from '@/services/authService';
-import type { ApiResponse } from '@/types';
 
-const getErrorMessage = (err: unknown) => {
-  const axiosErr = err as AxiosError<ApiResponse<null>>;
-  return axiosErr.response?.data?.message || 'Verifikasi email baru gagal';
-};
+const getErrorMessage = (err: unknown) =>
+  getApiErrorMessage(err, 'Verifikasi email baru gagal');
 
 const VerifyEmailChangePage: FC = () => {
   const { token } = useParams<{ token: string }>();

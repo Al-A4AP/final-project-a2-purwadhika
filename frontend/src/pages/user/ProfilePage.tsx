@@ -6,17 +6,13 @@ import { EmailChangeForm } from '@/components/user/profile/EmailChangeForm';
 import { PasswordChangeForm } from '@/components/user/profile/PasswordChangeForm';
 import { PasswordUnavailableCard } from '@/components/user/profile/PasswordUnavailableCard';
 import { ProfileInfoForm } from '@/components/user/profile/ProfileInfoForm';
+import { getApiErrorMessage } from '@/lib/errorMessage';
 import { userService } from '@/services/userService';
 import { useAuthStore } from '@/stores/authStore';
 
 const inputClass = 'w-full px-4 py-2.5 border border-gray-300 dark:border-slate-600 dark:bg-slate-700 dark:text-white rounded-lg focus:ring-2 focus:ring-red-500 outline-none';
 const allowedAvatarTypes = ['image/jpeg', 'image/png', 'image/gif'];
 const maxAvatarSize = 1024 * 1024;
-
-const getApiMessage = (err: unknown, fallback: string) => {
-  const error = err as { response?: { data?: { message?: string } } };
-  return error.response?.data?.message || fallback;
-};
 
 const isValidAvatar = (file: File) =>
   allowedAvatarTypes.includes(file.type) && file.size <= maxAvatarSize;
@@ -35,7 +31,7 @@ const ProfilePage: FC = () => {
       setUser(updated);
       toast.success('Profil berhasil disimpan!');
     } catch (err: unknown) {
-      toast.error(getApiMessage(err, 'Gagal menyimpan perubahan'));
+      toast.error(getApiErrorMessage(err, 'Profil belum bisa disimpan. Periksa data lalu coba lagi.'));
     }
   };
 
@@ -45,7 +41,7 @@ const ProfilePage: FC = () => {
       setUser(updated);
       toast.success('Link verifikasi dikirim ke email baru.');
     } catch (err: unknown) {
-      toast.error(getApiMessage(err, 'Gagal mengirim verifikasi email'));
+      toast.error(getApiErrorMessage(err, 'Verifikasi email baru gagal dikirim. Pastikan email valid lalu coba lagi.'));
     }
   };
 
@@ -54,7 +50,7 @@ const ProfilePage: FC = () => {
       await userService.changePassword(data);
       toast.success('Password berhasil diubah!');
     } catch (err: unknown) {
-      toast.error(getApiMessage(err, 'Gagal mengubah password'));
+      toast.error(getApiErrorMessage(err, 'Password gagal diubah. Periksa password lama dan aturan password baru.'));
     }
   };
 
@@ -70,8 +66,8 @@ const ProfilePage: FC = () => {
       const updated = await userService.updateAvatar(file);
       setUser(updated);
       toast.success('Foto profil berhasil diperbarui');
-    } catch {
-      toast.error('Gagal upload avatar');
+    } catch (err) {
+      toast.error(getApiErrorMessage(err, 'Foto profil gagal diunggah. Gunakan JPG, PNG, atau GIF maksimal 1MB.'));
     } finally {
       setUploadingAvatar(false);
     }

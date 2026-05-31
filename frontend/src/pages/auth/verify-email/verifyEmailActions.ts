@@ -1,13 +1,10 @@
 import type { Dispatch, SetStateAction } from "react";
-import type { AxiosError } from "axios";
 import { toast } from "react-hot-toast";
-import type { ApiResponse } from "@/types";
+import { getApiErrorMessage } from "@/lib/errorMessage";
 import type { VerifyEmailStatus } from "./verifyEmailTypes";
 
-export const getVerifyEmailError = (err: unknown) => {
-  const axiosErr = err as AxiosError<ApiResponse<null>>;
-  return axiosErr.response?.data?.message || "Verifikasi gagal";
-};
+export const getVerifyEmailError = (err: unknown) =>
+  getApiErrorMessage(err, "Verifikasi gagal");
 
 export const setVerifyEmailError = (
   setStatus: Dispatch<SetStateAction<VerifyEmailStatus>>,

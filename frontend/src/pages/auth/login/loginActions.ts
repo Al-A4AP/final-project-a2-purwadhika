@@ -4,7 +4,8 @@ import { toast } from "react-hot-toast";
 import type { AxiosError } from "axios";
 import { authService } from "@/services/authService";
 import { getRoleHome } from "@/lib/authRole";
-import type { ApiResponse, Role, User } from "@/types";
+import { getApiErrorMessage } from "@/lib/errorMessage";
+import type { Role, User } from "@/types";
 import type { LoginInput } from "@/validations/auth";
 
 export const loginWithPassword = async (
@@ -26,8 +27,8 @@ export const handleLoginError = (
   setError: UseFormSetError<LoginInput>,
   showResend: (email: string) => void,
 ) => {
-  const axiosErr = err as AxiosError<ApiResponse<null>>;
-  const msg = axiosErr.response?.data?.message || "Login gagal";
+  const axiosErr = err as AxiosError;
+  const msg = getApiErrorMessage(err, "Login gagal");
   toast.error(msg);
   setError("root", { message: msg });
   if (axiosErr.response?.status === 403) showResend(email);

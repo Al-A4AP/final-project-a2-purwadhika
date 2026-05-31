@@ -1,6 +1,7 @@
 import { useCallback } from "react";
 import type { FormEvent } from "react";
 import { toast } from "react-hot-toast";
+import { getApiErrorMessage } from "@/lib/errorMessage";
 import { tenantService } from "@/services/tenantService";
 import type { RoomFormState } from "./roomsTypes";
 
@@ -23,5 +24,5 @@ const saveRoom = async (propertyId: string, state: RoomFormState, fetchRooms: ()
     else await tenantService.createRoom(propertyId, state.form);
     toast.success(state.editingRoom ? "Kamar berhasil diperbarui!" : "Kamar baru berhasil ditambahkan!");
     state.setShowForm(false); state.resetRoomForm(); fetchRooms();
-  } catch { toast.error("Gagal menyimpan kamar"); }
+  } catch (err) { toast.error(getApiErrorMessage(err, "Kamar gagal disimpan. Periksa tipe kamar, harga, kapasitas, dan gambar.")); }
 };

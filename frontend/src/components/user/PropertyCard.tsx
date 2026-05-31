@@ -16,7 +16,6 @@ const PropertyCard: FC<PropertyCardProps> = ({ property }) => {
       to={`/properties/${property.id}`}
       className="bg-white dark:bg-slate-800 rounded-lg overflow-hidden shadow hover:shadow-xl transition-shadow duration-300"
     >
-      {/* Image */}
       <div className="relative w-full h-48 bg-gray-200 dark:bg-slate-700 overflow-hidden">
         <img
           src={image}
@@ -31,19 +30,16 @@ const PropertyCard: FC<PropertyCardProps> = ({ property }) => {
         )}
       </div>
 
-      {/* Content */}
       <div className="p-4">
         <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-1 line-clamp-2">
           {property.name}
         </h3>
 
-        {/* Location */}
         <div className="flex items-center text-sm text-gray-600 dark:text-gray-400 mb-3">
           <MapPin size={16} className="mr-1" />
           {property.city}
         </div>
 
-        {/* Rating */}
         {property.rating !== undefined && (
           <div className="flex items-center text-sm mb-3">
             <div className="flex items-center">
@@ -61,7 +57,6 @@ const PropertyCard: FC<PropertyCardProps> = ({ property }) => {
           </div>
         )}
 
-        {/* Price */}
         <div className="pt-3 border-t border-gray-200 dark:border-slate-700">
           <div className="text-2xl font-bold text-red-600">
             {property.min_price === 0 ? (

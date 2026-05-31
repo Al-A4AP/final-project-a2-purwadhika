@@ -1,5 +1,6 @@
 import type { FC } from "react";
 import type { TenantProperty } from "@/types";
+import { ORDER_STATUS_FILTER_OPTIONS } from "@/lib/constants";
 
 interface OrdersFilterProps {
   properties: TenantProperty[];
@@ -35,8 +36,8 @@ export const OrdersFilter: FC<OrdersFilterProps> = ({
   resetFilters,
 }) => {
   return (
-    <div className="bg-white dark:bg-slate-800 p-4 rounded-xl border dark:border-slate-700 mb-6 flex flex-wrap gap-4 items-end shadow-sm">
-      <div className="flex-1 min-w-50">
+    <div className="mb-6 grid grid-cols-1 gap-4 rounded-xl border bg-white p-4 shadow-sm dark:border-slate-700 dark:bg-slate-800 sm:grid-cols-2 xl:grid-cols-6">
+      <div className="min-w-0 sm:col-span-2 xl:col-span-1">
         <label className="block text-xs font-semibold text-gray-500 dark:text-gray-400 mb-1.5 uppercase tracking-wider">
           Properti
         </label>
@@ -54,7 +55,7 @@ export const OrdersFilter: FC<OrdersFilterProps> = ({
         </select>
       </div>
 
-      <div className="w-45">
+      <div className="min-w-0">
         <label className="block text-xs font-semibold text-gray-500 dark:text-gray-400 mb-1.5 uppercase tracking-wider">
           Status
         </label>
@@ -63,16 +64,15 @@ export const OrdersFilter: FC<OrdersFilterProps> = ({
           onChange={(e) => setSelectedStatus(e.target.value)}
           className="w-full text-sm border dark:border-slate-700 bg-white dark:bg-slate-900 rounded-lg p-2 text-gray-900 dark:text-white"
         >
-          <option value="">Semua Status</option>
-          <option value="WAITING_PAYMENT">Menunggu Pembayaran</option>
-          <option value="WAITING_CONFIRMATION">Menunggu Konfirmasi</option>
-          <option value="PROCESSED">Dikonfirmasi</option>
-          <option value="COMPLETED">Selesai Menginap</option>
-          <option value="CANCELLED">Dibatalkan</option>
+          {ORDER_STATUS_FILTER_OPTIONS.map((option) => (
+            <option key={option.value || "all"} value={option.value}>
+              {option.label}
+            </option>
+          ))}
         </select>
       </div>
 
-      <div className="w-40">
+      <div className="min-w-0">
         <label className="block text-xs font-semibold text-gray-500 dark:text-gray-400 mb-1.5 uppercase tracking-wider">
           Mulai Tanggal
         </label>
@@ -84,7 +84,7 @@ export const OrdersFilter: FC<OrdersFilterProps> = ({
         />
       </div>
 
-      <div className="w-40">
+      <div className="min-w-0">
         <label className="block text-xs font-semibold text-gray-500 dark:text-gray-400 mb-1.5 uppercase tracking-wider">
           Sampai Tanggal
         </label>
@@ -96,7 +96,7 @@ export const OrdersFilter: FC<OrdersFilterProps> = ({
         />
       </div>
 
-      <div className="w-45">
+      <div className="min-w-0">
         <label className="block text-xs font-semibold text-gray-500 dark:text-gray-400 mb-1.5 uppercase tracking-wider">
           Urutkan
         </label>
@@ -118,7 +118,7 @@ export const OrdersFilter: FC<OrdersFilterProps> = ({
 
       <button
         onClick={resetFilters}
-        className="px-4 py-2 border dark:border-slate-700 rounded-lg text-sm text-gray-600 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-slate-700"
+        className="h-10 rounded-lg border px-4 text-sm text-gray-600 hover:bg-gray-50 dark:border-slate-700 dark:text-gray-300 dark:hover:bg-slate-700"
       >
         Reset
       </button>

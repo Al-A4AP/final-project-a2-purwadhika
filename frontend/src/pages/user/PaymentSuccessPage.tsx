@@ -8,10 +8,8 @@ const PaymentSuccessPage: FC = () => {
   const navigate = useNavigate();
 
   useEffect(() => {
-    // Tampilkan notifikasi sukses saat halaman dimuat
     toast.success('Pembayaran Berhasil diproses!');
     
-    // Redirect ke halaman pesanan setelah 3 detik
     const timer = setTimeout(() => {
       navigate('/orders');
     }, 3000);

@@ -4,10 +4,9 @@ import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useSearchParams, Link, useNavigate } from 'react-router-dom';
 import { Lock, Loader2, CheckCircle } from 'lucide-react';
+import { getApiErrorMessage } from '@/lib/errorMessage';
 import { resetPasswordSchema, type ResetPasswordInput } from '@/validations/auth';
 import { authService } from '@/services/authService';
-import type { AxiosError } from 'axios';
-import type { ApiResponse } from '@/types';
 import { toast } from 'react-hot-toast';
 
 const ResetPasswordPage: FC = () => {
@@ -27,8 +26,7 @@ const ResetPasswordPage: FC = () => {
       toast.success('Password berhasil direset!');
       setTimeout(() => navigate('/auth/login'), 2000);
     } catch (err) {
-      const axiosErr = err as AxiosError<ApiResponse<null>>;
-      const msg = axiosErr.response?.data?.message || 'Reset gagal, token tidak valid.';
+      const msg = getApiErrorMessage(err, 'Reset gagal, token tidak valid.');
       toast.error(msg);
       setError('root', { message: msg });
     }

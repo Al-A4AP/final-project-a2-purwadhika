@@ -2,6 +2,7 @@ import type { FC } from 'react';
 import { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { propertyService } from '@/services/propertyService';
+import { getApiErrorMessage } from '@/lib/errorMessage';
 import { useFilterStore } from '@/stores/filterStore';
 import { reviewService } from '@/services/reviewService';
 import { availabilityService } from '@/services/availabilityService';
@@ -90,7 +91,7 @@ const PropertyDetailPage: FC = () => {
       const data = await availabilityService.getRoomAvailability(room.id);
       setBlockedDays(data.filter((a) => !a.is_available).map((a) => new Date(a.date)));
       setIsAvailModalOpen(true);
-    } catch { toast.error('Gagal mengambil data ketersediaan'); }
+    } catch (err) { toast.error(getApiErrorMessage(err, 'Ketersediaan kamar belum bisa dimuat. Coba lagi beberapa saat.')); }
   };
 
   if (loading) return (

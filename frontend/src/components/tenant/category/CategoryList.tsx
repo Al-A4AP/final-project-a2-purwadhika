@@ -1,4 +1,5 @@
 import type { FC } from 'react';
+import { EmptyState } from '@/components/common/EmptyState';
 import { Pencil, Trash2 } from 'lucide-react';
 import type { PropertyCategory } from '@/types';
 
@@ -14,8 +15,8 @@ const actionClass = 'flex h-10 w-10 items-center justify-center rounded-lg trans
 
 const CategoryActions: FC<Omit<CategoryListProps, 'categories' | 'loading'> & { category: PropertyCategory }> = ({ category, deletingId, onEdit, onDelete }) => (
   <div className="flex items-center justify-end gap-2">
-    <button onClick={() => onEdit(category)} className={`${actionClass} text-blue-600 hover:bg-blue-50 dark:hover:bg-blue-900/20`} aria-label="Edit kategori"><Pencil size={17} /></button>
-    <button onClick={() => onDelete(category)} disabled={deletingId === category.id} className={`${actionClass} text-red-600 hover:bg-red-50 disabled:opacity-50 dark:hover:bg-red-900/20`} aria-label="Hapus kategori"><Trash2 size={17} /></button>
+    <button onClick={() => onEdit(category)} className={`${actionClass} text-blue-600 hover:bg-blue-50 dark:hover:bg-blue-900/20`} title="Edit kategori" aria-label={`Edit kategori ${category.name}`}><Pencil size={17} /></button>
+    <button onClick={() => onDelete(category)} disabled={deletingId === category.id} className={`${actionClass} text-red-600 hover:bg-red-50 disabled:opacity-50 dark:hover:bg-red-900/20`} title="Hapus kategori" aria-label={`Hapus kategori ${category.name}`}><Trash2 size={17} /></button>
   </div>
 );
 
@@ -35,7 +36,7 @@ const CategoryCard: FC<Omit<CategoryListProps, 'categories' | 'loading'> & { cat
 
 export const CategoryList: FC<CategoryListProps> = ({ categories, loading, ...actions }) => {
   if (loading) return <div className="space-y-3">{[1, 2, 3].map((item) => <div key={item} className="h-16 animate-pulse rounded-lg bg-gray-200 dark:bg-slate-700" />)}</div>;
-  if (!categories.length) return <div className="rounded-lg border border-dashed p-10 text-center text-sm text-gray-500 dark:border-slate-700">Belum ada kategori ditemukan</div>;
+  if (!categories.length) return <EmptyState title="Belum ada kategori ditemukan" description="Kategori yang Anda buat akan muncul di daftar ini." />;
   return (
     <>
       <div className="space-y-3 md:hidden">{categories.map((category) => <CategoryCard key={category.id} category={category} {...actions} />)}</div>

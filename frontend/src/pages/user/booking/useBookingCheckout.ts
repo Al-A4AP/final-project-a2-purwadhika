@@ -1,9 +1,9 @@
 import { useState } from "react";
 import type { NavigateFunction } from "react-router-dom";
-import type { AxiosError } from "axios";
 import { toast } from "react-hot-toast";
 import { orderService } from "@/services/orderService";
-import type { ApiResponse, PropertyDetail, Room } from "@/types";
+import { getApiErrorMessage } from "@/lib/errorMessage";
+import type { PropertyDetail, Room } from "@/types";
 import { createCheckoutPayload } from "./checkoutPayload";
 import { validateCheckout } from "./checkoutValidation";
 import { openSnapPayment } from "./snapPayment";
@@ -23,7 +23,7 @@ const checkout = async (params: Parameters<typeof useBookingCheckout>[0], setPro
   if (!validateCheckout(params.query, params.room, params.guests)) return;
   setProcessing(true);
   try { await submitCheckout(params); }
-  catch (err) { toast.error(getCheckoutError(err)); }
+  catch (err) { toast.error(getApiErrorMessage(err, "Checkout gagal. Periksa tanggal, jumlah tamu, dan metode pembayaran lalu coba lagi.")); }
   finally { setProcessing(false); }
 };
 
@@ -33,9 +33,4 @@ const submitCheckout = async (params: Parameters<typeof useBookingCheckout>[0]) 
   if (params.paymentMethod === "MIDTRANS" && result.snapToken) return openSnapPayment(result.snapToken, params.navigate);
   toast.success("Pemesanan berhasil dibuat!");
   params.navigate("/orders");
-};
-
-const getCheckoutError = (err: unknown) => {
-  const axiosError = err as AxiosError<ApiResponse<null>>;
-  return axiosError.response?.data?.message || "Checkout gagal";
 };

@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useReducer } from 'react';
 import { toast } from 'react-hot-toast';
+import { getApiErrorMessage } from '@/lib/errorMessage';
 import { tenantService } from '@/services/tenantService';
 import type { PaginationMeta, PropertyCategory } from '@/types';
 
@@ -14,6 +15,7 @@ interface CategoryState {
   search: string;
   sortBy: SortBy;
   sortOrder: SortOrder;
+  error: string | null;
   loading: boolean;
   saving: boolean;
   deletingId: string | null;
@@ -26,13 +28,13 @@ const initialState: CategoryState = {
   search: '',
   sortBy: 'name',
   sortOrder: 'asc',
+  error: null,
   loading: true,
   saving: false,
   deletingId: null,
 };
 
 const reducer = (state: CategoryState, action: { patch: Patch }) => ({ ...state, ...action.patch });
-const apiMessage = (err: unknown, fallback: string) => (err as { response?: { data?: { message?: string } } }).response?.data?.message || fallback;
 
 const persistCategory = async (name: string, editing?: PropertyCategory | null) => {
   if (editing) return tenantService.updateCategory(editing.id, name);
@@ -41,15 +43,21 @@ const persistCategory = async (name: string, editing?: PropertyCategory | null) 
 
 const useCategoryLoad = (state: CategoryState, dispatch: React.Dispatch<{ patch: Patch }>) => {
   const load = useCallback(async (page = 1) => {
-    dispatch({ patch: { loading: true } });
+    dispatch({ patch: { error: null, loading: true } });
     try {
       const data = await tenantService.getCategories({ search: state.search, sortBy: state.sortBy, sortOrder: state.sortOrder, page, limit: 10 });
-      dispatch({ patch: { categories: data.categories, pagination: data.pagination } });
-    } catch { toast.error('Gagal memuat kategori'); }
+      dispatch({ patch: { categories: data.categories, error: null, pagination: data.pagination } });
+    } catch (err) { handleCategoryLoadError(err, dispatch); }
     finally { dispatch({ patch: { loading: false } }); }
   }, [state.search, state.sortBy, state.sortOrder, dispatch]);
   useEffect(() => { Promise.resolve().then(() => load(1)); }, [load]);
   return load;
+};
+
+const handleCategoryLoadError = (err: unknown, dispatch: React.Dispatch<{ patch: Patch }>) => {
+  const message = getApiErrorMessage(err, 'Kategori belum bisa dimuat. Periksa koneksi lalu coba lagi.');
+  dispatch({ patch: { categories: [], error: message } });
+  toast.error(message);
 };
 
 const useCategorySave = (state: CategoryState, dispatch: React.Dispatch<{ patch: Patch }>, load: (page?: number) => Promise<void>) => (
@@ -60,7 +68,7 @@ const useCategorySave = (state: CategoryState, dispatch: React.Dispatch<{ patch:
       await persistCategory(name.trim(), editing);
       toast.success(editing ? 'Kategori berhasil diperbarui' : 'Kategori berhasil dibuat');
       await load(editing ? state.pagination.page : 1);
-    } catch (err: unknown) { toast.error(apiMessage(err, 'Gagal menyimpan kategori')); }
+    } catch (err) { toast.error(getApiErrorMessage(err, getCategorySaveFallback(editing))); }
     finally { dispatch({ patch: { saving: false } }); }
   }, [dispatch, load, state.pagination.page])
 );
@@ -72,7 +80,7 @@ const useCategoryDelete = (state: CategoryState, dispatch: React.Dispatch<{ patc
       await tenantService.deleteCategory(category.id);
       toast.success('Kategori berhasil dihapus');
       await load(state.pagination.page);
-    } catch (err: unknown) { toast.error(apiMessage(err, 'Gagal menghapus kategori')); }
+    } catch (err) { toast.error(getApiErrorMessage(err, `Kategori "${category.name}" gagal dihapus. Pastikan tidak sedang dipakai properti.`)); }
     finally { dispatch({ patch: { deletingId: null } }); }
   }, [dispatch, load, state.pagination.page])
 );
@@ -91,3 +99,8 @@ export const useTenantCategories = () => {
   const controls = useCategoryControls(state, dispatch, load);
   return { ...state, ...controls, load };
 };
+
+const getCategorySaveFallback = (editing?: PropertyCategory | null) =>
+  editing
+    ? 'Kategori gagal diperbarui. Pastikan nama belum digunakan.'
+    : 'Kategori gagal dibuat. Pastikan nama belum digunakan.';

@@ -1,14 +1,22 @@
 import type { FC, ReactNode } from "react";
 import { CheckCircle2, Clock, XCircle } from "lucide-react";
+import type { OrderStatus } from "@/types";
+import { ORDER_STATUS_SOFT_CLASSES } from "@/lib/constants";
+import { getOrderStatusLabel, isOrderStatus } from "@/lib/orderStatus";
 
-const badgeClass = "flex items-center gap-1 px-2 py-1 rounded-md text-xs font-medium";
+const badgeClass = "inline-flex items-center justify-center gap-1 px-2 py-1 rounded-md text-center text-xs font-medium";
 
-const BADGES: Record<string, ReactNode> = {
-  WAITING_PAYMENT: <span className={`${badgeClass} text-yellow-600 bg-yellow-50`}><Clock size={14} /> Menunggu Pembayaran</span>,
-  WAITING_CONFIRMATION: <span className={`${badgeClass} text-blue-600 bg-blue-50`}><Clock size={14} /> Menunggu Konfirmasi</span>,
-  PROCESSED: <span className={`${badgeClass} text-green-600 bg-green-50`}><CheckCircle2 size={14} /> Dikonfirmasi</span>,
-  COMPLETED: <span className={`${badgeClass} text-emerald-600 bg-emerald-50`}><CheckCircle2 size={14} /> Selesai Menginap</span>,
-  CANCELLED: <span className={`${badgeClass} text-red-600 bg-red-50`}><XCircle size={14} /> Dibatalkan</span>,
+const STATUS_ICONS: Record<OrderStatus, ReactNode> = {
+  WAITING_PAYMENT: <Clock size={14} />,
+  WAITING_CONFIRMATION: <Clock size={14} />,
+  PROCESSED: <CheckCircle2 size={14} />,
+  COMPLETED: <CheckCircle2 size={14} />,
+  CANCELLED: <XCircle size={14} />,
 };
 
-export const UserOrderStatusBadge: FC<{ status: string }> = ({ status }) => <>{BADGES[status] || null}</>;
+export const UserOrderStatusBadge: FC<{ status: string }> = ({ status }) =>
+  isOrderStatus(status) ? (
+    <span className={`${badgeClass} ${ORDER_STATUS_SOFT_CLASSES[status]}`}>
+      {STATUS_ICONS[status]} {getOrderStatusLabel(status)}
+    </span>
+  ) : null;

@@ -2,6 +2,8 @@ import type { FC } from 'react';
 import { useState } from 'react';
 import { Tags } from 'lucide-react';
 import { ConfirmModal } from '@/components/common/ConfirmModal';
+import { ErrorState } from '@/components/common/ErrorState';
+import { HelpText } from '@/components/common/HelpText';
 import { Pagination } from '@/components/common/Pagination';
 import SortFilterBar, { type SortGroup } from '@/components/common/SortFilterBar';
 import { CategoryForm } from '@/components/tenant/category/CategoryForm';
@@ -40,6 +42,7 @@ const CategoriesPage: FC = () => {
         </div>
         <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">Kelola kategori yang dipakai saat membuat properti.</p>
       </div>
+      <HelpText>Kategori akan muncul di form properti dan filter pencarian user, jadi gunakan nama yang singkat dan mudah dipahami.</HelpText>
       <CategoryForm key={editing?.id || 'new'} editing={editing} saving={data.saving} onSubmit={handleSave} onCancel={() => setEditing(null)} />
       <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
         <div className="flex max-w-md flex-1 gap-2">
@@ -48,8 +51,8 @@ const CategoriesPage: FC = () => {
         </div>
         <SortFilterBar sortGroups={sortGroups} currentSort={data.sortBy} currentOrder={data.sortOrder} onChange={(sort, order) => data.changeSort(sort as 'name' | 'updated_at', order)} resultCount={data.pagination.total} resultLabel="kategori" />
       </div>
-      <CategoryList categories={data.categories} loading={data.loading} deletingId={data.deletingId} onEdit={setEditing} onDelete={setTargetDelete} />
-      <Pagination currentPage={data.pagination.page} totalPages={totalPages} totalItems={data.pagination.total} onPageChange={data.load} />
+      {data.error ? <ErrorState title="Kategori belum bisa dimuat" message={data.error} onRetry={() => data.load(data.pagination.page || 1)} /> : <CategoryList categories={data.categories} loading={data.loading} deletingId={data.deletingId} onEdit={setEditing} onDelete={setTargetDelete} />}
+      {!data.loading && !data.error && data.categories.length > 0 && <Pagination currentPage={data.pagination.page} totalPages={totalPages} totalItems={data.pagination.total} onPageChange={data.load} />}
       <ConfirmModal isOpen={Boolean(targetDelete)} title="Hapus Kategori" message={`Hapus kategori "${targetDelete?.name}"? Kategori yang sedang dipakai properti tidak dapat dihapus.`} confirmText="Ya" onConfirm={handleDelete} onCancel={() => setTargetDelete(null)} />
     </div>
   );

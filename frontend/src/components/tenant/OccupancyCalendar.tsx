@@ -37,20 +37,20 @@ export const OccupancyCalendar: FC<Props> = ({ data }) => {
   };
 
   return (
-    <div className="bg-white dark:bg-slate-800 p-6 rounded-xl shadow-sm border dark:border-slate-700 space-y-6">
+    <div className="space-y-5 rounded-xl border bg-white p-4 shadow-sm dark:border-slate-700 dark:bg-slate-800 md:space-y-6 md:p-6">
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div className="flex items-center gap-2">
           <Calendar className="text-red-600" size={24} />
           <h2 className="text-lg font-bold text-gray-900 dark:text-white">Kalender Okupansi Kamar</h2>
         </div>
-        <div className="flex items-center gap-4">
-          <button onClick={handlePrevMonth} className="p-2 border dark:border-slate-600 rounded-lg hover:bg-gray-100 dark:hover:bg-slate-700 transition"><ChevronLeft size={18} /></button>
+        <div className="flex w-full items-center justify-between gap-3 sm:w-auto sm:justify-start sm:gap-4">
+          <button onClick={handlePrevMonth} className="flex h-10 w-10 items-center justify-center rounded-lg border transition hover:bg-gray-100 dark:border-slate-600 dark:hover:bg-slate-700" title="Bulan sebelumnya" aria-label="Bulan sebelumnya"><ChevronLeft size={18} /></button>
           <span className="text-md font-semibold text-gray-800 dark:text-gray-200">{MONTH_NAMES[currentMonth]} {currentYear}</span>
-          <button onClick={handleNextMonth} className="p-2 border dark:border-slate-600 rounded-lg hover:bg-gray-100 dark:hover:bg-slate-700 transition"><ChevronRight size={18} /></button>
+          <button onClick={handleNextMonth} className="flex h-10 w-10 items-center justify-center rounded-lg border transition hover:bg-gray-100 dark:border-slate-600 dark:hover:bg-slate-700" title="Bulan berikutnya" aria-label="Bulan berikutnya"><ChevronRight size={18} /></button>
         </div>
       </div>
 
-      <div className="flex items-center gap-6 text-xs text-gray-500 dark:text-gray-400">
+      <div className="flex flex-wrap items-center gap-4 text-xs text-gray-500 dark:text-gray-400 md:gap-6">
         <div className="flex items-center gap-2"><div className="w-4 h-4 bg-emerald-500 rounded border border-emerald-600"></div><span>Kosong / Tersedia</span></div>
         <div className="flex items-center gap-2"><div className="w-4 h-4 bg-orange-500 rounded border border-orange-600"></div><span>Terisi / Dipesan</span></div>
       </div>

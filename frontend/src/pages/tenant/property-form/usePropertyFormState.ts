@@ -3,10 +3,10 @@ import { useNavigate, useParams } from "react-router-dom";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { toast } from "react-hot-toast";
-import type { AxiosError } from "axios";
+import { getApiErrorMessage } from "@/lib/errorMessage";
 import { propertyService } from "@/services/propertyService";
 import { tenantService } from "@/services/tenantService";
-import type { ApiResponse, PropertyCategory } from "@/types";
+import type { PropertyCategory } from "@/types";
 import { buildPropertyFormData, toPropertyFormValues } from "./propertyFormData";
 import { propertyFormSchema, type PropertyFormInput } from "./propertyFormSchema";
 
@@ -61,8 +61,7 @@ const loadPropertyForEdit = (
 }).catch((err) => handleLoadError(err, navigate));
 
 const handleLoadError = (err: unknown, navigate: (path: string) => void) => {
-  const axiosErr = err as AxiosError<ApiResponse<null>>;
-  toast.error(axiosErr.response?.data?.message || "Properti tidak ditemukan atau Anda tidak memiliki akses");
+  toast.error(getApiErrorMessage(err, "Properti tidak ditemukan atau Anda tidak memiliki akses."));
   navigate("/tenant/properties");
 };
 
@@ -83,8 +82,7 @@ const saveProperty = (id: string | undefined, isEdit: boolean, formData: FormDat
 };
 
 const handleSubmitError = (err: unknown) => {
-  const axiosErr = err as AxiosError<ApiResponse<null>>;
-  toast.error(axiosErr.response?.data?.message || "Gagal menyimpan properti");
+  toast.error(getApiErrorMessage(err, "Properti gagal disimpan. Periksa nama, kategori, lokasi, fasilitas, dan gambar."));
 };
 
 const updateFilePreview = (

@@ -1,10 +1,10 @@
 import { useCallback, useState } from "react";
 import type { FormEvent } from "react";
 import { toast } from "react-hot-toast";
+import { getApiErrorMessage } from "@/lib/errorMessage";
 import { tenantService } from "@/services/tenantService";
 import type { PeakSeasonRate } from "@/types";
 import { createEmptyPeakForm } from "./roomFormData";
-import { getApiErrorMessage } from "./roomError";
 import type { PeakRateForm, PeakRateSetter, RoomModalState } from "./roomsTypes";
 
 export const usePeakRateActions = (modals: RoomModalState, fetchRooms: () => void) => {
@@ -38,7 +38,7 @@ const useAddPeakRate = (
 
 const loadPeakRates = async (roomId: string, setPeakRates: PeakRateSetter) => {
   try { setPeakRates(await tenantService.getPeakRates(roomId)); }
-  catch { toast.error("Gagal memuat aturan peak season"); }
+  catch (err) { toast.error(getApiErrorMessage(err, "Aturan peak season belum bisa dimuat. Coba buka ulang modal.")); }
 };
 
 const addPeakRate = async (
@@ -52,5 +52,5 @@ const addPeakRate = async (
     await tenantService.createPeakRate(roomId, peakForm);
     await loadPeakRates(roomId, setPeakRates);
     setPeakForm(createEmptyPeakForm()); toast.success("Peak rate berhasil ditambahkan!"); fetchRooms();
-  } catch (err) { toast.error(getApiErrorMessage(err, "Gagal")); }
+  } catch (err) { toast.error(getApiErrorMessage(err, "Peak rate gagal ditambahkan. Pastikan tanggal dan nilai tambahan valid.")); }
 };

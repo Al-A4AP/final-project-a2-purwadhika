@@ -1,9 +1,9 @@
 import { useCallback, useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { toast } from "react-hot-toast";
+import { getApiErrorMessage } from "@/lib/errorMessage";
 import { tenantService } from "@/services/tenantService";
 import type { RoomWithPeakRates, TenantPropertyDetail } from "@/types";
-import { getApiErrorMessage } from "./roomError";
 
 export const useRoomsData = (id?: string) => {
   const navigate = useNavigate();
@@ -21,7 +21,7 @@ const loadRooms = async (id: string | undefined, navigate: ReturnType<typeof use
     const [roomsData, propData] = await Promise.all([tenantService.getRooms(id), tenantService.getProperty(id)]);
     setRooms(roomsData); setProperty(propData);
   } catch (err) {
-    toast.error(getApiErrorMessage(err, "Properti tidak ditemukan"));
+    toast.error(getApiErrorMessage(err, "Properti tidak ditemukan atau Anda tidak memiliki akses ke data kamar."));
     navigate("/tenant/properties");
   } finally { setLoading(false); }
 };

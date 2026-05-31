@@ -7,5 +7,5 @@ import { TransactionsBarChart } from "./TransactionsBarChart";
 import type { ReportsFilterActions } from "./reportsTypes";
 
 export const ReportsCharts: FC<{ actions: ReportsFilterActions; analytics: DashboardAnalytics }> = ({ actions, analytics }) => (
-  <div className="grid grid-cols-1 lg:grid-cols-2 gap-8"><ChartCard title="Status Pesanan"><OrderStatusPieChart data={analytics.ordersByStatus} /></ChartCard><ChartCard title="Perbandingan Transaksi"><TransactionsBarChart data={analytics.ordersByStatus} /></ChartCard><ReportOrdersCard analytics={analytics} onPageChange={actions.setReportPage} /></div>
+  <div className="grid grid-cols-1 gap-4 lg:grid-cols-2 lg:gap-8"><ChartCard title="Status Pesanan"><OrderStatusPieChart data={analytics.ordersByStatus} /></ChartCard><ChartCard title="Perbandingan Transaksi"><TransactionsBarChart data={analytics.ordersByStatus} /></ChartCard><ReportOrdersCard analytics={analytics} onPageChange={actions.setReportPage} /></div>
 );

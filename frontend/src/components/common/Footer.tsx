@@ -11,7 +11,6 @@ const Footer: FC = () => {
     <footer className="bg-slate-900 dark:bg-slate-950 text-slate-300 mt-16">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
         <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
-          {/* About */}
           <div>
             <h3 className="text-lg mb-4"><span className="text-rose-500 font-black">PURWA</span><span className="text-white font-black">LOKA</span></h3>
             <p className="text-sm leading-relaxed">
@@ -19,7 +18,6 @@ const Footer: FC = () => {
             </p>
           </div>
 
-          {/* Links */}
           <div>
             <h4 className="text-white font-semibold mb-4">Navigasi</h4>
             <ul className="space-y-2 text-sm">
@@ -29,7 +27,6 @@ const Footer: FC = () => {
             </ul>
           </div>
 
-          {/* Tenant */}
           {!isRegularUser && (
             <div>
               <h4 className="text-white font-semibold mb-4">Untuk Pemilik</h4>
@@ -55,7 +52,6 @@ const Footer: FC = () => {
             </div>
           )}
 
-          {/* Contact */}
           <div>
             <h4 className="text-white font-semibold mb-4">Hubungi Kami</h4>
             <div className="space-y-3 text-sm">
@@ -79,10 +75,8 @@ const Footer: FC = () => {
           </div>
         </div>
 
-        {/* Divider */}
         <hr className="border-slate-800 my-8" />
 
-        {/* Bottom */}
         <div className="flex flex-col md:flex-row justify-between items-center text-sm">
           <p>&copy; 2026 PURWALOKA. All rights reserved.</p>
           <div className="flex gap-4 mt-4 md:mt-0">
@@ -95,5 +89,4 @@ const Footer: FC = () => {
   );
 };
 
-// saat ini ckp segini dulu, kalo mau tambahin kita diskusi dulu
 export default Footer;

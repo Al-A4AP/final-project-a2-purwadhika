@@ -1,5 +1,5 @@
 import type { FC } from "react";
-import { USER_ORDER_STATUS_OPTIONS } from "./orderStatusOptions";
+import { ORDER_STATUS_FILTER_OPTIONS } from "@/lib/constants";
 import type { UserOrderFilterActions, UserOrderFilters } from "./userOrdersTypes";
 
 interface UserOrdersFilterProps {
@@ -22,6 +22,6 @@ export const UserOrdersFilter: FC<UserOrdersFilterProps> = ({ actions, filters, 
 
 const StatusSelect: FC<{ onChange: (value: string) => void; value: string }> = ({ onChange, value }) => (
   <select value={value} onChange={(event) => onChange(event.target.value)} className={INPUT_CLASS}>
-    {USER_ORDER_STATUS_OPTIONS.map((item) => <option key={item.value} value={item.value}>{item.label}</option>)}
+    {ORDER_STATUS_FILTER_OPTIONS.map((item) => <option key={item.value} value={item.value}>{item.label}</option>)}
   </select>
 );

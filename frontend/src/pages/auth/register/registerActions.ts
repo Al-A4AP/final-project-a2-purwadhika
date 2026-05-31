@@ -1,11 +1,8 @@
-import type { AxiosError } from "axios";
 import { toast } from "react-hot-toast";
-import type { ApiResponse } from "@/types";
+import { getApiErrorMessage } from "@/lib/errorMessage";
 
-export const getRegisterErrorMessage = (err: unknown) => {
-  const axiosErr = err as AxiosError<ApiResponse<null>>;
-  return axiosErr.response?.data?.message || "Registrasi gagal";
-};
+export const getRegisterErrorMessage = (err: unknown) =>
+  getApiErrorMessage(err, "Registrasi gagal");
 
 export const notifyRegisterSuccess = () => {
   toast.success("Registrasi berhasil! Silakan periksa email Anda.");

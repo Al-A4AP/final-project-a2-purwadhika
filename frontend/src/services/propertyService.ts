@@ -11,7 +11,6 @@ export const propertyService = {
   async getProperties(filters: PropertySearchFilters) {
     const params = new URLSearchParams();
 
-    // List field yang valid untuk dikirim
     const validFields = [
       "page",
       "limit",

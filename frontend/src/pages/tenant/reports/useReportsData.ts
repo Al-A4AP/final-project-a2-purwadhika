@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useState } from "react";
+import { getApiErrorMessage } from "@/lib/errorMessage";
 import { tenantReportService, type DashboardAnalytics, type OccupancyProperty } from "@/services/tenantReportService";
 import { tenantService } from "@/services/tenantService";
 import type { TenantProperty } from "@/types";
@@ -9,10 +10,11 @@ export const useReportsData = (filters: ReportsFilters) => {
   const [properties, setProperties] = useState<TenantProperty[]>([]);
   const [occupancyData, setOccupancyData] = useState<OccupancyProperty[]>([]);
   const [loading, setLoading] = useState(true);
-  const fetchAnalytics = useFetchAnalytics(filters, setAnalytics, setLoading);
+  const [error, setError] = useState<string | null>(null);
+  const fetchAnalytics = useFetchAnalytics(filters, setAnalytics, setLoading, setError);
   useStaticReportData(setProperties, setOccupancyData);
   useEffect(() => { Promise.resolve().then(() => fetchAnalytics()); }, [fetchAnalytics]);
-  return { analytics, loading, occupancyData, properties };
+  return { analytics, error, loading, occupancyData, properties, refetchReports: fetchAnalytics };
 };
 
 const useStaticReportData = (
@@ -27,14 +29,17 @@ const useStaticReportData = (
 
 const useFetchAnalytics = (
   filters: ReportsFilters,
-  setAnalytics: (analytics: DashboardAnalytics) => void,
+  setAnalytics: (analytics: DashboardAnalytics | null) => void,
   setLoading: (loading: boolean) => void,
+  setError: (error: string | null) => void,
 ) => useCallback(() => {
   setLoading(true);
+  setError(null);
   tenantReportService.getDashboardAnalytics(buildAnalyticsParams(filters))
-    .then(setAnalytics)
+    .then((data) => { setAnalytics(data); setError(null); })
+    .catch((err) => { setAnalytics(null); setError(getApiErrorMessage(err, "Laporan belum bisa dimuat. Periksa koneksi lalu coba lagi.")); })
     .finally(() => setLoading(false));
-}, [filters, setAnalytics, setLoading]);
+}, [filters, setAnalytics, setError, setLoading]);
 
 const buildAnalyticsParams = (filters: ReportsFilters) => ({
   propertyId: filters.selectedPropertyId || undefined,

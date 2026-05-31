@@ -1,5 +1,6 @@
 import type { FC } from 'react';
 import { Cell, Pie, PieChart, ResponsiveContainer, Tooltip } from 'recharts';
+import { getOrderStatusLabel } from '@/lib/orderStatus';
 
 interface StatusItem {
   name: string;
@@ -16,7 +17,7 @@ const LegendItem: FC<{ item: StatusItem; color: string }> = ({ item, color }) =>
   <div className="flex min-w-0 items-center gap-2 rounded-lg bg-slate-50 px-2.5 py-1.5 text-xs dark:bg-slate-900">
     <span className="h-3 w-3 shrink-0 rounded-full" style={{ backgroundColor: color }} />
     <span className="min-w-0 wrap-break-word text-gray-600 dark:text-gray-400">
-      {item.name} ({item.count})
+      {getOrderStatusLabel(item.name)} ({item.count})
     </span>
   </div>
 );
@@ -31,7 +32,7 @@ export const OrderStatusPieChart: FC<OrderStatusPieChartProps> = ({ data }) => {
       <div className="h-56">
         <ResponsiveContainer width="100%" height="100%">
           <PieChart>
-            <Pie data={data} cx="50%" cy="50%" outerRadius={80} dataKey="count" label={false}>
+            <Pie data={getChartData(data)} cx="50%" cy="50%" outerRadius={80} dataKey="count" label={false}>
               {data.map((item, i) => <Cell key={item.name} fill={COLORS[i % COLORS.length]} />)}
             </Pie>
             <Tooltip />
@@ -46,3 +47,6 @@ export const OrderStatusPieChart: FC<OrderStatusPieChartProps> = ({ data }) => {
     </div>
   );
 };
+
+const getChartData = (data: StatusItem[]) =>
+  data.map((item) => ({ ...item, name: getOrderStatusLabel(item.name) }));

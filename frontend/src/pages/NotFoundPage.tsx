@@ -5,8 +5,6 @@ const NotFoundPage: FC = () => {
   return (
     <div className="min-h-screen bg-[#FDFDFB] dark:bg-slate-950 flex items-center justify-center p-6 font-sans">
       <div className="max-w-5xl w-full flex flex-col md:flex-row items-center gap-12 md:gap-20">
-        
-        {/* Grumpy Cat Image (Left on Desktop, Top on Mobile) */}
         <div className="w-full md:w-1/2 flex justify-center md:justify-end">
           <img 
             src="https://images.unsplash.com/photo-1513360371669-4adf3dd7dff8?w=500&h=500&fit=crop" 
@@ -15,7 +13,6 @@ const NotFoundPage: FC = () => {
           />
         </div>
 
-        {/* Text & CTA Content (Right on Desktop, Bottom on Mobile) */}
         <div className="w-full md:w-1/2 text-center md:text-left">
           <h1 className="text-6xl md:text-8xl font-black text-slate-800 dark:text-slate-100 mb-4 tracking-tighter">
             404 <span className="text-slate-400 font-light">—</span> <br className="hidden md:block" /> Page <br className="hidden md:block" /> Not Found
