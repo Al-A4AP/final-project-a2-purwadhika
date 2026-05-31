@@ -1,72 +1,43 @@
 import { api } from "./api";
-import type {
-  Property,
-  PropertyDetail,
-  PaginatedResponse,
-  PropertySearchFilters,
-} from "@/types";
-import type { ApiResponse } from "@/types";
+import { buildUrl } from "./api/queryParams";
+import type { ApiResponse, PaginatedResponse, Property, PropertyDetail, PropertySearchFilters } from "@/types";
+
+const propertyFilterFields = [
+  "page",
+  "limit",
+  "sort",
+  "order",
+  "search",
+  "category",
+  "city",
+  "check_in_date",
+  "check_out_date",
+  "capacity",
+  "adults",
+  "children",
+  "babies",
+  "min_price",
+  "max_price",
+  "amenities",
+] as const;
 
 export const propertyService = {
   async getProperties(filters: PropertySearchFilters) {
-    const params = new URLSearchParams();
-
-    const validFields = [
-      "page",
-      "limit",
-      "sort",
-      "order",
-      "search",
-      "category",
-      "city",
-      "check_in_date",
-      "check_out_date",
-      "capacity",
-      "adults",
-      "children",
-      "babies",
-      "min_price",
-      "max_price",
-      "amenities",
-    ];
-
-    Object.entries(filters).forEach(([key, value]) => {
-      if (
-        validFields.includes(key) &&
-        value !== undefined &&
-        value !== null &&
-        value !== ""
-      ) {
-        params.append(key, Array.isArray(value) ? value.join(",") : String(value));
-      }
-    });
-
     const response = await api.get<ApiResponse<PaginatedResponse<Property>>>(
-      "/properties?" + params.toString(),
+      buildUrl("/properties", filters, propertyFilterFields),
     );
     return response.data.data;
   },
 
-  async getPropertyDetail(
-    id: string,
-    checkInDate?: string,
-    checkOutDate?: string,
-  ) {
-    const params = new URLSearchParams();
-    if (checkInDate) params.append("check_in_date", checkInDate);
-    if (checkOutDate) params.append("check_out_date", checkOutDate);
-    const queryString = params.toString() ? `?${params.toString()}` : "";
-
+  async getPropertyDetail(id: string, checkInDate?: string, checkOutDate?: string) {
     const response = await api.get<ApiResponse<PropertyDetail>>(
-      `/properties/${id}${queryString}`,
+      buildUrl(`/properties/${id}`, { check_in_date: checkInDate, check_out_date: checkOutDate }),
     );
     return response.data.data;
   },
 
   async getPropertyPrices(propertyId: string, month: number, year: number) {
-    const response = await api.get(`/properties/${propertyId}/prices`, {
-      params: { month, year },
-    });
+    const response = await api.get(`/properties/${propertyId}/prices`, { params: { month, year } });
     return response.data.data;
   },
 

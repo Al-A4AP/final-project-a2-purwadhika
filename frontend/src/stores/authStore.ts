@@ -1,53 +1,11 @@
 import { create } from "zustand";
-import type { User } from "@/types";
-import { STORAGE_KEYS } from "@/lib/constants";
-import { authService } from "@/services/authService";
-
-interface AuthStore {
-  user: User | null;
-  loading: boolean;
-  error: string | null;
-  isAuthenticated: boolean;
-  isTenant: boolean;
-  setUser: (user: User | null) => void;
-  logout: () => Promise<void>;
-  hydrate: () => void;
-}
+import { hydrateAuthUser, logoutAuthUser } from "./auth/authHydration";
+import { buildUserAuthState, initialAuthState } from "./auth/authState";
+import type { AuthStore } from "./auth/authTypes";
 
 export const useAuthStore = create<AuthStore>((set) => ({
-  user: null,
-  loading: false,
-  error: null,
-  isAuthenticated: false,
-  isTenant: false,
-
-  setUser: (user) => {
-    set({ user, isAuthenticated: !!user, isTenant: user?.role === "TENANT" });
-  },
-
-  logout: async () => {
-    await authService.logout().catch(() => undefined);
-    set({ user: null, isAuthenticated: false, isTenant: false });
-    localStorage.removeItem(STORAGE_KEYS.USER);
-  },
-
-  hydrate: () => {
-    authService
-      .getMe()
-      .then((updatedUser) => {
-        set({
-          user: updatedUser,
-          isAuthenticated: true,
-          isTenant: updatedUser.role === "TENANT",
-        });
-      })
-      .catch(() => {
-        set({
-          user: null,
-          isAuthenticated: false,
-          isTenant: false,
-        });
-        localStorage.removeItem(STORAGE_KEYS.USER);
-      });
-  },
+  ...initialAuthState,
+  setUser: (user) => set(buildUserAuthState(user)),
+  logout: () => logoutAuthUser(set),
+  hydrate: () => hydrateAuthUser(set),
 }));
