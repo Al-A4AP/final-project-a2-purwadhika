@@ -15,49 +15,49 @@ Final Project Purwadhika JCWDBGPM-11, Group 1:
 Audit dokumentasi dan source dilakukan pada 31 Mei 2026 dengan acuan
 `PURWADHIKA.md`.
 
-| Area | Status | Catatan |
-| --- | --- | --- |
-| Fitur utama | Mayoritas selesai | Fitur USER, TENANT, booking, payment, review, report, dan calendar sudah ada. |
-| Fitur 1 | Selesai | Auth/profile, katalog properti, property detail, tenant property/room/category management, dan public calendar sudah tersedia. |
-| Fitur 2 | Selesai dengan catatan | Alur transaksi, konfirmasi tenant, review, dan report sudah tersedia; automated test belum ada. |
-| Batas file 200 baris | Sesuai | Scan `frontend/src`, `backend/src`, dan `backend/prisma` menemukan `OVER_200=0`. |
-| Function maksimal 15 baris | Belum sepenuhnya sesuai | Masih ada fungsi/komponen/hook panjang yang perlu refactor bertahap. |
-| Log production | Sesuai | Scan source tidak menemukan `console.log/debug/info/warn/error` aktif. |
-| Frontend lint | Lulus | `npm run lint` di frontend selesai tanpa error. |
-| TypeScript no emit | Lulus | `node_modules/.bin/tsc --noEmit` backend dan frontend selesai tanpa error. |
-| Test suite | Belum ada | Backend `npm test` masih placeholder. |
+| Area                       | Status                  | Catatan                                                                                                                        |
+| -------------------------- | ----------------------- | ------------------------------------------------------------------------------------------------------------------------------ |
+| Fitur utama                | Mayoritas selesai       | Fitur USER, TENANT, booking, payment, review, report, dan calendar sudah ada.                                                  |
+| Fitur 1                    | Selesai                 | Auth/profile, katalog properti, property detail, tenant property/room/category management, dan public calendar sudah tersedia. |
+| Fitur 2                    | Selesai dengan catatan  | Alur transaksi, konfirmasi tenant, review, dan report sudah tersedia; automated test belum ada.                                |
+| Batas file 200 baris       | Sesuai                  | Scan `frontend/src`, `backend/src`, dan `backend/prisma` menemukan `OVER_200=0`.                                               |
+| Function maksimal 15 baris | Belum sepenuhnya sesuai | Masih ada fungsi/komponen/hook panjang yang perlu refactor bertahap.                                                           |
+| Log production             | Sesuai                  | Scan source tidak menemukan `console.log/debug/info/warn/error` aktif.                                                         |
+| Frontend lint              | Lulus                   | `npm run lint` di frontend selesai tanpa error.                                                                                |
+| TypeScript no emit         | Lulus                   | `node_modules/.bin/tsc --noEmit` backend dan frontend selesai tanpa error.                                                     |
+| Test suite                 | Belum ada               | Backend `npm test` masih placeholder.                                                                                          |
 
 Laporan lengkap tersedia di
 [`AUDIT_PURWADHIKA_FINAL_REPORT.md`](./AUDIT_PURWADHIKA_FINAL_REPORT.md).
 
 ## Fitur 1 - Property Renting Core
 
-| Requirement | Status | Folder/file terkait |
-| --- | --- | --- |
-| Homepage/Landing page | Selesai | `frontend/src/pages/user/HomePage.tsx`, `frontend/src/components/user/HeroSection.tsx`, `frontend/src/components/user/PropertyGrid.tsx`, `frontend/src/components/common/Navbar.tsx` |
-| Search destination, date, guest, price, amenities | Selesai | `frontend/src/components/user/SearchForm.tsx`, `frontend/src/components/user/propertyFilterDropdown/`, `frontend/src/stores/filterStore.ts`, `backend/src/services/propertyQueryService.ts` |
-| Sort dan pagination properti | Selesai | `frontend/src/pages/user/HomePage.tsx`, `backend/src/services/propertyService.ts`, `backend/src/services/propertyPriceSortService.ts`; sort name/created_at dan price tanpa tanggal diproses server-side, price bertanggal memakai availability/pricing dinamis. |
-| Auth, register, verify email, login, logout | Selesai | `frontend/src/pages/auth/`, `frontend/src/stores/authStore.ts`, `backend/src/controllers/authController.ts`, `backend/src/services/authService.ts`, `backend/src/routes/authRoutes.ts` |
-| Profile USER/TENANT | Selesai | `frontend/src/pages/user/ProfilePage.tsx`, `frontend/src/components/user/profile/`, route `/profile` dan `/tenant/profile`, `backend/src/controllers/userController.ts`, `backend/src/services/userService.ts`, `backend/src/services/userEmailService.ts` |
-| Property detail, gallery, facilities, review display | Selesai | `frontend/src/pages/user/PropertyDetailPage.tsx`, `frontend/src/components/property/`, `backend/src/services/propertyService.ts` |
-| Public calendar dan availability | Selesai | `frontend/src/components/property/PricingCalendarSection.tsx`, `frontend/src/services/availabilityService.ts`, `backend/src/services/publicAvailabilityService.ts`; backend membatasi maksimal 90 hari per request. |
-| Tenant property CRUD | Selesai | `frontend/src/pages/tenant/PropertiesListPage.tsx`, `frontend/src/pages/tenant/PropertyFormPage.tsx`, `backend/src/services/tenantPropertyService.ts`, `backend/src/routes/tenantRoutes.ts` |
-| Tenant room CRUD, images, availability, peak rates | Selesai | `frontend/src/pages/tenant/RoomsPage.tsx`, `frontend/src/components/tenant/RoomForm.tsx`, `frontend/src/components/tenant/RoomPeakRatesModal.tsx`, `backend/src/services/tenantRoomService.ts` |
-| Tenant category management | Selesai | `frontend/src/pages/tenant/CategoriesPage.tsx`, `frontend/src/components/tenant/category/`, `backend/src/controllers/categoryController.ts`, `backend/src/routes/tenantRoutes.ts` |
+| Requirement                                          | Status  | Folder/file terkait                                                                                                                                                                                                                                              |
+| ---------------------------------------------------- | ------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Homepage/Landing page                                | Selesai | `frontend/src/pages/user/HomePage.tsx`, `frontend/src/components/user/HeroSection.tsx`, `frontend/src/components/user/PropertyGrid.tsx`, `frontend/src/components/common/Navbar.tsx`                                                                             |
+| Search destination, date, guest, price, amenities    | Selesai | `frontend/src/components/user/SearchForm.tsx`, `frontend/src/components/user/propertyFilterDropdown/`, `frontend/src/stores/filterStore.ts`, `backend/src/services/propertyQueryService.ts`                                                                      |
+| Sort dan pagination properti                         | Selesai | `frontend/src/pages/user/HomePage.tsx`, `backend/src/services/propertyService.ts`, `backend/src/services/propertyPriceSortService.ts`; sort name/created_at dan price tanpa tanggal diproses server-side, price bertanggal memakai availability/pricing dinamis. |
+| Auth, register, verify email, login, logout          | Selesai | `frontend/src/pages/auth/`, `frontend/src/stores/authStore.ts`, `backend/src/controllers/authController.ts`, `backend/src/services/authService.ts`, `backend/src/routes/authRoutes.ts`                                                                           |
+| Profile USER/TENANT                                  | Selesai | `frontend/src/pages/user/ProfilePage.tsx`, `frontend/src/components/user/profile/`, route `/profile` dan `/tenant/profile`, `backend/src/controllers/userController.ts`, `backend/src/services/userService.ts`, `backend/src/services/userEmailService.ts`       |
+| Property detail, gallery, facilities, review display | Selesai | `frontend/src/pages/user/PropertyDetailPage.tsx`, `frontend/src/components/property/`, `backend/src/services/propertyService.ts`                                                                                                                                 |
+| Public calendar dan availability                     | Selesai | `frontend/src/components/property/PricingCalendarSection.tsx`, `frontend/src/services/availabilityService.ts`, `backend/src/services/publicAvailabilityService.ts`; backend membatasi maksimal 90 hari per request.                                              |
+| Tenant property CRUD                                 | Selesai | `frontend/src/pages/tenant/PropertiesListPage.tsx`, `frontend/src/pages/tenant/PropertyFormPage.tsx`, `backend/src/services/tenantPropertyService.ts`, `backend/src/routes/tenantRoutes.ts`                                                                      |
+| Tenant room CRUD, images, availability, peak rates   | Selesai | `frontend/src/pages/tenant/RoomsPage.tsx`, `frontend/src/components/tenant/RoomForm.tsx`, `frontend/src/components/tenant/RoomPeakRatesModal.tsx`, `backend/src/services/tenantRoomService.ts`                                                                   |
+| Tenant category management                           | Selesai | `frontend/src/pages/tenant/CategoriesPage.tsx`, `frontend/src/components/tenant/category/`, `backend/src/controllers/categoryController.ts`, `backend/src/routes/tenantRoutes.ts`                                                                                |
 
 ## Fitur 2 - Transaction, Review, Report
 
-| Requirement | Status | Folder/file terkait |
-| --- | --- | --- |
-| User booking flow | Selesai | `frontend/src/pages/user/BookingPage.tsx`, `frontend/src/components/user/BookingSummary.tsx`, `backend/src/services/orderService.ts`, `backend/src/routes/orderRoutes.ts` |
-| Payment manual dan Midtrans | Selesai dengan catatan | `frontend/src/components/user/PaymentMethodSelector.tsx`, `frontend/src/services/orderService.ts`, `backend/src/services/midtransService.ts`, `backend/src/config/midtrans.ts`; perlu E2E test Midtrans. |
-| Payment proof 1 jam | Selesai | `backend/src/constants/orderConstants.ts` menggunakan `60 * 60 * 1000`. |
-| Tenant transaction management | Selesai | `frontend/src/pages/tenant/OrdersPage.tsx`, `frontend/src/components/tenant/OrdersTable.tsx`, `frontend/src/components/tenant/OrderMobileCard.tsx`, `backend/src/services/orderService.ts` |
-| Auto-cancel unpaid reservations | Selesai | `backend/src/cron.ts`, `backend/src/services/orderService.ts`, `ENABLE_CRON=true` untuk persistent process. |
-| Auto-complete processed orders setelah checkout | Selesai | `backend/src/cron.ts` mengubah `PROCESSED` menjadi `COMPLETED` setelah checkout. |
-| Review setelah menginap | Selesai | `frontend/src/pages/user/OrdersPage.tsx`, `frontend/src/components/user/ReviewModal.tsx`, `backend/src/services/reviewService.ts`; `PROCESSED` dengan checkout terlewat juga boleh review. |
-| Tenant reply review | Selesai | `frontend/src/pages/tenant/ReviewsPage.tsx`, `backend/src/services/tenantReviewService.ts` |
-| Report dan analytics tenant | Selesai | `frontend/src/pages/tenant/ReportsPage.tsx`, `frontend/src/pages/tenant/DashboardPage.tsx`, `backend/src/services/tenantReportService.ts` |
+| Requirement                                     | Status                 | Folder/file terkait                                                                                                                                                                                      |
+| ----------------------------------------------- | ---------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| User booking flow                               | Selesai                | `frontend/src/pages/user/BookingPage.tsx`, `frontend/src/components/user/BookingSummary.tsx`, `backend/src/services/orderService.ts`, `backend/src/routes/orderRoutes.ts`                                |
+| Payment manual dan Midtrans                     | Selesai dengan catatan | `frontend/src/components/user/PaymentMethodSelector.tsx`, `frontend/src/services/orderService.ts`, `backend/src/services/midtransService.ts`, `backend/src/config/midtrans.ts`; perlu E2E test Midtrans. |
+| Payment proof 1 jam                             | Selesai                | `backend/src/constants/orderConstants.ts` menggunakan `60 * 60 * 1000`.                                                                                                                                  |
+| Tenant transaction management                   | Selesai                | `frontend/src/pages/tenant/OrdersPage.tsx`, `frontend/src/components/tenant/OrdersTable.tsx`, `frontend/src/components/tenant/OrderMobileCard.tsx`, `backend/src/services/orderService.ts`               |
+| Auto-cancel unpaid reservations                 | Selesai                | `backend/src/cron.ts`, `backend/src/services/orderService.ts`, `ENABLE_CRON=true` untuk persistent process.                                                                                              |
+| Auto-complete processed orders setelah checkout | Selesai                | `backend/src/cron.ts` mengubah `PROCESSED` menjadi `COMPLETED` setelah checkout.                                                                                                                         |
+| Review setelah menginap                         | Selesai                | `frontend/src/pages/user/OrdersPage.tsx`, `frontend/src/components/user/ReviewModal.tsx`, `backend/src/services/reviewService.ts`; `PROCESSED` dengan checkout terlewat juga boleh review.               |
+| Tenant reply review                             | Selesai                | `frontend/src/pages/tenant/ReviewsPage.tsx`, `backend/src/services/tenantReviewService.ts`                                                                                                               |
+| Report dan analytics tenant                     | Selesai                | `frontend/src/pages/tenant/ReportsPage.tsx`, `frontend/src/pages/tenant/DashboardPage.tsx`, `backend/src/services/tenantReportService.ts`                                                                |
 
 ## Struktur Project
 
@@ -233,10 +233,3 @@ Frontend dapat dideploy sebagai static Vite app. Backend harus memiliki
 environment production, CORS production, dan `ENABLE_CRON=true` pada platform
 yang mendukung persistent process seperti Render, Railway, VPS, atau layanan
 setara.
-
-## Rekomendasi Lanjutan
-
-- Tambahkan unit dan integration test untuk auth, katalog properti, booking, payment, review, dan report.
-- Refactor fungsi/komponen panjang agar memenuhi aturan maksimal 15 baris.
-- Optimalkan sort tambahan seperti `rating` dan `popularity` agar lebih database-side untuk dataset besar.
-- Tambahkan `VITE_MIDTRANS_CLIENT_KEY` ke `frontend/.env.example`.
