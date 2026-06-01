@@ -80,6 +80,7 @@ Auth:
 - `/auth/register/user`
 - `/auth/register/tenant`
 - `/auth/verify-email/:token`
+- `/auth/verify-email-change/:token`
 - `/auth/forgot-password`
 - `/auth/reset-password`
 
@@ -171,11 +172,12 @@ Default local frontend: `http://localhost:5173`.
 
 ## Catatan Audit Frontend
 
-- `npm run lint` lulus tanpa error pada audit 31 Mei 2026.
+- `npm run lint` lulus tanpa error pada audit 01 Juni 2026.
+- `npm run build` selesai tanpa error (exit code 0).
 - `node_modules/.bin/tsc -b --noEmit` lulus tanpa error.
-- Tidak ada file di `src` yang melebihi 200 baris.
-- Masih ada fungsi/komponen/hook yang melebihi batas 15 baris menurut aturan
-  clean code Purwadhika, sehingga perlu refactor bertahap.
+- Tidak ada file di `src` yang melebihi 200 baris (diverifikasi via scan PowerShell, hasil 0 file).
+- Seluruh fungsi/komponen/hook telah di-refactor sesuai aturan maksimal 15 baris.
 - Route tenant profile sudah diarahkan ke `src/pages/user/ProfilePage.tsx`.
-- Dashboard tenant mobile sudah memakai `TenantMobileTopbar` dan
-  `TenantSidebar`.
+- Dashboard tenant mobile sudah memakai `TenantMobileTopbar` dan `TenantSidebar`.
+- Validasi dinamis tanggal check-out (`min = check-in + 1 hari`) sudah berfungsi di `SearchForm.tsx`.
+- Jumlah anak dan bayi dibatasi maksimal sejumlah dewasa di `GuestCounter.tsx`.

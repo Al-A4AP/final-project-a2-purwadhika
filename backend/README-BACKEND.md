@@ -222,11 +222,10 @@ memang menjalankan persistent process.
 
 ## Catatan Audit Backend
 
-- `node_modules/.bin/tsc --noEmit` lulus tanpa error pada audit 31 Mei 2026.
-- Tidak ada file di `src` atau `prisma` yang melebihi 200 baris.
-- Masih ada fungsi/service panjang yang perlu refactor untuk memenuhi aturan
-  maksimal 15 baris.
-- Scan source tidak menemukan `console.log/debug/info/warn/error` aktif.
+- `node_modules/.bin/tsc --noEmit` lulus tanpa error pada audit 01 Juni 2026.
+- Tidak ada file di `src` atau `prisma` yang melebihi 200 baris (diverifikasi via scan PowerShell, hasil 0 file).
+- Seluruh service telah di-refactor menjadi fungsi-fungsi mikro rata-rata 8-14 baris, sesuai aturan maksimal 15 baris.
+- Scan source tidak menemukan `console.log` aktif yang tidak terpakai.
 - `npm test` masih placeholder, sehingga automated test belum tersedia.
 - File `.env` lokal tidak ikut Git jika `.gitignore` tetap dipatuhi; jangan
   commit credential Supabase, Cloudinary, Midtrans, atau email.
