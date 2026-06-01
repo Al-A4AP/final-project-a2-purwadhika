@@ -1,6 +1,10 @@
 import prisma from '../config/prisma';
+import type { OrderStatus } from '@prisma/client';
 import { calculateStayDetails } from './pricingService';
 import { checkAvailability } from './availabilityService';
+import { buildRoomCalendarAvailability } from './propertyDetailCalendar';
+
+const CALENDAR_BOOKING_STATUSES: OrderStatus[] = ['WAITING_PAYMENT', 'WAITING_CONFIRMATION', 'PROCESSED', 'COMPLETED'];
 
 const propertyInclude = {
   category: true,
@@ -18,6 +22,10 @@ const roomRelationInclude = (range: { start: Date; end: Date }) => ({
   peakRates: { where: { deleted_at: null } },
   images: { orderBy: { order: 'asc' as const } },
   availability: { where: { is_available: false, date: { gte: range.start, lte: range.end } } },
+  orders: {
+    where: { deleted_at: null, status: { in: CALENDAR_BOOKING_STATUSES }, check_in_date: { lte: range.end }, check_out_date: { gt: range.start } },
+    select: { check_in_date: true, check_out_date: true, id: true, roomId: true },
+  },
 });
 
 const parseDateFilters = (filters?: { check_in_date?: string; check_out_date?: string }) => ({
@@ -39,31 +47,32 @@ const findProperty = async (id: string) => {
   return property;
 };
 
-const buildRoomCalendarPayload = (room: any, roomRel: any) => {
-  const availability = roomRel?.availability || [];
+const buildRoomCalendarPayload = (room: any, roomRel: any, range: { start: Date; end: Date }) => {
+  const availability = buildRoomCalendarAvailability(room, roomRel?.availability || [], roomRel?.orders || [], range);
   return { ...room, images: roomRel?.images, peakRates: roomRel?.peakRates, availability, availabilities: availability };
 };
 
-const buildUnavailableRoomStatus = (room: any, roomRel: any, avail: { reason?: string; source?: string }) => ({
-  ...buildRoomCalendarPayload(room, roomRel),
+const buildUnavailableRoomStatus = (room: any, roomRel: any, range: { start: Date; end: Date }, avail: { reason?: string; source?: string }) => ({
+  ...buildRoomCalendarPayload(room, roomRel, range),
   availability_source: avail.source,
   is_available: false,
   reason: avail.reason || 'Kamar tidak tersedia pada tanggal yang dipilih.',
 });
 
-const buildAvailableRoomStatus = async (room: any, roomRel: any, checkIn: Date, checkOut: Date) => {
+const buildAvailableRoomStatus = async (room: any, roomRel: any, range: { start: Date; end: Date }, checkIn: Date, checkOut: Date) => {
   try {
     const avail = await checkAvailability(room.id, checkIn, checkOut);
-    if (!avail.available) return buildUnavailableRoomStatus(room, roomRel, avail);
+    if (!avail.available) return buildUnavailableRoomStatus(room, roomRel, range, avail);
     const priceDetails = await calculateStayDetails(room.id, checkIn, checkOut);
-    return { ...buildRoomCalendarPayload(room, roomRel), is_available: true, reason: avail.reason, priceDetails };
-  } catch { return buildRoomCalendarPayload(room, roomRel); }
+    return { ...buildRoomCalendarPayload(room, roomRel, range), is_available: true, reason: avail.reason, priceDetails };
+  } catch { return buildRoomCalendarPayload(room, roomRel, range); }
 };
 
 const buildRoomStatus = async (room: any, checkIn: Date | null, checkOut: Date | null) => {
-  const roomRel = await prisma.room.findUnique({ where: { id: room.id }, include: roomRelationInclude(getDefaultCalendarRange()) });
-  if (checkIn && checkOut) return buildAvailableRoomStatus(room, roomRel, checkIn, checkOut);
-  return buildRoomCalendarPayload(room, roomRel);
+  const range = getDefaultCalendarRange();
+  const roomRel = await prisma.room.findUnique({ where: { id: room.id }, include: roomRelationInclude(range) });
+  if (checkIn && checkOut) return buildAvailableRoomStatus(room, roomRel, range, checkIn, checkOut);
+  return buildRoomCalendarPayload(room, roomRel, range);
 };
 
 const fetchDetailedRoomsStatus = (rooms: any[], checkIn: Date | null, checkOut: Date | null) =>

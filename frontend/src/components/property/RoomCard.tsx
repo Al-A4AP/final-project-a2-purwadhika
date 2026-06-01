@@ -1,4 +1,4 @@
-import type { FC, ReactNode } from 'react';
+import type { FC, KeyboardEvent, ReactNode } from 'react';
 import type { Room } from '@/types';
 import { AlertTriangle, BedDouble, Calendar as CalendarIcon } from 'lucide-react';
 import { formatPrice } from '@/lib/formatters';
@@ -10,19 +10,28 @@ interface RoomCardProps {
   amenities?: string[];
   bookingBlockedReason?: string;
   isTenant: boolean;
+  isSelected?: boolean;
   room: Room;
   onBooking: (room: Room) => void;
   onCheckAvail: (room: Room) => void;
+  onSelectRoom?: (roomId: string) => void;
 }
 
 export const RoomCard: FC<RoomCardProps> = (props) => (
-  <div className="flex flex-col rounded-xl border bg-white p-6 shadow-sm dark:border-slate-700 dark:bg-slate-800">
+  <div className={roomCardClass(props.room, props.isSelected)} role="button" tabIndex={cardTabIndex(props.room)}
+    onClick={() => selectRoom(props)} onKeyDown={(event) => handleCardKey(event, props)}
+  >
+    <SelectedBadge isSelected={props.isSelected} />
     <RoomImage room={props.room} />
     <RoomDetails amenities={props.amenities} room={props.room} />
     <RoomRateBreakdown room={props.room} />
     <UnavailableNotice room={props.room} />
     <RoomFooter {...props} />
   </div>
+);
+
+const SelectedBadge: FC<{ isSelected?: boolean }> = ({ isSelected }) => (
+  isSelected ? <span className="mb-3 inline-flex w-fit rounded-full bg-red-600 px-3 py-1 text-xs font-semibold text-white">Dipilih</span> : null
 );
 
 const RoomImage: FC<{ room: Room }> = ({ room }) => (
@@ -116,6 +125,30 @@ const breakdownClass = (small?: boolean) => small ? 'p-3 text-xs' : 'p-4 text-sm
 
 const bookingClass = (disabled: boolean) =>
   disabled ? 'cursor-not-allowed bg-gray-400 text-gray-200 dark:bg-slate-700' : 'bg-red-600 text-white hover:bg-red-700';
+
+const cardTabIndex = (room: Room) => room.is_available === false ? -1 : 0;
+
+const handleCardKey = (event: KeyboardEvent<HTMLDivElement>, props: RoomCardProps) => {
+  if (!['Enter', ' '].includes(event.key)) return;
+  event.preventDefault();
+  selectRoom(props);
+};
+
+const roomCardClass = (room: Room, selected?: boolean) => [
+  'flex flex-col rounded-xl border p-6 shadow-sm transition',
+  selected ? selectedClass : defaultClass,
+  room.is_available === false ? disabledCardClass : enabledCardClass,
+].join(' ');
+
+const selectRoom = ({ onSelectRoom, room }: RoomCardProps) => {
+  if (room.is_available === false) return;
+  onSelectRoom?.(room.id);
+};
+
+const selectedClass = 'border-red-500 bg-red-50/70 ring-2 ring-red-100 dark:border-red-500 dark:bg-red-950/20 dark:ring-red-900/30';
+const defaultClass = 'border-gray-200 bg-white dark:border-slate-700 dark:bg-slate-800';
+const disabledCardClass = 'opacity-80';
+const enabledCardClass = 'cursor-pointer hover:border-red-300 dark:hover:border-red-500';
 
 const getBookingLabel = (room: Room, reason?: string) => {
   if (room.is_available === false) return getUnavailableLabel(room);

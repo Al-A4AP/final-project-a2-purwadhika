@@ -10,8 +10,10 @@ interface PropertyRoomsSectionProps {
   checkIn: string;
   checkOut: string;
   isTenant: boolean;
+  selectedRoomId: string | null;
   onBooking: (room: Room) => void;
   onCheckAvail: (room: Room) => void;
+  onSelectRoom: (roomId: string) => void;
   property: PropertyDetail;
 }
 
@@ -24,7 +26,12 @@ const RoomList: FC<PropertyRoomsSectionProps> = (props) => (
     <BookingAccessNotice message={!props.isTenant ? props.bookingBlockedReason : undefined} />
     <h2 className="mb-6 text-2xl font-bold text-gray-900 dark:text-white">Pilihan Kamar</h2>
     <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-      {props.property.rooms?.map((room) => <RoomCard key={room.id} room={room} amenities={props.property.amenities} isTenant={props.isTenant} bookingBlockedReason={props.bookingBlockedReason} onBooking={props.onBooking} onCheckAvail={props.onCheckAvail} />)}
+      {props.property.rooms?.map((room) => (
+        <RoomCard key={room.id} room={room} amenities={props.property.amenities} isTenant={props.isTenant}
+          isSelected={room.id === props.selectedRoomId} bookingBlockedReason={props.bookingBlockedReason}
+          onBooking={props.onBooking} onCheckAvail={props.onCheckAvail} onSelectRoom={props.onSelectRoom}
+        />
+      ))}
     </div>
   </>
 );
@@ -32,7 +39,11 @@ const RoomList: FC<PropertyRoomsSectionProps> = (props) => (
 const WholeUnit: FC<PropertyRoomsSectionProps & { room: Room }> = (props) => (
   <>
     <BookingAccessNotice message={!props.isTenant ? props.bookingBlockedReason : undefined} />
-    <WholeUnitCard room={props.room} amenities={props.property.amenities} isTenant={props.isTenant} bookingBlockedReason={props.bookingBlockedReason} onBooking={props.onBooking} onCheckAvail={props.onCheckAvail} categoryName={props.property.category?.name || ""} />
+    <WholeUnitCard room={props.room} amenities={props.property.amenities} isTenant={props.isTenant}
+      isSelected={props.room.id === props.selectedRoomId} bookingBlockedReason={props.bookingBlockedReason}
+      onBooking={props.onBooking} onCheckAvail={props.onCheckAvail} onSelectRoom={props.onSelectRoom}
+      categoryName={props.property.category?.name || ""}
+    />
   </>
 );
 

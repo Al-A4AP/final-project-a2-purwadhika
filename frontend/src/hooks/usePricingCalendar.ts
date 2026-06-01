@@ -1,12 +1,12 @@
 import { useCallback, useMemo } from "react";
 import type { Room } from "@/types";
 import { getNights, getToday } from "./pricing-calendar/dateUtils";
-import { getLowestPriceForDate } from "./pricing-calendar/priceForDate";
+import { getRoomPriceForDate, getUnavailableDates } from "./pricing-calendar/priceForDate";
 import type { PricingDateRange } from "./pricing-calendar/pricingCalendarTypes";
 import { syncSelectedDate } from "./pricing-calendar/selectDate";
 
 export const usePricingCalendar = (
-  rooms: Room[],
+  selectedRoom: Room | null,
   checkIn: string,
   checkOut: string,
   onCheckInChange: (val: string) => void,
@@ -15,8 +15,9 @@ export const usePricingCalendar = (
   const today = useMemo(() => getToday(), []);
   const selectedRange = useSelectedRange(checkIn, checkOut);
   const handleSelect = useSelectHandler(onCheckInChange, onCheckOutChange);
-  const getPriceForDate = useCallback((date: Date) => getLowestPriceForDate(rooms, date), [rooms]);
-  return { today, getPriceForDate, selectedRange, handleSelect, nights: getNights(checkIn, checkOut) };
+  const unavailableDates = useMemo(() => getUnavailableDates(selectedRoom), [selectedRoom]);
+  const getPriceForDate = useCallback((date: Date) => getRoomPriceForDate(selectedRoom, date), [selectedRoom]);
+  return { today, getPriceForDate, selectedRange, handleSelect, nights: getNights(checkIn, checkOut), unavailableDates };
 };
 
 const useSelectedRange = (checkIn: string, checkOut: string) =>

@@ -1,4 +1,4 @@
-import type { Order, PaginationMeta } from "@/types";
+import type { DashboardRevenuePeriod, Order, PaginationMeta } from "@/types";
 
 export interface DashboardAnalytics {
   totalRevenue: number;
@@ -24,6 +24,7 @@ export interface DashboardAnalyticsParams {
   startDate?: string;
   endDate?: string;
   propertyId?: string;
+  revenuePeriod?: DashboardRevenuePeriod;
   status?: string;
   userName?: string;
   sortBy?: string;

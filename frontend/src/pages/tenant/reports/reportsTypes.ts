@@ -1,9 +1,10 @@
 import type { DashboardAnalytics, OccupancyProperty } from "@/services/tenantReportService";
-import type { TenantProperty } from "@/types";
+import type { DashboardRevenuePeriod, TenantProperty } from "@/types";
 
 export interface ReportsFilters {
   endDate: string;
   reportPage: number;
+  revenuePeriod: DashboardRevenuePeriod;
   selectedPropertyId: string;
   selectedStatus: string;
   sortBy: string;
@@ -16,6 +17,7 @@ export interface ReportsFilterActions {
   resetFilters: () => void;
   setEndDate: (value: string) => void;
   setReportPage: (page: number) => void;
+  setRevenuePeriod: (value: DashboardRevenuePeriod) => void;
   setSelectedPropertyId: (value: string) => void;
   setSelectedStatus: (value: string) => void;
   setSortBy: (value: string) => void;

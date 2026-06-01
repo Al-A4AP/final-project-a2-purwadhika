@@ -10,7 +10,7 @@ export type { GetDashboardAnalyticsOptions } from './tenantReport/reportTypes';
 
 const loadDashboardAnalytics = async (where: Prisma.OrderWhereInput, options: NormalizedReportOptions) => {
   const [totalRevenue, ordersByStatus, totalOrders, recentOrders] = await Promise.all([
-    aggregateRevenue(buildRevenueWhere(where, options.status)),
+    aggregateRevenue(buildRevenueWhere(where, options)),
     groupOrdersByStatus(buildStatusWhere(where)),
     countReportOrders(where),
     findReportOrders(where, options),

@@ -9,18 +9,25 @@ interface WholeUnitCardProps {
   bookingBlockedReason?: string;
   categoryName: string;
   isTenant: boolean;
+  isSelected?: boolean;
   room: Room;
   onBooking: (room: Room) => void;
   onCheckAvail: (room: Room) => void;
+  onSelectRoom?: (roomId: string) => void;
 }
 
 export const WholeUnitCard: FC<WholeUnitCardProps> = (props) => (
-  <div className="rounded-xl border bg-white p-8 shadow-sm dark:border-slate-700 dark:bg-slate-800">
+  <div className={wholeUnitClass(props.room, props.isSelected)} onClick={() => selectRoom(props)}>
+    <SelectedBadge isSelected={props.isSelected} />
     <WholeUnitHeader categoryName={props.categoryName} />
     <WholeUnitInfo {...props} />
     <UnavailableNotice room={props.room} />
     {!props.isTenant && <WholeUnitActions {...props} />}
   </div>
+);
+
+const SelectedBadge: FC<{ isSelected?: boolean }> = ({ isSelected }) => (
+  isSelected ? <span className="mb-4 inline-flex rounded-full bg-red-600 px-3 py-1 text-xs font-semibold text-white">Dipilih</span> : null
 );
 
 const WholeUnitHeader: FC<{ categoryName: string }> = ({ categoryName }) => (
@@ -92,3 +99,17 @@ const unavailableLabel = (room: Room, reason?: string) =>
 
 const buttonClass = (disabled: boolean) =>
   disabled ? 'cursor-not-allowed bg-gray-400 text-gray-200 dark:bg-slate-700' : 'bg-red-600 hover:bg-red-700';
+
+const wholeUnitClass = (room: Room, selected?: boolean) => [
+  'rounded-xl border p-8 shadow-sm transition',
+  selected ? selectedClass : defaultClass,
+  room.is_available === false ? 'opacity-80' : 'cursor-pointer hover:border-red-300',
+].join(' ');
+
+const selectRoom = ({ onSelectRoom, room }: WholeUnitCardProps) => {
+  if (room.is_available === false) return;
+  onSelectRoom?.(room.id);
+};
+
+const selectedClass = 'border-red-500 bg-red-50/70 ring-2 ring-red-100 dark:border-red-500 dark:bg-red-950/20 dark:ring-red-900/30';
+const defaultClass = 'border-gray-200 bg-white dark:border-slate-700 dark:bg-slate-800';

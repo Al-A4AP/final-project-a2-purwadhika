@@ -43,6 +43,7 @@ const useFetchAnalytics = (
 
 const buildAnalyticsParams = (filters: ReportsFilters) => ({
   propertyId: filters.selectedPropertyId || undefined,
+  revenuePeriod: filters.revenuePeriod,
   status: filters.selectedStatus || undefined,
   userName: filters.userName || undefined,
   startDate: filters.startDate || undefined,

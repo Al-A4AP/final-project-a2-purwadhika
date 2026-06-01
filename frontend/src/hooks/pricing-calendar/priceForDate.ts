@@ -1,10 +1,20 @@
 import type { PeakSeasonRate, Room } from "@/types";
-import type { DatePrice } from "./pricingCalendarTypes";
+import type { DateAvailabilityStatus, DatePrice } from "./pricingCalendarTypes";
 
-const getDateKey = (date: Date) => date.toISOString().split("T")[0];
+const pad = (value: number) => String(value).padStart(2, "0");
 
-const isRoomBlocked = (room: Room, dateKey: string) =>
-  room.availabilities?.some((availability) => !availability.is_available && availability.date.startsWith(dateKey)) ?? false;
+const getDateKey = (date: Date) =>
+  `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())}`;
+
+const getAvailabilityRecords = (room: Room) => room.availabilities || room.availability || [];
+
+const getDateStatus = (room: Room, dateKey: string): DateAvailabilityStatus | null => {
+  const record = getAvailabilityRecords(room).find((item) => !item.is_available && item.date.startsWith(dateKey));
+  if (!record) return null;
+  if (record.source === "CUSTOMER_BOOKED") return "CUSTOMER_BOOKED";
+  if (record.source === "TENANT_BLOCKED") return "TENANT_BLOCKED";
+  return "UNAVAILABLE";
+};
 
 const normalizeDate = (value: Date | string) => {
   const date = new Date(value);
@@ -24,17 +34,14 @@ const applyRate = (basePrice: number, rate?: PeakSeasonRate) => {
   return basePrice + rate.rate_value;
 };
 
-const getRoomDatePrice = (room: Room, date: Date, dateKey: string): DatePrice | null => {
-  if (isRoomBlocked(room, dateKey)) return null;
-  const rate = getPeakRate(room, date);
-  return { price: applyRate(room.base_price, rate), isPeak: !!rate };
-};
-
-const getLowestPrice = (prices: DatePrice[]) =>
-  prices.reduce((lowest, current) => (current.price < lowest.price ? current : lowest));
-
-export const getLowestPriceForDate = (rooms: Room[], date: Date) => {
+export const getRoomPriceForDate = (room: Room | null, date: Date): DatePrice | null => {
+  if (!room) return null;
   const dateKey = getDateKey(date);
-  const prices = rooms.flatMap((room) => getRoomDatePrice(room, date, dateKey) ?? []);
-  return prices.length ? getLowestPrice(prices) : null;
+  const status = getDateStatus(room, dateKey);
+  if (status) return { price: null, isPeak: false, status };
+  const rate = getPeakRate(room, date);
+  return { price: applyRate(room.base_price, rate), isPeak: !!rate, status: "AVAILABLE" };
 };
+
+export const getUnavailableDates = (room: Room | null) =>
+  room ? getAvailabilityRecords(room).filter((item) => !item.is_available).map((item) => new Date(item.date)) : [];

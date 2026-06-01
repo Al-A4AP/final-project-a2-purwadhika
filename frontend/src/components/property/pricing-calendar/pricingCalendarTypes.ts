@@ -6,7 +6,7 @@ export type PricingCalendarSectionProps = {
   checkIn: string;
   checkOut: string;
   dateError: string;
-  rooms: Room[];
+  selectedRoom: Room | null;
   onCheckInChange: (val: string) => void;
   onCheckOutChange: (val: string) => void;
 };

@@ -5,7 +5,7 @@ import type { PricingCalendarSectionProps } from "./pricingCalendarTypes";
 
 export const PricingCalendarContent: FC<PricingCalendarSectionProps> = (props) => {
   const calendar = usePricingCalendar(
-    props.rooms,
+    props.selectedRoom,
     props.checkIn,
     props.checkOut,
     props.onCheckInChange,

@@ -1,4 +1,5 @@
 import prisma from '../../config/prisma';
+import { buildVerifiedRevenueDateWhere } from '../revenueDateFilter';
 import { getRevenueDateRange, normalizeRevenuePeriod } from './dashboardRevenuePeriod';
 import type { GetDashboardStatsOptions } from './tenantPropertyTypes';
 
@@ -26,7 +27,7 @@ const findRecentOrders = (tenantId: string) => prisma.order.findMany({
   take: 5,
 });
 const aggregateRevenue = (tenantId: string, start: Date, end: Date) => prisma.order.aggregate({
-  where: { property: { tenantId }, status: { in: ['PROCESSED', 'COMPLETED'] }, payment_verified_at: { gte: start, lt: end } },
+  where: { property: { tenantId }, status: { in: ['PROCESSED', 'COMPLETED'] }, ...buildVerifiedRevenueDateWhere(start, end) },
   _sum: { total_price: true },
 });
 
