@@ -15,7 +15,7 @@ const rangeText = (range?: DateRange) => {
 };
 
 const actionText = (isAvailable: boolean) =>
-  isAvailable ? "Aksi: jadikan tersedia kembali." : "Aksi: tandai tidak tersedia dengan warna merah.";
+  isAvailable ? "Aksi: jadikan tersedia kembali." : "Aksi: tandai tidak tersedia dengan warna kuning.";
 
 const formatLocalDate = (date: Date) =>
   date.toLocaleDateString("id-ID", { day: "2-digit", month: "2-digit", year: "numeric" });

@@ -15,6 +15,7 @@ export const handleNotification = async (notificationData: NotificationData) => 
   const statusResponse = await getMidtransStatus(notificationData);
   const order = await findOrderForPayment(statusResponse.order_id);
   if (!order) return;
+  if (order.payment_method !== 'MIDTRANS') return;
   const newStatus = resolveOrderStatus(order.status, statusResponse);
   if (newStatus === order.status) return;
   await updatePaymentStatus(order.id, newStatus, statusResponse.transaction_id);

@@ -4,7 +4,7 @@ import { toast } from "react-hot-toast";
 import { getApiErrorMessage } from "@/lib/errorMessage";
 import { availabilityService, type RoomAvailability } from "@/services/availabilityService";
 import { buildAvailabilityRangeInput, isAvailabilityRangeComplete } from "./availabilityRange";
-import { getBlockedDays } from "./roomAvailabilityDates";
+import { getCustomerBookedDays, getTenantBlockedDays } from "./roomAvailabilityDates";
 import type { AvailabilitySetter, RoomModalState } from "./roomsTypes";
 
 export const useAvailabilityActions = (modals: RoomModalState) => {
@@ -14,7 +14,7 @@ export const useAvailabilityActions = (modals: RoomModalState) => {
   const [availabilitySaving, setAvailabilitySaving] = useState(false);
   const handleOpenAvailModal = useOpenAvailabilityModal(modals, setAvailabilities, setAvailabilityRange);
   const confirmAvailabilityRange = useConfirmAvailabilityRange({ availabilityIsAvailable, availabilityRange, modals, setAvailabilities, setAvailabilityRange, setAvailabilitySaving });
-  return { availabilityIsAvailable, availabilityRange, availabilitySaving, blockedDays: getBlockedDays(availabilities), confirmAvailabilityRange, handleOpenAvailModal, setAvailabilityIsAvailable, setAvailabilityRange };
+  return { availabilityIsAvailable, availabilityRange, availabilitySaving, customerBookedDays: getCustomerBookedDays(availabilities), tenantBlockedDays: getTenantBlockedDays(availabilities), confirmAvailabilityRange, handleOpenAvailModal, setAvailabilityIsAvailable, setAvailabilityRange };
 };
 
 const useOpenAvailabilityModal = (

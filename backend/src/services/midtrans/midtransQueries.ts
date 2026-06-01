@@ -1,8 +1,9 @@
 import type { OrderStatus } from '@prisma/client';
 import prisma from '../../config/prisma';
+import { normalizePaymentOrderId } from './paymentOrderId';
 
 export const findOrderForPayment = (orderId: string) => prisma.order.findUnique({
-  where: { id: orderId },
+  where: { id: normalizePaymentOrderId(orderId) },
   include: { user: true },
 });
 

@@ -4,6 +4,7 @@ import type { RoomFormInput } from "@/types";
 export interface RoomFormProps {
   form: RoomFormInput;
   isEditing: boolean;
+  isWholeUnit: boolean;
   onChange: (form: RoomFormInput) => void;
   onSubmit: (event: FormEvent) => void;
 }

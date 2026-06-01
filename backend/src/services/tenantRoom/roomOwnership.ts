@@ -2,7 +2,10 @@ import prisma from '../../config/prisma';
 import { AppError } from '../../middlewares/errorHandler';
 
 export const ensureTenantProperty = async (propertyId: string, tenantId: string) => {
-  const property = await prisma.property.findFirst({ where: { id: propertyId, tenantId, deleted_at: null } });
+  const property = await prisma.property.findFirst({
+    where: { id: propertyId, tenantId, deleted_at: null },
+    include: { category: true },
+  });
   if (!property) throw new AppError('Properti tidak ditemukan', 404);
   return property;
 };
@@ -10,7 +13,7 @@ export const ensureTenantProperty = async (propertyId: string, tenantId: string)
 export const verifyRoomOwner = async (roomId: string, tenantId: string) => {
   const room = await prisma.room.findFirst({
     where: { id: roomId, deleted_at: null },
-    include: { property: true },
+    include: { property: { include: { category: true } } },
   });
   if (!room || room.property.tenantId !== tenantId) throw new AppError('Kamar tidak ditemukan', 404);
   return room;

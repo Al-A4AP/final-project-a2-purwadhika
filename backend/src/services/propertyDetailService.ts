@@ -44,10 +44,17 @@ const buildRoomCalendarPayload = (room: any, roomRel: any) => {
   return { ...room, images: roomRel?.images, peakRates: roomRel?.peakRates, availability, availabilities: availability };
 };
 
+const buildUnavailableRoomStatus = (room: any, roomRel: any, avail: { reason?: string; source?: string }) => ({
+  ...buildRoomCalendarPayload(room, roomRel),
+  availability_source: avail.source,
+  is_available: false,
+  reason: avail.reason || 'Kamar tidak tersedia pada tanggal yang dipilih.',
+});
+
 const buildAvailableRoomStatus = async (room: any, roomRel: any, checkIn: Date, checkOut: Date) => {
   try {
     const avail = await checkAvailability(room.id, checkIn, checkOut);
-    if (!avail.available) return buildRoomCalendarPayload(room, roomRel);
+    if (!avail.available) return buildUnavailableRoomStatus(room, roomRel, avail);
     const priceDetails = await calculateStayDetails(room.id, checkIn, checkOut);
     return { ...buildRoomCalendarPayload(room, roomRel), is_available: true, reason: avail.reason, priceDetails };
   } catch { return buildRoomCalendarPayload(room, roomRel); }

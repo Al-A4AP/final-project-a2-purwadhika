@@ -10,7 +10,7 @@ export const OrderCardDetails: FC<Omit<OrderCardProps, "StatusBadge" | "comment"
     <OrderStayInfo order={props.order} />
     <OrderPaymentInfo order={props.order} />
     <div>
-      <OrderPaymentActions order={props.order} uploading={props.uploading} handleUploadClick={props.handleUploadClick} canceling={props.canceling} handleCancelClick={props.handleCancelClick} />
+      <OrderPaymentActions order={props.order} uploading={props.uploading} handleUploadClick={props.handleUploadClick} canceling={props.canceling} handleCancelClick={props.handleCancelClick} paymentActionId={props.paymentActionId} retryMidtransPayment={props.retryMidtransPayment} switchToManualPayment={props.switchToManualPayment} />
       <OrderReviewControls order={props.order} reviewOrderId={props.reviewOrderId} setReviewOrderId={props.setReviewOrderId} />
     </div>
   </div>

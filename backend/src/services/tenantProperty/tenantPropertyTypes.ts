@@ -1,3 +1,5 @@
+import type { DashboardRevenuePeriod } from './dashboardRevenuePeriod';
+
 export interface GetTenantPropertiesOptions {
   search?: string;
   categoryId?: string;
@@ -5,6 +7,10 @@ export interface GetTenantPropertiesOptions {
   sortOrder?: 'asc' | 'desc';
   page?: number;
   limit?: number;
+}
+
+export interface GetDashboardStatsOptions {
+  revenuePeriod?: DashboardRevenuePeriod | string;
 }
 
 export interface NormalizedTenantPropertyOptions {

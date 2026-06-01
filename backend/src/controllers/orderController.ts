@@ -1,6 +1,7 @@
 import { Request, Response } from 'express';
 import * as orderService from '../services/orderService';
 import * as userOrderService from '../services/userOrderService';
+import * as userMidtransOrder from '../services/order/userMidtransOrder';
 import { sendSuccess, sendError } from '../utils/response';
 import { uploadBuffer } from '../utils/cloudinaryUpload';
 
@@ -68,6 +69,20 @@ export const uploadPaymentProofCtrl = async (req: Request, res: Response) => {
     const data = await orderService.uploadPaymentProof(id, userId, url);
 
     return sendSuccess(res, data, 'Bukti pembayaran berhasil diupload');
+  } catch (err: any) { return sendError(res, err.message, err.statusCode || 500); }
+};
+
+export const retryMidtransPaymentCtrl = async (req: Request, res: Response) => {
+  try {
+    const data = await userMidtransOrder.retryUserMidtransPayment(req.params.id as string, req.user!.id as string);
+    return sendSuccess(res, data, 'Pembayaran Midtrans siap dibuka ulang');
+  } catch (err: any) { return sendError(res, err.message, err.statusCode || 500); }
+};
+
+export const switchPaymentToManualCtrl = async (req: Request, res: Response) => {
+  try {
+    const data = await userMidtransOrder.switchUserMidtransToManual(req.params.id as string, req.user!.id as string);
+    return sendSuccess(res, data, 'Metode pembayaran diubah ke manual transfer');
   } catch (err: any) { return sendError(res, err.message, err.statusCode || 500); }
 };
 

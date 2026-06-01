@@ -1,23 +1,23 @@
 import type { Room } from '@prisma/client';
 import type { PeakRateFormData, RoomFormData } from './tenantRoomTypes';
 
-export const buildRoomCreateData = (propertyId: string, data: RoomFormData, image: { url: string; public_id: string }) => ({
+export const buildRoomCreateData = (propertyId: string, data: RoomFormData, image: { url: string; public_id: string }, isWholeUnit = false) => ({
   propertyId,
   room_type: data.room_type,
   base_price: Number(data.base_price),
   child_price: data.child_price ? Number(data.child_price) : null,
   capacity: Number(data.capacity),
-  quantity: data.quantity ? Number(data.quantity) : 1,
+  quantity: resolveQuantity(data.quantity, 1, isWholeUnit),
   description: data.description || null,
   images: { create: { image_url: image.url, cloudinary_public_id: image.public_id, order: 0 } },
 });
 
-export const buildRoomUpdateData = (data: RoomFormData, room: Room) => ({
+export const buildRoomUpdateData = (data: RoomFormData, room: Room, isWholeUnit = false) => ({
   room_type: data.room_type ?? room.room_type,
   base_price: data.base_price ? Number(data.base_price) : room.base_price,
   child_price: normalizeChildPrice(data.child_price, room.child_price),
   capacity: data.capacity ? Number(data.capacity) : room.capacity,
-  quantity: data.quantity ? Number(data.quantity) : room.quantity,
+  quantity: resolveQuantity(data.quantity, room.quantity, isWholeUnit),
   description: data.description ?? room.description,
 });
 
@@ -40,3 +40,6 @@ const normalizeChildPrice = (value: RoomFormData['child_price'], fallback: numbe
   if (value === '') return null;
   return value ? Number(value) : fallback;
 };
+
+const resolveQuantity = (value: RoomFormData['quantity'], fallback: number, isWholeUnit: boolean) =>
+  isWholeUnit ? 1 : value ? Number(value) : fallback;

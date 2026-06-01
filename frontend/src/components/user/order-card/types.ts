@@ -6,9 +6,12 @@ export interface OrderCardProps {
   canceling: string | null;
   comment: string;
   handleCancelClick: (id: string) => void;
+  retryMidtransPayment: (id: string) => void;
+  switchToManualPayment: (id: string) => void;
   handleReviewSubmit: (event: FormEvent) => void;
   handleUploadClick: (id: string) => void;
   order: Order;
+  paymentActionId: string | null;
   rating: number;
   reviewOrderId: string | null;
   setComment: (comment: string) => void;

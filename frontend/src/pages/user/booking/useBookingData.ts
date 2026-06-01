@@ -1,8 +1,8 @@
 import { useEffect, useState } from "react";
 import type { NavigateFunction } from "react-router-dom";
+import { appendMidtransScript, removeMidtransScript } from "@/lib/midtransSnap";
 import { propertyService } from "@/services/propertyService";
 import type { PropertyDetail, Room } from "@/types";
-import { appendMidtransScript, removeMidtransScript } from "./midtransScript";
 import { isBookingQueryComplete } from "./bookingQuery";
 import type { BookingQuery } from "./bookingTypes";
 

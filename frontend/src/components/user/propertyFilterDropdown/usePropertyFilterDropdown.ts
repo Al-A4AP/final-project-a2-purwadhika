@@ -3,7 +3,7 @@ import { useFilterStore } from '@/stores/filterStore';
 import { propertyService } from '@/services/propertyService';
 import type { PropertyCategory } from '@/types';
 import type { PriceDraft } from './types';
-import { useOutsideClick } from './useOutsideClick';
+import { useOutsideClick } from '@/hooks/useOutsideClick';
 
 type FilterState = ReturnType<typeof useFilterStore.getState>;
 

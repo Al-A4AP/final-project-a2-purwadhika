@@ -1,6 +1,8 @@
 import type { FC } from "react";
+import { useRef } from "react";
 import { ChevronDown, Users } from "lucide-react";
 import { GuestCounter } from "@/components/common/GuestCounter";
+import { useOutsideClick } from "@/hooks/useOutsideClick";
 import { SEARCH_INPUT_CLASS } from "./searchFormStyles";
 
 interface GuestSelectorProps {
@@ -16,17 +18,29 @@ interface GuestSelectorProps {
   setChildren: (value: number) => void;
 }
 
-export const GuestSelector: FC<GuestSelectorProps> = (props) => (
-  <div className="relative">
-    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-      <Users className="inline mr-1" size={16} /> Tamu
-    </label>
-    <button type="button" onClick={props.onToggle} className={`${SEARCH_INPUT_CLASS} flex items-center justify-between text-left`}>
-      <span className="text-sm truncate">{props.guestSummary || "1 Dewasa"}</span>
-      <ChevronDown size={16} className={`shrink-0 ml-1 transition-transform ${props.isOpen ? "rotate-180" : ""}`} />
-    </button>
-    {props.isOpen && <GuestSelectorPanel {...props} />}
-  </div>
+export const GuestSelector: FC<GuestSelectorProps> = (props) => {
+  const selectorRef = useRef<HTMLDivElement>(null);
+  useOutsideClick(selectorRef, props.onClose, props.isOpen);
+  return (
+    <div className="relative" ref={selectorRef}>
+      <GuestSelectorLabel />
+      <GuestSelectorButton {...props} />
+      {props.isOpen && <GuestSelectorPanel {...props} />}
+    </div>
+  );
+};
+
+const GuestSelectorLabel: FC = () => (
+  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+    <Users className="inline mr-1" size={16} /> Tamu
+  </label>
+);
+
+const GuestSelectorButton: FC<GuestSelectorProps> = (props) => (
+  <button type="button" onClick={props.onToggle} className={`${SEARCH_INPUT_CLASS} flex items-center justify-between text-left`}>
+    <span className="text-sm truncate">{props.guestSummary || "1 Dewasa"}</span>
+    <ChevronDown size={16} className={`shrink-0 ml-1 transition-transform ${props.isOpen ? "rotate-180" : ""}`} />
+  </button>
 );
 
 const GuestSelectorPanel: FC<GuestSelectorProps> = (props) => (

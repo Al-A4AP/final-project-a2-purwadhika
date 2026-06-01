@@ -1,11 +1,13 @@
 import { AppError } from '../middlewares/errorHandler';
 import { addRoomImage, uploadRoomImage } from './tenantRoom/roomImages';
 import { buildAvailabilityRangeDates } from './tenantRoom/availabilityRange';
+import { buildTenantAvailabilityView } from './tenantRoom/availabilityView';
 import { buildRoomCreateData, buildRoomUpdateData, normalizeAvailabilityDate } from './tenantRoom/roomData';
 import { createRoomPeakRate, findRoomPeakRates, softDeletePeakRate, updateRoomPeakRate } from './tenantRoom/peakRates';
-import { createRoomRecord, findRoomAvailabilities, findRoomById, findRoomsByProperty, softDeleteRoomRecord, updateRoomRecord, upsertRoomAvailability, upsertRoomAvailabilityRange } from './tenantRoom/roomQueries';
+import { createRoomRecord, findRoomAvailabilities, findRoomBookedOrders, findRoomById, findRoomsByProperty, softDeleteRoomRecord, updateRoomRecord, upsertRoomAvailability, upsertRoomAvailabilityRange } from './tenantRoom/roomQueries';
 import { ensureTenantProperty, verifyPeakRateOwner, verifyRoomOwner } from './tenantRoom/roomOwnership';
 import type { PeakRateFormData, RoomFormData } from './tenantRoom/tenantRoomTypes';
+import { isWholeUnitCategory } from './tenantRoom/wholeUnitCategory';
 
 export const getRooms = async (propertyId: string, tenantId: string) => {
   await ensureTenantProperty(propertyId, tenantId);
@@ -13,15 +15,16 @@ export const getRooms = async (propertyId: string, tenantId: string) => {
 };
 
 export const createRoom = async (propertyId: string, tenantId: string, data: RoomFormData, file?: Express.Multer.File) => {
-  await ensureTenantProperty(propertyId, tenantId);
+  const property = await ensureTenantProperty(propertyId, tenantId);
   if (!file) throw new AppError('Foto kamar wajib diupload', 400);
   const image = await uploadRoomImage(file);
-  return createRoomRecord(buildRoomCreateData(propertyId, data, image));
+  return createRoomRecord(buildRoomCreateData(propertyId, data, image, isWholeUnitCategory(property.category?.name)));
 };
 
 export const updateRoom = async (roomId: string, tenantId: string, data: RoomFormData, file?: Express.Multer.File) => {
   const room = await verifyRoomOwner(roomId, tenantId);
-  const updated = await updateRoomRecord(roomId, buildRoomUpdateData(data, room));
+  const isWholeUnit = isWholeUnitCategory(room.property.category?.name);
+  const updated = await updateRoomRecord(roomId, buildRoomUpdateData(data, room, isWholeUnit));
   if (file) await addRoomImage(roomId, file);
   return file ? findRoomById(roomId) : updated;
 };
@@ -53,7 +56,11 @@ export const deletePeakRate = async (id: string, tenantId: string) => {
 
 export const getRoomAvailabilities = async (roomId: string, tenantId: string) => {
   await verifyRoomOwner(roomId, tenantId);
-  return findRoomAvailabilities(roomId);
+  const [manual, orders] = await Promise.all([
+    findRoomAvailabilities(roomId),
+    findRoomBookedOrders(roomId),
+  ]);
+  return buildTenantAvailabilityView(manual, orders);
 };
 
 export const setRoomAvailability = async (roomId: string, tenantId: string, date: Date, is_available: boolean) => {

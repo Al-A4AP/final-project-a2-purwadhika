@@ -1,11 +1,12 @@
 import type { DateRange } from "react-day-picker";
 
 export interface RoomAvailabilityModalProps {
-  blockedDays: Date[];
+  customerBookedDays: Date[];
   isAvailable: boolean;
   isOpen: boolean;
   isSaving: boolean;
   range?: DateRange;
+  tenantBlockedDays: Date[];
   onAvailableChange: (value: boolean) => void;
   onClose: () => void;
   onConfirm: () => void;

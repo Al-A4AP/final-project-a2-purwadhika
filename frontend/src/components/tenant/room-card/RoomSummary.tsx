@@ -3,9 +3,14 @@ import type { RoomWithPeakRates } from "@/types";
 import { RoomImage } from "./RoomImage";
 import { RoomInfo } from "./RoomInfo";
 
-export const RoomSummary: FC<{ room: RoomWithPeakRates }> = ({ room }) => (
+interface RoomSummaryProps {
+  isWholeUnit: boolean;
+  room: RoomWithPeakRates;
+}
+
+export const RoomSummary: FC<RoomSummaryProps> = ({ isWholeUnit, room }) => (
   <div className="flex min-w-0 gap-3">
     <RoomImage room={room} />
-    <RoomInfo room={room} />
+    <RoomInfo isWholeUnit={isWholeUnit} room={room} />
   </div>
 );

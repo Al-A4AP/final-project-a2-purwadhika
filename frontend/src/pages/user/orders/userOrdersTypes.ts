@@ -32,11 +32,14 @@ export interface UserOrdersState {
   filterActions: UserOrderFilterActions;
   handleFileChange: (event: React.ChangeEvent<HTMLInputElement>) => Promise<void>;
   handleCancelClick: (orderId: string) => void;
+  retryMidtransPayment: (orderId: string) => void;
+  switchToManualPayment: (orderId: string) => void;
   handleReviewSubmit: (event: React.FormEvent) => Promise<void>;
   handleUploadClick: (orderId: string) => void;
   loading: boolean;
   orders: Order[];
   pagination: PaginationMeta;
+  paymentActionId: string | null;
   rating: number;
   reviewOrderId: string | null;
   setComment: (value: string) => void;

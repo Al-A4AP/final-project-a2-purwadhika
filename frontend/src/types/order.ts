@@ -8,6 +8,7 @@ export type OrderStatus =
   | 'COMPLETED';
 
 export type PaymentMethod = 'MANUAL' | 'MIDTRANS';
+export type DashboardRevenuePeriod = 'weekly' | 'monthly' | 'quarterly' | 'six_months' | 'yearly';
 
 export interface Order {
   id: string;
@@ -47,6 +48,8 @@ export interface DashboardStats {
   propertyCount: number;
   roomCount: number;
   pendingOrders: number;
+  revenue: number;
+  revenuePeriod: DashboardRevenuePeriod;
   monthlyRevenue: number;
   recentOrders: RecentOrder[];
 }

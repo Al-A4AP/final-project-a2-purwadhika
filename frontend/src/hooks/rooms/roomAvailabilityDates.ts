@@ -17,5 +17,16 @@ export const findAvailabilityForDate = (
   date: Date,
 ) => availabilities.find((availability) => getDateKey(getAvailabilityDate(availability)) === getDateKey(date));
 
-export const getBlockedDays = (availabilities: RoomAvailability[]) =>
-  availabilities.filter((availability) => !availability.is_available).map(getAvailabilityDate);
+export const getCustomerBookedDays = (availabilities: RoomAvailability[]) =>
+  availabilities.filter(isCustomerBooked).map(getAvailabilityDate);
+
+export const getTenantBlockedDays = (availabilities: RoomAvailability[]) => {
+  const bookedKeys = new Set(getCustomerBookedDays(availabilities).map(getDateKey));
+  return availabilities.filter((availability) => isTenantBlocked(availability, bookedKeys)).map(getAvailabilityDate);
+};
+
+const isCustomerBooked = (availability: RoomAvailability) =>
+  availability.source === "CUSTOMER_BOOKED";
+
+const isTenantBlocked = (availability: RoomAvailability, bookedKeys: Set<string>) =>
+  !availability.is_available && !isCustomerBooked(availability) && !bookedKeys.has(getDateKey(getAvailabilityDate(availability)));

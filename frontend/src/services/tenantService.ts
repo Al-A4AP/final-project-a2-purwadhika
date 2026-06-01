@@ -1,7 +1,7 @@
 import { api } from './api';
 import type {
   ApiResponse, DashboardStats, TenantProperty, TenantPropertyDetail,
-  RoomWithPeakRates, PeakSeasonRate, RoomFormInput, PaginationMeta, PropertyCategory,
+  RoomWithPeakRates, PeakSeasonRate, RoomFormInput, PaginationMeta, PropertyCategory, DashboardRevenuePeriod,
 } from '@/types';
 
 const buildUrl = (path: string, params?: Record<string, unknown>) => {
@@ -24,8 +24,8 @@ const buildRoomFormData = (data: Partial<RoomFormInput>) => {
 };
 
 export const tenantService = {
-  async getDashboard(): Promise<DashboardStats> {
-    const res = await api.get<ApiResponse<DashboardStats>>('/tenant/dashboard');
+  async getDashboard(params?: { revenuePeriod?: DashboardRevenuePeriod }): Promise<DashboardStats> {
+    const res = await api.get<ApiResponse<DashboardStats>>(buildUrl('/tenant/dashboard', params));
     return res.data.data;
   },
   async getOccupancyCalendar() {

@@ -3,6 +3,7 @@ export interface RoomAvailability {
   roomId: string;
   date: string;
   is_available: boolean;
+  source?: 'TENANT_AVAILABLE' | 'TENANT_BLOCKED' | 'CUSTOMER_BOOKED';
 }
 
 export interface RoomImage {
@@ -37,6 +38,7 @@ export interface Room {
   images?: RoomImage[];
   is_available?: boolean;
   reason?: string;
+  availability_source?: 'TENANT_BLOCKED' | 'CUSTOMER_BOOKED';
   priceDetails?: {
     roomId: string;
     basePrice: number;

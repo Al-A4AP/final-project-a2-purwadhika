@@ -5,7 +5,7 @@ import { sendSuccess, sendError } from '../utils/response';
 export const getDashboard = async (req: Request, res: Response) => {
   try {
     const tenantId = req.user!.id as string;
-    const data = await svc.getDashboardStats(tenantId);
+    const data = await svc.getDashboardStats(tenantId, { revenuePeriod: req.query.revenuePeriod as string });
     return sendSuccess(res, data, 'Dashboard berhasil diambil');
   } catch (err: any) { return sendError(res, err.message, err.statusCode || 500); }
 };

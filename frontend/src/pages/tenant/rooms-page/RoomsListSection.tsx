@@ -6,6 +6,7 @@ interface RoomsListSectionProps {
   handleEdit: (room: RoomWithPeakRates) => void;
   handleOpenAvailModal: (id: string) => void;
   handleOpenPeakModal: (id: string) => void;
+  isWholeUnit: boolean;
   loading: boolean;
   onDelete: (id: string) => void;
   rooms: RoomWithPeakRates[];
@@ -16,7 +17,7 @@ export const RoomsListSection: FC<RoomsListSectionProps> = (props) => {
   if (props.rooms.length === 0) return <p className="text-sm text-gray-500">Belum ada kamar. Tambahkan kamar pertama.</p>;
   return (
     <div className="space-y-3">
-      {props.rooms.map((room) => <RoomCard key={room.id} room={room} onDelete={props.onDelete} onEdit={props.handleEdit} onOpenAvail={props.handleOpenAvailModal} onOpenPeakRates={props.handleOpenPeakModal} />)}
+      {props.rooms.map((room) => <RoomCard key={room.id} isWholeUnit={props.isWholeUnit} room={room} onDelete={props.onDelete} onEdit={props.handleEdit} onOpenAvail={props.handleOpenAvailModal} onOpenPeakRates={props.handleOpenPeakModal} />)}
     </div>
   );
 };

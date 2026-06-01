@@ -13,4 +13,5 @@ export interface StayRange {
 export interface AvailabilityResult {
   available: boolean;
   reason?: string;
+  source?: 'TENANT_BLOCKED' | 'CUSTOMER_BOOKED';
 }

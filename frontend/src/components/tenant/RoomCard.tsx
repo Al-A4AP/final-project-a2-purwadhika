@@ -10,7 +10,7 @@ export const RoomCard: FC<RoomCardProps> = (props) => {
   return (
     <div className="space-y-3 rounded-xl border bg-white p-4 dark:border-slate-700 dark:bg-slate-800">
       <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
-        <RoomSummary room={props.room} />
+        <RoomSummary isWholeUnit={props.isWholeUnit} room={props.room} />
         <RoomActions {...props} />
       </div>
       <PeakRatesSection room={props.room} isOpen={showRates} onToggle={() => setShowRates((value) => !value)} />

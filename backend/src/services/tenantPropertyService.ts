@@ -4,7 +4,7 @@ import { getTenantDashboardStats } from './tenantProperty/dashboardStats';
 import { buildPropertyCreateData, buildPropertyUpdateData, buildTenantPropertyWhere, normalizePropertyOptions } from './tenantProperty/tenantPropertyFilters';
 import { createPropertyImage, removePropertyImage } from './tenantProperty/propertyImages';
 import { countTenantProperties, createTenantProperty, findTenantProperties, findTenantProperty, findTenantPropertyDetail, softDeleteTenantProperty, updateTenantProperty } from './tenantProperty/tenantPropertyQueries';
-import type { GetTenantPropertiesOptions, PropertyFormData } from './tenantProperty/tenantPropertyTypes';
+import type { GetDashboardStatsOptions, GetTenantPropertiesOptions, PropertyFormData } from './tenantProperty/tenantPropertyTypes';
 
 export type { GetTenantPropertiesOptions } from './tenantProperty/tenantPropertyTypes';
 
@@ -46,7 +46,8 @@ export const addPropertyImage = (propertyId: string, tenantId: string, file: Exp
 export const deletePropertyImage = (propertyId: string, imageId: string, tenantId: string) =>
   removePropertyImage(propertyId, imageId, tenantId);
 
-export const getDashboardStats = (tenantId: string) => getTenantDashboardStats(tenantId);
+export const getDashboardStats = (tenantId: string, options?: GetDashboardStatsOptions) =>
+  getTenantDashboardStats(tenantId, options);
 
 const buildPagination = (page: number, limit: number, total: number) => ({
   page,

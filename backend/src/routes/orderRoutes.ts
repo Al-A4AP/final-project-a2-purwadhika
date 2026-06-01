@@ -10,6 +10,8 @@ import {
   getTenantOrdersCtrl,
   updateOrderStatusCtrl,
   uploadPaymentProofCtrl,
+  retryMidtransPaymentCtrl,
+  switchPaymentToManualCtrl,
   midtransNotificationCtrl
 } from '../controllers/orderController';
 import { createOrderSchema, updateOrderStatusSchema } from '../validations/orderValidation';
@@ -23,6 +25,8 @@ router.post('/midtrans-notification', webhookLimiter, midtransNotificationCtrl);
 router.post('/', requireAuth, requireRole(['USER']), orderLimiter, validate(createOrderSchema), createOrderCtrl);
 router.get('/user', requireAuth, requireRole(['USER']), getUserOrdersCtrl);
 router.patch('/:id/cancel', requireAuth, requireRole(['USER']), cancelUserManualOrderCtrl);
+router.post('/:id/midtrans/retry', requireAuth, requireRole(['USER']), retryMidtransPaymentCtrl);
+router.patch('/:id/payment-method/manual', requireAuth, requireRole(['USER']), switchPaymentToManualCtrl);
 router.post('/:id/payment-proof', requireAuth, requireRole(['USER']), uploadPaymentProof.single('payment_proof'), uploadPaymentProofCtrl);
 
 // Tenant Routes

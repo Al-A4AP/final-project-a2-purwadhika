@@ -1,12 +1,12 @@
 import { useState } from "react";
 import type { NavigateFunction } from "react-router-dom";
 import { toast } from "react-hot-toast";
-import { orderService } from "@/services/orderService";
 import { getApiErrorMessage } from "@/lib/errorMessage";
+import { openSnapPayment } from "@/lib/midtransSnap";
+import { orderService } from "@/services/orderService";
 import type { PropertyDetail, Room } from "@/types";
 import { createCheckoutPayload } from "./checkoutPayload";
 import { validateCheckout } from "./checkoutValidation";
-import { openSnapPayment } from "./snapPayment";
 import type { BookingGuests, BookingQuery, PaymentMethod } from "./bookingTypes";
 
 export const useBookingCheckout = (params: {

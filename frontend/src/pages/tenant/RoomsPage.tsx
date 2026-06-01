@@ -26,8 +26,8 @@ const RoomsPage: FC = () => {
     <div className="p-6 md:p-8 space-y-6 max-w-2xl">
       <RoomsPageHeader onBack={() => navigate("/tenant/properties")} />
       <RoomsAddButton isVisible={!isWholeUnit} showForm={state.showForm} onClick={handleToggleForm} />
-      <RoomsFormSection showForm={state.showForm} form={state.form} setForm={state.setForm} handleSubmit={state.handleSubmit} />
-      <RoomsListSection rooms={state.rooms} loading={state.loading} onDelete={deleteActions.handleDelete} handleEdit={state.handleEdit} handleOpenAvailModal={state.handleOpenAvailModal} handleOpenPeakModal={state.handleOpenPeakModal} />
+      <RoomsFormSection showForm={state.showForm} isWholeUnit={isWholeUnit} form={state.form} setForm={state.setForm} handleSubmit={state.handleSubmit} />
+      <RoomsListSection rooms={state.rooms} isWholeUnit={isWholeUnit} loading={state.loading} onDelete={deleteActions.handleDelete} handleEdit={state.handleEdit} handleOpenAvailModal={state.handleOpenAvailModal} handleOpenPeakModal={state.handleOpenPeakModal} />
       <RoomsModals {...state} {...deleteActions} onDeleteRate={deleteActions.handleDeletePeakRate} />
     </div>
   );

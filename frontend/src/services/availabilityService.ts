@@ -2,11 +2,14 @@ import { api } from './api';
 import type { ApiResponse } from '@/types';
 
 
+export type AvailabilitySource = 'TENANT_AVAILABLE' | 'TENANT_BLOCKED' | 'CUSTOMER_BOOKED';
+
 export interface RoomAvailability {
   id: string;
   roomId: string;
   date: string;
   is_available: boolean;
+  source?: AvailabilitySource;
 }
 
 export interface AvailabilityRangeInput {
