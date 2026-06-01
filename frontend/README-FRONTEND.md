@@ -172,12 +172,16 @@ Default local frontend: `http://localhost:5173`.
 
 ## Catatan Audit Frontend
 
-- `npm run lint` lulus tanpa error pada audit 01 Juni 2026.
+Audit ke-3 dilakukan pada 01 Juni 2026 pukul 20:46 WIB.
+
+- `npm run lint` lulus tanpa error.
 - `npm run build` selesai tanpa error (exit code 0).
 - `node_modules/.bin/tsc -b --noEmit` lulus tanpa error.
 - Tidak ada file di `src` yang melebihi 200 baris (diverifikasi via scan PowerShell, hasil 0 file).
-- Seluruh fungsi/komponen/hook telah di-refactor sesuai aturan maksimal 15 baris.
+- Seluruh fungsi/komponen/hook di frontend sesuai aturan maksimal 15 baris (tidak ada pelanggaran di sisi frontend).
+- Pelanggaran 15 baris hanya ada di **backend** (11 fungsi). Frontend bersih.
+- `TenantOrdersConfirmModal.tsx` dikonfirmasi sudah ada dan menggunakan `ConfirmModal` sebelum setiap aksi perubahan status order (termasuk pembatalan), memenuhi syarat PURWADHIKA.
 - Route tenant profile sudah diarahkan ke `src/pages/user/ProfilePage.tsx`.
 - Dashboard tenant mobile sudah memakai `TenantMobileTopbar` dan `TenantSidebar`.
-- Validasi dinamis tanggal check-out (`min = check-in + 1 hari`) sudah berfungsi di `SearchForm.tsx`.
+- Validasi dinamis tanggal check-out (`min = check-in + 1 hari`) berfungsi di `SearchForm.tsx`.
 - Jumlah anak dan bayi dibatasi maksimal sejumlah dewasa di `GuestCounter.tsx`.

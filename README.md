@@ -12,20 +12,22 @@ Final Project Purwadhika JCWDBGPM-11, Group 1:
 
 ## Status Audit Terakhir
 
-Audit dokumentasi dan source dilakukan pada 01 Juni 2026 dengan acuan
-`PURWADHIKA.md`.
+Audit ke-3 dilakukan pada 01 Juni 2026 pukul 20:46 WIB dengan acuan
+`PURWADHIKA.md`. Laporan detail ada di `AUDIT_PURWADHIKA_1_JUNI_2026_07_21_AM`
+dan `AUDIT_CLEANCODE_REST_1_JUNI_2026.md`.
 
-| Area                       | Status  | Catatan                                                                                                                        |
-| -------------------------- | ------- | ------------------------------------------------------------------------------------------------------------------------------ |
-| Fitur utama                | Selesai | Seluruh 11 fitur utama PURWADHIKA.md telah terimplementasi penuh.                                                              |
-| Fitur 1                    | Selesai | Auth/profile, katalog properti, property detail, tenant property/room/category management, dan public calendar sudah tersedia. |
-| Fitur 2                    | Selesai | Alur transaksi, konfirmasi tenant, review, dan report sudah tersedia lengkap.                                                  |
-| Batas file 200 baris       | Sesuai  | Scan PowerShell: 0 file di backend maupun frontend yang melampaui 200 baris.                                                   |
-| Function maksimal 15 baris | Sesuai  | Semua service telah dipecah menjadi fungsi-fungsi mikro rata-rata 8-14 baris.                                                  |
-| Log production             | Sesuai  | Scan source tidak menemukan `console.log` aktif yang tidak terpakai.                                                           |
-| Frontend lint              | Lulus   | `npm run lint` di frontend selesai tanpa error; `npm run build` exit code 0.                                                   |
-| TypeScript no emit         | Lulus   | `tsc -b` backend dan frontend selesai tanpa error.                                                                             |
-| Test suite                 | Belum ada | Backend `npm test` masih placeholder.                                                                                        |
+| Area                       | Status              | Catatan                                                                                                                        |
+| -------------------------- | ------------------- | ------------------------------------------------------------------------------------------------------------------------------ |
+| Fitur utama                | Selesai             | Seluruh 11 fitur utama PURWADHIKA.md telah terimplementasi penuh.                                                              |
+| Fitur 1                    | Selesai             | Auth/profile, katalog properti, property detail, tenant property/room/category management, dan public calendar sudah tersedia. |
+| Fitur 2                    | Selesai             | Alur transaksi, konfirmasi tenant (pop-up verified), review, dan report sudah tersedia lengkap.                                |
+| Batas file 200 baris       | Sesuai              | Scan PowerShell: 0 file di backend maupun frontend yang melampaui 200 baris.                                                   |
+| Function maksimal 15 baris | Belum sepenuhnya   | 11 fungsi backend melampaui batas (terbesar: `getTenantReviews` 38 baris, `registerUser` 37 baris). Perlu refactor.            |
+| Log production             | Sesuai              | Scan: 0 baris `console.log` aktif di seluruh `backend/src` dan `frontend/src`.                                                |
+| Frontend lint              | Lulus               | `npm run lint` dan `npm run build` selesai tanpa error; exit code 0.                                                           |
+| TypeScript no emit         | Lulus               | `tsc -b` backend dan frontend selesai tanpa error.                                                                             |
+| Pop-up konfirmasi tenant   | Selesai             | `TenantOrdersConfirmModal.tsx` menggunakan `ConfirmModal` sebelum setiap perubahan status order.                               |
+| Test suite                 | Belum ada           | Backend `npm test` masih placeholder.                                                                                          |
 
 Laporan lengkap tersedia di
 [`AUDIT_PURWADHIKA_1_JUNI_2026_07_21_AM`](./AUDIT_PURWADHIKA_1_JUNI_2026_07_21_AM).

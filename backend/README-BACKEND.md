@@ -222,10 +222,18 @@ memang menjalankan persistent process.
 
 ## Catatan Audit Backend
 
-- `node_modules/.bin/tsc --noEmit` lulus tanpa error pada audit 01 Juni 2026.
+Audit ke-3 dilakukan pada 01 Juni 2026 pukul 20:46 WIB.
+
+- `node_modules/.bin/tsc --noEmit` lulus tanpa error.
+- `npm run build` selesai tanpa error (exit code 0).
 - Tidak ada file di `src` atau `prisma` yang melebihi 200 baris (diverifikasi via scan PowerShell, hasil 0 file).
-- Seluruh service telah di-refactor menjadi fungsi-fungsi mikro rata-rata 8-14 baris, sesuai aturan maksimal 15 baris.
-- Scan source tidak menemukan `console.log` aktif yang tidak terpakai.
+- Scan source tidak menemukan `console.log` aktif yang tidak terpakai di seluruh `backend/src`.
+- Ditemukan **11 fungsi** yang melebihi batas 15 baris (aturan PURWADHIKA.md):
+  - `getTenantReviews()` di `tenantReviewService.ts` — 38 baris (terbesar)
+  - `registerUser()` di `authService.ts` — 37 baris
+  - `getEmailWrapper()` di `emailTemplate.ts` — 31 baris (konten HTML statis)
+  - 8 fungsi lainnya di rentang 16-19 baris
+  - Detail dan panduan refactor: lihat `AUDIT_CLEANCODE_REST_1_JUNI_2026.md`
 - `npm test` masih placeholder, sehingga automated test belum tersedia.
 - File `.env` lokal tidak ikut Git jika `.gitignore` tetap dipatuhi; jangan
   commit credential Supabase, Cloudinary, Midtrans, atau email.
