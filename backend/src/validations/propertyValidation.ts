@@ -35,3 +35,12 @@ export const peakRateSchema = z.object({
   message: "Tanggal selesai harus setelah tanggal mulai",
   path: ["end_date"]
 });
+
+export const availabilityRangeSchema = z.object({
+  start_date: z.string().min(1, 'Tanggal mulai wajib diisi'),
+  end_date: z.string().min(1, 'Tanggal selesai wajib diisi'),
+  is_available: z.boolean(),
+}).refine((data) => new Date(data.end_date) >= new Date(data.start_date), {
+  message: 'Tanggal selesai tidak boleh sebelum tanggal mulai',
+  path: ['end_date'],
+});

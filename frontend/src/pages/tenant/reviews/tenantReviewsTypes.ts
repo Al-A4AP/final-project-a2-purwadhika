@@ -4,6 +4,10 @@ export type ReplyTextMap = Record<string, string>;
 export type SubmittingMap = Record<string, boolean>;
 
 export interface TenantReviewsState {
+  closeDeleteReview: () => void;
+  confirmDeleteReview: () => Promise<void>;
+  deleteTarget: Review | null;
+  deletingReviewId: string | null;
   error: string | null;
   fetchReviews: (page?: number) => Promise<void>;
   handlePageChange: (page: number) => void;
@@ -13,5 +17,6 @@ export interface TenantReviewsState {
   pagination: PaginationMeta;
   replyText: ReplyTextMap;
   reviews: Review[];
+  openDeleteReview: (review: Review) => void;
   submitting: SubmittingMap;
 }

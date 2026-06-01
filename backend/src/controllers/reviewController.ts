@@ -32,3 +32,13 @@ export const replyReviewCtrl = async (req: Request, res: Response) => {
     res.status(400).json({ message: err.message });
   }
 };
+
+export const deleteReviewCtrl = async (req: Request, res: Response) => {
+  try {
+    const reviewId = req.params.reviewId as string;
+    await reviewService.deleteTenantReview(req.user!.id, reviewId);
+    res.status(200).json({ message: 'Ulasan berhasil dihapus' });
+  } catch (err: any) {
+    res.status(400).json({ message: err.message });
+  }
+};

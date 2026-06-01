@@ -34,36 +34,42 @@ const SidebarHeader: FC<Pick<TenantSidebarProps, 'collapsed' | 'showCollapse' | 
 
 const TenantNavLinks: FC<{ collapsed: boolean; onNavigate?: () => void }> = ({ collapsed, onNavigate }) => (
   <nav className="flex-1 space-y-1 p-3">
-    {TENANT_NAV.map(({ to, icon: Icon, label }) => (
-      <NavLink key={to} to={to} onClick={onNavigate}
-        className={({ isActive }) =>
-          `flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition ${
-            isActive ? 'bg-red-50 text-red-600 dark:bg-red-900/20' : 'text-gray-600 hover:bg-gray-50 dark:text-gray-400 dark:hover:bg-slate-700'
-          }`
-        }
-      >
-        <Icon size={18} className="shrink-0" />
-        {!collapsed && <span>{label}</span>}
-      </NavLink>
-    ))}
+    {TENANT_NAV.map((item) => <TenantNavItem key={item.to} item={item} collapsed={collapsed} onNavigate={onNavigate} />)}
   </nav>
 );
 
-const AccountActions: FC<Pick<TenantSidebarProps, 'collapsed' | 'userName' | 'onNavigate' | 'onLogout'>> = ({
-  collapsed, userName, onNavigate, onLogout,
-}) => (
+const TenantNavItem: FC<{ item: (typeof TENANT_NAV)[number]; collapsed: boolean; onNavigate?: () => void }> = ({ item, collapsed, onNavigate }) => {
+  const Icon = item.icon;
+  return (
+    <NavLink to={item.to} end={item.to === '/'} onClick={onNavigate} className={({ isActive }) => navClass(isActive)}>
+      <Icon size={18} className="shrink-0" />
+      {!collapsed && <span>{item.label}</span>}
+    </NavLink>
+  );
+};
+
+const navClass = (isActive: boolean) =>
+  `flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition ${isActive ? 'bg-red-50 text-red-600 dark:bg-red-900/20' : 'text-gray-600 hover:bg-gray-50 dark:text-gray-400 dark:hover:bg-slate-700'}`;
+
+const AccountActions: FC<Pick<TenantSidebarProps, 'collapsed' | 'userName' | 'onNavigate' | 'onLogout'>> = (props) => (
   <div className="space-y-1 border-t p-3 dark:border-slate-700">
-    <Link to="/tenant/profile" onClick={onNavigate}
-      className="flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm text-gray-600 transition hover:bg-gray-50 dark:text-gray-400 dark:hover:bg-slate-700">
-      <User size={18} className="shrink-0" />
-      {!collapsed && <span className="truncate">{userName}</span>}
-    </Link>
-    <button onClick={onLogout}
-      className="flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-sm text-red-600 transition hover:bg-red-50 dark:hover:bg-red-900/20">
-      <LogOut size={18} className="shrink-0" />
-      {!collapsed && <span>Keluar</span>}
-    </button>
+    <ProfileLink {...props} />
+    <LogoutButton collapsed={props.collapsed} onLogout={props.onLogout} />
   </div>
+);
+
+const ProfileLink: FC<Pick<TenantSidebarProps, 'collapsed' | 'userName' | 'onNavigate'>> = ({ collapsed, userName, onNavigate }) => (
+  <Link to="/tenant/profile" onClick={onNavigate} className="flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm text-gray-600 transition hover:bg-gray-50 dark:text-gray-400 dark:hover:bg-slate-700">
+    <User size={18} className="shrink-0" />
+    {!collapsed && <span className="truncate">{userName}</span>}
+  </Link>
+);
+
+const LogoutButton: FC<Pick<TenantSidebarProps, 'collapsed' | 'onLogout'>> = ({ collapsed, onLogout }) => (
+  <button onClick={onLogout} className="flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-sm text-red-600 transition hover:bg-red-50 dark:hover:bg-red-900/20">
+    <LogOut size={18} className="shrink-0" />
+    {!collapsed && <span>Keluar</span>}
+  </button>
 );
 
 export const TenantSidebar: FC<TenantSidebarProps> = ({

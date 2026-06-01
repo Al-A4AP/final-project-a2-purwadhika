@@ -40,6 +40,9 @@ export const tenantService = {
     const response = await api.post(`/reviews/${reviewId}/reply`, { reply_text });
     return response.data.data;
   },
+  async deleteReview(reviewId: string): Promise<void> {
+    await api.delete(`/reviews/${reviewId}`);
+  },
   async getProperties(params?: {
     search?: string;
     categoryId?: string;
@@ -116,6 +119,10 @@ export const tenantService = {
   },
   async createPeakRate(roomId: string, data: Record<string, string>): Promise<PeakSeasonRate> {
     const res = await api.post<ApiResponse<PeakSeasonRate>>(`/tenant/rooms/${roomId}/peak-rates`, data);
+    return res.data.data;
+  },
+  async updatePeakRate(rateId: string, data: Record<string, string>): Promise<PeakSeasonRate> {
+    const res = await api.patch<ApiResponse<PeakSeasonRate>>(`/tenant/peak-rates/${rateId}`, data);
     return res.data.data;
   },
   async deletePeakRate(rateId: string): Promise<void> {

@@ -1,4 +1,5 @@
 import type { Dispatch, SetStateAction } from "react";
+import type { DateRange } from "react-day-picker";
 import type { PeakSeasonRate, RoomFormInput, RoomWithPeakRates } from "@/types";
 import type { RoomAvailability } from "@/services/availabilityService";
 
@@ -31,4 +32,5 @@ export type RoomModalState = {
 };
 
 export type AvailabilitySetter = Dispatch<SetStateAction<RoomAvailability[]>>;
+export type AvailabilityRangeSetter = Dispatch<SetStateAction<DateRange | undefined>>;
 export type PeakRateSetter = Dispatch<SetStateAction<PeakSeasonRate[]>>;

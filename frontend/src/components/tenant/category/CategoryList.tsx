@@ -1,6 +1,7 @@
 import type { FC } from 'react';
 import { EmptyState } from '@/components/common/EmptyState';
 import { Pencil, Trash2 } from 'lucide-react';
+import { isDefaultCategoryName } from '@/lib/defaultCategories';
 import type { PropertyCategory } from '@/types';
 
 interface CategoryListProps {
@@ -20,16 +21,27 @@ const CategoryActions: FC<Omit<CategoryListProps, 'categories' | 'loading'> & { 
   </div>
 );
 
+const DefaultBadge: FC<{ name: string }> = ({ name }) => (
+  isDefaultCategoryName(name) ? <span className="rounded-full bg-slate-100 px-2 py-0.5 text-xs font-semibold text-slate-600 dark:bg-slate-700 dark:text-slate-200">Default Sistem</span> : null
+);
+
+const CategoryName: FC<{ category: PropertyCategory }> = ({ category }) => (
+  <div className="flex min-w-0 flex-wrap items-center gap-2">
+    <span className="truncate">{category.name}</span>
+    <DefaultBadge name={category.name} />
+  </div>
+);
+
 const CategoryRow: FC<Omit<CategoryListProps, 'categories' | 'loading'> & { category: PropertyCategory }> = (props) => (
   <tr className="border-b last:border-0 dark:border-slate-700">
-    <td className="px-4 py-3 font-medium text-gray-900 dark:text-white">{props.category.name}</td>
+    <td className="px-4 py-3 font-medium text-gray-900 dark:text-white"><CategoryName category={props.category} /></td>
     <td className="px-4 py-3"><CategoryActions {...props} /></td>
   </tr>
 );
 
 const CategoryCard: FC<Omit<CategoryListProps, 'categories' | 'loading'> & { category: PropertyCategory }> = (props) => (
-  <div className="flex items-center justify-between rounded-lg border bg-white p-4 dark:border-slate-700 dark:bg-slate-800">
-    <p className="min-w-0 truncate font-medium text-gray-900 dark:text-white">{props.category.name}</p>
+  <div className="flex items-center justify-between gap-3 rounded-lg border bg-white p-4 dark:border-slate-700 dark:bg-slate-800">
+    <div className="min-w-0 font-medium text-gray-900 dark:text-white"><CategoryName category={props.category} /></div>
     <CategoryActions {...props} />
   </div>
 );

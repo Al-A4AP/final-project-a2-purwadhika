@@ -2,11 +2,12 @@ import type { FC } from "react";
 import { EmptyState } from "@/components/common/EmptyState";
 import { ErrorState } from "@/components/common/ErrorState";
 import { Pagination } from "@/components/common/Pagination";
+import { SectionLoading } from "@/components/common/SectionLoading";
 import { OrdersTable } from "@/components/tenant/OrdersTable";
 import type { TenantOrdersState } from "./tenantOrdersTypes";
 
 export const TenantOrdersTableSection: FC<{ state: TenantOrdersState }> = ({ state }) => {
-  if (state.loading) return <div className="p-10 text-center text-gray-500 dark:text-gray-400">Memuat data...</div>;
+  if (state.loading) return <SectionLoading label="Memuat data pesanan..." size="md" variant="table" />;
   if (state.error) return <ErrorState title="Pesanan belum bisa dimuat" message={state.error} onRetry={() => state.fetchOrders(state.pagination.page || 1)} />;
   if (!state.orders.length) return <EmptyOrders />;
   const totalPages = state.pagination.totalPages || state.pagination.pages || 1;

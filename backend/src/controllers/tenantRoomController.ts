@@ -56,6 +56,15 @@ export const createPeakRateCtrl = async (req: Request, res: Response) => {
   } catch (err: any) { return sendError(res, err.message, err.statusCode || 500); }
 };
 
+export const updatePeakRateCtrl = async (req: Request, res: Response) => {
+  try {
+    const { rateId } = req.params as { rateId: string };
+    const tenantId = req.user!.id as string;
+    const data = await svc.updatePeakRate(rateId, tenantId, req.body);
+    return sendSuccess(res, data, 'Peak rate berhasil diperbarui');
+  } catch (err: any) { return sendError(res, err.message, err.statusCode || 500); }
+};
+
 export const deletePeakRateCtrl = async (req: Request, res: Response) => {
   try {
     const { rateId } = req.params as { rateId: string };
@@ -71,6 +80,16 @@ export const getRoomAvailabilitiesCtrl = async (req: Request, res: Response) => 
     const tenantId = req.user!.id as string;
     const data = await svc.getRoomAvailabilities(roomId, tenantId);
     return sendSuccess(res, data, 'Ketersediaan kamar berhasil diambil');
+  } catch (err: any) { return sendError(res, err.message, err.statusCode || 500); }
+};
+
+export const setRoomAvailabilityRangeCtrl = async (req: Request, res: Response) => {
+  try {
+    const { roomId } = req.params as { roomId: string };
+    const tenantId = req.user!.id as string;
+    const { start_date, end_date, is_available } = req.body;
+    const data = await svc.setRoomAvailabilityRange(roomId, tenantId, new Date(start_date), new Date(end_date), is_available);
+    return sendSuccess(res, data, 'Ketersediaan kamar berhasil diperbarui');
   } catch (err: any) { return sendError(res, err.message, err.statusCode || 500); }
 };
 

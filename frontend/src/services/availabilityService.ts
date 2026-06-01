@@ -9,6 +9,12 @@ export interface RoomAvailability {
   is_available: boolean;
 }
 
+export interface AvailabilityRangeInput {
+  start_date: string;
+  end_date: string;
+  is_available: boolean;
+}
+
 export const availabilityService = {
   async getRoomAvailability(roomId: string, params?: { start_date?: string; end_date?: string }): Promise<RoomAvailability[]> {
     const res = await api.get<ApiResponse<RoomAvailability[]>>(`/properties/rooms/${roomId}/availability`, { params });
@@ -22,6 +28,11 @@ export const availabilityService = {
 
   async setRoomAvailability(roomId: string, date: string, is_available: boolean): Promise<null> {
     const res = await api.post<ApiResponse<null>>(`/tenant/rooms/${roomId}/availability`, { date, is_available });
+    return res.data.data;
+  },
+
+  async setRoomAvailabilityRange(roomId: string, data: AvailabilityRangeInput): Promise<RoomAvailability[]> {
+    const res = await api.post<ApiResponse<RoomAvailability[]>>(`/tenant/rooms/${roomId}/availability/range`, data);
     return res.data.data;
   }
 };

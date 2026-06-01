@@ -13,13 +13,16 @@ export type RoomPeakRatesModalProps = {
   isOpen: boolean;
   peakRates: PeakSeasonRate[];
   peakForm: PeakRateFormData;
+  editingRateId: string | null;
   onFormChange: (form: PeakRateFormData) => void;
-  onAddRate: (event: FormEvent) => void;
+  onSaveRate: (event: FormEvent) => void;
+  onEditRate: (rate: PeakSeasonRate) => void;
+  onCancelEdit: () => void;
   onDeleteRate: (id: string) => void;
   onClose: () => void;
 };
 
 export type PeakRateFormProps = Pick<
   RoomPeakRatesModalProps,
-  "peakForm" | "onFormChange" | "onAddRate"
+  "editingRateId" | "peakForm" | "onCancelEdit" | "onFormChange" | "onSaveRate"
 >;

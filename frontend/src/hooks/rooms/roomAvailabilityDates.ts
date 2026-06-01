@@ -2,23 +2,20 @@ import type { RoomAvailability } from "@/services/availabilityService";
 
 const parseDateParts = (value: string) => value.split("-").map((part) => parseInt(part, 10));
 
-export const getUtcStartOfDay = (date: Date) => {
-  const startOfDay = new Date(date);
-  startOfDay.setUTCHours(0, 0, 0, 0);
-  return startOfDay;
-};
+export const getDateKey = (date: Date) =>
+  [date.getFullYear(), padDatePart(date.getMonth() + 1), padDatePart(date.getDate())].join("-");
 
-export const getDateKey = (date: Date) => getUtcStartOfDay(date).toISOString().split("T")[0];
+const padDatePart = (value: number) => String(value).padStart(2, "0");
 
 export const getAvailabilityDate = (availability: RoomAvailability) => {
   const [year, month, day] = parseDateParts(availability.date);
-  return new Date(Date.UTC(year, month - 1, day));
+  return new Date(year, month - 1, day);
 };
 
 export const findAvailabilityForDate = (
   availabilities: RoomAvailability[],
   date: Date,
-) => availabilities.find((availability) => getAvailabilityDate(availability).getTime() === getUtcStartOfDay(date).getTime());
+) => availabilities.find((availability) => getDateKey(getAvailabilityDate(availability)) === getDateKey(date));
 
 export const getBlockedDays = (availabilities: RoomAvailability[]) =>
   availabilities.filter((availability) => !availability.is_available).map(getAvailabilityDate);

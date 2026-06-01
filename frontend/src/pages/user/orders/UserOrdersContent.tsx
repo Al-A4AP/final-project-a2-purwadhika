@@ -1,6 +1,7 @@
 import type { FC } from "react";
 import type { RefObject } from "react";
 import { HelpText } from "@/components/common/HelpText";
+import { SectionLoading } from "@/components/common/SectionLoading";
 import type { UserOrdersState } from "./userOrdersTypes";
 import { UserCancelOrderModal } from "./UserCancelOrderModal";
 import { UserOrdersFilter } from "./UserOrdersFilter";
@@ -12,7 +13,7 @@ interface UserOrdersContentProps {
 }
 
 export const UserOrdersContent: FC<UserOrdersContentProps> = ({ fileInputRef, state }) => {
-  if (state.loading) return <div className="p-10 text-center">Loading...</div>;
+  if (state.loading) return <SectionLoading className="mx-auto max-w-4xl px-4 py-12" label="Memuat riwayat pesanan..." size="md" variant="cards" />;
   return (
     <div className="max-w-4xl mx-auto px-4 py-12">
       <div className="mb-8 space-y-3">

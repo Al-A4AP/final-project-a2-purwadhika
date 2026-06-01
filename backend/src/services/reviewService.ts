@@ -1,4 +1,7 @@
-import { createReviewRecord, createReviewReplyRecord, findPropertyReviews, findReviewByOrder, findReviewableOrder, findTenantReview } from './review/reviewQueries';
+import {
+  createReviewRecord, createReviewReplyRecord, findPropertyReviews, findReviewByOrder,
+  findReviewableOrder, findTenantReview, softDeleteReviewRecord,
+} from './review/reviewQueries';
 import { assertReviewAllowed, assertValidRating } from './review/reviewRules';
 
 export const createReview = async (userId: string, orderId: string, rating: number, comment: string) => {
@@ -12,8 +15,13 @@ export const createReview = async (userId: string, orderId: string, rating: numb
 export const getPropertyReviews = (propertyId: string) => findPropertyReviews(propertyId);
 
 export const replyReview = async (tenantId: string, reviewId: string, reply_text: string) => {
-  await ensureTenantCanReply(tenantId, reviewId);
+  await ensureTenantCanManageReview(tenantId, reviewId, 'membalas');
   return createReviewReplyRecord(reviewId, tenantId, reply_text);
+};
+
+export const deleteTenantReview = async (tenantId: string, reviewId: string) => {
+  await ensureTenantCanManageReview(tenantId, reviewId, 'menghapus');
+  await softDeleteReviewRecord(reviewId);
 };
 
 const getReviewableOrderOrThrow = async (orderId: string, userId: string) => {
@@ -27,9 +35,9 @@ const ensureReviewDoesNotExist = async (orderId: string) => {
   if (existingReview) throw new Error('Anda sudah memberikan ulasan untuk pesanan ini');
 };
 
-const ensureTenantCanReply = async (tenantId: string, reviewId: string) => {
+const ensureTenantCanManageReview = async (tenantId: string, reviewId: string, action: string) => {
   const review = await findTenantReview(reviewId);
   if (!review || review.property.tenantId !== tenantId) {
-    throw new Error('Review tidak ditemukan atau Anda tidak berhak membalas');
+    throw new Error(`Review tidak ditemukan atau Anda tidak berhak ${action}`);
   }
 };

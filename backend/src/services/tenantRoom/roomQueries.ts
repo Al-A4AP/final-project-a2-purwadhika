@@ -27,3 +27,9 @@ export const upsertRoomAvailability = (roomId: string, date: Date, isAvailable: 
     update: { is_available: isAvailable },
     create: { roomId, date, is_available: isAvailable },
   });
+export const upsertRoomAvailabilityRange = (roomId: string, dates: Date[], isAvailable: boolean) =>
+  prisma.$transaction(dates.map((date) => prisma.roomAvailability.upsert({
+    where: { roomId_date: { roomId, date } },
+    update: { is_available: isAvailable },
+    create: { roomId, date, is_available: isAvailable },
+  })));

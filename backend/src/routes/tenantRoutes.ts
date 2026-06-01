@@ -7,7 +7,7 @@ import {
   verifyRoomOwnership,
   verifyPeakRateOwnership
 } from '../middlewares/ownershipMiddleware';
-import { createPropertySchema, updatePropertySchema, createRoomSchema, updateRoomSchema, peakRateSchema } from '../validations/propertyValidation';
+import { availabilityRangeSchema, createPropertySchema, updatePropertySchema, createRoomSchema, updateRoomSchema, peakRateSchema } from '../validations/propertyValidation';
 import {
   getDashboard, getPropertiesCtrl, getPropertyCtrl,
   createPropertyCtrl, updatePropertyCtrl, deletePropertyCtrl,
@@ -15,8 +15,8 @@ import {
 } from '../controllers/tenantPropertyController';
 import {
   getRoomsCtrl, createRoomCtrl, updateRoomCtrl, deleteRoomCtrl,
-  getPeakRatesCtrl, createPeakRateCtrl, deletePeakRateCtrl,
-  getRoomAvailabilitiesCtrl, setRoomAvailabilityCtrl
+  getPeakRatesCtrl, createPeakRateCtrl, updatePeakRateCtrl, deletePeakRateCtrl,
+  getRoomAvailabilitiesCtrl, setRoomAvailabilityCtrl, setRoomAvailabilityRangeCtrl
 } from '../controllers/tenantRoomController';
 import { getDashboardAnalyticsCtrl, getOccupancyCalendarCtrl } from '../controllers/tenantReportController';
 import { getTenantReviewsCtrl } from '../controllers/tenantReviewController';
@@ -48,10 +48,12 @@ router.delete('/rooms/:roomId', ...isTenant, verifyRoomOwnership, deleteRoomCtrl
 // Peak Season Rates
 router.get('/rooms/:roomId/peak-rates', ...isTenant, verifyRoomOwnership, getPeakRatesCtrl);
 router.post('/rooms/:roomId/peak-rates', ...isTenant, verifyRoomOwnership, validate(peakRateSchema), createPeakRateCtrl);
+router.patch('/peak-rates/:rateId', ...isTenant, verifyPeakRateOwnership, validate(peakRateSchema), updatePeakRateCtrl);
 router.delete('/peak-rates/:rateId', ...isTenant, verifyPeakRateOwnership, deletePeakRateCtrl);
 
 // Room Availability
 router.get('/rooms/:roomId/availability', ...isTenant, verifyRoomOwnership, getRoomAvailabilitiesCtrl);
+router.post('/rooms/:roomId/availability/range', ...isTenant, verifyRoomOwnership, validate(availabilityRangeSchema), setRoomAvailabilityRangeCtrl);
 router.post('/rooms/:roomId/availability', ...isTenant, verifyRoomOwnership, setRoomAvailabilityCtrl);
 
 // Reporting

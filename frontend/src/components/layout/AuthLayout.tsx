@@ -1,25 +1,34 @@
-import type { FC } from 'react';
+import type { FC, ReactNode } from 'react';
 import { Outlet, Link } from 'react-router-dom';
+import { ScrollToTop } from './ScrollToTop';
 
-const AuthLayout: FC = () => {
-  return (
-    <div className="min-h-screen flex items-center justify-center bg-linear-to-br from-red-50 to-blue-50 dark:from-slate-900 dark:to-slate-800 p-4">
-      <div className="w-full max-w-md">
-        <div className="text-center mb-8">
-          <Link to="/" className="text-2xl font-bold text-red-600">
-            <span className="text-rose-600 font-black">PURWA</span><span className="text-slate-900 dark:text-white font-black">LOKA</span>
-          </Link>
-          <p className="text-gray-600 dark:text-gray-400 text-sm mt-2">
-            Temukan akomodasi terbaik untuk kebutuhan Anda
-          </p>
-        </div>
+const AuthLayout: FC = () => (
+  <AuthShell>
+    <AuthBrand />
+    <AuthCard />
+  </AuthShell>
+);
 
-        <div className="bg-white dark:bg-slate-800 rounded-lg shadow-lg p-8">
-          <Outlet />
-        </div>
-      </div>
-    </div>
-  );
-};
+const AuthShell: FC<{ children: ReactNode }> = ({ children }) => (
+  <div className="flex min-h-screen items-center justify-center bg-linear-to-br from-red-50 to-blue-50 p-4 dark:from-slate-900 dark:to-slate-800">
+    <ScrollToTop />
+    <div className="w-full max-w-md">{children}</div>
+  </div>
+);
+
+const AuthBrand: FC = () => (
+  <div className="mb-8 text-center">
+    <Link to="/" className="text-2xl font-bold text-red-600">
+      <span className="font-black text-rose-600">PURWA</span><span className="font-black text-slate-900 dark:text-white">LOKA</span>
+    </Link>
+    <p className="mt-2 text-sm text-gray-600 dark:text-gray-400">Temukan akomodasi terbaik untuk kebutuhan Anda</p>
+  </div>
+);
+
+const AuthCard: FC = () => (
+  <div className="rounded-lg bg-white p-8 shadow-lg dark:bg-slate-800">
+    <Outlet />
+  </div>
+);
 
 export default AuthLayout;

@@ -1,6 +1,7 @@
 import prisma from '../config/prisma';
 import { AppError } from '../middlewares/errorHandler';
 import type { CategoryInput, CategoryQuery } from '../validations/categoryValidation';
+import { isDefaultCategoryName } from './category/defaultCategories';
 
 const normalizePagination = (page?: number, limit?: number) => ({
   page: Math.max(1, Number(page || 1)),
@@ -26,6 +27,10 @@ const findCategory = async (id: string) => {
   return category;
 };
 
+const ensureCustomCategory = (name: string, action: 'diubah' | 'dihapus') => {
+  if (isDefaultCategoryName(name)) throw new AppError(`Kategori default sistem tidak bisa ${action}`, 400);
+};
+
 export const listCategories = async (query: CategoryQuery) => {
   const { page, limit } = normalizePagination(query.page, query.limit);
   const where = buildWhere(query.search);
@@ -43,13 +48,15 @@ export const createCategory = async (data: CategoryInput) => {
 };
 
 export const updateCategory = async (id: string, data: CategoryInput) => {
-  await findCategory(id);
+  const category = await findCategory(id);
+  ensureCustomCategory(category.name, 'diubah');
   await ensureNameAvailable(data.name, id);
   return prisma.propertyCategory.update({ where: { id }, data: { name: data.name } });
 };
 
 export const deleteCategory = async (id: string) => {
-  await findCategory(id);
+  const category = await findCategory(id);
+  ensureCustomCategory(category.name, 'dihapus');
   const used = await prisma.property.count({ where: { categoryId: id, deleted_at: null } });
   if (used > 0) throw new AppError('Kategori sedang digunakan oleh properti', 400);
   await prisma.propertyCategory.delete({ where: { id } });

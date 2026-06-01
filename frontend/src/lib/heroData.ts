@@ -21,30 +21,3 @@ export const HERO_SLIDES = [
       "Apartemen elegan dengan pemandangan cakrawala metropolitan yang menakjubkan",
   },
 ];
-
-export const TRENDING_DESTINATIONS = [
-  {
-    city: "Bali",
-    image:
-      "https://images.unsplash.com/photo-1537996194471-e657df975ab4?auto=format&fit=crop&w=600&q=80",
-    count: "120+ Properti",
-  },
-  {
-    city: "Jakarta",
-    image:
-      "https://images.unsplash.com/photo-1506485338023-6ce5f36692df?auto=format&fit=crop&w=600&q=80",
-    count: "85+ Properti",
-  },
-  {
-    city: "Bandung",
-    image:
-      "https://images.unsplash.com/photo-1626125345510-4603468eedfb?auto=format&fit=crop&w=600&q=80",
-    count: "60+ Properti",
-  },
-  {
-    city: "Yogyakarta",
-    image:
-      "https://images.unsplash.com/photo-1584810359583-96fc3448beaa?auto=format&fit=crop&w=600&q=80",
-    count: "45+ Properti",
-  },
-];

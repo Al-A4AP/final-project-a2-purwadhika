@@ -1,8 +1,9 @@
 import { AppError } from '../middlewares/errorHandler';
 import { addRoomImage, uploadRoomImage } from './tenantRoom/roomImages';
+import { buildAvailabilityRangeDates } from './tenantRoom/availabilityRange';
 import { buildRoomCreateData, buildRoomUpdateData, normalizeAvailabilityDate } from './tenantRoom/roomData';
-import { createRoomPeakRate, findRoomPeakRates, softDeletePeakRate } from './tenantRoom/peakRates';
-import { createRoomRecord, findRoomAvailabilities, findRoomById, findRoomsByProperty, softDeleteRoomRecord, updateRoomRecord, upsertRoomAvailability } from './tenantRoom/roomQueries';
+import { createRoomPeakRate, findRoomPeakRates, softDeletePeakRate, updateRoomPeakRate } from './tenantRoom/peakRates';
+import { createRoomRecord, findRoomAvailabilities, findRoomById, findRoomsByProperty, softDeleteRoomRecord, updateRoomRecord, upsertRoomAvailability, upsertRoomAvailabilityRange } from './tenantRoom/roomQueries';
 import { ensureTenantProperty, verifyPeakRateOwner, verifyRoomOwner } from './tenantRoom/roomOwnership';
 import type { PeakRateFormData, RoomFormData } from './tenantRoom/tenantRoomTypes';
 
@@ -40,6 +41,11 @@ export const createPeakRate = async (roomId: string, tenantId: string, data: Pea
   return createRoomPeakRate(roomId, data);
 };
 
+export const updatePeakRate = async (id: string, tenantId: string, data: PeakRateFormData) => {
+  const rate = await verifyPeakRateOwner(id, tenantId);
+  return updateRoomPeakRate(id, rate.roomId, data);
+};
+
 export const deletePeakRate = async (id: string, tenantId: string) => {
   await verifyPeakRateOwner(id, tenantId);
   return softDeletePeakRate(id);
@@ -53,4 +59,9 @@ export const getRoomAvailabilities = async (roomId: string, tenantId: string) =>
 export const setRoomAvailability = async (roomId: string, tenantId: string, date: Date, is_available: boolean) => {
   await verifyRoomOwner(roomId, tenantId);
   return upsertRoomAvailability(roomId, normalizeAvailabilityDate(date), is_available);
+};
+
+export const setRoomAvailabilityRange = async (roomId: string, tenantId: string, start: Date, end: Date, isAvailable: boolean) => {
+  await verifyRoomOwner(roomId, tenantId);
+  return upsertRoomAvailabilityRange(roomId, buildAvailabilityRangeDates(start, end), isAvailable);
 };

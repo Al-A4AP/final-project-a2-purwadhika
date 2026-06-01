@@ -19,10 +19,18 @@ export const findPropertyReviews = (propertyId: string) => prisma.review.findMan
 });
 
 export const findTenantReview = (reviewId: string) =>
-  prisma.review.findUnique({ where: { id: reviewId }, include: { property: true } });
+  prisma.review.findFirst({ where: { id: reviewId, deleted_at: null }, include: { property: true } });
 
 export const createReviewReplyRecord = (reviewId: string, tenantId: string, replyText: string) =>
   prisma.reviewReply.create({ data: { reviewId, tenantId, reply_text: replyText } });
+
+export const softDeleteReviewRecord = (reviewId: string) => {
+  const deletedAt = new Date();
+  return prisma.$transaction([
+    prisma.review.update({ where: { id: reviewId }, data: { deleted_at: deletedAt } }),
+    prisma.reviewReply.updateMany({ where: { reviewId, deleted_at: null }, data: { deleted_at: deletedAt } }),
+  ]);
+};
 
 interface CreateReviewRecordData {
   orderId: string;
