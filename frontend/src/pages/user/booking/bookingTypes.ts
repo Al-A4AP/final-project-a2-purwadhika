@@ -1,4 +1,5 @@
 import type { PropertyDetail, Room } from "@/types";
+import type { BookingDateFormState } from "./date-fields/bookingDateFieldTypes";
 
 export type PaymentMethod = "MANUAL" | "MIDTRANS";
 export type GuestType = "adults" | "children" | "babies";
@@ -28,6 +29,7 @@ export type BookingPageState = {
   property: PropertyDetail | null;
   room: Room | null;
   loading: boolean;
+  dateForm: BookingDateFormState;
   guests: BookingGuests;
   updateGuest: (type: GuestType, delta: number) => void;
   paymentMethod: PaymentMethod;

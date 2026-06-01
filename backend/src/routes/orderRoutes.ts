@@ -1,8 +1,9 @@
 import { Router } from 'express';
 import { requireAuth, requireRole } from '../middlewares/authMiddleware';
 import { validate } from '../middlewares/validateMiddleware';
-import { upload, uploadPaymentProof } from '../middlewares/uploadMiddleware';
+import { uploadPaymentProof } from '../middlewares/uploadMiddleware';
 import { orderLimiter, webhookLimiter } from '../middlewares/rateLimitMiddleware';
+import { cancelUserManualOrderCtrl } from '../controllers/userOrderCancelController';
 import {
   createOrderCtrl,
   getUserOrdersCtrl,
@@ -21,6 +22,7 @@ router.post('/midtrans-notification', webhookLimiter, midtransNotificationCtrl);
 // User Routes
 router.post('/', requireAuth, requireRole(['USER']), orderLimiter, validate(createOrderSchema), createOrderCtrl);
 router.get('/user', requireAuth, requireRole(['USER']), getUserOrdersCtrl);
+router.patch('/:id/cancel', requireAuth, requireRole(['USER']), cancelUserManualOrderCtrl);
 router.post('/:id/payment-proof', requireAuth, requireRole(['USER']), uploadPaymentProof.single('payment_proof'), uploadPaymentProofCtrl);
 
 // Tenant Routes

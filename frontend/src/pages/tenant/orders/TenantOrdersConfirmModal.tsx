@@ -7,7 +7,8 @@ export const TenantOrdersConfirmModal: FC<{ onCancel: () => void; state: TenantO
     isOpen={state.confirmModal.isOpen}
     title={state.confirmModal.title}
     message={state.confirmModal.message}
-    confirmText={state.confirmModal.confirmText}
+    confirmText={state.updating ? "Memproses..." : state.confirmModal.confirmText}
+    confirmDisabled={Boolean(state.updating)}
     onConfirm={state.confirmModal.onConfirm}
     onCancel={onCancel}
   />

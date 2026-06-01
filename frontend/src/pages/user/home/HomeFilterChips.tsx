@@ -9,7 +9,7 @@ type ApplyFilters = (values: FilterValues) => void;
 export const HomeFilterChips: FC<{ activeFilters: FilterValues }> = ({ activeFilters }) => {
   const filters = useFilterStore();
   const apply = (values: FilterValues) => filters.applyFilterValues({ ...values, page: 1 });
-  return <FilterChips chips={buildFilterChips(activeFilters, apply)} onClearAll={filters.resetFilters} />;
+  return <FilterChips chips={buildFilterChips(activeFilters, apply)} onClearAll={filters.resetFilters} variant="inline" />;
 };
 
 const buildFilterChips = (values: FilterValues, apply: ApplyFilters): FilterChipItem[] => [

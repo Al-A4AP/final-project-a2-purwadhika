@@ -10,12 +10,18 @@ export interface FilterChipItem {
 interface FilterChipsProps {
   chips: FilterChipItem[];
   onClearAll?: () => void;
+  variant?: "card" | "inline";
 }
 
-export const FilterChips: FC<FilterChipsProps> = ({ chips, onClearAll }) => {
+const WRAPPER_CLASS = {
+  card: "mb-6 flex flex-col gap-3 rounded-lg border border-slate-200 bg-white p-4 dark:border-slate-700 dark:bg-slate-800/40",
+  inline: "flex flex-col gap-3 border-t border-slate-100 pt-4 dark:border-slate-800",
+};
+
+export const FilterChips: FC<FilterChipsProps> = ({ chips, onClearAll, variant = "card" }) => {
   if (!chips.length) return null;
   return (
-    <div className="mb-6 flex flex-col gap-3 rounded-lg border border-slate-200 bg-white p-4 dark:border-slate-700 dark:bg-slate-800/40">
+    <div className={WRAPPER_CLASS[variant]}>
       <p className="text-xs font-semibold uppercase text-slate-400">Filter aktif</p>
       <div className="flex flex-wrap gap-2">
         {chips.map((chip) => <FilterChip key={chip.id} chip={chip} />)}

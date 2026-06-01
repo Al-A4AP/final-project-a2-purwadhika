@@ -3,7 +3,9 @@ import type { Order } from "@/types";
 
 export interface OrderCardProps {
   StatusBadge: FC<{ status: string }>;
+  canceling: string | null;
   comment: string;
+  handleCancelClick: (id: string) => void;
   handleReviewSubmit: (event: FormEvent) => void;
   handleUploadClick: (id: string) => void;
   order: Order;

@@ -2,7 +2,8 @@ import type { User } from "@/types";
 
 export const initialAuthState = {
   user: null,
-  loading: false,
+  hydrated: false,
+  loading: true,
   error: null,
   isAuthenticated: false,
   isTenant: false,
@@ -10,6 +11,14 @@ export const initialAuthState = {
 
 export const buildUserAuthState = (user: User | null) => ({
   user,
+  hydrated: true,
+  loading: false,
+  error: null,
   isAuthenticated: !!user,
   isTenant: user?.role === "TENANT",
+});
+
+export const buildAuthLoadingState = () => ({
+  loading: true,
+  error: null,
 });

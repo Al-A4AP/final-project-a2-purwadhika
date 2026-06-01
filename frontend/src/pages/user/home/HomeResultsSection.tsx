@@ -1,9 +1,8 @@
 import type { FC } from "react";
 import type { FilterValues } from "@/stores/filterStore";
 import type { Property } from "@/types";
-import { HomeFilterChips } from "./HomeFilterChips";
+import { HomeFilterPanel } from "./HomeFilterPanel";
 import { HomePropertyResults } from "./HomePropertyResults";
-import { HomeSortBar } from "./HomeSortBar";
 
 interface HomeResultsSectionProps {
   activeFilters: FilterValues;
@@ -22,8 +21,7 @@ export const HomeResultsSection: FC<HomeResultsSectionProps> = (props) => {
   const currentSort = props.activeFilters.sort || "created_at";
   return (
     <section id="results-section" className="max-w-7xl mx-auto px-4 py-16 scroll-mt-24">
-      <HomeSortBar {...props} currentOrder={currentOrder} currentSort={currentSort} />
-      <HomeFilterChips activeFilters={props.activeFilters} />
+      <HomeFilterPanel activeFilters={props.activeFilters} currentOrder={currentOrder} currentSort={currentSort} hasFilterChanges={props.hasFilterChanges} totalCount={props.totalCount} />
       <HomePropertyResults {...props} currentOrder={currentOrder} currentSort={currentSort} />
     </section>
   );

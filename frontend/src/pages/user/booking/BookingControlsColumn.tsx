@@ -11,7 +11,7 @@ export const BookingControlsColumn: FC<{ state: BookingPageState }> = ({ state }
       <h1 className="text-2xl font-bold text-gray-900 dark:text-white">Selesaikan Pemesanan Anda</h1>
       <HelpText>Pastikan tanggal, jumlah tamu, dan metode pembayaran sudah sesuai sebelum melanjutkan.</HelpText>
     </div>
-    <TravelDetailsCard totals={state.totals!} />
+    <TravelDetailsCard dateForm={state.dateForm} />
     <GuestCounter guests={state.guests} roomCapacity={state.room!.capacity} onUpdate={state.updateGuest} />
     <PaymentMethodSelector paymentMethod={state.paymentMethod} onChange={state.setPaymentMethod} />
   </div>

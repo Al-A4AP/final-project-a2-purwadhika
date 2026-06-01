@@ -14,13 +14,24 @@ export interface UserOrderFilterActions {
   setStatus: (value: string) => void;
 }
 
+export interface CancelOrderModalState {
+  isOpen: boolean;
+  orderId: string | null;
+  orderNumber: string;
+}
+
 export interface UserOrdersState {
+  canceling: string | null;
+  cancelModal: CancelOrderModalState;
+  closeCancelModal: () => void;
   comment: string;
+  confirmCancelOrder: () => void;
   error: string | null;
   fetchOrders: (page?: number) => void;
   filters: UserOrderFilters;
   filterActions: UserOrderFilterActions;
   handleFileChange: (event: React.ChangeEvent<HTMLInputElement>) => Promise<void>;
+  handleCancelClick: (orderId: string) => void;
   handleReviewSubmit: (event: React.FormEvent) => Promise<void>;
   handleUploadClick: (orderId: string) => void;
   loading: boolean;

@@ -23,6 +23,7 @@ const PropertyDetailPage = Loadable(
 );
 const AboutPage = Loadable(lazy(() => import("@/pages/AboutPage")));
 const ContactPage = Loadable(lazy(() => import("@/pages/ContactPage")));
+const LegalPage = Loadable(lazy(() => import("@/pages/LegalPage")));
 
 // Auth pages
 const LoginPage = Loadable(lazy(() => import("@/pages/auth/LoginPage")));
@@ -82,6 +83,7 @@ export const router = createBrowserRouter([
       { path: "properties/:id", element: <PropertyDetailPage /> },
       { path: "about", element: <AboutPage /> },
       { path: "contact", element: <ContactPage /> },
+      { path: "legal", element: <LegalPage /> },
       {
         path: "profile",
         element: <ProtectedRoute component={<ProfilePage />} role="USER" />,

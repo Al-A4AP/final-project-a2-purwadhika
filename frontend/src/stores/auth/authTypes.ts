@@ -2,6 +2,7 @@ import type { User } from "@/types";
 
 export interface AuthStore {
   user: User | null;
+  hydrated: boolean;
   loading: boolean;
   error: string | null;
   isAuthenticated: boolean;

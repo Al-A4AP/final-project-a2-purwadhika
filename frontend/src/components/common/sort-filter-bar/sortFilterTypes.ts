@@ -23,9 +23,6 @@ export type SortFilterBarProps = {
   onChange: (sort: string, order: SortOrder) => void;
   resultCount?: number;
   resultLabel?: string;
-  hasFilterChanges?: boolean;
-  onApplyFilters?: () => void;
-  onResetFilters?: () => void;
 };
 
 export type SortDropdownProps = {

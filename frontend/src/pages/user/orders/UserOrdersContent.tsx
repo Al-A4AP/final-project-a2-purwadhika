@@ -2,6 +2,7 @@ import type { FC } from "react";
 import type { RefObject } from "react";
 import { HelpText } from "@/components/common/HelpText";
 import type { UserOrdersState } from "./userOrdersTypes";
+import { UserCancelOrderModal } from "./UserCancelOrderModal";
 import { UserOrdersFilter } from "./UserOrdersFilter";
 import { UserOrdersList } from "./UserOrdersList";
 
@@ -21,6 +22,7 @@ export const UserOrdersContent: FC<UserOrdersContentProps> = ({ fileInputRef, st
       <input type="file" ref={fileInputRef} onChange={state.handleFileChange} accept="image/*" className="hidden" />
       <UserOrdersFilter actions={state.filterActions} filters={state.filters} onSearch={() => state.fetchOrders(1)} />
       <UserOrdersList state={state} />
+      <UserCancelOrderModal state={state} />
     </div>
   );
 };

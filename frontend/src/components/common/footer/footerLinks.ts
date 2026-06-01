@@ -12,6 +12,6 @@ export const TENANT_FOOTER_LINKS = [
 ];
 
 export const LEGAL_LINKS = [
-  { href: "#", label: "Privacy Policy" },
-  { href: "#", label: "Terms of Service" },
+  { label: "Privacy Policy", to: "/legal#privacy" },
+  { label: "Terms of Service", to: "/legal#terms" },
 ];
