@@ -9,15 +9,15 @@ export interface RetryMidtransResult {
 
 export const userOrderActionService = {
   async cancelManualOrder(orderId: string): Promise<Order> {
-    const response = await api.patch<ApiResponse<Order>>(`/orders/${orderId}/cancel`);
+    const response = await api.post<ApiResponse<Order>>(`/orders/${orderId}/cancellations`);
     return response.data.data;
   },
   async retryMidtransPayment(orderId: string): Promise<RetryMidtransResult> {
-    const response = await api.post<ApiResponse<RetryMidtransResult>>(`/orders/${orderId}/midtrans/retry`);
+    const response = await api.post<ApiResponse<RetryMidtransResult>>(`/orders/${orderId}/payment-attempts`);
     return response.data.data;
   },
   async switchToManualPayment(orderId: string): Promise<Order> {
-    const response = await api.patch<ApiResponse<Order>>(`/orders/${orderId}/payment-method/manual`);
+    const response = await api.patch<ApiResponse<Order>>(`/orders/${orderId}/payment-method`, { payment_method: "MANUAL" });
     return response.data.data;
   },
 };

@@ -6,6 +6,8 @@ import { errorHandler } from './src/middlewares/errorHandler';
 import { globalLimiter } from './src/middlewares/rateLimitMiddleware';
 import authRoutes from './src/routes/authRoutes';
 import propertyRoutes from './src/routes/propertyRoutes';
+import locationRoutes from './src/routes/locationRoutes';
+import roomRoutes from './src/routes/roomRoutes';
 import orderRoutes from './src/routes/orderRoutes';
 import tenantRoutes from './src/routes/tenantRoutes';
 import userRoutes from './src/routes/userRoutes';
@@ -32,7 +34,9 @@ app.use('/api', globalLimiter);
 
 // Routes
 app.use('/api/auth', authRoutes);
+app.use('/api/locations', locationRoutes);
 app.use('/api/properties', propertyRoutes);
+app.use('/api/rooms', roomRoutes);
 app.use('/api/tenant', tenantRoutes);
 app.use('/api/orders', orderRoutes);
 app.use('/api/users', userRoutes);

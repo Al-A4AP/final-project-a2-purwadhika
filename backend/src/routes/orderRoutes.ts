@@ -24,6 +24,9 @@ router.post('/midtrans-notification', webhookLimiter, midtransNotificationCtrl);
 // User Routes
 router.post('/', requireAuth, requireRole(['USER']), orderLimiter, validate(createOrderSchema), createOrderCtrl);
 router.get('/user', requireAuth, requireRole(['USER']), getUserOrdersCtrl);
+router.post('/:id/cancellations', requireAuth, requireRole(['USER']), cancelUserManualOrderCtrl);
+router.post('/:id/payment-attempts', requireAuth, requireRole(['USER']), retryMidtransPaymentCtrl);
+router.patch('/:id/payment-method', requireAuth, requireRole(['USER']), switchPaymentToManualCtrl);
 router.patch('/:id/cancel', requireAuth, requireRole(['USER']), cancelUserManualOrderCtrl);
 router.post('/:id/midtrans/retry', requireAuth, requireRole(['USER']), retryMidtransPaymentCtrl);
 router.patch('/:id/payment-method/manual', requireAuth, requireRole(['USER']), switchPaymentToManualCtrl);
