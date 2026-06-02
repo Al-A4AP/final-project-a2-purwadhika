@@ -37,7 +37,7 @@ app.use('/api/auth', authRoutes);
 app.use('/api/locations', locationRoutes);
 app.use('/api/properties', propertyRoutes);
 app.use('/api/rooms', roomRoutes);
-app.use('/api/tenant', tenantRoutes);
+app.use('/api/tenants/me', tenantRoutes);      // RESTful — Tahap 4
 app.use('/api/orders', orderRoutes);
 app.use('/api/users', userRoutes);
 app.use('/api', reviewRoutes);

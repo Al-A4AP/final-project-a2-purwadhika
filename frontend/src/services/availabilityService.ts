@@ -25,17 +25,17 @@ export const availabilityService = {
   },
 
   async getTenantRoomAvailability(roomId: string): Promise<RoomAvailability[]> {
-    const res = await api.get<ApiResponse<RoomAvailability[]>>(`/tenant/rooms/${roomId}/availability`);
+    const res = await api.get<ApiResponse<RoomAvailability[]>>(`/tenants/me/rooms/${roomId}/availability`);
     return res.data.data;
   },
 
   async setRoomAvailability(roomId: string, date: string, is_available: boolean): Promise<null> {
-    const res = await api.post<ApiResponse<null>>(`/tenant/rooms/${roomId}/availability`, { date, is_available });
+    const res = await api.post<ApiResponse<null>>(`/tenants/me/rooms/${roomId}/availability`, { date, is_available });
     return res.data.data;
   },
 
   async setRoomAvailabilityRange(roomId: string, data: AvailabilityRangeInput): Promise<RoomAvailability[]> {
-    const res = await api.post<ApiResponse<RoomAvailability[]>>(`/tenant/rooms/${roomId}/availability/range`, data);
+    const res = await api.post<ApiResponse<RoomAvailability[]>>(`/tenants/me/rooms/${roomId}/availability/range`, data);
     return res.data.data;
   }
 };

@@ -25,15 +25,15 @@ const buildRoomFormData = (data: Partial<RoomFormInput>) => {
 
 export const tenantService = {
   async getDashboard(params?: { revenuePeriod?: DashboardRevenuePeriod }): Promise<DashboardStats> {
-    const res = await api.get<ApiResponse<DashboardStats>>(buildUrl('/tenant/dashboard', params));
+    const res = await api.get<ApiResponse<DashboardStats>>(buildUrl('/tenants/me/dashboard', params));
     return res.data.data;
   },
   async getOccupancyCalendar() {
-    const response = await api.get('/tenant/reports/occupancy');
+    const response = await api.get('/tenants/me/reports/occupancy');
     return response.data.data;
   },
   async getReviews(params?: { page?: number; limit?: number }) {
-    const response = await api.get('/tenant/reviews', { params });
+    const response = await api.get('/tenants/me/reviews', { params });
     return response.data.data;
   },
   async replyToReview(reviewId: string, reply_text: string) {
@@ -51,7 +51,7 @@ export const tenantService = {
     page?: number;
     limit?: number;
   }): Promise<{ properties: TenantProperty[]; pagination: PaginationMeta }> {
-    const res = await api.get<ApiResponse<{ properties: TenantProperty[]; pagination: PaginationMeta }>>(buildUrl('/tenant/properties', params));
+    const res = await api.get<ApiResponse<{ properties: TenantProperty[]; pagination: PaginationMeta }>>(buildUrl('/tenants/me/properties', params));
     return res.data.data;
   },
   async getCategories(params?: {
@@ -61,71 +61,71 @@ export const tenantService = {
     page?: number;
     limit?: number;
   }): Promise<{ categories: PropertyCategory[]; pagination: PaginationMeta }> {
-    const res = await api.get<ApiResponse<{ categories: PropertyCategory[]; pagination: PaginationMeta }>>(buildUrl('/tenant/categories', params));
+    const res = await api.get<ApiResponse<{ categories: PropertyCategory[]; pagination: PaginationMeta }>>(buildUrl('/tenants/me/categories', params));
     return res.data.data;
   },
   async createCategory(name: string): Promise<PropertyCategory> {
-    const res = await api.post<ApiResponse<PropertyCategory>>('/tenant/categories', { name });
+    const res = await api.post<ApiResponse<PropertyCategory>>('/tenants/me/categories', { name });
     return res.data.data;
   },
   async updateCategory(id: string, name: string): Promise<PropertyCategory> {
-    const res = await api.patch<ApiResponse<PropertyCategory>>(`/tenant/categories/${id}`, { name });
+    const res = await api.patch<ApiResponse<PropertyCategory>>(`/tenants/me/categories/${id}`, { name });
     return res.data.data;
   },
   async deleteCategory(id: string): Promise<void> {
-    await api.delete(`/tenant/categories/${id}`);
+    await api.delete(`/tenants/me/categories/${id}`);
   },
   async getProperty(id: string): Promise<TenantPropertyDetail> {
-    const res = await api.get<ApiResponse<TenantPropertyDetail>>(`/tenant/properties/${id}`);
+    const res = await api.get<ApiResponse<TenantPropertyDetail>>(`/tenants/me/properties/${id}`);
     return res.data.data;
   },
   async createProperty(formData: FormData): Promise<TenantProperty> {
-    const res = await api.post<ApiResponse<TenantProperty>>('/tenant/properties', formData, {
+    const res = await api.post<ApiResponse<TenantProperty>>('/tenants/me/properties', formData, {
       headers: { 'Content-Type': 'multipart/form-data' },
     });
     return res.data.data;
   },
   async updateProperty(id: string, formData: FormData): Promise<TenantProperty> {
-    const res = await api.patch<ApiResponse<TenantProperty>>(`/tenant/properties/${id}`, formData, {
+    const res = await api.patch<ApiResponse<TenantProperty>>(`/tenants/me/properties/${id}`, formData, {
       headers: { 'Content-Type': 'multipart/form-data' },
     });
     return res.data.data;
   },
   async deleteProperty(id: string): Promise<void> {
-    await api.delete(`/tenant/properties/${id}`);
+    await api.delete(`/tenants/me/properties/${id}`);
   },
   async getRooms(propertyId: string): Promise<RoomWithPeakRates[]> {
-    const res = await api.get<ApiResponse<RoomWithPeakRates[]>>(`/tenant/properties/${propertyId}/rooms`);
+    const res = await api.get<ApiResponse<RoomWithPeakRates[]>>(`/tenants/me/properties/${propertyId}/rooms`);
     return res.data.data;
   },
   async createRoom(propertyId: string, data: RoomFormInput): Promise<RoomWithPeakRates> {
-    const res = await api.post<ApiResponse<RoomWithPeakRates>>(`/tenant/properties/${propertyId}/rooms`, buildRoomFormData(data), {
+    const res = await api.post<ApiResponse<RoomWithPeakRates>>(`/tenants/me/properties/${propertyId}/rooms`, buildRoomFormData(data), {
       headers: { 'Content-Type': 'multipart/form-data' },
     });
     return res.data.data;
   },
   async updateRoom(roomId: string, data: Partial<RoomFormInput>): Promise<RoomWithPeakRates> {
-    const res = await api.patch<ApiResponse<RoomWithPeakRates>>(`/tenant/rooms/${roomId}`, buildRoomFormData(data), {
+    const res = await api.patch<ApiResponse<RoomWithPeakRates>>(`/tenants/me/rooms/${roomId}`, buildRoomFormData(data), {
       headers: { 'Content-Type': 'multipart/form-data' },
     });
     return res.data.data;
   },
   async deleteRoom(roomId: string): Promise<void> {
-    await api.delete(`/tenant/rooms/${roomId}`);
+    await api.delete(`/tenants/me/rooms/${roomId}`);
   },
   async getPeakRates(roomId: string): Promise<PeakSeasonRate[]> {
-    const res = await api.get<ApiResponse<PeakSeasonRate[]>>(`/tenant/rooms/${roomId}/peak-rates`);
+    const res = await api.get<ApiResponse<PeakSeasonRate[]>>(`/tenants/me/rooms/${roomId}/peak-rates`);
     return res.data.data;
   },
   async createPeakRate(roomId: string, data: Record<string, string>): Promise<PeakSeasonRate> {
-    const res = await api.post<ApiResponse<PeakSeasonRate>>(`/tenant/rooms/${roomId}/peak-rates`, data);
+    const res = await api.post<ApiResponse<PeakSeasonRate>>(`/tenants/me/rooms/${roomId}/peak-rates`, data);
     return res.data.data;
   },
   async updatePeakRate(rateId: string, data: Record<string, string>): Promise<PeakSeasonRate> {
-    const res = await api.patch<ApiResponse<PeakSeasonRate>>(`/tenant/peak-rates/${rateId}`, data);
+    const res = await api.patch<ApiResponse<PeakSeasonRate>>(`/tenants/me/peak-rates/${rateId}`, data);
     return res.data.data;
   },
   async deletePeakRate(rateId: string): Promise<void> {
-    await api.delete(`/tenant/peak-rates/${rateId}`);
+    await api.delete(`/tenants/me/peak-rates/${rateId}`);
   },
 };

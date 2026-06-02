@@ -7,12 +7,12 @@ export type { DashboardAnalytics, DashboardAnalyticsParams, OccupancyProperty, O
 
 export const tenantReportService = {
   async getDashboardAnalytics(params?: DashboardAnalyticsParams): Promise<DashboardAnalytics> {
-    const res = await api.get<ApiResponse<DashboardAnalytics>>(buildUrl("/tenant/reports", params));
+    const res = await api.get<ApiResponse<DashboardAnalytics>>(buildUrl("/tenants/me/reports", params));
     return res.data.data;
   },
 
   async getOccupancyCalendar(): Promise<OccupancyProperty[]> {
-    const res = await api.get<ApiResponse<OccupancyProperty[]>>("/tenant/reports/occupancy");
+    const res = await api.get<ApiResponse<OccupancyProperty[]>>("/tenants/me/reports/occupancy");
     return res.data.data;
   },
 };
