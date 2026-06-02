@@ -1,8 +1,8 @@
 import { Response } from 'express';
 
-export const sendSuccess = (
+export const sendSuccess = <T>(
   res: Response,
-  data: any,
+  data: T,
   message = 'Berhasil',
   statusCode = 200
 ) => {
@@ -18,7 +18,7 @@ export const sendError = (
   res: Response,
   message = 'Terjadi kesalahan',
   statusCode = 500,
-  errors?: any
+  errors?: unknown
 ) => {
   return res.status(statusCode).json({
     success: false,

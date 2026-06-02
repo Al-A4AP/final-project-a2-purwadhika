@@ -1,3 +1,5 @@
+import type { Prisma } from '@prisma/client';
+
 export interface PropertyFilters {
   page?: number; limit?: number; sort?: string; order?: string;
   search?: string; category?: string; city?: string;
@@ -6,8 +8,8 @@ export interface PropertyFilters {
   adults?: number; children?: number; babies?: number;
 }
 
-export const buildPropertyWhere = (filters: PropertyFilters) => {
-  const where: any = { deleted_at: null };
+export const buildPropertyWhere = (filters: PropertyFilters): Prisma.PropertyWhereInput => {
+  const where: Prisma.PropertyWhereInput = { deleted_at: null };
   if (filters.search) where.name = { contains: filters.search, mode: 'insensitive' };
   if (filters.city) where.city = { contains: filters.city, mode: 'insensitive' };
   if (filters.category) where.category = { name: { contains: filters.category, mode: 'insensitive' } };
@@ -25,16 +27,20 @@ export const buildOrderBy = (sort: string, order: string) => {
   return dbSorts[sort] || { created_at: 'desc' };
 };
 
-const buildRoomFilter = (filters: PropertyFilters) => {
-  const roomWhere: any = { deleted_at: null };
+const buildRoomFilter = (filters: PropertyFilters): Prisma.RoomWhereInput => {
+  const roomWhere: Prisma.RoomWhereInput = { deleted_at: null };
   const capacity = Number(filters.capacity || Number(filters.adults || 0) + Number(filters.children || 0));
   const minPrice = toNonNegative(filters.min_price);
   const maxPrice = toNonNegative(filters.max_price);
   if (capacity > 0) roomWhere.capacity = { gte: capacity };
-  if (minPrice !== undefined || maxPrice !== undefined) roomWhere.base_price = {};
-  if (minPrice !== undefined) roomWhere.base_price.gte = minPrice;
-  if (maxPrice !== undefined) roomWhere.base_price.lte = maxPrice;
+  const priceFilter = buildPriceFilter(minPrice, maxPrice);
+  if (priceFilter) roomWhere.base_price = priceFilter;
   return roomWhere;
+};
+
+const buildPriceFilter = (minPrice?: number, maxPrice?: number) => {
+  if (minPrice === undefined && maxPrice === undefined) return undefined;
+  return { gte: minPrice, lte: maxPrice };
 };
 
 const toNonNegative = (value?: number) => {

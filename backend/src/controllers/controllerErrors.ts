@@ -16,7 +16,7 @@ export const handleLegacyControllerError = (res: Response, err: unknown, statusC
 export const handleWebhookError = (res: Response) =>
   res.status(500).json({ error: 'Server error' });
 
-const getErrorMessage = (err: unknown) =>
+export const getErrorMessage = (err: unknown) =>
   getErrorLike(err).message || 'Terjadi kesalahan';
 
 const getStatusCode = (err: unknown, fallbackStatus: number) =>

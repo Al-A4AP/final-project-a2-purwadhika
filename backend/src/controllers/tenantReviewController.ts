@@ -1,5 +1,6 @@
 import { Request, Response } from 'express';
 import { getTenantReviews } from '../services/tenantReviewService';
+import { getErrorMessage } from './controllerErrors';
 
 export const getTenantReviewsCtrl = async (req: Request, res: Response) => {
   try {
@@ -9,7 +10,7 @@ export const getTenantReviewsCtrl = async (req: Request, res: Response) => {
     
     const result = await getTenantReviews(tenantId, page, limit);
     res.json({ success: true, data: result });
-  } catch (error: any) {
-    res.status(400).json({ success: false, message: error.message });
+  } catch (error: unknown) {
+    res.status(400).json({ success: false, message: getErrorMessage(error) });
   }
 };

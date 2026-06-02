@@ -1,12 +1,13 @@
 import { Request, Response } from 'express';
 import * as tenantReportService from '../services/tenantReportService';
+import { handleLegacyControllerError } from './controllerErrors';
 
 export const getDashboardAnalyticsCtrl = async (req: Request, res: Response) => {
   try {
     const analytics = await tenantReportService.getDashboardAnalytics(req.user!.id, buildAnalyticsOptions(req.query));
     res.status(200).json({ data: analytics });
-  } catch (err: any) {
-    res.status(400).json({ message: err.message });
+  } catch (err: unknown) {
+    handleLegacyControllerError(res, err, 400);
   }
 };
 
@@ -30,7 +31,7 @@ export const getOccupancyCalendarCtrl = async (req: Request, res: Response) => {
   try {
     const calendar = await tenantReportService.getOccupancyCalendar(req.user!.id);
     res.status(200).json({ data: calendar });
-  } catch (err: any) {
-    res.status(400).json({ message: err.message });
+  } catch (err: unknown) {
+    handleLegacyControllerError(res, err, 400);
   }
 };

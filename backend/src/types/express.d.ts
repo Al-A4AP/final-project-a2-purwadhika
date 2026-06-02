@@ -1,10 +1,11 @@
 import { Request } from 'express';
 import { Property, Room, PeakSeasonRate } from '@prisma/client';
+import type { AuthRole } from './authJwt';
 
 export interface AuthUser {
   id: string;
   email: string;
-  role: 'USER' | 'TENANT';
+  role: AuthRole;
 }
 
 declare global {

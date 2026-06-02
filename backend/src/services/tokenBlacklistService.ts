@@ -1,13 +1,23 @@
 import jwt from 'jsonwebtoken';
+import { isAuthJwtPayload } from '../types/authJwt';
 
 const tokenBlacklist = new Set<string>();
+const DEFAULT_EXPIRY_MS = 7 * 24 * 60 * 60 * 1000;
+
+const getFallbackExpiry = () => Date.now() + DEFAULT_EXPIRY_MS;
+
+const getDecodedExpiry = (token: string) => {
+  const decoded = jwt.decode(token);
+  return isAuthJwtPayload(decoded) && decoded.exp
+    ? decoded.exp * 1000
+    : getFallbackExpiry();
+};
 
 const getTokenExpiry = (token: string): number => {
   try {
-    const decoded = jwt.decode(token) as any;
-    return decoded?.exp ? decoded.exp * 1000 : Date.now() + 7 * 24 * 60 * 60 * 1000;
+    return getDecodedExpiry(token);
   } catch {
-    return Date.now() + 7 * 24 * 60 * 60 * 1000;
+    return getFallbackExpiry();
   }
 };
 
