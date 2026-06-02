@@ -1,4 +1,4 @@
-import type { DashboardAnalytics, OccupancyProperty } from "@/services/tenantReportService";
+import type { DashboardAnalytics } from "@/services/tenantReportService";
 import type { DashboardRevenuePeriod, TenantProperty } from "@/types";
 
 export interface ReportsFilters {
@@ -32,7 +32,6 @@ export interface ReportsPageState {
   error: string | null;
   filters: ReportsFilters;
   loading: boolean;
-  occupancyData: OccupancyProperty[];
   properties: TenantProperty[];
   refetchReports: () => void;
 }

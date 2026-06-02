@@ -1,4 +1,4 @@
-import { BarChart2, Building2, Home, LayoutDashboard, MessageSquare, ShoppingBag, Tags } from 'lucide-react';
+import { BarChart2, Building2, CalendarDays, Home, LayoutDashboard, MessageSquare, ShoppingBag, Tags } from 'lucide-react';
 
 export const TENANT_NAV = [
   { to: '/', icon: Home, label: 'Home' },
@@ -7,5 +7,6 @@ export const TENANT_NAV = [
   { to: '/tenant/categories', icon: Tags, label: 'Kategori' },
   { to: '/tenant/orders', icon: ShoppingBag, label: 'Pesanan' },
   { to: '/tenant/reviews', icon: MessageSquare, label: 'Ulasan Tamu' },
-  { to: '/tenant/reports', icon: BarChart2, label: 'Laporan' },
+  { to: '/tenant/reports', icon: BarChart2, label: 'Laporan Pendapatan' },
+  { to: '/tenant/occupancy', icon: CalendarDays, label: 'Okupasi Kamar' },
 ];

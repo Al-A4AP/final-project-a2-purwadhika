@@ -1,6 +1,7 @@
 import { Request, Response } from 'express';
 import * as propertyService from '../services/propertyService';
 import { getPublicRoomAvailability } from '../services/publicAvailabilityService';
+import { geocodeAddress } from '../services/locationIqService';
 import { sendSuccess, sendError } from '../utils/response';
 
 export const listPropertiesController = async (req: Request, res: Response) => {
@@ -36,6 +37,15 @@ export const getPublicRoomAvailabilityController = async (req: Request, res: Res
     const { roomId } = req.params as { roomId: string };
     const data = await getPublicRoomAvailability(roomId, req.query);
     return sendSuccess(res, data, 'Ketersediaan kamar berhasil diambil');
+  } catch (err: any) {
+    return sendError(res, err.message, err.statusCode || 500);
+  }
+};
+
+export const geocodePropertyLocationController = async (req: Request, res: Response) => {
+  try {
+    const data = await geocodeAddress(String(req.query.address || ''));
+    return sendSuccess(res, data, 'Lokasi berhasil ditemukan');
   } catch (err: any) {
     return sendError(res, err.message, err.statusCode || 500);
   }

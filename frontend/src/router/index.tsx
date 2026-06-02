@@ -80,6 +80,7 @@ const TenantReviewsPage = Loadable(
   "tenant",
 );
 const ReportsPage = Loadable(lazy(() => import("@/pages/tenant/ReportsPage")), "tenant");
+const OccupancyPage = Loadable(lazy(() => import("@/pages/tenant/OccupancyPage")), "tenant");
 const NotFoundPage = Loadable(lazy(() => import("@/pages/NotFoundPage")));
 
 const PUBLIC_ERROR = <RouteErrorPage variant="public" />;
@@ -145,6 +146,7 @@ export const router = createBrowserRouter([
       tenantRoute("reviews", <TenantReviewsPage />),
       tenantRoute("profile", <ProfilePage />),
       tenantRoute("reports", <ReportsPage />),
+      tenantRoute("occupancy", <OccupancyPage />),
     ],
   },
 ]);

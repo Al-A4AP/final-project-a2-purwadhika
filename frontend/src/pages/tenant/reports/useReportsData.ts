@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useState } from "react";
 import { getApiErrorMessage } from "@/lib/errorMessage";
-import { tenantReportService, type DashboardAnalytics, type OccupancyProperty } from "@/services/tenantReportService";
+import { tenantReportService, type DashboardAnalytics } from "@/services/tenantReportService";
 import { tenantService } from "@/services/tenantService";
 import type { TenantProperty } from "@/types";
 import type { ReportsFilters } from "./reportsTypes";
@@ -8,23 +8,18 @@ import type { ReportsFilters } from "./reportsTypes";
 export const useReportsData = (filters: ReportsFilters) => {
   const [analytics, setAnalytics] = useState<DashboardAnalytics | null>(null);
   const [properties, setProperties] = useState<TenantProperty[]>([]);
-  const [occupancyData, setOccupancyData] = useState<OccupancyProperty[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const fetchAnalytics = useFetchAnalytics(filters, setAnalytics, setLoading, setError);
-  useStaticReportData(setProperties, setOccupancyData);
+  useReportProperties(setProperties);
   useEffect(() => { Promise.resolve().then(() => fetchAnalytics()); }, [fetchAnalytics]);
-  return { analytics, error, loading, occupancyData, properties, refetchReports: fetchAnalytics };
+  return { analytics, error, loading, properties, refetchReports: fetchAnalytics };
 };
 
-const useStaticReportData = (
-  setProperties: (properties: TenantProperty[]) => void,
-  setOccupancyData: (data: OccupancyProperty[]) => void,
-) => {
+const useReportProperties = (setProperties: (properties: TenantProperty[]) => void) => {
   useEffect(() => {
     tenantService.getProperties({ limit: 100 }).then((data) => setProperties(data.properties)).catch(() => {});
-    tenantReportService.getOccupancyCalendar().then(setOccupancyData).catch(() => {});
-  }, [setOccupancyData, setProperties]);
+  }, [setProperties]);
 };
 
 const useFetchAnalytics = (

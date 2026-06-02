@@ -29,4 +29,7 @@ export const MidtransPaymentActions: FC<MidtransPaymentActionsProps> = (props) =
 };
 
 const getNotice = (status: Order["status"]) =>
-  status === "CANCELLED" ? "Pembayaran Midtrans dibatalkan. Anda bisa mencoba lagi jika tanggal masih tersedia." : "Jika popup Midtrans tertutup, buka ulang pembayaran atau pilih manual transfer.";
+  status === "CANCELLED" ? cancelledNotice : waitingNotice;
+
+const cancelledNotice = "Pembayaran Midtrans dibatalkan. Anda bisa mencoba lagi jika tanggal masih tersedia.";
+const waitingNotice = "Jika tidak diselesaikan dalam 1 jam, pesanan otomatis dibatalkan. Anda juga bisa buka ulang Midtrans atau pilih manual transfer.";

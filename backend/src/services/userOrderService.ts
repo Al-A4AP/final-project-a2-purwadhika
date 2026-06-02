@@ -1,3 +1,4 @@
+import { OrderStatus } from '@prisma/client';
 import prisma from '../config/prisma';
 
 export interface GetUserOrdersOptions {
@@ -9,6 +10,7 @@ export interface GetUserOrdersOptions {
 
 export const getUserOrders = async (userId: string, options: GetUserOrdersOptions = {}) => {
   const { sortBy = 'created_at', sortOrder = 'desc', page = 1, limit = 10 } = options;
+  await syncExpiredUserOrders(userId);
   const where = buildUserOrdersWhere(userId, options);
   const [orders, total] = await Promise.all([
     prisma.order.findMany({
@@ -25,6 +27,14 @@ export const getUserOrders = async (userId: string, options: GetUserOrdersOption
     prisma.order.count({ where }),
   ]);
   return { orders, pagination: { page, limit, total, totalPages: Math.ceil(total / limit) } };
+};
+
+const syncExpiredUserOrders = (userId: string) => {
+  const now = new Date();
+  return prisma.order.updateMany({
+    where: { userId, status: OrderStatus.WAITING_PAYMENT, expires_at: { lt: now } },
+    data: { status: OrderStatus.CANCELLED, canceled_at: now },
+  });
 };
 
 const buildUserOrdersWhere = (userId: string, options: GetUserOrdersOptions) => {

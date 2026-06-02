@@ -5,3 +5,6 @@ export const getDefaultSelectedRoom = (rooms: Room[]) =>
 
 export const getSelectedRoom = (rooms: Room[], selectedRoomId: string | null) =>
   rooms.find((room) => room.id === selectedRoomId) || getDefaultSelectedRoom(rooms);
+
+export const findRoomById = (rooms: Room[], roomId: string | null) =>
+  rooms.find((room) => room.id === roomId) || null;

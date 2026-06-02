@@ -25,5 +25,6 @@ export const validateBookingDates = (checkIn: string, checkOut: string): Booking
 };
 
 export const focusDatePicker = () => {
-  document.getElementById("date-picker-section")?.scrollIntoView({ behavior: "smooth", block: "center" });
+  const target = document.getElementById("availability-date-picker-section") || document.getElementById("date-picker-section");
+  target?.scrollIntoView({ behavior: "smooth", block: "center" });
 };

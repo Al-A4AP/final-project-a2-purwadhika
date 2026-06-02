@@ -3,7 +3,7 @@ import { ORDER_STATUS_FILTER_OPTIONS } from "@/lib/constants";
 import type { DashboardRevenuePeriod, TenantProperty } from "@/types";
 import { REPORT_REVENUE_PERIOD_OPTIONS, REPORT_SORT_OPTIONS } from "./reportOptions";
 import type { ReportsFilterActions, ReportsFilters } from "./reportsTypes";
-import { FilterDate, FilterSelect, TextFilter } from "./FilterControls";
+import { FilterDate, FilterLabel, FilterSelect, TextFilter } from "./FilterControls";
 
 interface ReportsFilterPanelProps {
   actions: ReportsFilterActions;
@@ -39,5 +39,8 @@ const setRevenuePeriod = (value: string, actions: ReportsFilterActions) =>
   actions.setRevenuePeriod(value as DashboardRevenuePeriod);
 
 const ResetButton: FC<{ onReset: () => void }> = ({ onReset }) => (
-  <button onClick={onReset} className="h-10 self-end rounded-lg border bg-white px-4 text-sm text-gray-600 hover:bg-gray-50 dark:border-slate-700 dark:bg-slate-900 dark:text-gray-300 dark:hover:bg-slate-700">Reset</button>
+  <div className="min-w-0">
+    <div className="invisible"><FilterLabel label="Aksi" /></div>
+    <button onClick={onReset} className="h-10 w-full rounded-lg border bg-white px-4 text-sm text-gray-600 hover:bg-gray-50 dark:border-slate-700 dark:bg-slate-900 dark:text-gray-300 dark:hover:bg-slate-700">Reset</button>
+  </div>
 );
