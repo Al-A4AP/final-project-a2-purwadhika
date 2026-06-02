@@ -61,24 +61,49 @@ export const sendOrderConfirmationEmail = async (
   email: string, orderNumber: string, propertyName: string,
   roomType: string, checkIn: Date, checkOut: Date, totalPrice: number,
 ) => {
-  const formattedPrice = new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', maximumFractionDigits: 0 }).format(totalPrice);
-  const fmtDate = (d: Date) => new Date(d).toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' });
-  const html = getEmailWrapper('Konfirmasi Pemesanan Baru - PropRent', `
+  const html = getEmailWrapper('Konfirmasi Pemesanan Baru - PropRent', buildOrderConfirmationBody({
+    checkIn, checkOut, orderNumber, propertyName, roomType, totalPrice,
+  }));
+  await sendMail(email, `Konfirmasi Pemesanan - Order #${orderNumber}`, html);
+};
+
+const buildOrderConfirmationBody = (data: OrderConfirmationData) => `
     <h2>Pemesanan Akomodasi Berhasil Dibuat</h2>
     <p>Halo,</p>
     <p>Terima kasih telah memesan akomodasi melalui PropRent. Berikut rincian pemesanan Anda yang menunggu pembayaran:</p>
-    <table style="width: 100%; border-collapse: collapse; margin: 20px 0;">
-      <tr><td style="padding: 8px 0; color: #64748b; width: 150px;">Nomor Order:</td><td style="padding: 8px 0; font-weight: bold; color: #1e293b;">#${orderNumber}</td></tr>
-      <tr><td style="padding: 8px 0; color: #64748b;">Akomodasi:</td><td style="padding: 8px 0; font-weight: bold; color: #1e293b;">${propertyName}</td></tr>
-      <tr><td style="padding: 8px 0; color: #64748b;">Tipe Kamar:</td><td style="padding: 8px 0; font-weight: bold; color: #1e293b;">${roomType}</td></tr>
-      <tr><td style="padding: 8px 0; color: #64748b;">Check-in:</td><td style="padding: 8px 0; font-weight: bold; color: #1e293b;">${fmtDate(checkIn)}</td></tr>
-      <tr><td style="padding: 8px 0; color: #64748b;">Check-out:</td><td style="padding: 8px 0; font-weight: bold; color: #1e293b;">${fmtDate(checkOut)}</td></tr>
-      <tr><td style="padding: 8px 0; color: #64748b;">Total Biaya:</td><td style="padding: 8px 0; font-weight: bold; color: #e11d48; font-size: 16px;">${formattedPrice}</td></tr>
-    </table>
+    ${buildOrderDetailTable(data)}
     <p>Silakan segera lakukan pembayaran sebelum batas waktu yang ditentukan untuk mengamankan pesanan Anda.</p>
-  `);
-  await sendMail(email, `Konfirmasi Pemesanan - Order #${orderNumber}`, html);
-};
+  `;
+
+const buildOrderDetailTable = (data: OrderConfirmationData) => `
+  <table style="width: 100%; border-collapse: collapse; margin: 20px 0;">
+    ${orderDetailRows(data).map(buildOrderDetailRow).join('')}
+  </table>
+`;
+
+const orderDetailRows = (data: OrderConfirmationData) => [
+  ['Nomor Order:', `#${data.orderNumber}`, false],
+  ['Akomodasi:', data.propertyName, false],
+  ['Tipe Kamar:', data.roomType, false],
+  ['Check-in:', formatEmailDate(data.checkIn), false],
+  ['Check-out:', formatEmailDate(data.checkOut), false],
+  ['Total Biaya:', formatEmailPrice(data.totalPrice), true],
+] as const;
+
+const buildOrderDetailRow = ([label, value, highlight]: OrderDetailRow) =>
+  `<tr><td style="${labelCellStyle(label)}">${label}</td><td style="${valueCellStyle(highlight)}">${value}</td></tr>`;
+
+const labelCellStyle = (label: string) =>
+  `padding: 8px 0; color: #64748b;${label === 'Nomor Order:' ? ' width: 150px;' : ''}`;
+
+const valueCellStyle = (highlight: boolean) =>
+  `padding: 8px 0; font-weight: bold; color: ${highlight ? '#e11d48' : '#1e293b'};${highlight ? ' font-size: 16px;' : ''}`;
+
+const formatEmailPrice = (price: number) =>
+  new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', maximumFractionDigits: 0 }).format(price);
+
+const formatEmailDate = (date: Date) =>
+  new Date(date).toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' });
 
 export const sendPaymentConfirmationEmail = async (email: string, orderNumber: string) => {
   const html = getEmailWrapper('Pembayaran Dikonfirmasi - PropRent', `
@@ -130,3 +155,14 @@ export const sendPaymentRejectionEmail = async (email: string, orderNumber: stri
   `);
   await sendMail(email, `Bukti Pembayaran Ditolak - Order #${orderNumber}`, html);
 };
+
+interface OrderConfirmationData {
+  orderNumber: string;
+  propertyName: string;
+  roomType: string;
+  checkIn: Date;
+  checkOut: Date;
+  totalPrice: number;
+}
+
+type OrderDetailRow = readonly [string, string, boolean];

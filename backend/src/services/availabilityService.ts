@@ -10,16 +10,33 @@ export const checkAvailability = async (
   checkOutDate: Date,
   tx?: AvailabilityClient,
 ): Promise<AvailabilityResult> => {
+  const context = await buildAvailabilityContext(roomId, checkInDate, checkOutDate, tx);
+  return resolveAvailability(context);
+};
+
+const buildAvailabilityContext = async (roomId: string, checkInDate: Date, checkOutDate: Date, tx?: AvailabilityClient) => {
   const client = getAvailabilityClient(tx);
   const room = await loadRoomOrThrow(client, roomId);
   const range = normalizeStayRange(checkInDate, checkOutDate);
-  const nights = buildNights(range);
-  const [availabilities, orders] = await Promise.all([
+  const [availabilities, orders] = await loadAvailabilityData(client, roomId, range);
+  return { availabilities, nights: buildNights(range), orders, room };
+};
+
+const loadAvailabilityData = (client: AvailabilityClient, roomId: string, range: ReturnType<typeof normalizeStayRange>) =>
+  Promise.all([
     loadBlockedAvailabilities(client, roomId, range),
     loadOverlappingOrders(client, roomId, range),
   ]);
-  const blockedNight = findBlockedNight(nights, availabilities);
+
+const resolveAvailability = (context: AvailabilityContext) => {
+  const blockedNight = findBlockedNight(context.nights, context.availabilities);
   if (blockedNight) return blockedResult(blockedNight);
-  const fullNight = findFullyBookedNight(nights, orders, room.quantity);
+  return resolveBookingAvailability(context);
+};
+
+const resolveBookingAvailability = (context: AvailabilityContext) => {
+  const fullNight = findFullyBookedNight(context.nights, context.orders, context.room.quantity);
   return fullNight ? fullResult(fullNight) : availableResult();
 };
+
+type AvailabilityContext = Awaited<ReturnType<typeof buildAvailabilityContext>>;

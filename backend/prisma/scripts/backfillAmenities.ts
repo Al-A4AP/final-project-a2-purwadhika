@@ -23,21 +23,29 @@ const buildNextAmenities = (name: string, current: string[]) =>
   unique([...current, ...getPropertyAmenities(name)]);
 
 const getUpdates = async (): Promise<PropertyAmenityUpdate[]> => {
-  const properties = await prisma.property.findMany({
+  const properties = await findSeedProperties();
+  return properties.map(buildAmenityUpdate).filter(needsUpdate);
+};
+
+const findSeedProperties = () =>
+  prisma.property.findMany({
     where: { deleted_at: null, name: { in: seedNames } },
     select: { id: true, name: true, amenities: true },
     orderBy: { name: 'asc' },
   });
 
-  return properties
-    .map((property) => ({
-      id: property.id,
-      name: property.name,
-      current: property.amenities || [],
-      next: buildNextAmenities(property.name, property.amenities || []),
-    }))
-    .filter((item) => !areEqual(item.current, item.next));
+const buildAmenityUpdate = (property: Awaited<ReturnType<typeof findSeedProperties>>[number]) => {
+  const current = property.amenities || [];
+  return {
+    id: property.id,
+    name: property.name,
+    current,
+    next: buildNextAmenities(property.name, current),
+  };
 };
+
+const needsUpdate = (item: PropertyAmenityUpdate) =>
+  !areEqual(item.current, item.next);
 
 const printPlan = (updates: PropertyAmenityUpdate[]) => {
   write(`MODE=${applyChanges ? 'APPLY' : 'DRY_RUN'}`);

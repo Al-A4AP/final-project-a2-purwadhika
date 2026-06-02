@@ -1,9 +1,12 @@
+import { OrderStatus, PaymentMethod, type Prisma } from '@prisma/client';
 import prisma from '../config/prisma';
-import { OrderStatus } from '@prisma/client';
-import { createSnapTransaction, handleNotification } from './midtransService';
-import { sendPaymentConfirmationEmail, sendPaymentRejectionEmail, sendOrderConfirmationEmail } from '../utils/emailService';
-import { getValidatedStayDetails } from './pricingService';
 import { createPaymentDeadline } from '../constants/orderConstants';
+import { AppError } from '../middlewares/errorHandler';
+import { sendOrderConfirmationEmail } from '../utils/emailService';
+import { createSnapTransaction, handleNotification } from './midtransService';
+import { getTenantOrders as getTenantOrderList, type GetTenantOrdersOptions } from './order/tenantOrderList';
+import { updateTenantOrderStatus } from './order/tenantOrderStatus';
+import { getValidatedStayDetails } from './pricingService';
 
 interface CreateOrderData {
   userId: string;
@@ -11,159 +14,153 @@ interface CreateOrderData {
   roomId: string;
   check_in_date: string;
   check_out_date: string;
-  payment_method: 'MANUAL' | 'MIDTRANS';
+  payment_method: PaymentMethod;
   adults: number;
   children: number;
   babies: number;
 }
 
-// Generate unique order number
-const generateOrderNumber = () => {
-  return `ORD-${Date.now()}-${Math.floor(Math.random() * 1000)}`;
-};
-
-const throwError = (message: string, statusCode: number): never => {
-  const error: any = new Error(message);
-  error.statusCode = statusCode;
-  throw error;
-};
-
-const validateUser = async (userId: string) => {
-  const user = await prisma.user.findFirst({ where: { id: userId, deleted_at: null } });
-  if (!user) throwError('User tidak ditemukan', 404);
-  if (!user!.verified_at) throwError('Akun Anda belum terverifikasi. Silakan verifikasi email Anda terlebih dahulu.', 403);
-  return user!;
-};
-
-const validateDates = (checkIn: Date, checkOut: Date) => {
-  if (checkIn >= checkOut) throwError('Tanggal check-out harus lebih dari check-in', 400);
-  const today = new Date();
-  today.setUTCHours(0, 0, 0, 0);
-  const checkInCompare = new Date(checkIn);
-  checkInCompare.setUTCHours(0, 0, 0, 0);
-  if (checkInCompare < today) throwError('Tanggal check-in tidak boleh di masa lalu', 400);
-};
-
-const validateCapacity = (adults: number, children: number, babies: number, capacity: number) => {
-  if (adults < 1) throwError('Pemesanan harus menyertakan minimal 1 orang dewasa', 400);
-  if (adults > capacity) throwError(`Jumlah orang dewasa melebihi kapasitas kamar (${capacity} orang)`, 400);
-  if (children > adults) throwError(`Jumlah anak-anak tidak boleh melebihi jumlah orang dewasa (${adults} orang)`, 400);
-  if (babies > adults) throwError(`Jumlah bayi tidak boleh melebihi jumlah orang dewasa (${adults} orang)`, 400);
-};
+export type { GetTenantOrdersOptions };
+export const getTenantOrders = getTenantOrderList;
+export const updateOrderStatus = updateTenantOrderStatus;
 
 export const createOrder = async (data: CreateOrderData) => {
-  const { userId, propertyId, roomId, check_in_date, check_out_date, payment_method, adults, children, babies } = data;
-  await validateUser(userId);
-  const checkIn = new Date(check_in_date);
-  const checkOut = new Date(check_out_date);
-  validateDates(checkIn, checkOut);
-  const nights = Math.ceil((checkOut.getTime() - checkIn.getTime()) / 86400000);
-  const order: any = await executeOrderTransaction(userId, propertyId, roomId, checkIn, checkOut, payment_method, { adults, children, babies });
-  const snapData = payment_method === 'MIDTRANS' ? await processMidtransPayment(order, nights) : { snapToken: null, snapRedirectUrl: null };
-  sendOrderConfirmationEmail(order.user.email, order.order_number, order.property.name, order.room.room_type, order.check_in_date, order.check_out_date, order.total_price).catch(() => {});
+  const context = await buildOrderContext(data);
+  const order = await executeOrderTransaction(context);
+  const snapData = await buildPaymentResponse(order, context.nights, data.payment_method);
+  sendOrderCreatedEmail(order);
   return { order, ...snapData };
 };
 
-const executeOrderTransaction = async (userId: string, propertyId: string, roomId: string, checkIn: Date, checkOut: Date, payment_method: 'MANUAL' | 'MIDTRANS', capacityData: any) => {
-  return prisma.$transaction(async (tx) => {
-    const room = await tx.room.findFirst({ where: { id: roomId, propertyId, deleted_at: null } });
-    if (!room) throwError('Kamar tidak ditemukan pada properti ini', 404);
-    validateCapacity(capacityData.adults, capacityData.children, capacityData.babies, room.capacity);
-    let pd;
-    try { pd = await getValidatedStayDetails(roomId, checkIn, checkOut, tx); } catch (e: any) { throwError(e.message, 400); }
-    return tx.order.create({
-      data: { order_number: generateOrderNumber(), userId, propertyId, roomId, check_in_date: checkIn, check_out_date: checkOut, total_price: pd.totalPrice, payment_method, status: 'WAITING_PAYMENT', expires_at: createPaymentDeadline() },
-      include: { user: { select: { name: true, email: true, phone: true } }, property: { select: { name: true } }, room: { select: { room_type: true } } },
-    });
-  });
+export const uploadPaymentProof = async (orderId: string, userId: string, imageUrl: string) => {
+  const order = await findUserOrderOrThrow(orderId, userId);
+  assertCanUploadPaymentProof(order);
+  await assertPaymentProofNotExpired(order);
+  return markPaymentProofUploaded(orderId, imageUrl);
 };
 
-const processMidtransPayment = async (order: any, nights: number) => {
+const buildOrderContext = async (data: CreateOrderData) => {
+  await validateUser(data.userId);
+  const dates = parseStayDates(data.check_in_date, data.check_out_date);
+  validateDates(dates.checkIn, dates.checkOut);
+  return { ...data, ...dates, guests: pickGuestCounts(data), nights: getNights(dates.checkIn, dates.checkOut) };
+};
+
+const executeOrderTransaction = (context: OrderContext) =>
+  prisma.$transaction(async (tx) => {
+    const room = await loadOrderRoom(tx, context);
+    validateCapacity(context.guests, room.capacity);
+    const price = await getStayPriceOrThrow(tx, context);
+    return tx.order.create({ data: buildOrderCreateData(context, price.totalPrice), include: orderCreateInclude });
+  });
+
+const buildPaymentResponse = (order: CreatedOrder, nights: number, method: PaymentMethod) =>
+  method === PaymentMethod.MIDTRANS ? processMidtransPayment(order, nights) : emptySnapData();
+
+const processMidtransPayment = async (order: CreatedOrder, nights: number) => {
   const snap = await createSnapTransaction(
-    order.id, order.total_price, nights,
-    order.user.name, order.user.email, order.user.phone || '',
-    order.property.name, order.room.room_type, order.roomId,
+    order.id, order.total_price, nights, order.user.name, order.user.email,
+    order.user.phone || '', order.property.name, order.room.room_type, order.roomId,
   );
   return { snapToken: snap.token, snapRedirectUrl: snap.redirectUrl };
 };
 
-export interface GetTenantOrdersOptions {
-  propertyId?: string; status?: string;
-  startDate?: string; endDate?: string;
-  sortBy?: string; sortOrder?: 'asc' | 'desc';
-  page?: number; limit?: number;
-}
-
-export const getTenantOrders = async (tenantId: string, options: GetTenantOrdersOptions = {}) => {
-  const { sortBy = 'created_at', sortOrder = 'desc', page = 1, limit = 10 } = options;
-  const skip = (page - 1) * limit;
-  const where = buildTenantOrdersWhere(tenantId, options);
-
-  const [orders, total] = await Promise.all([
-    prisma.order.findMany({
-      where,
-      include: { user: { select: { name: true, email: true } }, property: { select: { name: true } }, room: { select: { room_type: true } } },
-      orderBy: { [sortBy]: sortOrder }, skip, take: limit,
-    }),
-    prisma.order.count({ where }),
-  ]);
-
-  return { orders, pagination: { page, limit, total, totalPages: Math.ceil(total / limit) } };
+const validateUser = async (userId: string) => {
+  const user = await prisma.user.findFirst({ where: { id: userId, deleted_at: null } });
+  if (!user) throw new AppError('User tidak ditemukan', 404);
+  if (!user.verified_at) throw new AppError('Akun Anda belum terverifikasi. Silakan verifikasi email Anda terlebih dahulu.', 403);
 };
 
-const buildTenantOrdersWhere = (tenantId: string, options: GetTenantOrdersOptions) => {
-  const { propertyId, status, startDate, endDate } = options;
-  const where: any = { property: { tenantId } };
-  if (propertyId) where.propertyId = propertyId;
-  if (status) where.status = status;
-  if (startDate || endDate) {
-    where.created_at = {};
-    if (startDate) where.created_at.gte = new Date(startDate);
-    if (endDate) { const endOf = new Date(endDate); endOf.setHours(23, 59, 59, 999); where.created_at.lte = endOf; }
-  }
-  return where;
+const validateDates = (checkIn: Date, checkOut: Date) => {
+  if (checkIn >= checkOut) throw new AppError('Tanggal check-out harus lebih dari check-in', 400);
+  if (startOfUtcDay(checkIn) < todayUtc()) throw new AppError('Tanggal check-in tidak boleh di masa lalu', 400);
 };
 
-export const updateOrderStatus = async (orderId: string, tenantId: string, status: string) => {
-  const order = await prisma.order.findUnique({ where: { id: orderId }, include: { property: true, user: true } });
-  if (!order || order.property.tenantId !== tenantId) throwError('Akses ditolak', 404);
-  const { finalStatus, updateData } = buildTenantStatusUpdate(order.status, status);
-  const updatedOrder = await prisma.order.update({ where: { id: orderId }, data: updateData });
-  await handleOrderStatusEmail(order, finalStatus, status);
-  return updatedOrder;
+const validateCapacity = (guests: GuestCounts, capacity: number) => {
+  if (guests.adults < 1) throw new AppError('Pemesanan harus menyertakan minimal 1 orang dewasa', 400);
+  if (guests.adults > capacity) throw new AppError(`Jumlah orang dewasa melebihi kapasitas kamar (${capacity} orang)`, 400);
+  if (guests.children > guests.adults) throw new AppError(`Jumlah anak-anak tidak boleh melebihi jumlah orang dewasa (${guests.adults} orang)`, 400);
+  if (guests.babies > guests.adults) throw new AppError(`Jumlah bayi tidak boleh melebihi jumlah orang dewasa (${guests.adults} orang)`, 400);
 };
 
-const buildTenantStatusUpdate = (currentStatus: string, requestedStatus: string) => {
-  if (currentStatus === 'WAITING_CONFIRMATION' && requestedStatus === 'PROCESSED') {
-    return { finalStatus: 'PROCESSED', updateData: { status: OrderStatus.PROCESSED, payment_verified_at: new Date() } };
-  }
-  if (currentStatus === 'WAITING_CONFIRMATION' && requestedStatus === 'CANCELLED') {
-    return { finalStatus: 'WAITING_PAYMENT', updateData: { status: OrderStatus.WAITING_PAYMENT, payment_proof_url: null, expires_at: createPaymentDeadline() } };
-  }
-  if (currentStatus === 'WAITING_PAYMENT' && requestedStatus === 'CANCELLED') {
-    return { finalStatus: 'CANCELLED', updateData: { status: OrderStatus.CANCELLED, canceled_at: new Date() } };
-  }
-  throwError(`Transisi status dari ${currentStatus} ke ${requestedStatus} tidak diperbolehkan`, 400);
+const loadOrderRoom = async (tx: Prisma.TransactionClient, context: OrderContext) => {
+  const room = await tx.room.findFirst({ where: { id: context.roomId, propertyId: context.propertyId, deleted_at: null } });
+  if (!room) throw new AppError('Kamar tidak ditemukan pada properti ini', 404);
+  return room;
 };
 
-const handleOrderStatusEmail = async (order: any, finalStatus: string, originalStatus: string) => {
-  if (finalStatus === 'PROCESSED') {
-    await sendPaymentConfirmationEmail(order.user.email, order.order_number).catch(() => {});
-  } else if (order.status === 'WAITING_CONFIRMATION' && originalStatus === 'CANCELLED') {
-    await sendPaymentRejectionEmail(order.user.email, order.order_number).catch(() => {});
-  }
+const getStayPriceOrThrow = async (tx: Prisma.TransactionClient, context: OrderContext) => {
+  try { return await getValidatedStayDetails(context.roomId, context.checkIn, context.checkOut, tx); }
+  catch (err) { throw new AppError(getErrorMessage(err), 400); }
 };
 
-export const uploadPaymentProof = async (orderId: string, userId: string, imageUrl: string) => {
+const buildOrderCreateData = (context: OrderContext, totalPrice: number): Prisma.OrderCreateInput => ({
+  order_number: generateOrderNumber(), user: { connect: { id: context.userId } },
+  property: { connect: { id: context.propertyId } }, room: { connect: { id: context.roomId } },
+  check_in_date: context.checkIn, check_out_date: context.checkOut, total_price: totalPrice,
+  payment_method: context.payment_method, status: OrderStatus.WAITING_PAYMENT, expires_at: createPaymentDeadline(),
+});
+
+const findUserOrderOrThrow = async (orderId: string, userId: string) => {
   const order = await prisma.order.findUnique({ where: { id: orderId } });
-  if (!order || order.userId !== userId) throwError('Pesanan tidak ditemukan atau akses ditolak', 404);
-  if (order.status !== 'WAITING_PAYMENT') throwError('Pesanan tidak dalam status menunggu pembayaran', 400);
-  if (order.payment_method !== 'MANUAL') throwError('Bukti pembayaran hanya untuk pembayaran manual', 400);
-  if (order.expires_at && order.expires_at <= new Date()) {
-    await prisma.order.update({ where: { id: orderId }, data: { status: OrderStatus.CANCELLED, canceled_at: new Date() } });
-    throwError('Batas waktu upload bukti pembayaran telah berakhir', 400);
-  }
-  return prisma.order.update({ where: { id: orderId }, data: { payment_proof_url: imageUrl, status: 'WAITING_CONFIRMATION' } });
+  if (!order || order.userId !== userId) throw new AppError('Pesanan tidak ditemukan atau akses ditolak', 404);
+  return order;
 };
+
+const assertCanUploadPaymentProof = (order: UserPaymentOrder) => {
+  if (order.status !== OrderStatus.WAITING_PAYMENT) throw new AppError('Pesanan tidak dalam status menunggu pembayaran', 400);
+  if (order.payment_method !== PaymentMethod.MANUAL) throw new AppError('Bukti pembayaran hanya untuk pembayaran manual', 400);
+};
+
+const assertPaymentProofNotExpired = async (order: UserPaymentOrder) => {
+  if (!order.expires_at || order.expires_at > new Date()) return;
+  await prisma.order.update({ where: { id: order.id }, data: { status: OrderStatus.CANCELLED, canceled_at: new Date() } });
+  throw new AppError('Batas waktu upload bukti pembayaran telah berakhir', 400);
+};
+
+const markPaymentProofUploaded = (orderId: string, imageUrl: string) =>
+  prisma.order.update({ where: { id: orderId }, data: { payment_proof_url: imageUrl, status: OrderStatus.WAITING_CONFIRMATION } });
+
+const sendOrderCreatedEmail = (order: CreatedOrder) =>
+  sendOrderConfirmationEmail(order.user.email, order.order_number, order.property.name, order.room.room_type, order.check_in_date, order.check_out_date, order.total_price).catch(() => {});
+
+const parseStayDates = (checkIn: string, checkOut: string) =>
+  ({ checkIn: new Date(checkIn), checkOut: new Date(checkOut) });
+
+const pickGuestCounts = ({ adults, children, babies }: CreateOrderData) =>
+  ({ adults, children, babies });
+
+const getNights = (checkIn: Date, checkOut: Date) =>
+  Math.ceil((checkOut.getTime() - checkIn.getTime()) / 86400000);
+
+const startOfUtcDay = (date: Date) => {
+  const value = new Date(date);
+  value.setUTCHours(0, 0, 0, 0);
+  return value;
+};
+
+const todayUtc = () => startOfUtcDay(new Date());
+const generateOrderNumber = () =>
+  `ORD-${Date.now()}-${Math.floor(Math.random() * 1000)}`;
+const emptySnapData = () =>
+  ({ snapToken: null, snapRedirectUrl: null });
+const getErrorMessage = (err: unknown) =>
+  err instanceof Error ? err.message : 'Tanggal menginap tidak valid';
+
+const orderCreateInclude = {
+  user: { select: { name: true, email: true, phone: true } },
+  property: { select: { name: true } },
+  room: { select: { room_type: true } },
+} satisfies Prisma.OrderInclude;
 
 export const handleMidtransNotification = handleNotification;
+
+type CreatedOrder = Prisma.OrderGetPayload<{ include: typeof orderCreateInclude }>;
+type UserPaymentOrder = NonNullable<Awaited<ReturnType<typeof findUserOrderOrThrow>>>;
+type OrderContext = Awaited<ReturnType<typeof buildOrderContext>>;
+
+interface GuestCounts {
+  adults: number;
+  children: number;
+  babies: number;
+}

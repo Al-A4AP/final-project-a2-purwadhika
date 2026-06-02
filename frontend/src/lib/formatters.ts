@@ -15,61 +15,16 @@ export const formatCurrency = (price: number): string =>
     minimumFractionDigits: 0,
   }).format(price);
 
-// Format date to "DD-MM-YYYY" (e.g., 18-05-2026)
-// Input: string format YYYY-MM-DD (UTC) atau Date object
 export const formatDate = (date: Date | string): string => {
-  let dateObj: Date;
-
-  if (typeof date === "string") {
-    // Parse YYYY-MM-DD as UTC, not local
-    const [year, month, day] = date.split("-");
-    if (!year || !month || !day) return "";
-    dateObj = new Date(
-      Date.UTC(parseInt(year), parseInt(month) - 1, parseInt(day)),
-    );
-  } else {
-    dateObj = date;
-  }
-
+  const dateObj = parseDisplayDate(date);
   if (isNaN(dateObj.getTime())) return "";
-
-  // Get UTC values, not local
-  const day = String(dateObj.getUTCDate()).padStart(2, "0");
-  const month = String(dateObj.getUTCMonth() + 1).padStart(2, "0");
-  const year = dateObj.getUTCFullYear();
-  return `${day}-${month}-${year}`;
+  return formatUtcDateParts(dateObj);
 };
 
-// Format datetime to "DD-MM-YYYY HH:mm" (e.g., 18-05-2026 14:30)
-// Input: string format YYYY-MM-DD atau ISO datetime (UTC)
 export const formatDateTime = (date: Date | string): string => {
-  let dateObj: Date;
-
-  if (typeof date === "string") {
-    // Handle YYYY-MM-DD or ISO format
-    if (date.includes("T")) {
-      dateObj = new Date(date); // ISO format, already UTC
-    } else {
-      // YYYY-MM-DD format, parse as UTC
-      const [year, month, day] = date.split("-");
-      if (!year || !month || !day) return "";
-      dateObj = new Date(
-        Date.UTC(parseInt(year), parseInt(month) - 1, parseInt(day)),
-      );
-    }
-  } else {
-    dateObj = date;
-  }
-
+  const dateObj = parseDisplayDate(date);
   if (isNaN(dateObj.getTime())) return "";
-
-  // Get UTC values
-  const day = String(dateObj.getUTCDate()).padStart(2, "0");
-  const month = String(dateObj.getUTCMonth() + 1).padStart(2, "0");
-  const year = dateObj.getUTCFullYear();
-  const hours = String(dateObj.getUTCHours()).padStart(2, "0");
-  const minutes = String(dateObj.getUTCMinutes()).padStart(2, "0");
-  return `${day}-${month}-${year} ${hours}:${minutes}`;
+  return `${formatUtcDateParts(dateObj)} ${formatUtcTimeParts(dateObj)}`;
 };
 
 // Format date to YYYY-MM-DD for input[type=date]
@@ -91,27 +46,12 @@ export const parseDate = (dateString: string): Date => {
   return new Date(Date.UTC(parseInt(year), parseInt(month) - 1, parseInt(day)));
 };
 
-// Calculate days between two dates (both UTC)
-// Input: YYYY-MM-DD strings atau Date objects
 export const getDaysBetween = (
   startDate: Date | string,
   endDate: Date | string,
 ): number => {
-  let start: Date;
-  let end: Date;
-
-  if (typeof startDate === "string") {
-    start = parseDate(startDate);
-  } else {
-    start = startDate;
-  }
-
-  if (typeof endDate === "string") {
-    end = parseDate(endDate);
-  } else {
-    end = endDate;
-  }
-
+  const start = toDate(startDate);
+  const end = toDate(endDate);
   const diffTime = Math.abs(end.getTime() - start.getTime());
   return Math.ceil(diffTime / (1000 * 60 * 60 * 24));
 };
@@ -122,3 +62,27 @@ export const cn = (
 ): string => {
   return classes.filter(Boolean).join(" ");
 };
+
+const parseDisplayDate = (date: Date | string) => {
+  if (date instanceof Date) return date;
+  if (date.includes("T")) return new Date(date);
+  return parseDate(date);
+};
+
+const toDate = (date: Date | string) =>
+  date instanceof Date ? date : parseDate(date);
+
+const formatUtcDateParts = (date: Date) => {
+  const day = padDatePart(date.getUTCDate());
+  const month = padDatePart(date.getUTCMonth() + 1);
+  return `${day}-${month}-${date.getUTCFullYear()}`;
+};
+
+const formatUtcTimeParts = (date: Date) => {
+  const hours = padDatePart(date.getUTCHours());
+  const minutes = padDatePart(date.getUTCMinutes());
+  return `${hours}:${minutes}`;
+};
+
+const padDatePart = (value: number) =>
+  String(value).padStart(2, "0");
