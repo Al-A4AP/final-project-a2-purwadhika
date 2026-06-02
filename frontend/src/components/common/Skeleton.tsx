@@ -10,22 +10,32 @@ export const Skeleton: FC<SkeletonProps> = ({ className = '' }) => {
   );
 };
 
-export const PropertyCardSkeleton: FC = () => {
-  return (
-    <div className="bg-white dark:bg-slate-800 rounded-2xl overflow-hidden border border-gray-100 dark:border-slate-700 shadow-sm flex flex-col h-full">
-      <Skeleton className="w-full aspect-4/3 rounded-none" />
-      <div className="p-4 flex flex-col grow space-y-3">
-        <Skeleton className="h-6 w-3/4" />
-        <Skeleton className="h-4 w-1/2" />
-        <div className="flex gap-2 mt-2">
-          <Skeleton className="h-6 w-16 rounded-full" />
-          <Skeleton className="h-6 w-16 rounded-full" />
-        </div>
-        <div className="mt-auto pt-4 border-t border-gray-100 dark:border-slate-700 flex justify-between items-end">
-          <Skeleton className="h-5 w-1/3" />
-          <Skeleton className="h-6 w-1/3" />
-        </div>
-      </div>
-    </div>
-  );
-};
+const PropertyTagsSkeleton: FC = () => (
+  <div className="mt-2 flex gap-2">
+    <Skeleton className="h-6 w-16 rounded-full" />
+    <Skeleton className="h-6 w-16 rounded-full" />
+  </div>
+);
+
+const PropertyFooterSkeleton: FC = () => (
+  <div className="mt-auto flex items-end justify-between border-t border-gray-100 pt-4 dark:border-slate-700">
+    <Skeleton className="h-5 w-1/3" />
+    <Skeleton className="h-6 w-1/3" />
+  </div>
+);
+
+const PropertyCardSkeletonContent: FC = () => (
+  <div className="flex grow flex-col space-y-3 p-4">
+    <Skeleton className="h-6 w-3/4" />
+    <Skeleton className="h-4 w-1/2" />
+    <PropertyTagsSkeleton />
+    <PropertyFooterSkeleton />
+  </div>
+);
+
+export const PropertyCardSkeleton: FC = () => (
+  <div className="flex h-full flex-col overflow-hidden rounded-2xl border border-gray-100 bg-white shadow-sm dark:border-slate-700 dark:bg-slate-800">
+    <Skeleton className="aspect-4/3 w-full rounded-none" />
+    <PropertyCardSkeletonContent />
+  </div>
+);

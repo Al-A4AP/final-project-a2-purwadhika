@@ -5,24 +5,21 @@ import {
   deleteFromCloudinary,
   uploadBuffer,
 } from "../../utils/cloudinaryUpload";
-import { findTenantProperty } from "./tenantPropertyQueries";
+
+type UploadedImage = Awaited<ReturnType<typeof uploadBuffer>>;
 
 export const createPropertyImage = async (
   propertyId: string,
   tenantId: string,
   file: Express.Multer.File,
 ) => {
-  await ensurePropertyExists(propertyId, tenantId);
   const result = await uploadBuffer(file.buffer);
-  const order = await getNextImageOrder(propertyId);
-  return prisma.propertyImage.create({
-    data: {
-      propertyId,
-      image_url: result.url,
-      cloudinary_public_id: result.public_id,
-      order,
-    },
-  });
+  try {
+    return await createImageRecordInTransaction(propertyId, tenantId, result);
+  } catch (error) {
+    await cleanupUploadedImage(result.public_id);
+    throw error;
+  }
 };
 
 export const removePropertyImage = async (
@@ -39,17 +36,40 @@ export const removePropertyImage = async (
   return deleted;
 };
 
-const ensurePropertyExists = async (propertyId: string, tenantId: string) => {
-  const property = await findTenantProperty(propertyId, tenantId);
-  if (!property) throw new AppError("Properti tidak ditemukan", 404);
-};
-const getNextImageOrder = async (propertyId: string) => {
-  const last = await prisma.propertyImage.findFirst({
+const createImageRecordInTransaction = (
+  propertyId: string,
+  tenantId: string,
+  result: UploadedImage,
+) =>
+  prisma.$transaction(async (tx) => {
+    await ensureTransactionProperty(tx, propertyId, tenantId);
+    const order = await getNextImageOrder(tx, propertyId);
+    return createImageRecord(tx, propertyId, result, order);
+  });
+
+const getNextImageOrder = async (tx: Prisma.TransactionClient, propertyId: string) => {
+  const last = await tx.propertyImage.findFirst({
     where: { propertyId },
     orderBy: { order: "desc" },
   });
   return (last?.order ?? -1) + 1;
 };
+
+const createImageRecord = (
+  tx: Prisma.TransactionClient,
+  propertyId: string,
+  result: UploadedImage,
+  order: number,
+) =>
+  tx.propertyImage.create({
+    data: {
+      propertyId,
+      image_url: result.url,
+      cloudinary_public_id: result.public_id,
+      order,
+    },
+  });
+
 const deleteImageRecord = async (
   tx: Prisma.TransactionClient,
   propertyId: string,
@@ -82,6 +102,10 @@ const ensureTransactionImage = async (
 };
 const deleteCloudinaryImage = async (publicId?: string | null) => {
   if (!publicId) return;
+  await deleteFromCloudinary(publicId);
+};
+
+const cleanupUploadedImage = async (publicId: string) => {
   try {
     await deleteFromCloudinary(publicId);
   } catch {

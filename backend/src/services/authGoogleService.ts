@@ -57,21 +57,26 @@ const verifyExistingGoogleUser = async (
   });
 };
 
+const findGoogleUser = (email: string) =>
+  prisma.user.findFirst({ where: { email, deleted_at: null } });
+
+const resolveGoogleUser = async (profile: GoogleProfile, role?: Role) => {
+  const existing = await findGoogleUser(profile.email!);
+  return existing
+    ? verifyExistingGoogleUser(existing, role)
+    : createGoogleUser(profile, role || "USER");
+};
+
+const createGoogleAuthResult = (user: GoogleAuthUser) => ({
+  user: sanitizeUser(user),
+  token: generateToken({ id: user.id, email: user.email, role: user.role }),
+});
+
 export const googleLogin = async (data: {
   accessToken: string;
   role?: Role;
 }) => {
   const profile = await getGoogleProfile(data.accessToken);
-  const existing = await prisma.user.findFirst({
-    where: { email: profile.email!, deleted_at: null },
-  });
-  const user = existing
-    ? await verifyExistingGoogleUser(existing, data.role)
-    : await createGoogleUser(profile, data.role || "USER");
-  const token = generateToken({
-    id: user.id,
-    email: user.email,
-    role: user.role,
-  });
-  return { user: sanitizeUser(user), token };
+  const user = await resolveGoogleUser(profile, data.role);
+  return createGoogleAuthResult(user);
 };

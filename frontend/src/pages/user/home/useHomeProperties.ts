@@ -26,7 +26,7 @@ const useHomePropertyFetch = (
 ) => {
   useEffect(() => {
     let mounted = true;
-    fetchHomeProperties(activeFilters, propertyLimit, () => mounted, setters);
+    fetchHomeProperties({ activeFilters, isMounted: () => mounted, propertyLimit, setters });
     return () => { mounted = false; };
   }, [activeFilters, propertyLimit, reloadToken, setters]);
 };
@@ -41,6 +41,13 @@ interface HomePropertySetters {
   setTotalPages: (value: number) => void;
 }
 
+interface FetchHomePropertiesOptions {
+  activeFilters: FilterValues;
+  isMounted: () => boolean;
+  propertyLimit: number;
+  setters: HomePropertySetters;
+}
+
 const useHomePropertySetters = (
   setLoading: (value: boolean) => void,
   setProperties: (items: Property[]) => void,
@@ -52,22 +59,26 @@ const useHomePropertySetters = (
   [setError, setLoading, setProperties, setTotalCount, setTotalPages],
 );
 
-const fetchHomeProperties = async (
-  activeFilters: FilterValues,
-  propertyLimit: number,
-  isMounted: () => boolean,
-  setters: HomePropertySetters,
-) => {
+const fetchHomeProperties = async ({ activeFilters, isMounted, propertyLimit, setters }: FetchHomePropertiesOptions) => {
   setters.setLoading(true);
   setters.setError(null);
   try {
-    const result = await propertyService.getProperties({ ...activeFilters, limit: propertyLimit });
-    updatePropertyState(result, isMounted(), setters);
+    await loadPropertyState(activeFilters, propertyLimit, isMounted, setters);
   } catch (err) {
     if (isMounted()) handlePropertyError(err, setters);
   } finally {
     if (isMounted()) setters.setLoading(false);
   }
+};
+
+const loadPropertyState = async (
+  activeFilters: FilterValues,
+  propertyLimit: number,
+  isMounted: () => boolean,
+  setters: HomePropertySetters,
+) => {
+  const result = await propertyService.getProperties({ ...activeFilters, limit: propertyLimit });
+  updatePropertyState(result, isMounted(), setters);
 };
 
 const updatePropertyState = (

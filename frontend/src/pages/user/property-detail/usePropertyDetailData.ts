@@ -18,13 +18,34 @@ export const usePropertyDetailData = (id: string | undefined, checkIn: string, c
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    if (!id) return onMissing();
-    Promise.resolve().then(() => setLoading(true));
-    fetchPropertyDetail(id, checkIn, checkOut)
-      .then(([propertyData, reviewData]) => { setProperty(propertyData); setReviews(reviewData); })
-      .catch(onMissing)
-      .finally(() => setLoading(false));
+    loadPropertyDetail({ checkIn, checkOut, id, onMissing, setLoading, setProperty, setReviews });
   }, [checkIn, checkOut, id, onMissing]);
 
   return { loading, property, reviews };
 };
+
+const loadPropertyDetail = (options: LoadPropertyDetailOptions) => {
+  if (!options.id) return options.onMissing();
+  Promise.resolve().then(() => options.setLoading(true));
+  fetchPropertyDetail(options.id, options.checkIn, options.checkOut)
+    .then((data) => applyPropertyDetail(data, options))
+    .catch(options.onMissing)
+    .finally(() => options.setLoading(false));
+};
+
+const applyPropertyDetail = ([property, reviews]: PropertyDetailResult, options: LoadPropertyDetailOptions) => {
+  options.setProperty(property);
+  options.setReviews(reviews);
+};
+
+type PropertyDetailResult = [PropertyDetail, Review[]];
+
+interface LoadPropertyDetailOptions {
+  checkIn: string;
+  checkOut: string;
+  id?: string;
+  onMissing: () => void;
+  setLoading: (value: boolean) => void;
+  setProperty: (property: PropertyDetail) => void;
+  setReviews: (reviews: Review[]) => void;
+}

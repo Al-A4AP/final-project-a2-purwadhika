@@ -12,6 +12,9 @@ import type { Role, User } from "@/types";
 import { handleLoginError, loginWithPassword } from "./loginActions";
 import type { LoginPageState, ResendStatus } from "./loginTypes";
 
+type SetLoginError = ReturnType<typeof useForm<LoginInput>>["setError"];
+type LoginNavigate = ReturnType<typeof useNavigate>;
+
 const selectSetUser = (state: { setUser: (user: User | null) => void }) => state.setUser;
 
 export const useLoginPageState = (targetRole?: LoginPageState["role"]): LoginPageState => {
@@ -55,7 +58,7 @@ const useResendAction = (email: string, setStatus: (status: ResendStatus) => voi
 
 const useLoginActions = (
   role: LoginPageState["role"],
-  setError: ReturnType<typeof useForm<LoginInput>>["setError"],
+  setError: SetLoginError,
   resend: ReturnType<typeof useResendVerification>,
 ) => {
   const navigate = useNavigate();
@@ -69,8 +72,8 @@ const useLoginActions = (
 const usePasswordSubmit = (
   acceptLogin: (role: Role) => Promise<boolean>,
   setUser: (user: User) => void,
-  navigate: ReturnType<typeof useNavigate>,
-  setError: ReturnType<typeof useForm<LoginInput>>["setError"],
+  navigate: LoginNavigate,
+  setError: SetLoginError,
   resetResend: () => void,
   showResend: (email: string) => void,
 ) => useCallback(async (data: LoginInput) => {
@@ -81,7 +84,7 @@ const usePasswordSubmit = (
 
 const useRoleGuard = (
   role: LoginPageState["role"],
-  setError: ReturnType<typeof useForm<LoginInput>>["setError"],
+  setError: SetLoginError,
 ) => useCallback(async (userRole: Role) => {
   if (!role || userRole === role) return true;
   await authService.logout().catch(() => undefined);
@@ -95,8 +98,8 @@ const useGoogleLoginAction = (
   role: LoginPageState["role"],
   acceptLogin: (role: Role) => Promise<boolean>,
   setUser: (user: User) => void,
-  navigate: ReturnType<typeof useNavigate>,
-  setError: ReturnType<typeof useForm<LoginInput>>["setError"],
+  navigate: LoginNavigate,
+  setError: SetLoginError,
 ) => useGoogleLogin({
   onSuccess: async (token) => handleGoogleSuccess(token.access_token, role, acceptLogin, setUser, navigate, setError),
   onError: () => toast.error("Gagal terhubung ke Google"),
@@ -107,14 +110,30 @@ const handleGoogleSuccess = async (
   role: LoginPageState["role"],
   acceptLogin: (role: Role) => Promise<boolean>,
   setUser: (user: User) => void,
-  navigate: ReturnType<typeof useNavigate>,
-  setError: ReturnType<typeof useForm<LoginInput>>["setError"],
+  navigate: LoginNavigate,
+  setError: SetLoginError,
 ) => {
   try {
     const result = await authService.googleLogin({ accessToken, role });
-    if (!(await acceptLogin(result.user.role))) return;
-    setUser(result.user);
-    toast.success("Berhasil login menggunakan Google");
-    navigate(getRoleHome(result.user.role));
-  } catch { setError("root", { message: "Gagal memproses login Google" }); toast.error("Gagal login menggunakan Google"); }
+    await acceptGoogleResult(result.user, acceptLogin, setUser, navigate);
+  } catch {
+    showGoogleLoginError(setError);
+  }
+};
+
+const acceptGoogleResult = async (
+  user: User,
+  acceptLogin: (role: Role) => Promise<boolean>,
+  setUser: (user: User) => void,
+  navigate: LoginNavigate,
+) => {
+  if (!(await acceptLogin(user.role))) return;
+  setUser(user);
+  toast.success("Berhasil login menggunakan Google");
+  navigate(getRoleHome(user.role));
+};
+
+const showGoogleLoginError = (setError: SetLoginError) => {
+  setError("root", { message: "Gagal memproses login Google" });
+  toast.error("Gagal login menggunakan Google");
 };

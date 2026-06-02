@@ -102,16 +102,18 @@ const assertPendingEmail = (record: EmailChangeRecord) => {
   }
 };
 
+const getEmailActivationData = (record: EmailChangeRecord) => ({
+  email: record.target_email,
+  pending_email: null,
+  email_change_requested_at: null,
+  verified_at: new Date(),
+});
+
 const activatePendingEmail = (record: EmailChangeRecord) =>
   prisma.$transaction([
     prisma.user.update({
       where: { id: record.userId },
-      data: {
-        email: record.target_email,
-        pending_email: null,
-        email_change_requested_at: null,
-        verified_at: new Date(),
-      },
+      data: getEmailActivationData(record),
     }),
     prisma.emailVerification.update({
       where: { id: record.id },
@@ -119,29 +121,44 @@ const activatePendingEmail = (record: EmailChangeRecord) =>
     }),
   ]);
 
-export const requestEmailChange = async (userId: string, email: string) => {
-  const targetEmail = normalizeEmail(email);
+const assertEmailChangeAllowed = async (userId: string, targetEmail: string) => {
   const user = await findActiveUser(userId);
   if (!user) throw new AppError("User tidak ditemukan", 404);
   if (user.email === targetEmail)
     throw new AppError("Email baru sama dengan email saat ini", 400);
   await ensureEmailAvailable(targetEmail, userId);
+};
 
-  const rawToken = crypto.randomBytes(32).toString("hex");
-  const updated = await saveEmailChangeRequest(
-    userId,
-    targetEmail,
-    hashToken(rawToken),
-  );
+const createRawEmailToken = () => crypto.randomBytes(32).toString("hex");
+
+const saveAndSendEmailChange = async (userId: string, targetEmail: string) => {
+  const rawToken = createRawEmailToken();
+  const updated = await saveEmailChangeRequest(userId, targetEmail, hashToken(rawToken));
   await sendEmailChangeVerificationEmail(targetEmail, rawToken);
+  return updated;
+};
+
+export const requestEmailChange = async (userId: string, email: string) => {
+  const targetEmail = normalizeEmail(email);
+  await assertEmailChangeAllowed(userId, targetEmail);
+  const updated = await saveAndSendEmailChange(userId, targetEmail);
   return sanitizeUser(updated);
 };
 
-export const verifyEmailChange = async (rawToken: string) => {
+const getValidEmailChangeRecord = async (rawToken: string) => {
   const record = await findEmailChangeRecord(hashToken(rawToken));
   if (!record) throw new AppError("Token tidak valid atau kadaluarsa", 400);
+  return record;
+};
+
+const completeEmailChange = async (record: EmailChangeRecord) => {
   assertPendingEmail(record);
   await ensureEmailAvailable(record.target_email!, record.userId);
   await activatePendingEmail(record);
+};
+
+export const verifyEmailChange = async (rawToken: string) => {
+  const record = await getValidEmailChangeRecord(rawToken);
+  await completeEmailChange(record);
   return { email: record.target_email };
 };

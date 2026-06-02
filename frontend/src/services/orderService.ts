@@ -1,6 +1,10 @@
 import { api } from './api';
 import type { ApiResponse, Order, PaginationMeta } from '@/types';
 
+type OrderListResponse = { orders: Order[]; pagination: PaginationMeta };
+type CreateOrderResponse = { order: Order; snapToken?: string; snapRedirectUrl?: string };
+type QueryValue = number | string | undefined;
+
 export interface CreateOrderPayload {
   propertyId: string;
   roomId: string;
@@ -12,48 +16,56 @@ export interface CreateOrderPayload {
   babies: number;
 }
 
+export interface UserOrderParams {
+  orderNumber?: string;
+  status?: string;
+  startDate?: string;
+  endDate?: string;
+  page?: number;
+  limit?: number;
+}
+
+export interface TenantOrderParams {
+  propertyId?: string;
+  status?: string;
+  startDate?: string;
+  endDate?: string;
+  sortBy?: string;
+  sortOrder?: 'asc' | 'desc';
+  page?: number;
+  limit?: number;
+}
+
+const appendQueryValue = (query: URLSearchParams, key: string, value: QueryValue, omitEmpty: boolean) => {
+  if (value === undefined || (omitEmpty && value === '')) return;
+  query.append(key, String(value));
+};
+
+const buildQueryString = <T extends object>(params: T | undefined, omitEmpty = false) => {
+  const query = new URLSearchParams();
+  Object.entries(params || {}).forEach(([key, value]) => appendQueryValue(query, key, value as QueryValue, omitEmpty));
+  return query.toString();
+};
+
+const fetchOrderList = async (path: string, query: string) => {
+  const res = await api.get<ApiResponse<OrderListResponse>>(`${path}?${query}`);
+  return res.data.data;
+};
+
 export const orderService = {
-  async createOrder(payload: CreateOrderPayload): Promise<{ order: Order; snapToken?: string; snapRedirectUrl?: string }> {
-    const res = await api.post<ApiResponse<{ order: Order; snapToken?: string; snapRedirectUrl?: string }>>('/orders', payload);
+  async createOrder(payload: CreateOrderPayload): Promise<CreateOrderResponse> {
+    const res = await api.post<ApiResponse<CreateOrderResponse>>('/orders', payload);
     return res.data.data;
   },
 
-  async getUserOrders(params?: {
-    orderNumber?: string;
-    status?: string;
-    startDate?: string;
-    endDate?: string;
-    page?: number;
-    limit?: number;
-  }): Promise<{ orders: Order[]; pagination: PaginationMeta }> {
-    const query = new URLSearchParams();
-    if (params) {
-      Object.entries(params).forEach(([key, val]) => {
-        if (val !== undefined && val !== '') query.append(key, String(val));
-      });
-    }
-    const res = await api.get<ApiResponse<{ orders: Order[]; pagination: PaginationMeta }>>(`/orders/user?${query.toString()}`);
-    return res.data.data;
+  async getUserOrders(params?: UserOrderParams): Promise<OrderListResponse> {
+    const query = buildQueryString(params, true);
+    return fetchOrderList('/orders/user', query);
   },
 
-  async getTenantOrders(params?: {
-    propertyId?: string;
-    status?: string;
-    startDate?: string;
-    endDate?: string;
-    sortBy?: string;
-    sortOrder?: 'asc' | 'desc';
-    page?: number;
-    limit?: number;
-  }): Promise<{ orders: Order[]; pagination: PaginationMeta }> {
-    const query = new URLSearchParams();
-    if (params) {
-      Object.entries(params).forEach(([key, val]) => {
-        if (val !== undefined) query.append(key, String(val));
-      });
-    }
-    const res = await api.get<ApiResponse<{ orders: Order[]; pagination: PaginationMeta }>>(`/orders/tenant?${query.toString()}`);
-    return res.data.data;
+  async getTenantOrders(params?: TenantOrderParams): Promise<OrderListResponse> {
+    const query = buildQueryString(params);
+    return fetchOrderList('/orders/tenant', query);
   },
 
   async updateOrderStatus(orderId: string, status: string): Promise<Order> {

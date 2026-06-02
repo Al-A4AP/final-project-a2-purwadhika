@@ -10,31 +10,76 @@ interface PropertyCardProps {
   onDelete: (id: string, name: string) => void;
 }
 
-export const PropertyCard: FC<PropertyCardProps> = ({ property: p, deletingId, onDelete }) => {
-  const minPrice = p.rooms && p.rooms.length > 0 ? Math.min(...p.rooms.map((r) => r.base_price)) : null;
+interface PropertyPartProps {
+  property: TenantProperty;
+}
+
+interface PropertyActionsProps extends PropertyPartProps {
+  deletingId: string | null;
+  onDelete: (id: string, name: string) => void;
+}
+
+const getMinPrice = (property: TenantProperty) =>
+  property.rooms?.length ? Math.min(...property.rooms.map((room) => room.base_price)) : null;
+
+const PropertyImage: FC<PropertyPartProps> = ({ property }) =>
+  property.featured_image_url ? (
+    <img src={property.featured_image_url} alt={property.name} className="h-44 w-full object-cover sm:h-auto sm:w-36 sm:shrink-0" />
+  ) : null;
+
+const PropertyMeta: FC<PropertyPartProps> = ({ property }) => (
+  <div className="mb-1 flex flex-wrap items-center gap-2">
+    <span className="rounded-full bg-red-50 px-2 py-0.5 text-xs text-red-600 dark:bg-red-900/20">{property.category?.name}</span>
+    <span className="text-xs text-gray-400">{property.city}</span>
+  </div>
+);
+
+const PropertyStats: FC<PropertyPartProps> = ({ property }) => {
+  const minPrice = getMinPrice(property);
 
   return (
-    <div className="flex flex-col overflow-hidden rounded-xl border bg-white shadow-sm dark:border-slate-700 dark:bg-slate-800 sm:flex-row">
-      {p.featured_image_url && <img src={p.featured_image_url} alt={p.name} className="h-44 w-full object-cover sm:h-auto sm:w-36 sm:shrink-0" />}
-      <div className="flex flex-1 flex-col gap-4 p-4 sm:flex-row sm:items-center sm:justify-between">
-        <div className="min-w-0">
-          <div className="mb-1 flex flex-wrap items-center gap-2">
-            <span className="rounded-full bg-red-50 px-2 py-0.5 text-xs text-red-600 dark:bg-red-900/20">{p.category?.name}</span>
-            <span className="text-xs text-gray-400">{p.city}</span>
-          </div>
-          <h3 className="font-semibold text-gray-900 dark:text-white truncate">{p.name}</h3>
-          <div className="mt-1 flex flex-wrap items-center gap-3 text-xs text-gray-500">
-            <span className="flex items-center gap-1"><BedDouble size={12} /> {p._count?.rooms || 0} Kamar</span>
-            <span className="flex items-center gap-1"><Star size={12} /> {p._count?.reviews || 0} Review</span>
-            {minPrice && <span className="font-semibold text-red-600">{formatPrice(minPrice)}/malam</span>}
-          </div>
-        </div>
-        <div className="grid grid-cols-[1fr_44px_44px] items-center gap-2 sm:flex sm:shrink-0">
-          <Link to={`/tenant/properties/${p.id}/rooms`} className="flex h-11 items-center justify-center rounded-lg border px-3 text-sm text-gray-600 transition hover:bg-gray-50 dark:border-slate-600 dark:text-gray-300 dark:hover:bg-slate-700" title="Kelola kamar">Kamar</Link>
-          <Link to={`/tenant/properties/${p.id}/edit`} className="flex h-11 w-11 items-center justify-center rounded-lg text-blue-600 transition hover:bg-blue-50 dark:hover:bg-blue-900/20" title="Edit properti" aria-label={`Edit properti ${p.name}`}><Pencil size={17} /></Link>
-          <button onClick={() => onDelete(p.id, p.name)} disabled={deletingId === p.id} className="flex h-11 w-11 items-center justify-center rounded-lg text-red-600 transition hover:bg-red-50 disabled:opacity-50 dark:hover:bg-red-900/20" title="Hapus properti" aria-label={`Hapus properti ${p.name}`}><Trash2 size={17} /></button>
-        </div>
-      </div>
+    <div className="mt-1 flex flex-wrap items-center gap-3 text-xs text-gray-500">
+      <span className="flex items-center gap-1"><BedDouble size={12} /> {property._count?.rooms || 0} Kamar</span>
+      <span className="flex items-center gap-1"><Star size={12} /> {property._count?.reviews || 0} Review</span>
+      {minPrice && <span className="font-semibold text-red-600">{formatPrice(minPrice)}/malam</span>}
     </div>
   );
 };
+
+const PropertySummary: FC<PropertyPartProps> = ({ property }) => (
+  <div className="min-w-0">
+    <PropertyMeta property={property} />
+    <h3 className="truncate font-semibold text-gray-900 dark:text-white">{property.name}</h3>
+    <PropertyStats property={property} />
+  </div>
+);
+
+const RoomLink: FC<PropertyPartProps> = ({ property }) => (
+  <Link to={`/tenant/properties/${property.id}/rooms`} className="flex h-11 items-center justify-center rounded-lg border px-3 text-sm text-gray-600 transition hover:bg-gray-50 dark:border-slate-600 dark:text-gray-300 dark:hover:bg-slate-700" title="Kelola kamar" aria-label={`Kelola kamar ${property.name}`}>Kamar</Link>
+);
+
+const EditLink: FC<PropertyPartProps> = ({ property }) => (
+  <Link to={`/tenant/properties/${property.id}/edit`} className="flex h-11 w-11 items-center justify-center rounded-lg text-blue-600 transition hover:bg-blue-50 dark:hover:bg-blue-900/20" title="Edit properti" aria-label={`Edit properti ${property.name}`}><Pencil size={17} /></Link>
+);
+
+const DeleteButton: FC<PropertyActionsProps> = ({ property, deletingId, onDelete }) => (
+  <button onClick={() => onDelete(property.id, property.name)} disabled={deletingId === property.id} className="flex h-11 w-11 items-center justify-center rounded-lg text-red-600 transition hover:bg-red-50 disabled:opacity-50 dark:hover:bg-red-900/20" title="Hapus properti" aria-label={`Hapus properti ${property.name}`}><Trash2 size={17} /></button>
+);
+
+const PropertyActions: FC<PropertyActionsProps> = (props) => (
+  <div className="grid grid-cols-[1fr_44px_44px] items-center gap-2 sm:flex sm:shrink-0">
+    <RoomLink property={props.property} />
+    <EditLink property={props.property} />
+    <DeleteButton {...props} />
+  </div>
+);
+
+export const PropertyCard: FC<PropertyCardProps> = ({ property, deletingId, onDelete }) => (
+  <div className="flex flex-col overflow-hidden rounded-xl border bg-white shadow-sm dark:border-slate-700 dark:bg-slate-800 sm:flex-row">
+    <PropertyImage property={property} />
+    <div className="flex flex-1 flex-col gap-4 p-4 sm:flex-row sm:items-center sm:justify-between">
+      <PropertySummary property={property} />
+      <PropertyActions property={property} deletingId={deletingId} onDelete={onDelete} />
+    </div>
+  </div>
+);

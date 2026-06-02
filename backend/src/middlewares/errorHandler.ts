@@ -1,24 +1,39 @@
-import { Request, Response, NextFunction } from 'express';
+import type { ErrorRequestHandler } from 'express';
 
-export const errorHandler = (
-  err: any,
-  req: Request,
-  res: Response,
-  next: NextFunction
-) => {
-  let statusCode = err.statusCode || err.status || 500;
-  let message = err.message || 'Internal Server Error';
+interface ErrorLike {
+  code?: string;
+  errors?: unknown;
+  message?: string;
+  status?: number;
+  statusCode?: number;
+}
 
-  if (err.code === 'LIMIT_FILE_SIZE') {
-    statusCode = 400;
-    message = 'Ukuran file maksimal adalah 1MB';
-  }
+const isErrorLike = (err: unknown): err is ErrorLike =>
+  typeof err === 'object' && err !== null;
 
+const getErrorLike = (err: unknown): ErrorLike =>
+  isErrorLike(err) ? err : {};
+
+const isFileSizeError = (err: ErrorLike) =>
+  err.code === 'LIMIT_FILE_SIZE';
+
+const getErrorPayload = (err: unknown) => {
+  const error = getErrorLike(err);
+  if (isFileSizeError(error)) return { errors: null, message: 'Ukuran file maksimal adalah 1MB', statusCode: 400 };
+  return {
+    errors: error.errors || null,
+    message: error.message || 'Internal Server Error',
+    statusCode: error.statusCode || error.status || 500,
+  };
+};
+
+export const errorHandler: ErrorRequestHandler = (err, _req, res, _next) => {
+  const { errors, message, statusCode } = getErrorPayload(err);
   res.status(statusCode).json({
     success: false,
     statusCode,
     message,
-    errors: err.errors || null,
+    errors,
   });
 };
 
