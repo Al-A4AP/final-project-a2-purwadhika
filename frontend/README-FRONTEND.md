@@ -172,14 +172,14 @@ Default local frontend: `http://localhost:5173`.
 
 ## Catatan Audit Frontend
 
-Audit ke-3 dilakukan pada 01 Juni 2026 pukul 20:46 WIB.
+Audit ke-4 dilakukan pada 02 Juni 2026 pukul 21:00 WIB.
 
 - `npm run lint` lulus tanpa error.
 - `npm run build` selesai tanpa error (exit code 0).
 - `node_modules/.bin/tsc -b --noEmit` lulus tanpa error.
 - Tidak ada file di `src` yang melebihi 200 baris (diverifikasi via scan PowerShell, hasil 0 file).
 - Seluruh fungsi/komponen/hook di frontend sesuai aturan maksimal 15 baris (tidak ada pelanggaran di sisi frontend).
-- Pelanggaran 15 baris hanya ada di **backend** (11 fungsi). Frontend bersih.
+- Rute-rute pemanggilan API untuk Tenant sudah bermigrasi penuh menggunakan endpoint RESTful `/tenants/me/...` (menggantikan `/tenant/...`).
 - `TenantOrdersConfirmModal.tsx` dikonfirmasi sudah ada dan menggunakan `ConfirmModal` sebelum setiap aksi perubahan status order (termasuk pembatalan), memenuhi syarat PURWADHIKA.
 - Route tenant profile sudah diarahkan ke `src/pages/user/ProfilePage.tsx`.
 - Dashboard tenant mobile sudah memakai `TenantMobileTopbar` dan `TenantSidebar`.

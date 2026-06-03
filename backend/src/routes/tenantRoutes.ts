@@ -16,7 +16,8 @@ import {
 import {
   getRoomsCtrl, createRoomCtrl, updateRoomCtrl, deleteRoomCtrl,
   getPeakRatesCtrl, createPeakRateCtrl, updatePeakRateCtrl, deletePeakRateCtrl,
-  getRoomAvailabilitiesCtrl, setRoomAvailabilityCtrl, setRoomAvailabilityRangeCtrl
+  getRoomAvailabilitiesCtrl, setRoomAvailabilityCtrl, setRoomAvailabilityRangeCtrl,
+  addRoomImageCtrl, deleteRoomImageCtrl, setRoomMainImageCtrl
 } from '../controllers/tenantRoomController';
 import { getDashboardAnalyticsCtrl, getOccupancyCalendarCtrl } from '../controllers/tenantReportController';
 import { getTenantReviewsCtrl } from '../controllers/tenantReviewController';
@@ -44,6 +45,9 @@ router.get('/properties/:propertyId/rooms', ...isTenant, verifyPropertyOwnership
 router.post('/properties/:propertyId/rooms', ...isTenant, verifyPropertyOwnership, upload.single('image'), validate(createRoomSchema), createRoomCtrl);
 router.patch('/rooms/:roomId', ...isTenant, verifyRoomOwnership, upload.single('image'), validate(updateRoomSchema), updateRoomCtrl);
 router.delete('/rooms/:roomId', ...isTenant, verifyRoomOwnership, deleteRoomCtrl);
+router.post('/rooms/:roomId/images', ...isTenant, verifyRoomOwnership, upload.single('image'), addRoomImageCtrl);
+router.delete('/rooms/:roomId/images/:imageId', ...isTenant, verifyRoomOwnership, deleteRoomImageCtrl);
+router.patch('/rooms/:roomId/images/:imageId/main', ...isTenant, verifyRoomOwnership, setRoomMainImageCtrl);
 
 // Peak Season Rates
 router.get('/rooms/:roomId/peak-rates', ...isTenant, verifyRoomOwnership, getPeakRatesCtrl);

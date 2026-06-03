@@ -14,7 +14,7 @@ const getStateClass = (isOpen: boolean, hasActiveFilters: boolean) => {
 };
 
 export const FilterTrigger: FC<FilterTriggerProps> = ({ isOpen, hasActiveFilters, onClick }) => (
-  <button onClick={onClick} className={`flex items-center gap-1.5 px-4 py-2 rounded-full text-xs font-semibold transition border ${getStateClass(isOpen, hasActiveFilters)}`}>
+  <button onClick={onClick} className={`flex items-center gap-1.5 px-4 py-2 rounded-lg text-xs font-semibold transition border ${getStateClass(isOpen, hasActiveFilters)}`}>
     <SlidersHorizontal size={13} />
     Filter
     {hasActiveFilters && <span className="w-1.5 h-1.5 rounded-full bg-white animate-pulse" />}

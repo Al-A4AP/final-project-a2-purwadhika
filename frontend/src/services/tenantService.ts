@@ -2,6 +2,7 @@ import { api } from './api';
 import type {
   ApiResponse, DashboardStats, TenantProperty, TenantPropertyDetail,
   RoomWithPeakRates, PeakSeasonRate, RoomFormInput, PaginationMeta, PropertyCategory, DashboardRevenuePeriod,
+  PropertyImage, RoomImage
 } from '@/types';
 
 const buildUrl = (path: string, params?: Record<string, unknown>) => {
@@ -127,5 +128,30 @@ export const tenantService = {
   },
   async deletePeakRate(rateId: string): Promise<void> {
     await api.delete(`/tenants/me/peak-rates/${rateId}`);
+  },
+  async addPropertyImage(propertyId: string, file: File): Promise<PropertyImage> {
+    const formData = new FormData();
+    formData.append('image', file);
+    const res = await api.post<ApiResponse<PropertyImage>>(`/tenants/me/properties/${propertyId}/images`, formData, {
+      headers: { 'Content-Type': 'multipart/form-data' },
+    });
+    return res.data.data;
+  },
+  async deletePropertyImage(propertyId: string, imageId: string): Promise<void> {
+    await api.delete(`/tenants/me/properties/${propertyId}/images/${imageId}`);
+  },
+  async addRoomImage(roomId: string, file: File): Promise<RoomImage> {
+    const formData = new FormData();
+    formData.append('image', file);
+    const res = await api.post<ApiResponse<RoomImage>>(`/tenants/me/rooms/${roomId}/images`, formData, {
+      headers: { 'Content-Type': 'multipart/form-data' },
+    });
+    return res.data.data;
+  },
+  async deleteRoomImage(roomId: string, imageId: string): Promise<void> {
+    await api.delete(`/tenants/me/rooms/${roomId}/images/${imageId}`);
+  },
+  async setRoomMainImage(roomId: string, imageId: string): Promise<void> {
+    await api.patch(`/tenants/me/rooms/${roomId}/images/${imageId}/main`);
   },
 };

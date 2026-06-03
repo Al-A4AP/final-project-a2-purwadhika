@@ -4,7 +4,7 @@ const IDLE_BUTTON_CLASS = "bg-white dark:bg-slate-900 text-slate-600 dark:text-s
 
 export const getDropdownButtonClass = (active: boolean, open: boolean) => {
   const tone = active ? ACTIVE_BUTTON_CLASS : open ? OPEN_BUTTON_CLASS : IDLE_BUTTON_CLASS;
-  return `flex items-center gap-1.5 px-3.5 py-2 rounded-full text-xs font-semibold transition border ${tone}`;
+  return `flex items-center gap-1.5 px-3.5 py-2 rounded-lg text-xs font-semibold transition border ${tone}`;
 };
 
 export const getDropdownOptionClass = (active: boolean) => {

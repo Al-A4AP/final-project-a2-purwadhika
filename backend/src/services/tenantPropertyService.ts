@@ -25,13 +25,14 @@ export const getTenantPropertyById = async (id: string, tenantId: string) => {
 };
 
 export const createProperty = async (tenantId: string, data: PropertyFormData, file?: Express.Multer.File) => {
+  if (!file) throw new AppError('Foto utama properti wajib diupload', 400);
   const featuredImageUrl = await uploadFeaturedImage(file);
   return createTenantProperty(buildPropertyCreateData(tenantId, data, featuredImageUrl));
 };
 
-export const updateProperty = async (id: string, tenantId: string, data: PropertyFormData, file?: Express.Multer.File) => {
+export const updateProperty = async (id: string, tenantId: string, data: PropertyFormData & { featured_image_url?: string }, file?: Express.Multer.File) => {
   const existing = await findTenantPropertyOrThrow(id, tenantId);
-  const featuredImageUrl = file ? await uploadFeaturedImage(file) : existing.featured_image_url;
+  const featuredImageUrl = file ? await uploadFeaturedImage(file) : (data.featured_image_url || existing.featured_image_url);
   return updateTenantProperty(id, buildPropertyUpdateData(data, existing, featuredImageUrl));
 };
 

@@ -12,7 +12,7 @@ const getAmenity = (id: string) =>
   optionMap.get(id) || { id, label: id, icon: AMENITIES_LIST[0].icon };
 
 const getBadgeClass = (compact?: boolean) =>
-  `inline-flex items-center gap-1.5 rounded-full bg-slate-100 text-slate-700 dark:bg-slate-700 dark:text-slate-200 ${compact ? 'px-2 py-1 text-xs' : 'px-3 py-1.5 text-sm'}`;
+  `inline-flex items-center gap-1.5 rounded-lg bg-slate-100 text-slate-700 dark:bg-slate-700 dark:text-slate-200 ${compact ? 'px-2 py-1 text-xs' : 'px-3 py-1.5 text-sm'}`;
 
 const AmenityBadge: FC<{ id: string; compact?: boolean }> = ({ id, compact }) => {
   const amenity = getAmenity(id);

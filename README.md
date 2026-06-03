@@ -12,25 +12,39 @@ Final Project Purwadhika JCWDBGPM-11, Group 1:
 
 ## Status Audit Terakhir
 
-Audit ke-3 dilakukan pada 01 Juni 2026 pukul 20:46 WIB dengan acuan
-`PURWADHIKA.md`. Laporan detail ada di `AUDIT_PURWADHIKA_1_JUNI_2026_07_21_AM`
-dan `AUDIT_CLEANCODE_REST_1_JUNI_2026.md`.
+Audit ke-4 dilakukan pada 02 Juni 2026 pukul 21:00 WIB dengan acuan
+`PURWADHIKA.md` dan `REST_API_GUIDELINES.md`. Laporan detail ada di `AUDIT_PURWADHIKA`
+dan `AUDIT_CLEANCODE_REST.md`.
 
 | Area                       | Status              | Catatan                                                                                                                        |
 | -------------------------- | ------------------- | ------------------------------------------------------------------------------------------------------------------------------ |
 | Fitur utama                | Selesai             | Seluruh 11 fitur utama PURWADHIKA.md telah terimplementasi penuh.                                                              |
 | Fitur 1                    | Selesai             | Auth/profile, katalog properti, property detail, tenant property/room/category management, dan public calendar sudah tersedia. |
 | Fitur 2                    | Selesai             | Alur transaksi, konfirmasi tenant (pop-up verified), review, dan report sudah tersedia lengkap.                                |
-| Batas file 200 baris       | Sesuai              | Scan PowerShell: 0 file di backend maupun frontend yang melampaui 200 baris.                                                   |
-| Function maksimal 15 baris | Belum sepenuhnya   | 11 fungsi backend melampaui batas (terbesar: `getTenantReviews` 38 baris, `registerUser` 37 baris). Perlu refactor.            |
+| Batas file 200 baris       | Sesuai              | Scan: 0 file di backend maupun frontend yang melampaui 200 baris.                                                              |
+| Function maksimal 15 baris | Sesuai              | Seluruh 11 fungsi logika bisnis di backend telah di-refactor mematuhi batas maksimal 15 baris.                                 |
 | Log production             | Sesuai              | Scan: 0 baris `console.log` aktif di seluruh `backend/src` dan `frontend/src`.                                                |
 | Frontend lint              | Lulus               | `npm run lint` dan `npm run build` selesai tanpa error; exit code 0.                                                           |
 | TypeScript no emit         | Lulus               | `tsc -b` backend dan frontend selesai tanpa error.                                                                             |
 | Pop-up konfirmasi tenant   | Selesai             | `TenantOrdersConfirmModal.tsx` menggunakan `ConfirmModal` sebelum setiap perubahan status order.                               |
+| REST API Naming & Format   | Lulus               | Seluruh endpoint non-RESTful & alias route telah didepresiasi; standardisasi response `sendSuccess` selesai 100%.              |
 | Test suite                 | Belum ada           | Backend `npm test` masih placeholder.                                                                                          |
 
 Laporan lengkap tersedia di
-[`AUDIT_PURWADHIKA_1_JUNI_2026_07_21_AM`](./AUDIT_PURWADHIKA_1_JUNI_2026_07_21_AM).
+[`AUDIT_PURWADHIKA`](./AUDIT_PURWADHIKA) dan [`AUDIT_CLEANCODE_REST.md`](./AUDIT_CLEANCODE_REST.md).
+
+## Eksternal API yang Digunakan
+
+Proyek ini mengintegrasikan beberapa layanan API eksternal untuk mendukung fungsionalitas utama:
+
+1. **LocationIQ API**: Digunakan untuk fitur geocoding otomatis. API ini mengubah input alamat teks properti menjadi koordinat latitude/longitude di halaman pengelolaan properti oleh Tenant, sekaligus menyajikan visualisasi koordinat di peta interaktif Leaflet.
+2. **Midtrans API (Payment Gateway)**: Digunakan untuk memproses transaksi digital. Mendukung snap popup checkout di sisi Frontend dan webhook notification handler di sisi Backend untuk pencatatan status pembayaran secara real-time.
+3. **Cloudinary API (Cloud Storage)**: Digunakan untuk mengunggah dan menyimpan file media (seperti foto profil pengguna, foto galeri properti, foto kamar, serta gambar bukti transfer pembayaran manual).
+4. **Supabase (PostgreSQL)**: Berperan sebagai Database Relasional awan untuk menyimpan seluruh entitas data transaksi, user, tenant, properti, dan log sistem.
+5. **Google OAuth API**: Digunakan sebagai penyedia otentikasi sekali klik (social sign-in/sign-up) untuk mempermudah pendaftaran user/tenant.
+6. **SMTP Nodemailer**: Digunakan untuk mengirimkan email sistem secara terprogram, seperti email verifikasi aktivasi akun baru, email perubahan verifikasi email, email reset password, serta email reminder check-in otomatis pada H-1.
+
+---
 
 ## Fitur 1 - Property Renting Core
 
@@ -40,7 +54,7 @@ Laporan lengkap tersedia di
 | Search destination, date, guest, price, amenities    | Selesai | `frontend/src/components/user/SearchForm.tsx`, `frontend/src/components/user/propertyFilterDropdown/`, `frontend/src/stores/filterStore.ts`, `backend/src/services/propertyQueryService.ts`                                                                      |
 | Sort dan pagination properti                         | Selesai | `frontend/src/pages/user/HomePage.tsx`, `backend/src/services/propertyService.ts`, `backend/src/services/propertyPriceSortService.ts`; sort name/created_at dan price tanpa tanggal diproses server-side, price bertanggal memakai availability/pricing dinamis. |
 | Auth, register, verify email, login, logout          | Selesai | `frontend/src/pages/auth/`, `frontend/src/stores/authStore.ts`, `backend/src/controllers/authController.ts`, `backend/src/services/authService.ts`, `backend/src/routes/authRoutes.ts`                                                                           |
-| Profile USER/TENANT                                  | Selesai | `frontend/src/pages/user/ProfilePage.tsx`, `frontend/src/components/user/profile/`, route `/profile` dan `/tenant/profile`, `backend/src/controllers/userController.ts`, `backend/src/services/userService.ts`, `backend/src/services/userEmailService.ts`       |
+| Profile USER/TENANT                                  | Selesai | `frontend/src/pages/user/ProfilePage.tsx`, `frontend/src/components/user/profile/`, route `/users/me` dan `/tenants/me`, `backend/src/controllers/userController.ts`, `backend/src/services/userService.ts`, `backend/src/services/userEmailService.ts`      |
 | Property detail, gallery, facilities, review display | Selesai | `frontend/src/pages/user/PropertyDetailPage.tsx`, `frontend/src/components/property/`, `backend/src/services/propertyService.ts`                                                                                                                                 |
 | Public calendar dan availability                     | Selesai | `frontend/src/components/property/PricingCalendarSection.tsx`, `frontend/src/services/availabilityService.ts`, `backend/src/services/publicAvailabilityService.ts`; backend membatasi maksimal 90 hari per request.                                              |
 | Tenant property CRUD                                 | Selesai | `frontend/src/pages/tenant/PropertiesListPage.tsx`, `frontend/src/pages/tenant/PropertyFormPage.tsx`, `backend/src/services/tenantPropertyService.ts`, `backend/src/routes/tenantRoutes.ts`                                                                      |
@@ -196,6 +210,7 @@ untuk memuat Midtrans Snap.
 
 Perintah seed akan mengisi ulang data dummy sesuai script Prisma:
 
+```bash
 ```bash
 cd backend
 npx prisma db seed

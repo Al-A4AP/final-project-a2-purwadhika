@@ -27,7 +27,7 @@ const handleGoogleSuccess = async (
   navigate: NavigateFunction,
 ) => {
   try {
-    const result = await authService.googleLogin({ accessToken, role });
+    const result = await authService.googleLogin({ accessToken, role, mode: "register" });
     setUser(result.user);
     notifyGoogleSuccess();
     navigate(getRoleHome(result.user.role));

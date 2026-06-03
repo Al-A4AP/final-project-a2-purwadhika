@@ -24,12 +24,12 @@ const getMinPrice = (property: TenantProperty) =>
 
 const PropertyImage: FC<PropertyPartProps> = ({ property }) =>
   property.featured_image_url ? (
-    <img src={property.featured_image_url} alt={property.name} className="h-44 w-full object-cover sm:h-auto sm:w-36 sm:shrink-0" />
+    <img src={property.featured_image_url} alt={property.name} className="h-44 w-full object-cover sm:h-32 sm:w-36 sm:shrink-0" />
   ) : null;
 
 const PropertyMeta: FC<PropertyPartProps> = ({ property }) => (
   <div className="mb-1 flex flex-wrap items-center gap-2">
-    <span className="rounded-full bg-red-50 px-2 py-0.5 text-xs text-red-600 dark:bg-red-900/20">{property.category?.name}</span>
+    <span className="rounded-lg bg-red-50 px-2 py-0.5 text-xs text-red-600 dark:bg-red-900/20">{property.category?.name}</span>
     <span className="text-xs text-gray-400">{property.city}</span>
   </div>
 );

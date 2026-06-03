@@ -60,11 +60,15 @@ const verifyExistingGoogleUser = async (
 const findGoogleUser = (email: string) =>
   prisma.user.findFirst({ where: { email, deleted_at: null } });
 
-const resolveGoogleUser = async (profile: GoogleProfile, role?: Role) => {
+const resolveGoogleUser = async (profile: GoogleProfile, role?: Role, mode?: "login" | "register") => {
   const existing = await findGoogleUser(profile.email!);
-  return existing
-    ? verifyExistingGoogleUser(existing, role)
-    : createGoogleUser(profile, role || "USER");
+  if (existing) {
+    return verifyExistingGoogleUser(existing, role);
+  }
+  if (mode === "login") {
+    throw new AppError("Akun Google belum terdaftar. Silakan melakukan registrasi terlebih dahulu.", 404);
+  }
+  return createGoogleUser(profile, role || "USER");
 };
 
 const createGoogleAuthResult = (user: GoogleAuthUser) => ({
@@ -75,8 +79,9 @@ const createGoogleAuthResult = (user: GoogleAuthUser) => ({
 export const googleLogin = async (data: {
   accessToken: string;
   role?: Role;
+  mode?: "login" | "register";
 }) => {
   const profile = await getGoogleProfile(data.accessToken);
-  const user = await resolveGoogleUser(profile, data.role);
+  const user = await resolveGoogleUser(profile, data.role, data.mode);
   return createGoogleAuthResult(user);
 };

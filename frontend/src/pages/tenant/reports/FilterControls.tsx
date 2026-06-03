@@ -1,4 +1,5 @@
 import type { FC } from "react";
+import { CustomDatePickerPopup } from "@/components/common/CustomDatePickerPopup";
 
 export interface SelectOption {
   label: string;
@@ -12,7 +13,7 @@ export const FilterSelect: FC<{ label: string; onChange: (value: string) => void
 );
 
 export const FilterDate: FC<{ label: string; onChange: (value: string) => void; value: string }> = ({ label, onChange, value }) => (
-  <div className="min-w-0"><FilterLabel label={label} /><input type="date" value={value} onChange={(e) => onChange(e.target.value)} className={CONTROL_CLASS} /></div>
+  <div className="min-w-0"><FilterLabel label={label} /><CustomDatePickerPopup value={value} onChange={onChange} className={CONTROL_CLASS} /></div>
 );
 
 export const FilterLabel: FC<{ label: string }> = ({ label }) => (

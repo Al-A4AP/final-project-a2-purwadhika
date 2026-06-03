@@ -10,7 +10,7 @@ interface AvailabilityCalendarProps {
 }
 
 export const AvailabilityCalendar: FC<AvailabilityCalendarProps> = (props) => (
-  <div className="flex justify-center rounded-lg bg-gray-50 p-4 dark:bg-slate-900">
+  <div className="flex justify-center overflow-x-auto bg-gray-50 dark:bg-slate-900/50 p-6 rounded-xl border border-gray-100 dark:border-slate-700/50">
     <DayPicker mode="range" selected={props.range} onSelect={props.onRangeChange} disabled={[{ before: new Date() }, ...props.customerBookedDays]} modifiers={availabilityModifiers(props)} modifiersStyles={availabilityStyles} />
   </div>
 );

@@ -7,7 +7,7 @@ export const authService = {
     return res.data.data;
   },
 
-  async googleLogin(data: { accessToken: string; role?: Role }) {
+  async googleLogin(data: { accessToken: string; role?: Role; mode?: "login" | "register" }) {
     const res = await api.post<ApiResponse<AuthResponse>>('/auth/google-login', data);
     return res.data.data;
   },

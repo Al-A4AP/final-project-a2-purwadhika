@@ -1,6 +1,6 @@
 import { Request, Response } from 'express';
 import * as svc from '../services/tenantRoomService';
-import { sendSuccess } from '../utils/response';
+import { sendSuccess, sendError } from '../utils/response';
 import { handleControllerError } from './controllerErrors';
 
 export const getRoomsCtrl = async (req: Request, res: Response) => {
@@ -95,4 +95,29 @@ export const setRoomAvailabilityCtrl = async (req: Request, res: Response) => {
 const setRoomAvailabilityRange = (roomId: string, req: Request) => {
   const { start_date, end_date, is_available } = req.body;
   return svc.setRoomAvailabilityRange(roomId, req.user!.id as string, new Date(start_date), new Date(end_date), is_available);
+};
+
+export const addRoomImageCtrl = async (req: Request, res: Response) => {
+  try {
+    const { roomId } = req.params as { roomId: string };
+    if (!req.file) return sendError(res, 'File gambar wajib diupload', 400);
+    const data = await svc.addRoomImageService(roomId, req.file);
+    return sendSuccess(res, data, 'Gambar berhasil ditambahkan', 201);
+  } catch (err) { return handleControllerError(res, err); }
+};
+
+export const deleteRoomImageCtrl = async (req: Request, res: Response) => {
+  try {
+    const { roomId, imageId } = req.params as { roomId: string; imageId: string };
+    const data = await svc.removeRoomImage(roomId, imageId);
+    return sendSuccess(res, data, 'Gambar berhasil dihapus');
+  } catch (err) { return handleControllerError(res, err); }
+};
+
+export const setRoomMainImageCtrl = async (req: Request, res: Response) => {
+  try {
+    const { roomId, imageId } = req.params as { roomId: string; imageId: string };
+    const data = await svc.setRoomMainImage(roomId, imageId);
+    return sendSuccess(res, data, 'Gambar utama berhasil diubah');
+  } catch (err) { return handleControllerError(res, err); }
 };

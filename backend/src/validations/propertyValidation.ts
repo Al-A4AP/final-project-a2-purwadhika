@@ -12,7 +12,9 @@ export const createPropertySchema = z.object({
   longitude: z.string().optional(),
 });
 
-export const updatePropertySchema = createPropertySchema.partial();
+export const updatePropertySchema = createPropertySchema.partial().extend({
+  featured_image_url: z.string().optional(),
+});
 
 export const createRoomSchema = z.object({
   room_type: z.string().min(3, 'Tipe kamar minimal 3 karakter'),

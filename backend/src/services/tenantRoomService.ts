@@ -1,5 +1,5 @@
 import { AppError } from '../middlewares/errorHandler';
-import { addRoomImage, uploadRoomImage } from './tenantRoom/roomImages';
+import { addRoomImage, uploadRoomImage, deleteRoomImage, setRoomImageAsMain } from './tenantRoom/roomImages';
 import { buildAvailabilityRangeDates } from './tenantRoom/availabilityRange';
 import { buildTenantAvailabilityView } from './tenantRoom/availabilityView';
 import { buildRoomCreateData, buildRoomUpdateData, normalizeAvailabilityDate } from './tenantRoom/roomData';
@@ -71,4 +71,16 @@ export const setRoomAvailability = async (roomId: string, tenantId: string, date
 export const setRoomAvailabilityRange = async (roomId: string, tenantId: string, start: Date, end: Date, isAvailable: boolean) => {
   await verifyRoomOwner(roomId, tenantId);
   return upsertRoomAvailabilityRange(roomId, buildAvailabilityRangeDates(start, end), isAvailable);
+};
+
+export const addRoomImageService = async (roomId: string, file: Express.Multer.File) => {
+  return addRoomImage(roomId, file);
+};
+
+export const removeRoomImage = async (roomId: string, imageId: string) => {
+  return deleteRoomImage(roomId, imageId);
+};
+
+export const setRoomMainImage = async (roomId: string, imageId: string) => {
+  return setRoomImageAsMain(roomId, imageId);
 };

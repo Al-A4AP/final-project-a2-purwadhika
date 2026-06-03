@@ -14,6 +14,7 @@ export const loginSchema = z.object({
 export const googleLoginSchema = z.object({
   accessToken: z.string().min(1, 'Token Google wajib diisi'),
   role: z.enum(['USER', 'TENANT']).optional(),
+  mode: z.enum(['login', 'register']).optional(),
 });
 
 export const verifyEmailSchema = z.object({

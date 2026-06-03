@@ -28,11 +28,10 @@ export const removePropertyImage = async (
   tenantId: string,
 ) => {
   const deleted = await prisma.$transaction(async (tx) => {
-    const deleted = await deleteImageRecord(tx, propertyId, imageId, tenantId);
-    await deleteCloudinaryImage(deleted.cloudinary_public_id);
-    return deleted;
+    return deleteImageRecord(tx, propertyId, imageId, tenantId);
   });
 
+  await deleteCloudinaryImage(deleted.cloudinary_public_id);
   return deleted;
 };
 
@@ -70,16 +69,44 @@ const createImageRecord = (
     },
   });
 
+const getPropertyAndImageOrThrow = async (tx: Prisma.TransactionClient, propertyId: string, imageId: string, tenantId: string) => {
+  const property = await tx.property.findFirst({ where: { id: propertyId, tenantId } });
+  if (!property) throw new AppError("Properti tidak ditemukan", 404);
+  const image = await tx.propertyImage.findFirst({ where: { id: imageId, propertyId } });
+  if (!image) throw new AppError("Gambar tidak ditemukan", 404);
+  return { property, image };
+};
+
+const checkMinImagesConstraint = (featuredUrl: string | null, gallery: { image_url: string }[]) => {
+  const urls = new Set<string>();
+  if (featuredUrl) urls.add(featuredUrl);
+  gallery.forEach(img => urls.add(img.image_url));
+  if (urls.size <= 1) throw new AppError("Gagal menghapus. Properti harus memiliki minimal 1 gambar.", 400);
+};
+
+const promoteNextFeaturedImage = async (tx: Prisma.TransactionClient, propertyId: string, imageId: string, gallery: { id: string; image_url: string }[]) => {
+  const nextImage = gallery.find(img => img.id !== imageId);
+  await tx.property.update({
+    where: { id: propertyId },
+    data: { featured_image_url: nextImage ? nextImage.image_url : null }
+  });
+};
+
 const deleteImageRecord = async (
   tx: Prisma.TransactionClient,
   propertyId: string,
   imageId: string,
   tenantId: string,
 ) => {
-  await ensureTransactionProperty(tx, propertyId, tenantId);
-  await ensureTransactionImage(tx, propertyId, imageId);
+  const { property, image } = await getPropertyAndImageOrThrow(tx, propertyId, imageId, tenantId);
+  const gallery = await tx.propertyImage.findMany({ where: { propertyId } });
+  checkMinImagesConstraint(property.featured_image_url, gallery);
+  if (property.featured_image_url === image.image_url) {
+    await promoteNextFeaturedImage(tx, propertyId, imageId, gallery);
+  }
   return tx.propertyImage.delete({ where: { id: imageId } });
 };
+
 const ensureTransactionProperty = async (
   tx: Prisma.TransactionClient,
   propertyId: string,
@@ -90,16 +117,7 @@ const ensureTransactionProperty = async (
   });
   if (!property) throw new AppError("Properti tidak ditemukan", 404);
 };
-const ensureTransactionImage = async (
-  tx: Prisma.TransactionClient,
-  propertyId: string,
-  imageId: string,
-) => {
-  const image = await tx.propertyImage.findFirst({
-    where: { id: imageId, propertyId },
-  });
-  if (!image) throw new AppError("Gambar tidak ditemukan", 404);
-};
+
 const deleteCloudinaryImage = async (publicId?: string | null) => {
   if (!publicId) return;
   await deleteFromCloudinary(publicId);

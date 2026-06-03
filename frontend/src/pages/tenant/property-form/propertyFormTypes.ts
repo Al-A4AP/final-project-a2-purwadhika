@@ -1,5 +1,5 @@
 import type { UseFormReturn } from "react-hook-form";
-import type { PropertyCategory } from "@/types";
+import type { PropertyCategory, PropertyImage } from "@/types";
 import type { PropertyFormInput } from "./propertyFormSchema";
 
 export interface PropertyFormState {
@@ -12,4 +12,12 @@ export interface PropertyFormState {
   preview: string | null;
   selectedAmenities: string[];
   toggleAmenity: (id: string) => void;
+  cropperSrc: string | null;
+  handleCropComplete: (blob: Blob) => void;
+  closeCropper: () => void;
+  galleryImages: PropertyImage[];
+  uploadingGallery: boolean;
+  handleGalleryFileChange: (event: React.ChangeEvent<HTMLInputElement>) => void;
+  handleDeleteGallery: (imageId: string) => Promise<void>;
+  handleSetMainGallery: (imageUrl: string) => Promise<void>;
 }

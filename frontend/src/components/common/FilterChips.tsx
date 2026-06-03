@@ -32,12 +32,12 @@ export const FilterChips: FC<FilterChipsProps> = ({ chips, onClearAll, variant =
 };
 
 const FilterChip: FC<{ chip: FilterChipItem }> = ({ chip }) => (
-  <span className="inline-flex max-w-full items-center gap-2 rounded-full bg-rose-50 px-3 py-1.5 text-xs font-semibold text-rose-700 dark:bg-rose-900/20 dark:text-rose-200">
+  <span className="inline-flex max-w-full items-center gap-2 rounded-lg bg-rose-50 px-3 py-1.5 text-xs font-semibold text-rose-700 dark:bg-rose-900/20 dark:text-rose-200">
     <span className="truncate">{chip.label}</span>
-    <button onClick={chip.onRemove} className="rounded-full p-0.5 hover:bg-rose-100 dark:hover:bg-rose-900/40" aria-label={`Hapus ${chip.label}`}><X size={13} /></button>
+    <button onClick={chip.onRemove} className="rounded-lg p-0.5 hover:bg-rose-100 dark:hover:bg-rose-900/40" aria-label={`Hapus ${chip.label}`}><X size={13} /></button>
   </span>
 );
 
 const ClearAllButton: FC<{ onClear: () => void }> = ({ onClear }) => (
-  <button onClick={onClear} className="rounded-full border border-slate-200 px-3 py-1.5 text-xs font-semibold text-slate-600 hover:bg-slate-50 dark:border-slate-700 dark:text-slate-300 dark:hover:bg-slate-800">Reset Semua</button>
+  <button onClick={onClear} className="rounded-lg border border-slate-200 px-3 py-1.5 text-xs font-semibold text-slate-600 hover:bg-slate-50 dark:border-slate-700 dark:text-slate-300 dark:hover:bg-slate-800">Reset Semua</button>
 );

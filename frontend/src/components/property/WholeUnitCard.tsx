@@ -1,6 +1,6 @@
 import type { FC } from 'react';
 import type { Room } from '@/types';
-import { AlertTriangle, BedDouble, Calendar as CalendarIcon } from 'lucide-react';
+import { AlertTriangle, BedDouble } from 'lucide-react';
 import { formatPrice } from '@/lib/formatters';
 import { AmenitiesList } from './AmenitiesList';
 
@@ -12,7 +12,6 @@ interface WholeUnitCardProps {
   isSelected?: boolean;
   room: Room;
   onBooking: (room: Room) => void;
-  onCheckAvail: (room: Room) => void;
   onSelectRoom?: (roomId: string) => void;
 }
 
@@ -68,14 +67,8 @@ const UnavailableNotice: FC<{ room: Room }> = ({ room }) => (
 
 const WholeUnitActions: FC<WholeUnitCardProps> = (props) => {
   const disabled = props.room.is_available === false || Boolean(props.bookingBlockedReason);
-  return <div className="mt-6 flex gap-3 border-t pt-6 dark:border-slate-700"><AvailabilityButton {...props} /><BookingButton disabled={disabled} {...props} /></div>;
+  return <div className="mt-6 flex gap-3 border-t pt-6 dark:border-slate-700"><BookingButton disabled={disabled} {...props} /></div>;
 };
-
-const AvailabilityButton: FC<WholeUnitCardProps> = ({ onCheckAvail, room }) => (
-  <button onClick={() => onCheckAvail(room)} className="flex items-center gap-2 rounded-lg border px-4 py-2.5 text-sm text-gray-600 transition hover:bg-gray-100 dark:border-slate-600 dark:text-gray-300 dark:hover:bg-slate-700">
-    <CalendarIcon size={16} /> Cek Ketersediaan
-  </button>
-);
 
 const BookingButton: FC<WholeUnitCardProps & { disabled: boolean }> = ({ bookingBlockedReason, disabled, onBooking, room }) => (
   <button onClick={() => onBooking(room)} disabled={disabled} className={`flex-1 rounded-lg px-6 py-2.5 text-sm font-semibold text-white transition ${buttonClass(disabled)}`}>

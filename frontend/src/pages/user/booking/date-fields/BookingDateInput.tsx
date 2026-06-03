@@ -1,4 +1,5 @@
 import type { FC } from "react";
+import { CustomDatePickerPopup } from "@/components/common/CustomDatePickerPopup";
 import { BOOKING_DATE_INPUT_CLASS } from "./dateInputClass";
 
 interface BookingDateInputProps {
@@ -11,6 +12,6 @@ interface BookingDateInputProps {
 export const BookingDateInput: FC<BookingDateInputProps> = ({ label, min, onChange, value }) => (
   <div>
     <label className="text-sm font-medium text-gray-600 dark:text-gray-300">{label}</label>
-    <input type="date" min={min} value={value} onChange={(event) => onChange(event.target.value)} className={BOOKING_DATE_INPUT_CLASS} />
+    <CustomDatePickerPopup min={min} value={value} onChange={onChange} className={BOOKING_DATE_INPUT_CLASS} />
   </div>
 );

@@ -6,7 +6,7 @@ import { toast } from "react-hot-toast";
 import { getApiErrorMessage } from "@/lib/errorMessage";
 import { propertyService } from "@/services/propertyService";
 import { tenantService } from "@/services/tenantService";
-import type { PropertyCategory } from "@/types";
+import type { PropertyCategory, PropertyImage } from "@/types";
 import { buildPropertyFormData, toPropertyFormValues } from "./propertyFormData";
 import { propertyFormSchema, type PropertyFormInput } from "./propertyFormSchema";
 
@@ -16,85 +16,126 @@ export const usePropertyFormState = () => {
   const isEdit = Boolean(id);
   const form = useForm<PropertyFormInput>({ resolver: zodResolver(propertyFormSchema) });
   const [categories, setCategories] = useState<PropertyCategory[]>([]);
-  const media = usePropertyMedia();
-  const amenities = usePropertyAmenities();
-  useLoadPropertyForm(id, isEdit, form.reset, amenities.setSelectedAmenities, setCategories, navigate);
-  const onSubmit = usePropertySubmit(id, isEdit, media.file, amenities.selectedAmenities, navigate);
-  return { categories, form, handleBack: () => navigate(-1), handleFileChange: media.handleFileChange, isEdit, onSubmit, preview: media.preview, selectedAmenities: amenities.selectedAmenities, toggleAmenity: amenities.toggleAmenity };
-};
+  const [selectedAmenities, setSelectedAmenities] = useState<string[]>([]);
 
-const usePropertyMedia = () => {
+  // Image & Gallery State
   const [preview, setPreview] = useState<string | null>(null);
   const [file, setFile] = useState<File | null>(null);
-  const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => updateFilePreview(event, setFile, setPreview);
-  return { file, handleFileChange, preview };
-};
+  const [cropperSrc, setCropperSrc] = useState<string | null>(null);
+  const [cropMode, setCropMode] = useState<"main" | "gallery" | null>(null);
+  const [galleryImages, setGalleryImages] = useState<PropertyImage[]>([]);
+  const [uploadingGallery, setUploadingGallery] = useState(false);
 
-const usePropertyAmenities = () => {
-  const [selectedAmenities, setSelectedAmenities] = useState<string[]>([]);
-  const toggleAmenity = (id: string) => setSelectedAmenities((items) => toggleItem(items, id));
-  return { selectedAmenities, setSelectedAmenities, toggleAmenity };
-};
-
-const useLoadPropertyForm = (
-  id: string | undefined,
-  isEdit: boolean,
-  reset: (values: PropertyFormInput) => void,
-  setAmenities: (values: string[]) => void,
-  setCategories: (values: PropertyCategory[]) => void,
-  navigate: (path: string) => void,
-) => {
   useEffect(() => {
     propertyService.getCategories().then(setCategories);
-    if (isEdit && id) loadPropertyForEdit(id, reset, setAmenities, navigate);
-  }, [id, isEdit, navigate, reset, setAmenities, setCategories]);
+    if (isEdit && id) {
+      tenantService.getProperty(id).then((property) => {
+        setSelectedAmenities(property.amenities || []);
+        form.reset(toPropertyFormValues(property));
+        setGalleryImages(property.images || []);
+        if (property.featured_image_url) setPreview(property.featured_image_url);
+      }).catch((err) => {
+        toast.error(getApiErrorMessage(err, "Properti tidak ditemukan"));
+        navigate("/tenant/properties");
+      });
+    }
+  }, [id, isEdit, navigate, form.reset]);
+
+  const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const selected = event.target.files?.[0];
+    if (!selected) return;
+    setCropMode("main");
+    setCropperSrc(URL.createObjectURL(selected));
+  };
+
+  const handleGalleryFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const selected = event.target.files?.[0];
+    if (!selected) return;
+    setCropMode("gallery");
+    setCropperSrc(URL.createObjectURL(selected));
+  };
+
+  const handleCropComplete = async (blob: Blob) => {
+    if (cropMode === "main") {
+      const croppedFile = new File([blob], "property.jpg", { type: "image/jpeg" });
+      setFile(croppedFile);
+      setPreview(URL.createObjectURL(croppedFile));
+    } else if (cropMode === "gallery" && id) {
+      setUploadingGallery(true);
+      try {
+        const croppedFile = new File([blob], "gallery.jpg", { type: "image/jpeg" });
+        const newImg = await tenantService.addPropertyImage(id, croppedFile);
+        setGalleryImages((prev) => [...prev, newImg]);
+        toast.success("Gambar berhasil ditambahkan ke galeri");
+      } catch (err) {
+        toast.error("Gagal menambahkan gambar");
+      } finally {
+        setUploadingGallery(false);
+      }
+    }
+    setCropperSrc(null);
+    setCropMode(null);
+  };
+
+  const handleDeleteGallery = async (imageId: string) => {
+    if (!id) return;
+    try {
+      await tenantService.deletePropertyImage(id, imageId);
+      const updated = await tenantService.getProperty(id);
+      setGalleryImages(updated.images || []);
+      setPreview(updated.featured_image_url || null);
+      toast.success("Gambar galeri berhasil dihapus");
+    } catch (err) {
+      toast.error(getApiErrorMessage(err, "Gagal menghapus gambar"));
+    }
+  };
+
+  const handleSetMainGallery = async (imageUrl: string) => {
+    if (!id) return;
+    try {
+      const formData = new FormData();
+      formData.append("featured_image_url", imageUrl);
+      await tenantService.updateProperty(id, formData);
+      setPreview(imageUrl);
+      toast.success("Gambar utama berhasil diubah");
+    } catch (err) {
+      toast.error("Gagal mengubah gambar utama");
+    }
+  };
+
+  const onSubmit = async (data: PropertyFormInput) => {
+    try {
+      const formData = buildPropertyFormData(data, selectedAmenities, file);
+      if (isEdit && id) {
+        await tenantService.updateProperty(id, formData);
+      } else {
+        await tenantService.createProperty(formData);
+      }
+      navigate("/tenant/properties");
+    } catch (err) {
+      toast.error(getApiErrorMessage(err, "Properti gagal disimpan"));
+    }
+  };
+
+  return {
+    categories,
+    form,
+    handleBack: () => navigate(-1),
+    handleFileChange,
+    isEdit,
+    onSubmit,
+    preview,
+    selectedAmenities,
+    toggleAmenity: (uid: string) => setSelectedAmenities((items) =>
+      items.includes(uid) ? items.filter((item) => item !== uid) : [...items, uid]
+    ),
+    cropperSrc,
+    handleCropComplete,
+    closeCropper: () => { setCropperSrc(null); setCropMode(null); },
+    galleryImages,
+    uploadingGallery,
+    handleGalleryFileChange,
+    handleDeleteGallery,
+    handleSetMainGallery,
+  };
 };
-
-const loadPropertyForEdit = (
-  id: string,
-  reset: (values: PropertyFormInput) => void,
-  setAmenities: (values: string[]) => void,
-  navigate: (path: string) => void,
-) => tenantService.getProperty(id).then((property) => {
-  setAmenities(property.amenities || []);
-  reset(toPropertyFormValues(property));
-}).catch((err) => handleLoadError(err, navigate));
-
-const handleLoadError = (err: unknown, navigate: (path: string) => void) => {
-  toast.error(getApiErrorMessage(err, "Properti tidak ditemukan atau Anda tidak memiliki akses."));
-  navigate("/tenant/properties");
-};
-
-const usePropertySubmit = (
-  id: string | undefined,
-  isEdit: boolean,
-  file: File | null,
-  amenities: string[],
-  navigate: (path: string) => void,
-) => async (data: PropertyFormInput) => {
-  try { await saveProperty(id, isEdit, buildPropertyFormData(data, amenities, file)); navigate("/tenant/properties"); }
-  catch (err) { handleSubmitError(err); }
-};
-
-const saveProperty = (id: string | undefined, isEdit: boolean, formData: FormData) => {
-  if (isEdit && id) return tenantService.updateProperty(id, formData);
-  return tenantService.createProperty(formData);
-};
-
-const handleSubmitError = (err: unknown) => {
-  toast.error(getApiErrorMessage(err, "Properti gagal disimpan. Periksa nama, kategori, lokasi, fasilitas, dan gambar."));
-};
-
-const updateFilePreview = (
-  event: React.ChangeEvent<HTMLInputElement>,
-  setFile: (file: File) => void,
-  setPreview: (url: string) => void,
-) => {
-  const file = event.target.files?.[0];
-  if (!file) return;
-  setFile(file);
-  setPreview(URL.createObjectURL(file));
-};
-
-const toggleItem = (items: string[], id: string) =>
-  items.includes(id) ? items.filter((item) => item !== id) : [...items, id];

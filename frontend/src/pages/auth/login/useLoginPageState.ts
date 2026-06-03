@@ -1,5 +1,6 @@
 import { useCallback, useState } from "react";
 import { useForm } from "react-hook-form";
+import axios from "axios";
 import { useGoogleLogin } from "@react-oauth/google";
 import { useLocation, useNavigate } from "react-router-dom";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -114,10 +115,15 @@ const handleGoogleSuccess = async (
   setError: SetLoginError,
 ) => {
   try {
-    const result = await authService.googleLogin({ accessToken, role });
+    const result = await authService.googleLogin({ accessToken, role, mode: "login" });
     await acceptGoogleResult(result.user, acceptLogin, setUser, navigate);
-  } catch {
-    showGoogleLoginError(setError);
+  } catch (err) {
+    if (axios.isAxiosError(err) && err.response?.status === 404) {
+      toast.error("Akun Google belum terdaftar. Silakan registrasi terlebih dahulu.");
+      navigate("/auth/register");
+    } else {
+      showGoogleLoginError(setError);
+    }
   }
 };
 
