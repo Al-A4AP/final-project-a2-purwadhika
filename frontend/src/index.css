@@ -1,28 +1,50 @@
 @import "tailwindcss";
 
-@theme {
-  /* Quiet Luxury Backgrounds (Alabaster / Off-White) */
-  --color-white: #FDFBF7;
-  --color-slate-50: #F3F0EB;
-  
-  /* Muted Taupe / Charcoal for Dark Mode */
-  --color-slate-800: #3C3A38;
-  --color-slate-900: #2E2C29;
-  --color-slate-950: #1C1A18;
+@font-face {
+  font-family: 'Geomanist';
+  src: url('/fonts/Geomanist-Complete-Desktop/Geomanist-Regular.otf') format('opentype');
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+@font-face {
+  font-family: 'Geomanist';
+  src: url('/fonts/Geomanist-Complete-Desktop/Geomanist-Medium.otf') format('opentype');
+  font-weight: 500;
+  font-style: normal;
+  font-display: swap;
+}
+@font-face {
+  font-family: 'Geomanist';
+  src: url('/fonts/Geomanist-Complete-Desktop/Geomanist-Bold.otf') format('opentype');
+  font-weight: 700;
+  font-style: normal;
+  font-display: swap;
+}
 
-  /* Sage Green Accents (Replacing Red for Buttons) */
-  --color-red-500: #A3B19B;
-  --color-red-600: #8A9A86;
-  --color-red-700: #6D7D69;
+@theme {
+  /* Deep Slate Backgrounds (Light Mode) */
+  --color-white: #FFFFFF;
+  --color-slate-50: #F8FAFC;
   
-  /* Pale Gold / Muted Terracotta Accents (Replacing Rose for Logo PURWA) */
-  --color-rose-500: #C4A786;
-  --color-rose-600: #B69B7D;
-  --color-rose-700: #9B8266;
+  /* Deep Slate Backgrounds (Dark Mode) */
+  --color-slate-800: #1E293B;
+  --color-slate-900: #0F172A;
+  --color-slate-950: #020617;
+
+  /* Azure Allure Palette (Primary - replacing red) */
+  --color-red-500: #85C1E9;
+  --color-red-600: #2980B9;
+  --color-red-700: #1A5276;
+  
+  /* Azure Allure Palette (Accent - replacing rose) */
+  --color-rose-500: #F7DC6F;
+  --color-rose-600: #D4AC0D;
+  --color-rose-700: #B28F0B;
 
   /* Typography */
-  --font-sans: 'Lato', system-ui, sans-serif;
-  --font-serif: 'Cormorant Garamond', serif;
+  --font-sans: 'Geomanist', system-ui, sans-serif;
+  --font-serif: 'Geomanist', serif;
 }
 
 @layer base {
@@ -61,8 +83,8 @@
 }
 
 body {
-  @apply bg-gray-50 text-gray-900 dark:bg-slate-900 dark:text-gray-100 antialiased;
-  font-family: 'Inter', system-ui, -apple-system, sans-serif;
+  @apply bg-slate-50 text-slate-900 dark:bg-slate-900 dark:text-slate-100 antialiased;
+  font-family: var(--font-sans);
 }
 
 #root {
