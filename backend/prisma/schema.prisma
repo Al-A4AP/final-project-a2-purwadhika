@@ -28,6 +28,7 @@ model User {
   tenantProperties          Property[]          @relation("TenantProperties")
   reviewReplies             ReviewReply[]
   reviews                   Review[]
+  propertyCategories        PropertyCategory[]  @relation("TenantCategories")
 
   @@map("users")
 }
@@ -63,10 +64,13 @@ model PasswordReset {
 
 model PropertyCategory {
   id         String     @id @default(cuid())
-  name       String     @unique
+  name       String
+  tenantId   String?
+  tenant     User?      @relation("TenantCategories", fields: [tenantId], references: [id])
   updated_at DateTime   @default(now()) @updatedAt
   properties Property[]
 
+  @@unique([tenantId, name])
   @@map("property_categories")
 }
 

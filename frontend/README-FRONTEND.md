@@ -74,8 +74,6 @@ Public dan user:
 Auth:
 
 - `/auth/login`
-- `/auth/login/user`
-- `/auth/login/tenant`
 - `/auth/register`
 - `/auth/register/user`
 - `/auth/register/tenant`
@@ -101,28 +99,28 @@ Routing utama ada di `src/router/index.tsx` dan proteksi role ada di
 
 ## Fitur 1 di Frontend
 
-| Requirement | Status | Folder/file |
-| --- | --- | --- |
-| Homepage dan landing content | Selesai | `src/pages/user/HomePage.tsx`, `src/components/user/HeroSection.tsx` |
-| Search properti | Selesai | `src/components/user/SearchForm.tsx`, `src/components/user/propertyFilterDropdown/`, `src/stores/filterStore.ts` |
+| Requirement                          | Status  | Folder/file                                                                                                                                   |
+| ------------------------------------ | ------- | --------------------------------------------------------------------------------------------------------------------------------------------- |
+| Homepage dan landing content         | Selesai | `src/pages/user/HomePage.tsx`, `src/components/user/HeroSection.tsx`                                                                          |
+| Search properti                      | Selesai | `src/components/user/SearchForm.tsx`, `src/components/user/propertyFilterDropdown/`, `src/stores/filterStore.ts`                              |
 | Filter harga minimal 0 dan fasilitas | Selesai | `src/stores/filterStore.ts`, `src/components/user/PropertyFilterModal.tsx`, `src/components/user/propertyFilterDropdown/PriceRangeFields.tsx` |
-| Property list default terbaru | Selesai | `src/pages/user/HomePage.tsx` |
-| Property detail, fasilitas, review | Selesai | `src/pages/user/PropertyDetailPage.tsx`, `src/components/property/` |
-| Auth dan profile | Selesai | `src/pages/auth/`, `src/pages/user/ProfilePage.tsx`, `src/components/user/profile/`, `src/stores/authStore.ts` |
-| Tenant property dan room management | Selesai | `src/pages/tenant/PropertiesListPage.tsx`, `src/pages/tenant/PropertyFormPage.tsx`, `src/pages/tenant/RoomsPage.tsx` |
-| Tenant category management | Selesai | `src/pages/tenant/CategoriesPage.tsx`, `src/components/tenant/category/`, `src/components/layout/tenantNavigation.ts` |
+| Property list default terbaru        | Selesai | `src/pages/user/HomePage.tsx`                                                                                                                 |
+| Property detail, fasilitas, review   | Selesai | `src/pages/user/PropertyDetailPage.tsx`, `src/components/property/`                                                                           |
+| Auth dan profile                     | Selesai | `src/pages/auth/`, `src/pages/user/ProfilePage.tsx`, `src/components/user/profile/`, `src/stores/authStore.ts`                                |
+| Tenant property dan room management  | Selesai | `src/pages/tenant/PropertiesListPage.tsx`, `src/pages/tenant/PropertyFormPage.tsx`, `src/pages/tenant/RoomsPage.tsx`                          |
+| Tenant category management           | Selesai | `src/pages/tenant/CategoriesPage.tsx`, `src/components/tenant/category/`, `src/components/layout/tenantNavigation.ts`                         |
 
 ## Fitur 2 di Frontend
 
-| Requirement | Status | Folder/file |
-| --- | --- | --- |
-| Booking user | Selesai | `src/pages/user/BookingPage.tsx`, `src/components/user/BookingSummary.tsx` |
-| Payment manual dan Midtrans | Selesai dengan catatan | `src/components/user/PaymentMethodSelector.tsx`, `src/services/orderService.ts`; perlu E2E test Midtrans. |
-| Riwayat order user | Selesai | `src/pages/user/OrdersPage.tsx`, `src/components/user/OrderCard.tsx` |
-| Review user | Selesai | `src/components/user/ReviewModal.tsx`, `src/services/reviewService.ts` |
-| Tenant order management | Selesai | `src/pages/tenant/OrdersPage.tsx`, `src/components/tenant/OrdersTable.tsx`, `src/components/tenant/OrderMobileCard.tsx` |
-| Tenant review reply | Selesai | `src/pages/tenant/ReviewsPage.tsx` |
-| Tenant report dan analytics | Selesai | `src/pages/tenant/ReportsPage.tsx`, `src/pages/tenant/DashboardPage.tsx`, `src/components/tenant/OrderStatusPieChart.tsx`, `src/components/tenant/OccupancyCalendar.tsx` |
+| Requirement                 | Status                 | Folder/file                                                                                                                                                              |
+| --------------------------- | ---------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| Booking user                | Selesai                | `src/pages/user/BookingPage.tsx`, `src/components/user/BookingSummary.tsx`                                                                                               |
+| Payment manual dan Midtrans | Selesai dengan catatan | `src/components/user/PaymentMethodSelector.tsx`, `src/services/orderService.ts`; perlu E2E test Midtrans.                                                                |
+| Riwayat order user          | Selesai                | `src/pages/user/OrdersPage.tsx`, `src/components/user/OrderCard.tsx`                                                                                                     |
+| Review user                 | Selesai                | `src/components/user/ReviewModal.tsx`, `src/services/reviewService.ts`                                                                                                   |
+| Tenant order management     | Selesai                | `src/pages/tenant/OrdersPage.tsx`, `src/components/tenant/OrdersTable.tsx`, `src/components/tenant/OrderMobileCard.tsx`                                                  |
+| Tenant review reply         | Selesai                | `src/pages/tenant/ReviewsPage.tsx`                                                                                                                                       |
+| Tenant report dan analytics | Selesai                | `src/pages/tenant/ReportsPage.tsx`, `src/pages/tenant/DashboardPage.tsx`, `src/components/tenant/OrderStatusPieChart.tsx`, `src/components/tenant/OccupancyCalendar.tsx` |
 
 ## Services
 
@@ -174,7 +172,7 @@ Default local frontend: `http://localhost:5173`.
 
 Audit Final dilakukan pada 03 Juni 2026 pukul 21:30 WIB.
 
-- Identitas Visual (UI/UX) telah sepenuhnya menggunakan Tema *Deep Slate*, Palet *Azure Allure*, dan Tipografi lokal *Geomanist*.
+- Identitas Visual (UI/UX) telah sepenuhnya menggunakan Tema _Deep Slate_, Palet _Azure Allure_, dan Tipografi lokal _Geomanist_.
 - Keamanan Lingkungan (ENV) telah diverifikasi; tidak ada _secrets_ sensitif backend yang terekspos di client-side.
 - Input komponen `CustomDatePickerPopup.tsx` diimplementasikan secara terpusat untuk menjamin konsistensi UI kalender di seluruh aplikasi.
 

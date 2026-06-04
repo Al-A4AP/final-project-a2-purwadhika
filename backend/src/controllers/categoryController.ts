@@ -21,7 +21,11 @@ const handleError = (res: Response, err: unknown) =>
 
 export const getCategoriesCtrl = async (req: Request, res: Response) => {
   try {
-    const data = await svc.listCategories(categoryQuerySchema.parse(req.query));
+    const tenantId = req.user!.id as string;
+    const data = await svc.listCategories(
+      tenantId,
+      categoryQuerySchema.parse(req.query),
+    );
     return sendSuccess(res, data, "Kategori berhasil diambil");
   } catch (err: unknown) {
     return handleError(res, err);
@@ -30,7 +34,11 @@ export const getCategoriesCtrl = async (req: Request, res: Response) => {
 
 export const createCategoryCtrl = async (req: Request, res: Response) => {
   try {
-    const data = await svc.createCategory(categorySchema.parse(req.body));
+    const tenantId = req.user!.id as string;
+    const data = await svc.createCategory(
+      tenantId,
+      categorySchema.parse(req.body),
+    );
     return sendSuccess(res, data, "Kategori berhasil dibuat", 201);
   } catch (err: unknown) {
     return handleError(res, err);
@@ -39,8 +47,10 @@ export const createCategoryCtrl = async (req: Request, res: Response) => {
 
 export const updateCategoryCtrl = async (req: Request, res: Response) => {
   try {
+    const tenantId = req.user!.id as string;
     const data = await svc.updateCategory(
       String(req.params.id),
+      tenantId,
       categorySchema.parse(req.body),
     );
     return sendSuccess(res, data, "Kategori berhasil diperbarui");
@@ -51,7 +61,8 @@ export const updateCategoryCtrl = async (req: Request, res: Response) => {
 
 export const deleteCategoryCtrl = async (req: Request, res: Response) => {
   try {
-    await svc.deleteCategory(String(req.params.id));
+    const tenantId = req.user!.id as string;
+    await svc.deleteCategory(String(req.params.id), tenantId);
     return sendSuccess(res, null, "Kategori berhasil dihapus");
   } catch (err: unknown) {
     return handleError(res, err);
