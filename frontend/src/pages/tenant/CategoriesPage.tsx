@@ -4,7 +4,6 @@ import { toast } from 'react-hot-toast';
 import { ConfirmModal } from '@/components/common/ConfirmModal';
 import { ErrorState } from '@/components/common/ErrorState';
 import { Pagination } from '@/components/common/Pagination';
-import SortFilterBar, { type SortGroup } from '@/components/common/SortFilterBar';
 import { useTenantCategories } from '@/hooks/useTenantCategories';
 import { isDefaultCategoryName } from '@/lib/defaultCategories';
 import type { PropertyCategory } from '@/types';
@@ -12,7 +11,6 @@ import { CategoriesHeader } from './categories/CategoriesHeader';
 import { CategoriesSummary } from './categories/CategoriesSummary';
 import { CategoryListView } from './categories/CategoryListView';
 import { CategoryFormModal } from './categories/CategoryFormModal';
-import { Search } from 'lucide-react';
 
 type CategoryData = ReturnType<typeof useTenantCategories>;
 
@@ -30,11 +28,6 @@ interface CategoryViewState {
   closeModal: () => void;
   resetTargetDelete: () => void;
 }
-
-const sortGroups: SortGroup[] = [
-  { key: 'name', label: 'Nama', icon: 'alpha', options: [{ order: 'asc', label: 'A-Z' }, { order: 'desc', label: 'Z-A' }] },
-  { key: 'updated_at', label: 'Update', icon: 'clock', options: [{ order: 'desc', label: 'Terbaru' }, { order: 'asc', label: 'Terlama' }] },
-];
 
 const CategoriesPage: FC = () => {
   const view = useCategoryViewState();
@@ -87,8 +80,6 @@ const CategoryPageView: FC<{ view: CategoryViewState }> = ({ view }) => (
       <CategoriesHeader onAdd={view.openAddModal} />
       <CategoriesSummary total={view.data.pagination.total || 0} />
       
-      <CategoryToolbar view={view} />
-      
       <div className="mt-6">
         <CategoryResults view={view} />
       </div>
@@ -106,41 +97,6 @@ const CategoryPageView: FC<{ view: CategoryViewState }> = ({ view }) => (
       />
       <CategoryDeleteModal view={view} />
     </div>
-  </div>
-);
-
-const CategoryToolbar: FC<{ view: CategoryViewState }> = ({ view }) => (
-  <div className="flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
-    <CategorySearch data={view.data} />
-    <SortFilterBar 
-      sortGroups={sortGroups} 
-      currentSort={view.data.sortBy} 
-      currentOrder={view.data.sortOrder} 
-      onChange={(sort, order) => view.data.changeSort(sort as 'name' | 'updated_at', order)} 
-      resultCount={view.data.pagination.total} 
-      resultLabel="kategori" 
-    />
-  </div>
-);
-
-const CategorySearch: FC<{ data: CategoryData }> = ({ data }) => (
-  <div className="flex w-full md:w-96 gap-2">
-    <div className="relative flex-1">
-      <Search className="absolute left-3 top-1/2 h-5 w-5 -translate-y-1/2 text-slate-400" />
-      <input 
-        value={data.searchInput} 
-        onChange={(event) => data.setSearchInput(event.target.value)} 
-        onKeyDown={(event) => { if (event.key === 'Enter') data.applySearch(); }} 
-        placeholder="Cari kategori..." 
-        className="w-full rounded-xl border border-slate-200 bg-white py-2.5 pl-10 pr-4 text-sm outline-none transition focus:border-slate-400 focus:ring-1 focus:ring-slate-400 dark:border-slate-700 dark:bg-slate-800 dark:text-white dark:focus:border-slate-500" 
-      />
-    </div>
-    <button 
-      onClick={data.applySearch} 
-      className="rounded-xl bg-slate-900 px-5 py-2.5 text-sm font-semibold text-white transition hover:bg-slate-800 dark:bg-slate-700 dark:hover:bg-slate-600"
-    >
-      Cari
-    </button>
   </div>
 );
 

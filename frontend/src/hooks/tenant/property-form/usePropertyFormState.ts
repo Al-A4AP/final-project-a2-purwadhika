@@ -99,6 +99,7 @@ const applyLoadedProperty = (property: Awaited<ReturnType<typeof tenantService.g
 };
 
 const submitPropertyForm = async (data: PropertyFormInput, options: SubmitPropertyOptions) => {
+  if (!hasRequiredMainImage(options)) return;
   try {
     const formData = buildPropertyFormData(data, options.amenity.selectedAmenities, options.file);
     await saveProperty(options, formData);
@@ -106,6 +107,12 @@ const submitPropertyForm = async (data: PropertyFormInput, options: SubmitProper
   } catch (err) {
     toast.error(getApiErrorMessage(err, "Properti gagal disimpan"));
   }
+};
+
+const hasRequiredMainImage = (options: SubmitPropertyOptions) => {
+  if (options.isEdit || options.file) return true;
+  toast.error("Foto utama wajib diunggah. Pilih minimal satu foto properti sebelum menyimpan.");
+  return false;
 };
 
 const saveProperty = (options: SubmitPropertyOptions, formData: FormData) =>

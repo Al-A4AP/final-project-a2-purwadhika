@@ -1,7 +1,7 @@
 import type { Prisma, Property } from '@prisma/client';
 import type { GetTenantPropertiesOptions, NormalizedTenantPropertyOptions, PropertyFormData } from './tenantPropertyTypes';
 
-const sortableColumns = new Set(['created_at', 'name', 'city', 'updated_at']);
+const sortableColumns = new Set(['created_at', 'name', 'city', 'updated_at', 'min_price']);
 
 export const normalizePropertyOptions = (options: GetTenantPropertiesOptions = {}): NormalizedTenantPropertyOptions => ({
   search: options.search,

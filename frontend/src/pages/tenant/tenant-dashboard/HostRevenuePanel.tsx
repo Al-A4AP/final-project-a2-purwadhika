@@ -39,7 +39,7 @@ export const HostRevenuePanel: FC<HostRevenuePanelProps> = ({ revenuePeriod, set
         <div className="text-center">
           <BarChart3 size={32} className="mx-auto mb-3 text-slate-400 dark:text-slate-500" />
           <p className="text-sm font-medium text-slate-500 dark:text-slate-400">Grafik pendapatan belum tersedia.</p>
-          <p className="mt-1 text-xs text-slate-400 dark:text-slate-500">Lihat laporan Laporan Penjualan untuk detail lengkap.</p>
+          <p className="mt-1 text-xs text-slate-400 dark:text-slate-500">Lihat Laporan Penjualan untuk detail lengkap.</p>
         </div>
       </div>
     </div>

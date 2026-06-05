@@ -55,4 +55,3 @@ export const ReportsPage = Loadable(lazy(() => import("@/pages/tenant/ReportsPag
 export const PropertyReportPage = Loadable(lazy(() => import("@/pages/tenant/PropertyReportPage")), "tenant");
 export const OccupancyPage = Loadable(lazy(() => import("@/pages/tenant/OccupancyPage")), "tenant");
 export const PeakSeasonPage = Loadable(lazy(() => import("@/pages/tenant/PeakSeasonPage")), "tenant");
-export const PaymentConfirmationPage = Loadable(lazy(() => import("@/pages/tenant/PaymentConfirmationPage")), "tenant");

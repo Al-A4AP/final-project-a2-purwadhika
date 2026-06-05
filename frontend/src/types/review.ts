@@ -20,3 +20,15 @@ export interface ReviewReply {
   reply_text: string;
   created_at: string;
 }
+
+export interface ReviewRatingSummaryItem {
+  averageRating: number;
+  id: string;
+  name: string;
+  totalReviews: number;
+}
+
+export interface TenantReviewSummary {
+  byCategory: ReviewRatingSummaryItem[];
+  byProperty: ReviewRatingSummaryItem[];
+}

@@ -1,6 +1,5 @@
 import type { FC } from "react";
-import { Link } from "react-router-dom";
-import { CalendarDays, BarChart3, Building2, BedDouble, BookOpen } from "lucide-react";
+import { Building2, BedDouble, BookOpen } from "lucide-react";
 import type { OccupancyProperty } from "@/services/tenantReportService";
 import { getTotals } from "./propertyReportUtils";
 
@@ -30,24 +29,4 @@ const SummaryCard: FC<{ icon: React.ReactNode; colorClass: string; label: string
       </div>
     </div>
   </div>
-);
-
-export const PropertyReportShortcuts: FC = () => (
-  <div className="rounded-2xl border border-slate-100 bg-white p-6 shadow-sm dark:border-slate-800 dark:bg-slate-900">
-    <h2 className="mb-5 text-lg font-bold text-slate-900 dark:text-white">Navigasi Cepat</h2>
-    <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-5">
-      <ShortcutLink to="/tenant/occupancy" icon={<CalendarDays size={18} />} label="Ketersediaan" />
-      <ShortcutLink to="/tenant/rooms" icon={<BedDouble size={18} />} label="Kamar" />
-      <ShortcutLink to="/tenant/properties" icon={<Building2 size={18} />} label="Properti" />
-      <ShortcutLink to="/tenant/peak-season" icon={<BookOpen size={18} />} label="Harga Khusus" />
-      <ShortcutLink to="/tenant/reports" icon={<BarChart3 size={18} />} label="Laporan Penjualan" />
-    </div>
-  </div>
-);
-
-const ShortcutLink: FC<{ to: string; icon: React.ReactNode; label: string }> = ({ to, icon, label }) => (
-  <Link to={to} className="flex flex-col items-center gap-2 rounded-xl border border-slate-100 p-4 text-center text-sm font-semibold text-slate-700 transition hover:border-slate-900 hover:bg-slate-900 hover:text-white dark:border-slate-800 dark:text-slate-300 dark:hover:border-white dark:hover:bg-white dark:hover:text-slate-900">
-    {icon}
-    {label}
-  </Link>
 );

@@ -1,5 +1,5 @@
 import type { Dispatch, FC, SetStateAction } from 'react';
-import { formatPrice } from '@/lib/formatters';
+import { formatCurrencyInputValue, readCurrencyInputValue } from '@/lib/currencyInput';
 import type { PriceDraft } from './types';
 
 interface PriceRangeFieldsProps {
@@ -9,26 +9,19 @@ interface PriceRangeFieldsProps {
   setMaxPrice: Dispatch<SetStateAction<PriceDraft>>;
 }
 
-const readPrice = (value: string): PriceDraft => (value === '' ? '' : Math.max(0, Number(value)));
-
-const PriceInput: FC<{ placeholder: string; value: PriceDraft; onChange: (value: PriceDraft) => void }> = ({ placeholder, value, onChange }) => {
-  const numericVal = Number(value);
-  const showPreview = value !== '' && !isNaN(numericVal) && numericVal > 0;
-
-  return (
-    <div className="flex-1">
-      <div className="relative">
-        <span className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 text-xs font-medium">Rp</span>
-        <input type="number" min="0" step="50000" placeholder={placeholder} value={value} onChange={(event) => onChange(readPrice(event.target.value))} className="w-full pl-8 pr-3 py-2 border border-slate-100 dark:border-slate-800 rounded-xl bg-slate-50 dark:bg-slate-950 text-xs focus:outline-none focus:ring-1 focus:ring-rose-500 dark:text-white" />
-      </div>
-      {showPreview && (
-        <p className="mt-1 text-[10px] text-slate-500 dark:text-slate-400 text-center font-medium">
-          {formatPrice(numericVal)}
-        </p>
-      )}
-    </div>
-  );
+const readPrice = (value: string): PriceDraft => {
+  const digits = readCurrencyInputValue(value);
+  return digits === '' ? '' : Math.max(0, Number(digits));
 };
+
+const PriceInput: FC<{ placeholder: string; value: PriceDraft; onChange: (value: PriceDraft) => void }> = ({ placeholder, value, onChange }) => (
+  <div className="flex-1">
+    <div className="relative">
+      <span className="absolute left-3 top-1/2 -translate-y-1/2 text-xs font-medium text-slate-400">Rp</span>
+      <input type="text" inputMode="numeric" placeholder={placeholder} value={formatCurrencyInputValue(value)} onChange={(event) => onChange(readPrice(event.target.value))} className="w-full rounded-xl border border-slate-100 bg-slate-50 py-2 pl-8 pr-3 text-xs focus:outline-none focus:ring-1 focus:ring-rose-500 dark:border-slate-800 dark:bg-slate-950 dark:text-white" />
+    </div>
+  </div>
+);
 
 export const PriceRangeFields: FC<PriceRangeFieldsProps> = ({ minPrice, maxPrice, setMinPrice, setMaxPrice }) => (
   <section>

@@ -122,7 +122,7 @@ export const tenantDashboardQuerySchema = z.object({
 export const tenantPropertyQuerySchema = z.object({
   search: optionalString(),
   categoryId: optionalString(),
-  sortBy: optionalEnum(['created_at', 'name', 'city', 'updated_at'] as const),
+  sortBy: optionalEnum(['created_at', 'name', 'city', 'updated_at', 'min_price'] as const),
   sortOrder: optionalEnum(orderDirections),
   page: optionalPositiveInt(100),
   limit: optionalPositiveInt(100),

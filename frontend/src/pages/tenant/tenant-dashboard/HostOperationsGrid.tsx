@@ -7,7 +7,6 @@ import {
   CalendarCheck, 
   CalendarRange, 
   Receipt, 
-  BadgeCheck, 
   BarChart, 
   FilePieChart, 
   Star 
@@ -20,7 +19,6 @@ const operations = [
   { title: "Ketersediaan", desc: "Atur ketersediaan", icon: CalendarCheck, href: "/tenant/occupancy", color: "text-emerald-500", bg: "bg-emerald-50 dark:bg-emerald-500/10" },
   { title: "Peak Season", desc: "Atur harga khusus", icon: CalendarRange, href: "/tenant/peak-season", color: "text-amber-500", bg: "bg-amber-50 dark:bg-amber-500/10" },
   { title: "Reservasi", desc: "Semua pesanan", icon: Receipt, href: "/tenant/orders", color: "text-cyan-500", bg: "bg-cyan-50 dark:bg-cyan-500/10" },
-  { title: "Konfirmasi", desc: "Bukti bayar manual", icon: BadgeCheck, href: "/tenant/payment-confirmation", color: "text-violet-500", bg: "bg-violet-50 dark:bg-violet-500/10" },
   { title: "Lap. Penjualan", desc: "Performa pendapatan", icon: BarChart, href: "/tenant/reports", color: "text-green-500", bg: "bg-green-50 dark:bg-green-500/10" },
   { title: "Lap. Properti", desc: "Statistik properti", icon: FilePieChart, href: "/tenant/property-report", color: "text-orange-500", bg: "bg-orange-50 dark:bg-orange-500/10" },
   { title: "Ulasan", desc: "Feedback tamu", icon: Star, href: "/tenant/reviews", color: "text-yellow-500", bg: "bg-yellow-50 dark:bg-yellow-500/10" },

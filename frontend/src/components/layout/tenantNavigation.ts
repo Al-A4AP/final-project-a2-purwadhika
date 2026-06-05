@@ -1,4 +1,4 @@
-import { BarChart2, Building2, CalendarDays, Home, LayoutDashboard, MessageSquare, ShoppingBag, Tags, CalendarClock, CreditCard, LineChart } from 'lucide-react';
+import { BarChart2, Building2, CalendarDays, Home, LayoutDashboard, MessageSquare, ShoppingBag, Tags, CalendarClock, LineChart } from 'lucide-react';
 
 export const TENANT_NAV = [
   { to: '/', icon: Home, label: 'Home' },
@@ -8,7 +8,6 @@ export const TENANT_NAV = [
   { to: '/tenant/occupancy', icon: CalendarDays, label: 'Ketersediaan Kamar' },
   { to: '/tenant/peak-season', icon: CalendarClock, label: 'Harga Musiman' },
   { to: '/tenant/orders', icon: ShoppingBag, label: 'Reservasi' },
-  { to: '/tenant/payment-confirmation', icon: CreditCard, label: 'Konfirmasi Pembayaran' },
   { to: '/tenant/reports', icon: BarChart2, label: 'Laporan Penjualan' },
   { to: '/tenant/property-report', icon: LineChart, label: 'Laporan Properti' },
   { to: '/tenant/reviews', icon: MessageSquare, label: 'Ulasan Tamu' },

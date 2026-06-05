@@ -7,7 +7,6 @@ import type { RoomWithPeakRates } from "@/types";
 interface RoomsListSectionProps {
   handleEdit: (room: RoomWithPeakRates) => void;
   handleOpenAvailModal: (id: string) => void;
-  handleOpenPeakModal: (id: string) => void;
   isWholeUnit: boolean;
   loading: boolean;
   onDelete: (id: string) => void;

@@ -4,17 +4,11 @@ import { getApiErrorMessage } from '@/lib/errorMessage';
 import { tenantService } from '@/services/tenantService';
 import type { PaginationMeta, PropertyCategory } from '@/types';
 
-type SortBy = 'name' | 'updated_at';
-type SortOrder = 'asc' | 'desc';
 type Patch = Partial<CategoryState>;
 
 interface CategoryState {
   categories: PropertyCategory[];
   pagination: PaginationMeta;
-  searchInput: string;
-  search: string;
-  sortBy: SortBy;
-  sortOrder: SortOrder;
   error: string | null;
   loading: boolean;
   saving: boolean;
@@ -24,10 +18,6 @@ interface CategoryState {
 const initialState: CategoryState = {
   categories: [],
   pagination: { page: 1, limit: 10, total: 0, totalPages: 1 },
-  searchInput: '',
-  search: '',
-  sortBy: 'name',
-  sortOrder: 'asc',
   error: null,
   loading: true,
   saving: false,
@@ -41,15 +31,15 @@ const persistCategory = async (name: string, editing?: PropertyCategory | null) 
   return tenantService.createCategory(name);
 };
 
-const useCategoryLoad = (state: CategoryState, dispatch: React.Dispatch<{ patch: Patch }>) => {
+const useCategoryLoad = (dispatch: React.Dispatch<{ patch: Patch }>) => {
   const load = useCallback(async (page = 1) => {
     dispatch({ patch: { error: null, loading: true } });
     try {
-      const data = await tenantService.getCategories({ search: state.search, sortBy: state.sortBy, sortOrder: state.sortOrder, page, limit: 10 });
+      const data = await tenantService.getCategories({ sortBy: 'name', sortOrder: 'asc', page, limit: 10 });
       dispatch({ patch: { categories: data.categories, error: null, pagination: data.pagination } });
     } catch (err) { handleCategoryLoadError(err, dispatch); }
     finally { dispatch({ patch: { loading: false } }); }
-  }, [state.search, state.sortBy, state.sortOrder, dispatch]);
+  }, [dispatch]);
   useEffect(() => { Promise.resolve().then(() => load(1)); }, [load]);
   return load;
 };
@@ -86,16 +76,13 @@ const useCategoryDelete = (state: CategoryState, dispatch: React.Dispatch<{ patc
 );
 
 const useCategoryControls = (state: CategoryState, dispatch: React.Dispatch<{ patch: Patch }>, load: (page?: number) => Promise<void>) => ({
-  setSearchInput: (searchInput: string) => dispatch({ patch: { searchInput } }),
-  applySearch: () => dispatch({ patch: { search: state.searchInput.trim() } }),
-  changeSort: (sortBy: SortBy, sortOrder: SortOrder) => dispatch({ patch: { sortBy, sortOrder } }),
   saveCategory: useCategorySave(state, dispatch, load),
   deleteCategory: useCategoryDelete(state, dispatch, load),
 });
 
 export const useTenantCategories = () => {
   const [state, dispatch] = useReducer(reducer, initialState);
-  const load = useCategoryLoad(state, dispatch);
+  const load = useCategoryLoad(dispatch);
   const controls = useCategoryControls(state, dispatch, load);
   return { ...state, ...controls, load };
 };

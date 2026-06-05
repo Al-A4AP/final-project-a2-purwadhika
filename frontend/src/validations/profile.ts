@@ -6,7 +6,7 @@ export const profileSchema = z.object({
 });
 
 export const emailChangeSchema = z.object({
-  email: z.string().email('Email tidak valid'),
+  email: z.string().trim().min(1, 'Email baru wajib diisi').email('Email tidak valid'),
 });
 
 export const passwordSchema = z.object({

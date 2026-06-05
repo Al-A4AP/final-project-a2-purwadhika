@@ -55,7 +55,6 @@ const RoomsPageLayout: FC<RoomsPageLayoutProps> = ({ deleteActions, handleToggle
           onDelete={deleteActions.handleDelete} 
           handleEdit={state.handleEdit} 
           handleOpenAvailModal={state.handleOpenAvailModal} 
-          handleOpenPeakModal={state.handleOpenPeakModal} 
         />
       </div>
 

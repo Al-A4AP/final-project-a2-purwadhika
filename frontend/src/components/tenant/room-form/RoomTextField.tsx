@@ -2,7 +2,7 @@ import type { FC } from "react";
 import type { RoomFormInput } from "@/types";
 import type { RoomFormFieldName } from "./types";
 import { RoomFieldShell } from "./RoomFieldShell";
-import { formatPrice } from "@/lib/formatters";
+import { formatCurrencyInputValue, readCurrencyInputValue } from "@/lib/currencyInput";
 
 interface RoomTextFieldProps {
   className?: string;
@@ -20,17 +20,22 @@ interface RoomTextFieldProps {
 }
 
 export const RoomTextField: FC<RoomTextFieldProps> = (props) => {
-  const valueAsNumber = Number(props.form[props.name]);
-  const hasValidPrice = props.isPrice && !isNaN(valueAsNumber) && valueAsNumber > 0;
+  const value = String(props.form[props.name] ?? "");
+  const inputValue = props.isPrice ? formatCurrencyInputValue(value) : value;
+  const inputType = props.isPrice ? "text" : props.type || "text";
+  const updateValue = (value: string) =>
+    props.onChange({ ...props.form, [props.name]: props.isPrice ? readCurrencyInputValue(value) : value });
 
   return (
     <RoomFieldShell label={props.label} className={props.className}>
-      <input type={props.type || "text"} min={props.min} step={props.step} value={String(props.form[props.name] ?? "")} onChange={(event) => props.onChange({ ...props.form, [props.name]: event.target.value })} placeholder={props.placeholder} className={props.inputClass} required={props.required} />
-      {hasValidPrice && (
-        <p className="mt-1 text-xs font-medium text-slate-500 dark:text-slate-400">
-          Format: {formatPrice(valueAsNumber)}
-        </p>
-      )}
+      {props.isPrice ? <PriceInput {...props} inputType={inputType} value={inputValue} updateValue={updateValue} /> : <input type={inputType} min={props.min} step={props.step} value={inputValue} onChange={(event) => updateValue(event.target.value)} placeholder={props.placeholder} className={props.inputClass} required={props.required} />}
     </RoomFieldShell>
   );
 };
+
+const PriceInput: FC<RoomTextFieldProps & { inputType: string; value: string; updateValue: (value: string) => void }> = (props) => (
+  <div className="relative">
+    <span className="absolute left-3 top-1/2 -translate-y-1/2 text-xs font-semibold text-slate-400">Rp</span>
+    <input type={props.inputType} inputMode="numeric" min={props.min} step={props.step} value={props.value} onChange={(event) => props.updateValue(event.target.value)} placeholder={props.placeholder} className={`${props.inputClass} pl-10`} required={props.required} />
+  </div>
+);

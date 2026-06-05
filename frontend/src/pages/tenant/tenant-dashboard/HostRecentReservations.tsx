@@ -1,7 +1,7 @@
 import type { FC } from "react";
 import { Link } from "react-router-dom";
 import type { RecentOrder } from "@/types";
-import { formatPrice } from "@/lib/formatters";
+import { formatCurrency } from "@/lib/formatters";
 import { ChevronRight, CalendarDays, User } from "lucide-react";
 
 interface HostRecentReservationsProps {
@@ -59,7 +59,7 @@ export const HostRecentReservations: FC<HostRecentReservationsProps> = ({ orders
             
             <div className="flex items-center justify-between md:justify-end gap-6 md:w-1/3">
               <div className="text-left md:text-right">
-                <div className="text-sm font-bold text-slate-900 dark:text-white">{formatPrice(order.total_price)}</div>
+                <div className="text-sm font-bold text-slate-900 dark:text-white">{formatCurrency(order.total_price)}</div>
                 <div className={`text-xs font-semibold mt-0.5 ${
                   order.status === 'WAITING_PAYMENT' ? 'text-amber-600 dark:text-amber-400' :
                   order.status === 'WAITING_CONFIRMATION' ? 'text-blue-600 dark:text-blue-400' :

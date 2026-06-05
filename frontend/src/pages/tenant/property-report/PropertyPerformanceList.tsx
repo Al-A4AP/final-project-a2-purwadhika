@@ -14,7 +14,7 @@ export const PropertyPerformanceList: FC<PropertyPerformanceListProps> = ({ data
     <div className="flex items-center justify-between border-b border-slate-100 px-6 py-4 dark:border-slate-800">
       <h2 className="text-lg font-bold text-slate-900 dark:text-white">Performa Per Properti</h2>
       <Link to="/tenant/occupancy" className="text-sm font-semibold text-slate-500 transition hover:text-slate-900 dark:hover:text-white">
-        Lihat Kalender →
+        Lihat Ketersediaan Kamar &gt;
       </Link>
     </div>
     <div className="divide-y divide-slate-50 dark:divide-slate-800">

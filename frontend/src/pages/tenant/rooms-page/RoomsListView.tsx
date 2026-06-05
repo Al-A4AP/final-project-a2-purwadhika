@@ -1,12 +1,11 @@
 import type { FC } from "react";
-import { Pencil, Trash2, CalendarDays, TrendingUp, Users, BedDouble } from "lucide-react";
+import { Pencil, Trash2, CalendarDays, Users, BedDouble } from "lucide-react";
 import type { RoomWithPeakRates } from "@/types";
 import { formatPrice } from "@/lib/formatters";
 
 interface RoomsListViewProps {
   handleEdit: (room: RoomWithPeakRates) => void;
   handleOpenAvailModal: (id: string) => void;
-  handleOpenPeakModal: (id: string) => void;
   isWholeUnit: boolean;
   onDelete: (id: string) => void;
   rooms: RoomWithPeakRates[];
@@ -15,7 +14,7 @@ interface RoomsListViewProps {
 const fallbackImage = "https://via.placeholder.com/300x200?text=Room";
 
 export const RoomsListView: FC<RoomsListViewProps> = ({ 
-  handleEdit, handleOpenAvailModal, handleOpenPeakModal, isWholeUnit, onDelete, rooms 
+  handleEdit, handleOpenAvailModal, isWholeUnit, onDelete, rooms 
 }) => {
   return (
     <div className="overflow-hidden rounded-2xl border border-slate-100 bg-white shadow-sm dark:border-slate-800 dark:bg-slate-900">
@@ -54,18 +53,12 @@ export const RoomsListView: FC<RoomsListViewProps> = ({
               </div>
             </div>
             
-            <div className="mt-4 grid grid-cols-2 gap-2">
+            <div className="mt-4">
               <button 
                 onClick={() => handleOpenAvailModal(room.id)}
-                className="flex items-center justify-center gap-2 rounded-xl border border-slate-200 bg-white px-3 py-2 text-xs font-semibold text-slate-600 shadow-sm transition hover:bg-slate-50 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-300 dark:hover:bg-slate-700"
+                className="flex w-full items-center justify-center gap-2 rounded-xl border border-slate-200 bg-white px-3 py-2 text-xs font-semibold text-slate-600 shadow-sm transition hover:bg-slate-50 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-300 dark:hover:bg-slate-700"
               >
                 <CalendarDays size={14} /> Ketersediaan
-              </button>
-              <button 
-                onClick={() => handleOpenPeakModal(room.id)}
-                className="flex items-center justify-center gap-2 rounded-xl border border-slate-200 bg-white px-3 py-2 text-xs font-semibold text-slate-600 shadow-sm transition hover:bg-slate-50 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-300 dark:hover:bg-slate-700"
-              >
-                <TrendingUp size={14} /> Harga Khusus
               </button>
             </div>
           </div>
@@ -131,18 +124,12 @@ export const RoomsListView: FC<RoomsListViewProps> = ({
                       <Trash2 size={14} />
                     </button>
                   </div>
-                  <div className="flex items-center justify-end gap-2">
+                  <div className="flex items-center justify-end">
                     <button
                       onClick={() => handleOpenAvailModal(room.id)}
                       className="flex items-center gap-1.5 rounded-lg border border-slate-200 bg-white px-3 py-1.5 text-xs font-semibold text-slate-600 shadow-sm transition hover:bg-slate-50 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-300 dark:hover:bg-slate-700"
                     >
                       <CalendarDays size={14} /> Ketersediaan
-                    </button>
-                    <button
-                      onClick={() => handleOpenPeakModal(room.id)}
-                      className="flex items-center gap-1.5 rounded-lg border border-slate-200 bg-white px-3 py-1.5 text-xs font-semibold text-slate-600 shadow-sm transition hover:bg-slate-50 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-300 dark:hover:bg-slate-700"
-                    >
-                      <TrendingUp size={14} /> Harga Khusus
                     </button>
                   </div>
                 </td>

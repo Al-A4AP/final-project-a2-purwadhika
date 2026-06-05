@@ -1,6 +1,6 @@
 import type { FC } from "react";
 import type { DashboardStats } from "@/types";
-import { formatPrice } from "@/lib/formatters";
+import { formatCurrency } from "@/lib/formatters";
 import { Building2, BedDouble, Wallet, Clock } from "lucide-react";
 
 interface HostKpiGridProps {
@@ -19,7 +19,7 @@ export const HostKpiGrid: FC<HostKpiGridProps> = ({ stats }) => {
           </div>
           <div>
             <p className="text-sm font-medium text-slate-500 dark:text-slate-400">Total Pendapatan</p>
-            <p className="text-2xl font-bold text-slate-900 dark:text-white">{formatPrice(stats.revenue)}</p>
+            <p className="text-2xl font-bold text-slate-900 dark:text-white">{formatCurrency(stats.revenue)}</p>
           </div>
         </div>
       </div>

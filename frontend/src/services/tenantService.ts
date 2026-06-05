@@ -2,7 +2,7 @@ import { api } from './api';
 import type {
   ApiResponse, DashboardStats, TenantProperty, TenantPropertyDetail,
   RoomWithPeakRates, PeakSeasonRate, RoomFormInput, PaginationMeta, PropertyCategory, DashboardRevenuePeriod,
-  PropertyImage, RoomImage
+  PropertyImage, Review, RoomImage, TenantReviewSummary
 } from '@/types';
 
 const buildUrl = (path: string, params?: Record<string, unknown>) => {
@@ -33,8 +33,8 @@ export const tenantService = {
     const response = await api.get('/tenants/me/reports/occupancy');
     return response.data.data;
   },
-  async getReviews(params?: { page?: number; limit?: number }) {
-    const response = await api.get('/tenants/me/reviews', { params });
+  async getReviews(params?: { page?: number; limit?: number }): Promise<{ pagination: PaginationMeta; reviews: Review[]; summary: TenantReviewSummary }> {
+    const response = await api.get<ApiResponse<{ pagination: PaginationMeta; reviews: Review[]; summary: TenantReviewSummary }>>('/tenants/me/reviews', { params });
     return response.data.data;
   },
   async replyToReview(reviewId: string, reply_text: string) {

@@ -1,5 +1,5 @@
 import type { FC } from "react";
-import { formatPrice } from "@/lib/formatters";
+import { formatCurrency } from "@/lib/formatters";
 import type { Order } from "@/types";
 import { OrderStatusBadge } from "@/components/tenant/OrderStatusBadge";
 
@@ -19,7 +19,7 @@ export const ReportOrderItem: FC<{ order: Order }> = ({ order }) => (
       </div>
     </div>
     <div className="sm:text-right shrink-0">
-      <p className="text-lg font-bold text-slate-900 dark:text-white">{formatPrice(order.total_price)}</p>
+      <p className="text-lg font-bold text-slate-900 dark:text-white">{formatCurrency(order.total_price)}</p>
     </div>
   </div>
 );

@@ -4,6 +4,7 @@ import { Pagination } from "@/components/common/Pagination";
 import { ReviewsHeader } from "./ReviewsHeader";
 import { ReviewsSkeleton } from "./ReviewsSkeleton";
 import { TenantReviewDeleteModal } from "./TenantReviewDeleteModal";
+import { TenantReviewRatingSummary } from "./TenantReviewRatingSummary";
 import { TenantReviewsList } from "./TenantReviewsList";
 import type { TenantReviewsState } from "./tenantReviewsTypes";
 
@@ -18,6 +19,7 @@ export const TenantReviewsContent: FC<{ state: TenantReviewsState }> = ({ state 
   return (
     <ReviewsPageShell>
       <ReviewsHeader />
+      <TenantReviewRatingSummary summary={state.summary} />
       <TenantReviewsList state={state} />
       {state.reviews.length > 0 && (
         <div className="rounded-xl border border-slate-100 bg-white p-4 dark:border-slate-800 dark:bg-slate-900">

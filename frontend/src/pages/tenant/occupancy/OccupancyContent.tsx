@@ -1,10 +1,9 @@
 import type { FC } from "react";
-import { Link } from "react-router-dom";
 import { ErrorState } from "@/components/common/ErrorState";
 import { SectionLoading } from "@/components/common/SectionLoading";
 import { OccupancyCalendar } from "@/components/tenant/OccupancyCalendar";
 import type { OccupancyPageState } from "../../../hooks/tenant/occupancy/useOccupancyPageState";
-import { Building2, Plus, CalendarDays } from "lucide-react";
+import { Building2, CalendarDays } from "lucide-react";
 
 export const OccupancyContent: FC<{ state: OccupancyPageState }> = ({ state }) => (
   <div className="min-h-screen bg-slate-50 px-4 py-8 md:p-10 dark:bg-slate-900 pb-24">
@@ -17,23 +16,6 @@ export const OccupancyContent: FC<{ state: OccupancyPageState }> = ({ state }) =
           <p className="mt-2 text-slate-600 dark:text-slate-400">
             Pantau tanggal kamar yang sudah terisi dan kosong dalam tampilan kalender.
           </p>
-        </div>
-        
-        <div className="flex shrink-0 gap-3">
-          <Link 
-            to="/tenant/properties"
-            className="flex items-center justify-center gap-2 rounded-xl bg-white px-5 py-2.5 text-sm font-semibold text-slate-700 shadow-sm border border-slate-200 transition hover:bg-slate-50 dark:bg-slate-800 dark:text-slate-300 dark:border-slate-700 dark:hover:bg-slate-700"
-          >
-            <Building2 size={16} />
-            Kelola Properti
-          </Link>
-          <Link 
-            to="/tenant/properties"
-            className="flex items-center justify-center gap-2 rounded-xl bg-slate-900 px-5 py-2.5 text-sm font-bold text-white shadow-sm transition hover:bg-slate-800 dark:bg-white dark:text-slate-900 dark:hover:bg-slate-200"
-          >
-            <Plus size={16} />
-            Atur Harga Khusus
-          </Link>
         </div>
       </div>
 
@@ -102,9 +84,6 @@ const renderContent = (state: OccupancyPageState) => {
         <CalendarDays size={48} className="mx-auto mb-4 text-slate-300 dark:text-slate-600" />
         <h3 className="text-lg font-bold text-slate-900 dark:text-white">Tidak ada data properti</h3>
         <p className="mt-2 text-slate-500 dark:text-slate-400">Tambahkan properti dan kamar terlebih dahulu.</p>
-        <Link to="/tenant/properties" className="mt-6 inline-flex items-center justify-center rounded-xl bg-slate-900 px-6 py-2.5 text-sm font-bold text-white transition hover:bg-slate-800 dark:bg-white dark:text-slate-900 dark:hover:bg-slate-200">
-          Kelola Properti
-        </Link>
       </div>
     );
   }

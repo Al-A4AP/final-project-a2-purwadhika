@@ -6,9 +6,15 @@ export const usePropertiesFilters = () => {
   const [sortKey, setSortKey] = useState("created_at");
   const [sortOrder, setSortOrder] = useState<"asc" | "desc">("desc");
   const applySearch = () => setActiveSearch(searchQuery);
+  const resetFilters = () => {
+    setActiveSearch("");
+    setSearchQuery("");
+    setSortKey("created_at");
+    setSortOrder("desc");
+  };
   const setSort = (sort: string, order: "asc" | "desc") => {
     setSortKey(sort);
     setSortOrder(order);
   };
-  return { activeSearch, applySearch, searchQuery, setSearchQuery, setSort, sortKey, sortOrder };
+  return { activeSearch, applySearch, resetFilters, searchQuery, setSearchQuery, setSort, sortKey, sortOrder };
 };

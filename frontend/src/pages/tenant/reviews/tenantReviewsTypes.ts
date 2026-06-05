@@ -1,4 +1,4 @@
-import type { Review, PaginationMeta } from "@/types";
+import type { Review, PaginationMeta, TenantReviewSummary } from "@/types";
 
 export type ReplyTextMap = Record<string, string>;
 export type SubmittingMap = Record<string, boolean>;
@@ -19,4 +19,5 @@ export interface TenantReviewsState {
   reviews: Review[];
   openDeleteReview: (review: Review) => void;
   submitting: SubmittingMap;
+  summary: TenantReviewSummary;
 }
