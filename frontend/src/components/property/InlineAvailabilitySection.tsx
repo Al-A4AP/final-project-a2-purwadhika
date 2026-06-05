@@ -29,7 +29,7 @@ export const InlineAvailabilitySection: FC<InlineAvailabilitySectionProps> = (pr
 
   return (
     <SectionCard id="availability-date-picker-section">
-      <SectionHeader />
+      <SectionHeader room={props.room} />
       {props.room
         ? <>
             <PricingCalendarLegend />
@@ -47,11 +47,14 @@ const SectionCard: FC<{ id: string; children: ReactNode }> = ({ id, children }) 
   </div>
 );
 
-const SectionHeader: FC = () => (
-  <h2 className="text-lg font-semibold text-gray-900 dark:text-white mb-6 flex items-center gap-2">
-    <CalendarDays size={20} className="text-red-600" />
-    Kalender Ketersediaan Kamar
-  </h2>
+const SectionHeader: FC<{ room: Room | null }> = ({ room }) => (
+  <div className="mb-6 flex flex-col gap-1">
+    <h2 className="flex items-center gap-2 text-lg font-semibold text-gray-900 dark:text-white">
+      <CalendarDays size={20} className="text-red-600" />
+      Kalender Ketersediaan Kamar
+    </h2>
+    {room && <p className="text-sm font-medium text-red-600 dark:text-red-400">{room.room_type}</p>}
+  </div>
 );
 
 const NoRoomSelectedPlaceholder: FC = () => (

@@ -1,18 +1,25 @@
 import { useEffect, useMemo, useState } from "react";
 import { useForm, useWatch, type UseFormReturn } from "react-hook-form";
+import { useNavigate, type NavigateFunction } from "react-router-dom";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { formatDateForInput } from "@/lib/formatters";
-import { useFilterStore } from "@/stores/filterStore";
+import { useFilterStore, type FilterValues } from "@/stores/filterStore";
 import { searchFormSchema, type SearchFormInput } from "@/validations/search";
 
 type FilterStoreState = ReturnType<typeof useFilterStore.getState>;
 type SearchFormValues = Partial<Pick<SearchFormInput, "adults" | "babies" | "check_in_date" | "check_out_date" | "children" | "city">>;
+export type SearchSubmitMode = "explore" | "scroll";
+
+interface SearchFormLogicOptions {
+  submitMode?: SearchSubmitMode;
+}
 
 const scrollToResults = () =>
   document.getElementById("results-section")?.scrollIntoView({ behavior: "smooth" });
 
-export const useSearchFormLogic = () => {
+export const useSearchFormLogic = (options: SearchFormLogicOptions = {}) => {
   const filters = useFilterStore();
+  const navigate = useNavigate();
   const [guestOpen, setGuestOpen] = useState(false);
   const form = useSearchFormDefaults(filters);
   useSyncSearchForm(form, filters.activeFilters, filters.appliedAt);
@@ -20,7 +27,7 @@ export const useSearchFormLogic = () => {
   const dates = useSearchDates(checkInVal);
   const guests = useGuestSummary(filters.adults, filters.children, filters.babies);
   const onSubmit = (data: SearchFormInput) =>
-    submitSearch(data, filters, guests.totalGuests, () => setGuestOpen(false));
+    submitSearch(data, { filters, navigate, submitMode: options.submitMode || "scroll", totalGuests: guests.totalGuests }, () => setGuestOpen(false));
 
   return { filters, form, guestOpen, setGuestOpen, dates, guests, onSubmit };
 };
@@ -71,13 +78,17 @@ const useGuestSummary = (adults: number, children: number, babies: number) => {
 
 const submitSearch = (
   data: SearchFormInput,
-  filters: FilterStoreState,
-  totalGuests: number,
+  options: SubmitSearchOptions,
   closeGuests: () => void,
 ) => {
-  applySearchValues(data, filters, totalGuests);
-  filters.applyFilters();
+  applySearchValues(data, options.filters, options.totalGuests);
+  options.filters.applyFilters();
   closeGuests();
+  handleSubmitNavigation(options);
+};
+
+const handleSubmitNavigation = (options: SubmitSearchOptions) => {
+  if (options.submitMode === "explore") return options.navigate(buildExploreUrl(options.filters.getFilterValues()));
   scrollToResults();
 };
 
@@ -90,3 +101,27 @@ const applySearchValues = (data: SearchFormInput, filters: FilterStoreState, tot
   filters.setBabies(filters.babies);
   filters.setCapacity(totalGuests || 1);
 };
+
+const buildExploreUrl = (values: FilterValues) => {
+  const query = new URLSearchParams();
+  appendQuery(query, "city", values.city);
+  appendQuery(query, "check_in_date", values.check_in_date);
+  appendQuery(query, "check_out_date", values.check_out_date);
+  appendQuery(query, "adults", values.adults);
+  appendQuery(query, "children", values.children);
+  appendQuery(query, "babies", values.babies);
+  appendQuery(query, "capacity", values.capacity);
+  return `/explore${query.toString() ? `?${query}` : ""}`;
+};
+
+const appendQuery = (query: URLSearchParams, key: string, value?: number | string) => {
+  if (value === undefined || value === "") return;
+  query.set(key, String(value));
+};
+
+interface SubmitSearchOptions {
+  filters: FilterStoreState;
+  navigate: NavigateFunction;
+  submitMode: SearchSubmitMode;
+  totalGuests: number;
+}

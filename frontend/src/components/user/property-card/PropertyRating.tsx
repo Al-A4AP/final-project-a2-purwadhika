@@ -6,11 +6,12 @@ const RatingStar: FC<{ active: boolean; index: number }> = ({ active, index }) =
 );
 
 export const PropertyRating: FC<{ rating?: number; reviewCount?: number }> = ({ rating, reviewCount }) => {
-  if (rating === undefined) return null;
+  const ratingValue = rating ?? 0;
+  const count = reviewCount ?? 0;
   return (
-    <div className="mb-3 flex items-center text-sm">
-      <div className="flex items-center">{[...Array(5)].map((_, i) => <RatingStar key={i} index={i} active={i < Math.floor(rating || 0)} />)}</div>
-      <span className="ml-2 text-gray-600 dark:text-gray-400">({reviewCount || 0})</span>
+    <div className="mb-3 flex min-h-5 items-center text-sm">
+      <div className="flex items-center">{[...Array(5)].map((_, i) => <RatingStar key={i} index={i} active={i < Math.floor(ratingValue)} />)}</div>
+      <span className="ml-2 text-gray-600 dark:text-gray-400">({count} ulasan)</span>
     </div>
   );
 };

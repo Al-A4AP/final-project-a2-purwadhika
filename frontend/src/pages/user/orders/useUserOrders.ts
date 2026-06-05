@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { getApiErrorMessage } from "@/lib/errorMessage";
 import { orderService } from "@/services/orderService";
+import type { UserOrderParams } from "@/services/orderService";
 import type { Order, PaginationMeta } from "@/types";
 import type { UserOrderFilterActions, UserOrderFilters } from "./userOrdersTypes";
 
@@ -16,12 +17,13 @@ export const useUserOrders = () => {
 };
 
 const useUserOrderFilters = () => {
+  const [checkInDate, setCheckInDate] = useState("");
+  const [checkOutDate, setCheckOutDate] = useState("");
   const [orderNumber, setOrderNumber] = useState("");
   const [status, setStatus] = useState("");
-  const [startDate, setStartDate] = useState("");
-  const [endDate, setEndDate] = useState("");
-  const values = useMemo<UserOrderFilters>(() => ({ endDate, orderNumber, startDate, status }), [endDate, orderNumber, startDate, status]);
-  const actions = useMemo<UserOrderFilterActions>(() => ({ setEndDate, setOrderNumber, setStartDate, setStatus }), []);
+  const resetFilters = useCallback(() => { setCheckInDate(""); setCheckOutDate(""); setOrderNumber(""); setStatus(""); }, []);
+  const values = useMemo<UserOrderFilters>(() => ({ checkInDate, checkOutDate, orderNumber, status }), [checkInDate, checkOutDate, orderNumber, status]);
+  const actions = useMemo<UserOrderFilterActions>(() => ({ resetFilters, setCheckInDate, setCheckOutDate, setOrderNumber, setStatus }), [resetFilters]);
   return { actions, values };
 };
 
@@ -34,8 +36,17 @@ const useFetchUserOrders = (
 ) => useCallback((page = 1) => {
   setLoading(true);
   setError(null);
-  orderService.getUserOrders({ ...filters, page, limit: 10 })
+  orderService.getUserOrders(buildUserOrderParams(filters, page))
     .then((data) => { setOrders(data.orders); setPagination(data.pagination); })
     .catch((err) => { setError(getApiErrorMessage(err, "Pesanan belum bisa dimuat. Periksa koneksi lalu coba lagi.")); setOrders([]); })
     .finally(() => setLoading(false));
 }, [filters, setError, setLoading, setOrders, setPagination]);
+
+const buildUserOrderParams = (filters: UserOrderFilters, page: number): UserOrderParams => ({
+  check_in_date: filters.checkInDate,
+  check_out_date: filters.checkOutDate,
+  limit: 10,
+  orderNumber: filters.orderNumber,
+  page,
+  status: filters.status,
+});

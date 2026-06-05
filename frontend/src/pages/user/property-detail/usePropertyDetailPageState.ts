@@ -40,10 +40,16 @@ const usePropertyDetailAuth = () => {
 
 const useSelectedRoomState = (rooms: Room[]) => {
   const [selectedRoomId, setSelectedRoomId] = useState<string | null>(null);
-  const selectedRoom = rooms.find((r) => r.id === selectedRoomId) ?? null;
+  const selectedRoom = getSelectedRoom(selectedRoomId, rooms);
   const selectRoom = useCallback((roomId: string) => setSelectedRoomId(roomId), []);
   return { selectRoom, selectedRoom };
 };
+
+const getSelectedRoom = (selectedRoomId: string | null, rooms: Room[]) =>
+  rooms.find((room) => room.id === selectedRoomId) ?? getDefaultRoom(rooms);
+
+const getDefaultRoom = (rooms: Room[]) =>
+  rooms.find((room) => room.is_available !== false) || rooms[0] || null;
 
 const usePropertyDetailHandlers = (
   dates: PropertyDatesState,

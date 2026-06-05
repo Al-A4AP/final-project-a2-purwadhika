@@ -1,16 +1,17 @@
 import type { PaginationMeta, Order } from "@/types";
 
 export interface UserOrderFilters {
-  endDate: string;
+  checkInDate: string;
+  checkOutDate: string;
   orderNumber: string;
-  startDate: string;
   status: string;
 }
 
 export interface UserOrderFilterActions {
-  setEndDate: (value: string) => void;
+  resetFilters: () => void;
+  setCheckInDate: (value: string) => void;
+  setCheckOutDate: (value: string) => void;
   setOrderNumber: (value: string) => void;
-  setStartDate: (value: string) => void;
   setStatus: (value: string) => void;
 }
 

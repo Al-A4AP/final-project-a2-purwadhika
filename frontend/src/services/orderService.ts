@@ -17,12 +17,12 @@ export interface CreateOrderPayload {
 }
 
 export interface UserOrderParams {
+  check_in_date?: string;
+  check_out_date?: string;
   orderNumber?: string;
-  status?: string;
-  startDate?: string;
-  endDate?: string;
-  page?: number;
   limit?: number;
+  page?: number;
+  status?: string;
 }
 
 export interface TenantOrderParams {

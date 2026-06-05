@@ -79,10 +79,12 @@ export const reverseGeocodeQuerySchema = z.object({
 });
 
 export const userOrderQuerySchema = z.object({
-  orderNumber: optionalString(),
-  status: optionalOrderStatus(),
-  startDate: optionalDateString(),
+  check_in_date: optionalDateString(),
+  check_out_date: optionalDateString(),
   endDate: optionalDateString(),
+  orderNumber: optionalString(),
+  startDate: optionalDateString(),
+  status: optionalOrderStatus(),
   sortBy: optionalEnum(orderSortFields),
   sortOrder: optionalEnum(orderDirections),
   page: optionalPositiveInt(100),

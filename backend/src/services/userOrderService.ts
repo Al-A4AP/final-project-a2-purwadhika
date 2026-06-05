@@ -2,6 +2,7 @@ import { OrderStatus, type Prisma } from '@prisma/client';
 import prisma from '../config/prisma';
 
 export interface GetUserOrdersOptions {
+  check_in_date?: string; check_out_date?: string;
   orderNumber?: string; status?: string;
   startDate?: string; endDate?: string;
   sortBy?: string; sortOrder?: 'asc' | 'desc';
@@ -46,15 +47,27 @@ const buildUserOrdersWhere = (userId: string, options: GetUserOrdersOptions): Pr
   const where: Prisma.OrderWhereInput = { userId };
   if (options.orderNumber) where.order_number = { contains: options.orderNumber, mode: 'insensitive' };
   if (options.status) where.status = options.status as OrderStatus;
-  if (options.startDate || options.endDate) where.check_in_date = buildDateRange(options);
+  applyStayDateFilters(where, options);
   return where;
 };
 
-const buildDateRange = (options: GetUserOrdersOptions): Prisma.DateTimeFilter => {
-  const range: Prisma.DateTimeFilter = {};
-  if (options.startDate) range.gte = new Date(options.startDate);
-  if (options.endDate) { const end = new Date(options.endDate); end.setHours(23, 59, 59, 999); range.lte = end; }
-  return range;
+const applyStayDateFilters = (where: Prisma.OrderWhereInput, options: GetUserOrdersOptions) => {
+  const checkInDate = options.check_in_date || options.startDate;
+  const checkOutDate = options.check_out_date || options.endDate;
+  if (checkInDate) where.check_in_date = buildSingleDayRange(checkInDate);
+  if (checkOutDate) where.check_out_date = buildSingleDayRange(checkOutDate);
+};
+
+const buildSingleDayRange = (value: string): Prisma.DateTimeFilter =>
+  ({ gte: startOfDay(value), lte: endOfDay(value) });
+
+const startOfDay = (value: string) =>
+  new Date(value);
+
+const endOfDay = (value: string) => {
+  const date = new Date(value);
+  date.setHours(23, 59, 59, 999);
+  return date;
 };
 
 const buildPagination = (page: number, limit: number, total: number) =>
