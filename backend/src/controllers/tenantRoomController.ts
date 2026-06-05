@@ -101,7 +101,7 @@ export const addRoomImageCtrl = async (req: Request, res: Response) => {
   try {
     const { roomId } = req.params as { roomId: string };
     if (!req.file) return sendError(res, 'File gambar wajib diupload', 400);
-    const data = await svc.addRoomImageService(roomId, req.file);
+    const data = await svc.addRoomImageService(roomId, req.user!.id as string, req.file);
     return sendSuccess(res, data, 'Gambar berhasil ditambahkan', 201);
   } catch (err) { return handleControllerError(res, err); }
 };
@@ -109,15 +109,23 @@ export const addRoomImageCtrl = async (req: Request, res: Response) => {
 export const deleteRoomImageCtrl = async (req: Request, res: Response) => {
   try {
     const { roomId, imageId } = req.params as { roomId: string; imageId: string };
-    const data = await svc.removeRoomImage(roomId, imageId);
+    const data = await svc.removeRoomImage(roomId, req.user!.id as string, imageId);
     return sendSuccess(res, data, 'Gambar berhasil dihapus');
+  } catch (err) { return handleControllerError(res, err); }
+};
+
+export const updateRoomImageCtrl = async (req: Request, res: Response) => {
+  try {
+    const { roomId, imageId } = req.params as { roomId: string; imageId: string };
+    const data = await svc.updateRoomImage(roomId, req.user!.id as string, imageId, req.body);
+    return sendSuccess(res, data, 'Gambar berhasil diperbarui');
   } catch (err) { return handleControllerError(res, err); }
 };
 
 export const setRoomMainImageCtrl = async (req: Request, res: Response) => {
   try {
     const { roomId, imageId } = req.params as { roomId: string; imageId: string };
-    const data = await svc.setRoomMainImage(roomId, imageId);
+    const data = await svc.setRoomMainImage(roomId, imageId, req.user!.id as string);
     return sendSuccess(res, data, 'Gambar utama berhasil diubah');
   } catch (err) { return handleControllerError(res, err); }
 };

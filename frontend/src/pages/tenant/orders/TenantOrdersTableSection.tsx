@@ -12,9 +12,11 @@ export const TenantOrdersTableSection: FC<{ state: TenantOrdersState }> = ({ sta
   if (!state.orders.length) return <EmptyOrders />;
   const totalPages = state.pagination.totalPages || state.pagination.pages || 1;
   return (
-    <div className="rounded-xl md:border md:bg-white md:shadow-sm md:dark:border-slate-700 md:dark:bg-slate-800 md:overflow-hidden">
+    <div className="rounded-2xl border border-slate-100 bg-white shadow-sm dark:border-slate-800 dark:bg-slate-900 md:overflow-hidden">
       <OrdersTable orders={state.orders} updating={state.updating} handleUpdateStatus={state.handleUpdateStatus} />
-      <Pagination currentPage={state.pagination.page || 1} totalPages={totalPages} totalItems={state.pagination.total} onPageChange={state.fetchOrders} />
+      <div className="border-t border-slate-100 bg-slate-50/50 p-4 dark:border-slate-800 dark:bg-slate-800/50">
+        <Pagination currentPage={state.pagination.page || 1} totalPages={totalPages} totalItems={state.pagination.total} onPageChange={state.fetchOrders} />
+      </div>
     </div>
   );
 };

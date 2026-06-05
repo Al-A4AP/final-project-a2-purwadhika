@@ -1,0 +1,50 @@
+import type { FC } from "react";
+import { Link } from "react-router-dom";
+import { 
+  Building2, 
+  Tags, 
+  BedDouble, 
+  CalendarCheck, 
+  CalendarRange, 
+  Receipt, 
+  BadgeCheck, 
+  BarChart, 
+  FilePieChart, 
+  Star 
+} from "lucide-react";
+
+const operations = [
+  { title: "Kategori", desc: "Kelola tipe properti", icon: Tags, href: "/tenant/categories", color: "text-rose-500", bg: "bg-rose-50 dark:bg-rose-500/10" },
+  { title: "Properti", desc: "Daftar properti Anda", icon: Building2, href: "/tenant/properties", color: "text-blue-500", bg: "bg-blue-50 dark:bg-blue-500/10" },
+  { title: "Kamar", desc: "Kelola tipe kamar", icon: BedDouble, href: "/tenant/properties", color: "text-indigo-500", bg: "bg-indigo-50 dark:bg-indigo-500/10" },
+  { title: "Ketersediaan", desc: "Atur ketersediaan", icon: CalendarCheck, href: "/tenant/occupancy", color: "text-emerald-500", bg: "bg-emerald-50 dark:bg-emerald-500/10" },
+  { title: "Peak Season", desc: "Atur harga khusus", icon: CalendarRange, href: "/tenant/peak-season", color: "text-amber-500", bg: "bg-amber-50 dark:bg-amber-500/10" },
+  { title: "Reservasi", desc: "Semua pesanan", icon: Receipt, href: "/tenant/orders", color: "text-cyan-500", bg: "bg-cyan-50 dark:bg-cyan-500/10" },
+  { title: "Konfirmasi", desc: "Bukti bayar manual", icon: BadgeCheck, href: "/tenant/payment-confirmation", color: "text-violet-500", bg: "bg-violet-50 dark:bg-violet-500/10" },
+  { title: "Lap. Penjualan", desc: "Performa pendapatan", icon: BarChart, href: "/tenant/reports", color: "text-green-500", bg: "bg-green-50 dark:bg-green-500/10" },
+  { title: "Lap. Properti", desc: "Statistik properti", icon: FilePieChart, href: "/tenant/property-report", color: "text-orange-500", bg: "bg-orange-50 dark:bg-orange-500/10" },
+  { title: "Ulasan", desc: "Feedback tamu", icon: Star, href: "/tenant/reviews", color: "text-yellow-500", bg: "bg-yellow-50 dark:bg-yellow-500/10" },
+];
+
+export const HostOperationsGrid: FC = () => {
+  return (
+    <div className="mb-8">
+      <h2 className="text-xl font-bold text-slate-900 dark:text-white mb-6">Pintasan Operasional</h2>
+      <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5">
+        {operations.map((op, i) => (
+          <Link 
+            key={i} 
+            to={op.href}
+            className="group flex flex-col rounded-2xl border border-slate-100 bg-white p-5 shadow-sm transition hover:-translate-y-1 hover:border-slate-200 hover:shadow-md dark:border-slate-800 dark:bg-slate-900 dark:hover:border-slate-700"
+          >
+            <div className={`mb-4 flex h-10 w-10 items-center justify-center rounded-xl ${op.bg} ${op.color} transition-transform group-hover:scale-110`}>
+              <op.icon size={20} />
+            </div>
+            <h3 className="text-sm font-bold text-slate-900 dark:text-white mb-1">{op.title}</h3>
+            <p className="text-xs text-slate-500 dark:text-slate-400 leading-tight">{op.desc}</p>
+          </Link>
+        ))}
+      </div>
+    </div>
+  );
+};

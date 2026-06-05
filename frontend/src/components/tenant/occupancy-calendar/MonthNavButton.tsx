@@ -5,5 +5,14 @@ export const MonthNavButton: FC<{ direction: "next" | "prev"; onClick: () => voi
   const isPrev = direction === "prev";
   const label = isPrev ? "Bulan sebelumnya" : "Bulan berikutnya";
   const Icon = isPrev ? ChevronLeft : ChevronRight;
-  return <button onClick={onClick} className="flex h-10 w-10 items-center justify-center rounded-lg border transition hover:bg-gray-100 dark:border-slate-600 dark:hover:bg-slate-700" title={label} aria-label={label}><Icon size={18} /></button>;
+  return (
+    <button 
+      onClick={onClick} 
+      className="flex h-10 w-10 items-center justify-center rounded-xl border border-slate-200 text-slate-500 shadow-sm transition hover:bg-slate-50 hover:text-slate-900 dark:border-slate-700 dark:text-slate-400 dark:hover:bg-slate-800 dark:hover:text-white" 
+      title={label} 
+      aria-label={label}
+    >
+      <Icon size={18} />
+    </button>
+  );
 };

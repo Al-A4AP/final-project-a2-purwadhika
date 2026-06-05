@@ -1,7 +1,7 @@
 import type { FC } from "react";
 import { ResetPasswordContent } from "./reset-password/ResetPasswordContent";
 import { ResetPasswordSuccessPanel } from "./reset-password/ResetPasswordSuccessPanel";
-import { useResetPasswordPageState } from "./reset-password/useResetPasswordPageState";
+import { useResetPasswordPageState } from "../../hooks/auth/reset-password/useResetPasswordPageState";
 
 const ResetPasswordPage: FC = () => {
   const state = useResetPasswordPageState();

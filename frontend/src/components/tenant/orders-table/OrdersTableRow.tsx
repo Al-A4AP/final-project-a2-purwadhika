@@ -4,12 +4,14 @@ import { OrdersTableActions } from "./OrdersTableActions";
 import type { OrderRowProps } from "./types";
 
 export const OrdersTableRow: FC<OrderRowProps> = ({ order, updating, handleUpdateStatus }) => (
-  <tr className="border-b bg-white dark:border-slate-700 dark:bg-slate-800">
+  <tr className="bg-white transition hover:bg-slate-50/50 dark:bg-slate-900 dark:hover:bg-slate-800/50">
     <OrderGuestCell order={order} />
     <OrderPropertyCell order={order} />
     <OrderDatesCell order={order} />
     <OrderPaymentCell order={order} />
     <OrderStatusCell order={order} />
-    <td className="px-6 py-4"><OrdersTableActions order={order} updating={updating} handleUpdateStatus={handleUpdateStatus} /></td>
+    <td className="px-6 py-4 whitespace-nowrap">
+      <OrdersTableActions order={order} updating={updating} handleUpdateStatus={handleUpdateStatus} />
+    </td>
   </tr>
 );

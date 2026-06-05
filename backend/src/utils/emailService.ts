@@ -1,21 +1,22 @@
 import nodemailer from 'nodemailer';
+import { env } from '../config/env';
 import { getEmailWrapper } from './emailTemplate';
 
 const transporter = nodemailer.createTransport({
-  host: process.env.EMAIL_HOST,
-  port: Number(process.env.EMAIL_PORT) || 587,
+  host: env.EMAIL_HOST,
+  port: env.EMAIL_PORT,
   secure: false,
-  auth: { user: process.env.EMAIL_USER, pass: process.env.EMAIL_PASSWORD },
+  auth: { user: env.EMAIL_USER, pass: env.EMAIL_PASSWORD },
 });
 
-const FROM = `"PropRent" <${process.env.EMAIL_USER}>`;
+const FROM = `"PropRent" <${env.EMAIL_USER}>`;
 
 const sendMail = async (to: string, subject: string, html: string) => {
   await transporter.sendMail({ from: FROM, to, subject, html });
 };
 
 export const sendVerificationEmail = async (email: string, token: string) => {
-  const url = `${process.env.FRONTEND_URL || 'http://localhost:5173'}/auth/verify-email/${token}`;
+  const url = `${env.FRONTEND_URL}/auth/verify-email/${token}`;
   const html = getEmailWrapper('Verifikasi Email Anda - PropRent', `
     <h2>Verifikasi Email Akun Anda</h2>
     <p>Halo,</p>
@@ -29,7 +30,7 @@ export const sendVerificationEmail = async (email: string, token: string) => {
 };
 
 export const sendEmailChangeVerificationEmail = async (email: string, token: string) => {
-  const url = `${process.env.FRONTEND_URL || 'http://localhost:5173'}/auth/verify-email-change/${token}`;
+  const url = `${env.FRONTEND_URL}/auth/verify-email-change/${token}`;
   const html = getEmailWrapper('Verifikasi Email Baru - PropRent', `
     <h2>Verifikasi Email Baru</h2>
     <p>Halo,</p>
@@ -43,7 +44,7 @@ export const sendEmailChangeVerificationEmail = async (email: string, token: str
 };
 
 export const sendPasswordResetEmail = async (email: string, token: string) => {
-  const url = `${process.env.FRONTEND_URL || 'http://localhost:5173'}/auth/reset-password?token=${token}`;
+  const url = `${env.FRONTEND_URL}/auth/reset-password?token=${token}`;
   const html = getEmailWrapper('Reset Password Anda - PropRent', `
     <h2>Permintaan Reset Password</h2>
     <p>Halo,</p>

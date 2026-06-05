@@ -14,3 +14,7 @@ export const createOrderSchema = z.object({
 export const updateOrderStatusSchema = z.object({
   status: z.enum(['PROCESSED', 'CANCELLED']),
 });
+
+export const paymentAttemptSchema = z.object({
+  payment_method: z.enum(['MIDTRANS']).optional(),
+});

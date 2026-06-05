@@ -35,7 +35,7 @@ export const availabilityService = {
   },
 
   async setRoomAvailabilityRange(roomId: string, data: AvailabilityRangeInput): Promise<RoomAvailability[]> {
-    const res = await api.post<ApiResponse<RoomAvailability[]>>(`/tenants/me/rooms/${roomId}/availability/range`, data);
+    const res = await api.post<ApiResponse<RoomAvailability[]>>(`/tenants/me/rooms/${roomId}/availability-ranges`, data);
     return res.data.data;
   }
 };

@@ -38,9 +38,9 @@ const PropertyStats: FC<PropertyPartProps> = ({ property }) => {
   const minPrice = getMinPrice(property);
 
   return (
-    <div className="mt-1 flex flex-wrap items-center gap-3 text-xs text-gray-500">
-      <span className="flex items-center gap-1"><BedDouble size={12} /> {property._count?.rooms || 0} Kamar</span>
-      <span className="flex items-center gap-1"><Star size={12} /> {property._count?.reviews || 0} Review</span>
+    <div className="mt-2 flex flex-wrap items-center gap-3 text-xs text-slate-500 dark:text-slate-400">
+      <span className="flex items-center gap-1"><BedDouble size={14} className="text-slate-400" /> {property._count?.rooms || 0} Kamar</span>
+      <span className="flex items-center gap-1 font-medium"><Star size={14} className="text-rose-500 fill-rose-500" /> {property._count?.reviews || 0} Ulasan</span>
       {minPrice && <span className="font-semibold text-red-600">{formatPrice(minPrice)}/malam</span>}
     </div>
   );
@@ -75,7 +75,7 @@ const PropertyActions: FC<PropertyActionsProps> = (props) => (
 );
 
 export const PropertyCard: FC<PropertyCardProps> = ({ property, deletingId, onDelete }) => (
-  <div className="flex flex-col overflow-hidden rounded-xl border bg-white shadow-sm dark:border-slate-700 dark:bg-slate-800 sm:flex-row">
+  <div className="flex flex-col overflow-hidden rounded-2xl border border-slate-100 bg-white/90 backdrop-blur-lg shadow-sm transition hover:shadow-md dark:border-slate-800 dark:bg-slate-900/90 sm:flex-row">
     <PropertyImage property={property} />
     <div className="flex flex-1 flex-col gap-4 p-4 sm:flex-row sm:items-center sm:justify-between">
       <PropertySummary property={property} />

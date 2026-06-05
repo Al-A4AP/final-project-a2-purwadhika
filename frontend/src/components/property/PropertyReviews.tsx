@@ -1,6 +1,7 @@
 import type { FC } from 'react';
 import type { Review } from '@/types';
 import { Star, User } from 'lucide-react';
+import { EmptyState } from '../common/EmptyState';
 
 interface PropertyReviewsProps {
   reviews: Review[];
@@ -22,11 +23,16 @@ const ReviewsGrid: FC<PropertyReviewsProps> = ({ reviews }) => (
 );
 
 const EmptyReviews = () => (
-  <p className="text-gray-500">Belum ada ulasan untuk properti ini.</p>
+  <div className="col-span-1 md:col-span-2">
+    <EmptyState 
+      title="Belum Ada Ulasan" 
+      description="Properti ini belum memiliki ulasan dari tamu. Jadilah yang pertama memberikan ulasan setelah Anda menginap!" 
+    />
+  </div>
 );
 
 const ReviewCard: FC<{ review: Review }> = ({ review }) => (
-  <div className="bg-white dark:bg-slate-800 rounded-xl p-6 shadow-sm border dark:border-slate-700">
+  <div className="bg-white/60 backdrop-blur-sm dark:bg-slate-900/60 rounded-2xl p-6 shadow-sm border border-slate-100 dark:border-slate-800">
     <ReviewAuthor review={review} />
     <p className="text-gray-600 dark:text-gray-300 text-sm">{review.comment}</p>
     <ReviewReplies replies={review.replies} />
@@ -50,7 +56,7 @@ const ReviewAvatar: FC<{ avatarUrl?: string | null }> = ({ avatarUrl }) => (
 );
 
 const RatingLine: FC<{ rating: number }> = ({ rating }) => (
-  <div className="flex items-center gap-1 text-yellow-500 text-sm">
+  <div className="flex items-center gap-1 text-rose-500 text-sm font-medium">
     <Star size={14} fill="currentColor" /> {rating}/5
   </div>
 );

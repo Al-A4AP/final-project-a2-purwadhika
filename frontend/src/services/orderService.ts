@@ -60,16 +60,16 @@ export const orderService = {
 
   async getUserOrders(params?: UserOrderParams): Promise<OrderListResponse> {
     const query = buildQueryString(params, true);
-    return fetchOrderList('/orders/user', query);
+    return fetchOrderList('/users/me/orders', query);
   },
 
   async getTenantOrders(params?: TenantOrderParams): Promise<OrderListResponse> {
     const query = buildQueryString(params);
-    return fetchOrderList('/orders/tenant', query);
+    return fetchOrderList('/tenants/me/orders', query);
   },
 
   async updateOrderStatus(orderId: string, status: string): Promise<Order> {
-    const res = await api.patch<ApiResponse<Order>>(`/orders/${orderId}/status`, { status });
+    const res = await api.post<ApiResponse<Order>>(`/orders/${orderId}/status-transitions`, { status });
     return res.data.data;
   },
 

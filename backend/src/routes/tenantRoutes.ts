@@ -7,7 +7,10 @@ import {
   verifyRoomOwnership,
   verifyPeakRateOwnership
 } from '../middlewares/ownershipMiddleware';
-import { availabilityRangeSchema, createPropertySchema, updatePropertySchema, createRoomSchema, updateRoomSchema, peakRateSchema } from '../validations/propertyValidation';
+import {
+  availabilityRangeSchema, createPropertySchema, updatePropertySchema,
+  createRoomSchema, updateRoomSchema, peakRateSchema, updateRoomImageSchema,
+} from '../validations/propertyValidation';
 import {
   getDashboard, getPropertiesCtrl, getPropertyCtrl,
   createPropertyCtrl, updatePropertyCtrl, deletePropertyCtrl,
@@ -17,17 +20,19 @@ import {
   getRoomsCtrl, createRoomCtrl, updateRoomCtrl, deleteRoomCtrl,
   getPeakRatesCtrl, createPeakRateCtrl, updatePeakRateCtrl, deletePeakRateCtrl,
   getRoomAvailabilitiesCtrl, setRoomAvailabilityCtrl, setRoomAvailabilityRangeCtrl,
-  addRoomImageCtrl, deleteRoomImageCtrl, setRoomMainImageCtrl
+  addRoomImageCtrl, deleteRoomImageCtrl, setRoomMainImageCtrl, updateRoomImageCtrl
 } from '../controllers/tenantRoomController';
 import { getDashboardAnalyticsCtrl, getOccupancyCalendarCtrl } from '../controllers/tenantReportController';
 import { getTenantReviewsCtrl } from '../controllers/tenantReviewController';
 import { createCategoryCtrl, deleteCategoryCtrl, getCategoriesCtrl, updateCategoryCtrl } from '../controllers/categoryController';
+import { getTenantOrdersCtrl } from '../controllers/orderController';
 
 const router = Router();
 const isTenant = [requireAuth, requireRole(['TENANT'])];
 
 // Dashboard
 router.get('/dashboard', ...isTenant, getDashboard);
+router.get('/orders', ...isTenant, getTenantOrdersCtrl);
 
 // Properties
 router.get('/properties', ...isTenant, getPropertiesCtrl);
@@ -47,6 +52,7 @@ router.patch('/rooms/:roomId', ...isTenant, verifyRoomOwnership, upload.single('
 router.delete('/rooms/:roomId', ...isTenant, verifyRoomOwnership, deleteRoomCtrl);
 router.post('/rooms/:roomId/images', ...isTenant, verifyRoomOwnership, upload.single('image'), addRoomImageCtrl);
 router.delete('/rooms/:roomId/images/:imageId', ...isTenant, verifyRoomOwnership, deleteRoomImageCtrl);
+router.patch('/rooms/:roomId/images/:imageId', ...isTenant, verifyRoomOwnership, validate(updateRoomImageSchema), updateRoomImageCtrl);
 router.patch('/rooms/:roomId/images/:imageId/main', ...isTenant, verifyRoomOwnership, setRoomMainImageCtrl);
 
 // Peak Season Rates
@@ -57,6 +63,7 @@ router.delete('/peak-rates/:rateId', ...isTenant, verifyPeakRateOwnership, delet
 
 // Room Availability
 router.get('/rooms/:roomId/availability', ...isTenant, verifyRoomOwnership, getRoomAvailabilitiesCtrl);
+router.post('/rooms/:roomId/availability-ranges', ...isTenant, verifyRoomOwnership, validate(availabilityRangeSchema), setRoomAvailabilityRangeCtrl);
 router.post('/rooms/:roomId/availability/range', ...isTenant, verifyRoomOwnership, validate(availabilityRangeSchema), setRoomAvailabilityRangeCtrl);
 router.post('/rooms/:roomId/availability', ...isTenant, verifyRoomOwnership, setRoomAvailabilityCtrl);
 

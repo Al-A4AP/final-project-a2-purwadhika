@@ -1,3 +1,3 @@
-import { STORAGE_KEYS } from "@/lib/constants";
+import { clearLegacyAuthUser } from "@/lib/browserStorageCleanup";
 
-export const clearStoredUser = () => localStorage.removeItem(STORAGE_KEYS.USER);
+export const clearStoredUser = clearLegacyAuthUser;

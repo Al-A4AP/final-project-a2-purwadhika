@@ -29,7 +29,6 @@ export const RoomImageField: FC<RoomImageFieldProps> = ({
   const [cropMode, setCropMode] = useState<"main" | "gallery" | null>(null);
   const [uploadingGallery, setUploadingGallery] = useState(false);
 
-  // Form image preview (for new creation)
   const filePreview = form.image ? URL.createObjectURL(form.image) : null;
   const existingImageUrl = editingRoom?.images?.[0]?.image_url || null;
   const previewUrl = filePreview || existingImageUrl;
@@ -118,76 +117,81 @@ export const RoomImageField: FC<RoomImageFieldProps> = ({
   const canDelete = roomImages.length > 1;
 
   return (
-    <RoomFieldShell label="Foto Kamar" className="col-span-2 space-y-4">
-      {/* Upload/Preview Area */}
+    <RoomFieldShell label="Galeri Foto Kamar" className="space-y-4">
       <div>
-        <label className="relative border-2 border-dashed border-gray-300 dark:border-slate-600 rounded-xl p-4 flex flex-col items-center gap-1.5 cursor-pointer hover:border-rose-400 transition bg-white dark:bg-slate-800">
+        <label className="relative flex h-48 cursor-pointer flex-col items-center justify-center gap-2 rounded-xl border-2 border-dashed border-slate-300 bg-slate-50 transition hover:border-slate-400 hover:bg-slate-100 dark:border-slate-700 dark:bg-slate-800/50 dark:hover:border-slate-500 dark:hover:bg-slate-800 p-2">
           {previewUrl ? (
-            <img src={previewUrl} className="w-full h-36 object-cover rounded-xl" alt="preview" />
+            <img src={previewUrl} className="h-full w-full rounded-lg object-cover" alt="preview" />
           ) : (
-            <div className="py-4 text-center">
-              <Upload size={20} className="mx-auto text-gray-400 mb-1" />
-              <span className="text-xs text-gray-500 font-medium">Klik untuk upload foto utama kamar</span>
+            <div className="flex flex-col items-center text-center px-4">
+              <div className="mb-3 flex h-12 w-12 items-center justify-center rounded-full bg-white text-slate-400 shadow-sm dark:bg-slate-800 dark:text-slate-500">
+                <Upload size={20} />
+              </div>
+              <span className="text-sm font-semibold text-slate-700 dark:text-slate-300">Klik untuk upload foto utama kamar</span>
+              <span className="mt-1 text-xs text-slate-500 dark:text-slate-400">Format JPG atau PNG</span>
             </div>
           )}
           <input type="file" accept="image/*" onChange={handleFileChange} className="hidden" />
         </label>
         {isEditing && (
-          <p className="mt-1 text-[10px] text-gray-400 text-center">
-            Pilih file baru untuk menambahkan atau ganti foto utama kamar
+          <p className="mt-1.5 text-[10px] text-slate-500 dark:text-slate-400">
+            Pilih file baru untuk mengganti foto utama kamar.
           </p>
         )}
       </div>
 
-      {/* Gallery Manager (Only in Edit Mode) */}
       {isEditing && editingRoom && roomImages.length > 0 && (
-        <div className="space-y-2 pt-2 border-t dark:border-slate-700">
-          <span className="text-xs font-semibold text-gray-700 dark:text-slate-300">Galeri Foto Kamar</span>
-          <div className="grid grid-cols-3 gap-2">
+        <div className="pt-4 border-t border-slate-100 dark:border-slate-800">
+          <label className="mb-3 block text-sm font-semibold text-slate-700 dark:text-slate-300">
+            Foto Tambahan
+          </label>
+          <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 md:grid-cols-4">
             {roomImages.map((img, index) => {
               const isMain = index === 0;
               return (
-                <div key={img.id} className="relative group rounded-lg overflow-hidden border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800">
-                  <img src={img.image_url} className="w-full h-20 object-cover" alt="Galeri kamar" />
+                <div key={img.id} className="group relative overflow-hidden rounded-xl border border-slate-200 bg-white dark:border-slate-700 dark:bg-slate-800">
+                  <img src={img.image_url} className="h-24 w-full object-cover" alt="Galeri kamar" />
                   
                   {isMain && (
-                    <div className="absolute top-1 left-1 bg-rose-600 text-white text-[8px] font-bold px-1.5 py-0.5 rounded-full shadow-md">
+                    <div className="absolute left-1 top-1 rounded-full bg-slate-900 px-2 py-0.5 text-[8px] font-bold text-white shadow-sm dark:bg-white dark:text-slate-900">
                       Utama
                     </div>
                   )}
 
-                  <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 flex items-center justify-center gap-1 transition-opacity">
+                  <div className="absolute inset-0 flex items-center justify-center gap-1.5 bg-slate-900/40 opacity-0 backdrop-blur-[2px] transition-opacity group-hover:opacity-100">
                     {!isMain && (
                       <button
                         type="button"
                         onClick={() => handleSetMainGallery(img.id)}
-                        className="p-1 bg-white hover:bg-slate-100 text-rose-600 rounded shadow transition-colors"
+                        className="rounded-lg bg-white p-1.5 text-slate-700 shadow-sm transition hover:bg-slate-100 hover:text-slate-900 dark:bg-slate-800 dark:text-slate-300 dark:hover:bg-slate-700 dark:hover:text-white"
                         title="Jadikan Utama"
                       >
-                        <Star size={12} fill="currentColor" />
+                        <Star size={14} />
                       </button>
                     )}
                     <button
                       type="button"
                       onClick={() => handleDeleteGallery(img.id)}
                       disabled={!canDelete}
-                      className="p-1 bg-white hover:bg-slate-100 text-slate-600 hover:text-red-600 rounded shadow disabled:opacity-50 transition-colors"
+                      className="rounded-lg bg-white p-1.5 text-slate-700 shadow-sm transition hover:bg-red-50 hover:text-red-600 disabled:opacity-50 dark:bg-slate-800 dark:text-slate-300 dark:hover:bg-red-900/20 dark:hover:text-red-400"
                       title="Hapus"
                     >
-                      <Trash2 size={12} />
+                      <Trash2 size={14} />
                     </button>
                   </div>
                 </div>
               );
             })}
 
-            <label className="border-2 border-dashed border-gray-300 dark:border-slate-600 hover:border-rose-400 rounded-lg h-20 flex flex-col items-center justify-center cursor-pointer transition bg-white dark:bg-slate-800">
+            <label className="flex h-24 cursor-pointer flex-col items-center justify-center gap-1.5 rounded-xl border-2 border-dashed border-slate-300 bg-slate-50 transition hover:border-slate-400 hover:bg-slate-100 dark:border-slate-700 dark:bg-slate-800/50 dark:hover:border-slate-500 dark:hover:bg-slate-800">
               {uploadingGallery ? (
-                <span className="text-[10px] text-gray-500 font-medium animate-pulse">Unggah...</span>
+                <span className="animate-pulse text-[10px] font-semibold text-slate-500">Mengunggah...</span>
               ) : (
                 <>
-                  <Plus size={16} className="text-gray-400" />
-                  <span className="text-[10px] text-gray-500 font-medium mt-0.5">Tambah</span>
+                  <div className="flex h-7 w-7 items-center justify-center rounded-full bg-white text-slate-400 shadow-sm dark:bg-slate-800 dark:text-slate-500">
+                    <Plus size={14} />
+                  </div>
+                  <span className="text-[10px] font-semibold text-slate-500">Tambah Foto</span>
                 </>
               )}
               <input type="file" accept="image/*" onChange={handleGalleryFileChange} className="hidden" disabled={uploadingGallery} />

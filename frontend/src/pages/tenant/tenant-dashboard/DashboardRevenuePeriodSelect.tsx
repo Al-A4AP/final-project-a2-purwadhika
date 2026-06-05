@@ -1,6 +1,6 @@
 import type { FC } from "react";
 import type { DashboardRevenuePeriod } from "@/types";
-import { REVENUE_PERIOD_OPTIONS } from "./dashboardRevenuePeriod";
+import { REVENUE_PERIOD_OPTIONS } from "@/hooks/tenant/tenant-dashboard/dashboardRevenuePeriod";
 
 interface DashboardRevenuePeriodSelectProps {
   onChange: (period: DashboardRevenuePeriod) => void;

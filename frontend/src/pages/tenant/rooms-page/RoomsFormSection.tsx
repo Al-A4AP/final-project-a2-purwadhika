@@ -1,6 +1,7 @@
 import type { FC } from "react";
 import { RoomForm } from "@/components/tenant/RoomForm";
 import type { RoomFormInput, RoomWithPeakRates } from "@/types";
+import { Modal } from "@/components/common/Modal";
 
 interface RoomsFormSectionProps {
   form: RoomFormInput;
@@ -11,6 +12,7 @@ interface RoomsFormSectionProps {
   showForm: boolean;
   fetchRooms: () => void;
   setEditingRoom: (room: RoomWithPeakRates | null) => void;
+  onClose: () => void;
 }
 
 export const RoomsFormSection: FC<RoomsFormSectionProps> = ({
@@ -22,17 +24,25 @@ export const RoomsFormSection: FC<RoomsFormSectionProps> = ({
   showForm,
   fetchRooms,
   setEditingRoom,
+  onClose
 }) => (
-  showForm ? (
-    <RoomForm
-      isEditing={form.room_type !== ""}
-      isWholeUnit={isWholeUnit}
-      form={form}
-      editingRoom={editingRoom}
-      onChange={setForm}
-      onSubmit={handleSubmit}
-      fetchRooms={fetchRooms}
-      setEditingRoom={setEditingRoom}
-    />
-  ) : null
+  <Modal 
+    isOpen={showForm} 
+    onClose={onClose} 
+    title={form.room_type !== "" || editingRoom ? "Edit Kamar" : "Tambah Kamar Baru"}
+    maxWidth="2xl"
+  >
+    <div className="p-6">
+      <RoomForm
+        isEditing={form.room_type !== "" || Boolean(editingRoom)}
+        isWholeUnit={isWholeUnit}
+        form={form}
+        editingRoom={editingRoom}
+        onChange={setForm}
+        onSubmit={handleSubmit}
+        fetchRooms={fetchRooms}
+        setEditingRoom={setEditingRoom}
+      />
+    </div>
+  </Modal>
 );

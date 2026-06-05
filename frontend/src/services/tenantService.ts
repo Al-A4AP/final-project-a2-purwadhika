@@ -38,7 +38,7 @@ export const tenantService = {
     return response.data.data;
   },
   async replyToReview(reviewId: string, reply_text: string) {
-    const response = await api.post(`/reviews/${reviewId}/reply`, { reply_text });
+    const response = await api.post(`/reviews/${reviewId}/replies`, { reply_text });
     return response.data.data;
   },
   async deleteReview(reviewId: string): Promise<void> {
@@ -152,6 +152,6 @@ export const tenantService = {
     await api.delete(`/tenants/me/rooms/${roomId}/images/${imageId}`);
   },
   async setRoomMainImage(roomId: string, imageId: string): Promise<void> {
-    await api.patch(`/tenants/me/rooms/${roomId}/images/${imageId}/main`);
+    await api.patch(`/tenants/me/rooms/${roomId}/images/${imageId}`, { is_main: true });
   },
 };

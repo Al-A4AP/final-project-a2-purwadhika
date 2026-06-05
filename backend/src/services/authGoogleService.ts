@@ -2,8 +2,10 @@ import bcryptjs from "bcryptjs";
 import crypto from "crypto";
 import jwt, { type SignOptions } from "jsonwebtoken";
 import type { Prisma, Role } from "@prisma/client";
+import { env } from "../config/env";
 import prisma from "../config/prisma";
 import { AppError } from "../middlewares/errorHandler";
+import type { AuthJwtPayload } from "../types/authJwt";
 import { getGoogleProfile } from "./googleAuthService";
 
 type GoogleProfile = {
@@ -15,12 +17,13 @@ type GoogleProfile = {
 type GoogleAuthUser = Prisma.UserGetPayload<{}>;
 
 type SanitizedGoogleAuthUser = Omit<GoogleAuthUser, "password_hash">;
+type AuthTokenPayload = Pick<AuthJwtPayload, "email" | "id" | "role">;
 
-const JWT_SECRET = process.env.JWT_SECRET as string;
-const JWT_EXPIRES = process.env.JWT_EXPIRES_IN || "7d";
+const JWT_SECRET = env.JWT_SECRET;
+const JWT_EXPIRES = env.JWT_EXPIRES_IN;
 const JWT_SIGN_OPTIONS = { expiresIn: JWT_EXPIRES as SignOptions["expiresIn"] };
 
-const generateToken = (payload: object) =>
+const generateToken = (payload: AuthTokenPayload) =>
   jwt.sign(payload, JWT_SECRET, JWT_SIGN_OPTIONS);
 
 const sanitizeUser = (user: GoogleAuthUser): SanitizedGoogleAuthUser => {

@@ -18,7 +18,7 @@ export const SectionLoading: FC<SectionLoadingProps> = ({ className = '', label,
   </section>
 );
 
-const baseClass = 'space-y-4 rounded-xl border bg-white p-6 dark:border-slate-700 dark:bg-slate-800';
+const baseClass = 'space-y-4 rounded-2xl border border-slate-100 bg-white/80 backdrop-blur-md p-6 shadow-sm dark:border-slate-800 dark:bg-slate-900/80';
 
 const sizeClass = (size: SectionLoadingSize) => ({
   sm: 'min-h-[14rem]',

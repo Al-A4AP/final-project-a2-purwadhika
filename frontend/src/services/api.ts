@@ -1,6 +1,7 @@
 import axios from 'axios';
-import { API_BASE_URL, STORAGE_KEYS } from '@/lib/constants';
+import { API_BASE_URL } from '@/lib/constants';
 import { storeAuthNotice } from '@/lib/authNotice';
+import { clearLegacyAuthUser } from '@/lib/browserStorageCleanup';
 
 const isAuthProbe = (url?: string) => url?.includes('/auth/me');
 
@@ -26,7 +27,7 @@ api.interceptors.response.use(
   (response) => response,
   (error) => {
     if (error.response?.status === 401) {
-      localStorage.removeItem(STORAGE_KEYS.USER);
+      clearLegacyAuthUser();
       if (!isAuthProbe(error.config?.url)) redirectToHome();
     }
     return Promise.reject(error);

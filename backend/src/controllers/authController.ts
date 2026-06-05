@@ -2,6 +2,7 @@ import { Request, Response } from 'express';
 import * as authService from '../services/authService';
 import { googleLogin } from '../services/authGoogleService';
 import { verifyEmailChange } from '../services/userEmailService';
+import { AUTH_COOKIE_NAME, authCookieOptions, clearAuthCookieOptions } from '../config/authCookie';
 import { sendSuccess } from '../utils/response';
 import { handleControllerError } from './controllerErrors';
 
@@ -17,13 +18,8 @@ export const registerController = async (req: Request, res: Response) => {
 export const loginController = async (req: Request, res: Response) => {
   try {
     const result = await authService.loginUser(req.body.email, req.body.password);
-    res.cookie('auth_token', result.token, {
-      httpOnly: true,
-      secure: process.env.NODE_ENV === 'production',
-      sameSite: 'strict',
-      maxAge: 7 * 24 * 60 * 60 * 1000,
-    });
-    return sendSuccess(res, result, 'Login berhasil');
+    setAuthCookie(res, result.token);
+    return sendSuccess(res, buildAuthResponse(result), 'Login berhasil');
   } catch (err) {
     return handleControllerError(res, err);
   }
@@ -86,13 +82,8 @@ export const verifyEmailChangeController = async (req: Request, res: Response) =
 export const googleLoginController = async (req: Request, res: Response) => {
   try {
     const result = await googleLogin(req.body);
-    res.cookie('auth_token', result.token, {
-      httpOnly: true,
-      secure: process.env.NODE_ENV === 'production',
-      sameSite: 'strict',
-      maxAge: 7 * 24 * 60 * 60 * 1000,
-    });
-    return sendSuccess(res, result, 'Login Google berhasil');
+    setAuthCookie(res, result.token);
+    return sendSuccess(res, buildAuthResponse(result), 'Login Google berhasil');
   } catch (err) {
     return handleControllerError(res, err);
   }
@@ -100,11 +91,17 @@ export const googleLoginController = async (req: Request, res: Response) => {
 
 export const logoutController = async (req: Request, res: Response) => {
   try {
-    const token = req.headers.authorization?.split(' ')[1] || req.cookies?.auth_token;
+    const token = req.headers.authorization?.split(' ')[1] || req.cookies?.[AUTH_COOKIE_NAME];
     if (token) await authService.logout(token);
-    res.clearCookie('auth_token', { httpOnly: true, sameSite: 'strict' });
+    res.clearCookie(AUTH_COOKIE_NAME, clearAuthCookieOptions);
     return sendSuccess(res, null, 'Logout berhasil');
   } catch (err) {
     return handleControllerError(res, err);
   }
 };
+
+const setAuthCookie = (res: Response, token: string) =>
+  res.cookie(AUTH_COOKIE_NAME, token, authCookieOptions);
+
+const buildAuthResponse = <T extends { user: unknown }>(result: T) =>
+  ({ user: result.user });

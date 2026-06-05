@@ -11,7 +11,7 @@ interface OrderMobileCardProps {
 }
 
 export const OrderMobileCard: FC<OrderMobileCardProps> = (props) => (
-  <article className="rounded-2xl border bg-white p-4 shadow-sm dark:border-slate-700 dark:bg-slate-800">
+  <article className="rounded-2xl border border-slate-100 bg-white p-5 shadow-sm transition hover:shadow-md dark:border-slate-800 dark:bg-slate-900">
     <OrderMobileHeader order={props.order} />
     <OrderMobileFields order={props.order} />
     <PaymentProofLink order={props.order} />
@@ -20,7 +20,7 @@ export const OrderMobileCard: FC<OrderMobileCardProps> = (props) => (
 );
 
 const OrderMobileHeader: FC<Pick<OrderMobileCardProps, 'order'>> = ({ order }) => (
-  <div className="mb-4 flex items-start justify-between gap-3">
+  <div className="mb-4 flex items-start justify-between gap-3 border-b border-slate-100 pb-4 dark:border-slate-800">
     <OrderIdentity order={order} />
     <div className="shrink-0"><OrderStatusBadge status={order.status} /></div>
   </div>
@@ -28,28 +28,28 @@ const OrderMobileHeader: FC<Pick<OrderMobileCardProps, 'order'>> = ({ order }) =
 
 const OrderIdentity: FC<Pick<OrderMobileCardProps, 'order'>> = ({ order }) => (
   <div className="min-w-0">
-    <p className="truncate font-semibold text-gray-900 dark:text-white">{order.order_number}</p>
-    <p className="truncate text-xs text-gray-500">{order.user?.name} - {order.user?.email}</p>
+    <p className="truncate font-bold text-slate-900 dark:text-white">{order.order_number}</p>
+    <p className="truncate text-xs text-slate-500 dark:text-slate-400 mt-0.5">{order.user?.name} - {order.user?.email}</p>
   </div>
 );
 
 const OrderMobileFields: FC<Pick<OrderMobileCardProps, 'order'>> = ({ order }) => (
-  <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+  <div className="grid grid-cols-2 gap-y-4 gap-x-2">
     {getOrderFields(order).map((field) => <Field key={field.label} {...field} />)}
   </div>
 );
 
 const Field: FC<{ label: string; value?: string }> = ({ label, value }) => (
   <div>
-    <p className="text-[11px] font-semibold uppercase tracking-wide text-gray-400">{label}</p>
-    <p className="break-words text-sm text-gray-700 dark:text-gray-200">{value || '-'}</p>
+    <p className="text-[10px] font-semibold uppercase tracking-wider text-slate-400">{label}</p>
+    <p className="truncate text-sm font-medium text-slate-700 dark:text-slate-200 mt-0.5">{value || '-'}</p>
   </div>
 );
 
 const PaymentProofLink: FC<Pick<OrderMobileCardProps, 'order'>> = ({ order }) =>
   order.payment_proof_url ? (
     <a href={order.payment_proof_url} target="_blank" rel="noreferrer" className={proofLinkClass} aria-label={`Lihat bukti bayar ${order.order_number}`} title="Lihat bukti bayar">
-      Lihat Bukti <ExternalLink size={13} />
+      Lihat Bukti Pembayaran <ExternalLink size={14} />
     </a>
   ) : null;
 
@@ -60,7 +60,7 @@ const OrderMobileActions: FC<OrderMobileCardProps> = (props) => {
 };
 
 const ReviewActions: FC<OrderMobileCardProps> = (props) => (
-  <div className="grid grid-cols-2 gap-2">
+  <div className="grid grid-cols-2 gap-3">
     <StatusButton {...props} status="PROCESSED" label="Terima" icon={<Check size={16} />} />
     <StatusButton {...props} status="CANCELLED" label="Tolak" icon={<X size={16} />} danger />
   </div>
@@ -81,7 +81,7 @@ const StatusButton: FC<StatusButtonProps> = (props) => (
 );
 
 const ActionWrap: FC<{ children: ReactNode }> = ({ children }) => (
-  <div className="mt-4">{children}</div>
+  <div className="mt-5 border-t border-slate-100 pt-5 dark:border-slate-800">{children}</div>
 );
 
 const getOrderFields = (order: Order) => [
@@ -99,10 +99,10 @@ const isManualWaitingPayment = (order: Order) =>
 const isUpdating = ({ order, updating }: Pick<OrderMobileCardProps, 'order' | 'updating'>) =>
   updating === order.id;
 
-const proofLinkClass = 'mt-4 flex h-11 items-center justify-center gap-2 rounded-xl border border-blue-100 text-sm font-medium text-blue-600 dark:border-blue-900/40';
-const manualCancelClass = 'h-11 w-full rounded-xl border border-red-200 text-sm font-medium text-red-600 disabled:opacity-50';
-const acceptButtonClass = 'flex h-11 items-center justify-center gap-2 rounded-xl bg-green-50 text-sm font-medium text-green-700 disabled:opacity-50';
-const rejectButtonClass = 'flex h-11 items-center justify-center gap-2 rounded-xl bg-red-50 text-sm font-medium text-red-700 disabled:opacity-50';
+const proofLinkClass = 'mt-4 flex w-full items-center justify-center gap-2 rounded-xl border border-blue-200 bg-blue-50/50 px-4 py-2.5 text-sm font-semibold text-blue-600 transition hover:bg-blue-100 dark:border-blue-900/40 dark:bg-blue-900/10 dark:hover:bg-blue-900/30';
+const manualCancelClass = 'w-full rounded-xl border border-red-200 bg-white px-4 py-2.5 text-sm font-bold text-red-600 transition hover:bg-red-50 disabled:opacity-50 dark:border-red-900/30 dark:bg-slate-800 dark:hover:bg-red-900/20';
+const acceptButtonClass = 'flex items-center justify-center gap-2 rounded-xl bg-slate-900 px-4 py-2.5 text-sm font-bold text-white transition hover:bg-slate-800 disabled:opacity-50 dark:bg-white dark:text-slate-900 dark:hover:bg-slate-200';
+const rejectButtonClass = 'flex items-center justify-center gap-2 rounded-xl border border-red-200 bg-white px-4 py-2.5 text-sm font-bold text-red-600 transition hover:bg-red-50 disabled:opacity-50 dark:border-red-900/30 dark:bg-slate-800 dark:hover:bg-red-900/20';
 
 interface StatusButtonProps extends OrderMobileCardProps {
   status: string;

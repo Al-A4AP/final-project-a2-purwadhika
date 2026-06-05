@@ -5,6 +5,7 @@ interface ErrorLike {
   message?: string;
   status?: number;
   statusCode?: number;
+  issues?: Array<{ message?: string }>;
 }
 
 export const handleControllerError = (res: Response, err: unknown, fallbackStatus = 500) =>
@@ -17,10 +18,16 @@ export const handleWebhookError = (res: Response) =>
   res.status(500).json({ error: 'Server error' });
 
 export const getErrorMessage = (err: unknown) =>
-  getErrorLike(err).message || 'Terjadi kesalahan';
+  getFirstIssueMessage(err) || getErrorLike(err).message || 'Terjadi kesalahan';
 
 const getStatusCode = (err: unknown, fallbackStatus: number) =>
-  getErrorLike(err).statusCode || getErrorLike(err).status || fallbackStatus;
+  getErrorLike(err).statusCode || getErrorLike(err).status || getValidationStatus(err, fallbackStatus);
 
 const getErrorLike = (err: unknown): ErrorLike =>
   typeof err === 'object' && err !== null ? err as ErrorLike : {};
+
+const getFirstIssueMessage = (err: unknown) =>
+  getErrorLike(err).issues?.[0]?.message;
+
+const getValidationStatus = (err: unknown, fallbackStatus: number) =>
+  getErrorLike(err).issues?.length ? 400 : fallbackStatus;

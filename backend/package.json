@@ -9,7 +9,8 @@
     "build": "tsc",
     "seed": "ts-node-dev --transpile-only prisma/seed.ts",
     "backfill:amenities": "ts-node --transpile-only prisma/scripts/backfillAmenities.ts",
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "node -r ts-node/register --test tests/ownership/ownership.test.ts",
+    "test:ownership": "node -r ts-node/register --test tests/ownership/ownership.test.ts"
   },
   "keywords": [],
   "author": "",

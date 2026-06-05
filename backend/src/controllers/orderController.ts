@@ -5,6 +5,7 @@ import * as userMidtransOrder from '../services/order/userMidtransOrder';
 import { sendSuccess, sendError } from '../utils/response';
 import { uploadBuffer } from '../utils/cloudinaryUpload';
 import { handleControllerError, handleWebhookError } from './controllerErrors';
+import { tenantOrderQuerySchema, userOrderQuerySchema } from '../validations/queryValidation';
 
 export const createOrderCtrl = async (req: Request, res: Response) => {
   try {
@@ -17,7 +18,7 @@ export const createOrderCtrl = async (req: Request, res: Response) => {
 export const getUserOrdersCtrl = async (req: Request, res: Response) => {
   try {
     const userId = req.user!.id as string;
-    const data = await userOrderService.getUserOrders(userId, buildUserOrderOptions(req.query));
+    const data = await userOrderService.getUserOrders(userId, userOrderQuerySchema.parse(req.query));
     return sendSuccess(res, data, 'Daftar pesanan pengguna');
   } catch (err) { return handleControllerError(res, err); }
 };
@@ -25,7 +26,7 @@ export const getUserOrdersCtrl = async (req: Request, res: Response) => {
 export const getTenantOrdersCtrl = async (req: Request, res: Response) => {
   try {
     const tenantId = req.user!.id as string;
-    const data = await orderService.getTenantOrders(tenantId, buildTenantOrderOptions(req.query));
+    const data = await orderService.getTenantOrders(tenantId, tenantOrderQuerySchema.parse(req.query));
     return sendSuccess(res, data, 'Daftar pesanan tenant');
   } catch (err) { return handleControllerError(res, err); }
 };
@@ -76,20 +77,3 @@ export const midtransNotificationCtrl = async (req: Request, res: Response) => {
     return handleWebhookError(res);
   }
 };
-
-const buildUserOrderOptions = (query: Request['query']) => {
-  const { orderNumber, status, startDate, endDate, sortBy, sortOrder, page, limit } = query;
-  return { orderNumber: orderNumber as string, status: status as string, startDate: startDate as string,
-    endDate: endDate as string, sortBy: sortBy as string, sortOrder: sortOrder as 'asc' | 'desc',
-    page: toOptionalNumber(page), limit: toOptionalNumber(limit) };
-};
-
-const buildTenantOrderOptions = (query: Request['query']) => {
-  const { propertyId, status, startDate, endDate, sortBy, sortOrder, page, limit } = query;
-  return { propertyId: propertyId as string, status: status as string, startDate: startDate as string,
-    endDate: endDate as string, sortBy: sortBy as string, sortOrder: sortOrder as 'asc' | 'desc',
-    page: toOptionalNumber(page), limit: toOptionalNumber(limit) };
-};
-
-const toOptionalNumber = (value: unknown) =>
-  value ? Number(value) : undefined;

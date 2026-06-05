@@ -1,5 +1,7 @@
 import type { FC } from "react";
-import { RoomCard } from "@/components/tenant/RoomCard";
+import { SectionLoading } from "@/components/common/SectionLoading";
+import { EmptyState } from "@/components/common/EmptyState";
+import { RoomsListView } from "./RoomsListView";
 import type { RoomWithPeakRates } from "@/types";
 
 interface RoomsListSectionProps {
@@ -13,11 +15,22 @@ interface RoomsListSectionProps {
 }
 
 export const RoomsListSection: FC<RoomsListSectionProps> = (props) => {
-  if (props.loading) return <div className="h-32 animate-pulse rounded-xl bg-gray-200 dark:bg-slate-700" />;
-  if (props.rooms.length === 0) return <p className="text-sm text-gray-500">Belum ada kamar. Tambahkan kamar pertama.</p>;
+  if (props.loading) {
+    return <SectionLoading variant="table" label="Memuat kamar..." />;
+  }
+  
+  if (props.rooms.length === 0) {
+    return (
+      <div className="rounded-2xl border border-slate-100 bg-white p-2 shadow-sm dark:border-slate-800 dark:bg-slate-900">
+        <EmptyState 
+          title="Tidak ada tipe kamar" 
+          description="Tambahkan tipe kamar untuk mulai menerima pesanan dari tamu." 
+        />
+      </div>
+    );
+  }
+  
   return (
-    <div className="space-y-3">
-      {props.rooms.map((room) => <RoomCard key={room.id} isWholeUnit={props.isWholeUnit} room={room} onDelete={props.onDelete} onEdit={props.handleEdit} onOpenAvail={props.handleOpenAvailModal} onOpenPeakRates={props.handleOpenPeakModal} />)}
-    </div>
+    <RoomsListView {...props} />
   );
 };

@@ -37,10 +37,13 @@ const markTenantAvailability = (availability: CalendarAvailability) => ({
 });
 
 const buildFullBookedDays = (room: CalendarRoom, orders: CalendarOrder[], range: CalendarRange) =>
+  getFullBookedDates(orders, room.quantity, range)
+    .map(([date]) => buildBookedAvailability(room.id, date));
+
+const getFullBookedDates = (orders: CalendarOrder[], quantity: number, range: CalendarRange) =>
   [...countBookedNights(orders).entries()]
     .filter(([date]) => isDateInRange(date, range))
-    .filter(([, count]) => count >= room.quantity)
-    .map(([date]) => buildBookedAvailability(room.id, date));
+    .filter(([, count]) => count >= quantity);
 
 const isDateInRange = (date: string, range: CalendarRange) =>
   date >= formatDateKey(range.start) && date <= formatDateKey(range.end);

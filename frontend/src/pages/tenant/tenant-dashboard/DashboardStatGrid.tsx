@@ -1,6 +1,6 @@
 import type { FC } from "react";
 import type { DashboardRevenuePeriod, DashboardStats } from "@/types";
-import { buildDashboardStatItems } from "./dashboardStats";
+import { buildDashboardStatItems } from "@/hooks/tenant/tenant-dashboard/dashboardStats";
 import { StatCard } from "./StatCard";
 
 interface DashboardStatGridProps {

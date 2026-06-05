@@ -5,7 +5,7 @@ import { RoomSubmitButton } from "./room-form/RoomSubmitButton";
 import type { RoomFormProps } from "./room-form/types";
 
 export const RoomForm: FC<RoomFormProps> = (props) => (
-  <form onSubmit={props.onSubmit} className="space-y-4 rounded-xl border bg-white p-5 dark:border-slate-700 dark:bg-slate-800">
+  <form onSubmit={props.onSubmit} className="space-y-4">
     <RoomFormHeader isEditing={props.isEditing} isWholeUnit={props.isWholeUnit} />
     <RoomFormFields
       form={props.form}

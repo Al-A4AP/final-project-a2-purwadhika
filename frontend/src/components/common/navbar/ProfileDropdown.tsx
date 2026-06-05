@@ -1,5 +1,5 @@
 import type { FC } from "react";
-import { LayoutDashboard, LogOut, ShoppingBag, User } from "lucide-react";
+import { LayoutDashboard, LogOut, ShoppingBag, User, Heart, MessageSquare } from "lucide-react";
 import { Link } from "react-router-dom";
 import type { NavbarState } from "./navbarTypes";
 
@@ -18,7 +18,32 @@ const ProfileDropdownHeader: FC<{ state: NavbarState }> = ({ state }) => (
 );
 
 const ProfileDropdownLinks: FC<{ state: NavbarState }> = ({ state }) => (
-  <><Link to={state.profilePath} className={LINK_CLASS} onClick={state.closeProfile}><User size={16} className="text-slate-400" /> Profil Saya</Link>{state.user?.role === "USER" && <Link to="/orders" className={LINK_CLASS} onClick={state.closeProfile}><ShoppingBag size={16} className="text-slate-400" /> Pesanan Saya</Link>}{state.user?.role === "TENANT" && <Link to="/tenant/dashboard" className={LINK_CLASS} onClick={state.closeProfile}><LayoutDashboard size={16} className="text-slate-400" /> Dashboard Tenant</Link>}</>
+  <>
+    {state.user?.role === "USER" && (
+      <>
+        <Link to="/dashboard" className={LINK_CLASS} onClick={state.closeProfile}>
+          <LayoutDashboard size={16} className="text-slate-400" /> Dashboard
+        </Link>
+        <Link to="/orders" className={LINK_CLASS} onClick={state.closeProfile}>
+          <ShoppingBag size={16} className="text-slate-400" /> Riwayat Pemesanan
+        </Link>
+        <Link to="/saved-properties" className={LINK_CLASS} onClick={state.closeProfile}>
+          <Heart size={16} className="text-slate-400" /> Tersimpan
+        </Link>
+        <Link to="/reviews" className={LINK_CLASS} onClick={state.closeProfile}>
+          <MessageSquare size={16} className="text-slate-400" /> Ulasan Saya
+        </Link>
+      </>
+    )}
+    <Link to={state.profilePath} className={LINK_CLASS} onClick={state.closeProfile}>
+      <User size={16} className="text-slate-400" /> Profil Saya
+    </Link>
+    {state.user?.role === "TENANT" && (
+      <Link to="/tenant/dashboard" className={LINK_CLASS} onClick={state.closeProfile}>
+        <LayoutDashboard size={16} className="text-slate-400" /> Dashboard Tenant
+      </Link>
+    )}
+  </>
 );
 
 export const LogoutButton: FC<{ onLogout: () => void }> = ({ onLogout }) => (

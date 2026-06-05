@@ -1,4 +1,5 @@
 import type { FC, ReactNode } from "react";
+import { Filter } from "lucide-react";
 import { ORDER_STATUS_FILTER_OPTIONS } from "@/lib/constants";
 import type { DashboardRevenuePeriod, TenantProperty } from "@/types";
 import {
@@ -20,20 +21,26 @@ interface ReportsFilterPanelProps {
 }
 
 export const ReportsFilterPanel: FC<ReportsFilterPanelProps> = ({ actions, filters, properties }) => (
-  <ReportsFilterGrid>
-    <PropertyFilter properties={properties} filters={filters} actions={actions} />
-    <RevenuePeriodFilter filters={filters} actions={actions} />
-    <StatusFilter filters={filters} actions={actions} />
-    <BookerNameFilter filters={filters} actions={actions} />
-    <DateFilter label="Mulai Tanggal" value={filters.startDate} onChange={actions.setStartDate} />
-    <DateFilter label="Sampai Tanggal" value={filters.endDate} onChange={actions.setEndDate} />
-    <SortFilter filters={filters} actions={actions} />
-    <ResetButton onReset={actions.resetFilters} />
-  </ReportsFilterGrid>
+  <div className="rounded-2xl border border-slate-100 bg-white p-5 shadow-sm dark:border-slate-800 dark:bg-slate-900">
+    <div className="mb-4 flex items-center gap-2 border-b border-slate-100 pb-4 dark:border-slate-800">
+      <Filter className="h-5 w-5 text-slate-500" />
+      <h3 className="font-semibold text-slate-900 dark:text-white">Filter Laporan</h3>
+    </div>
+    <ReportsFilterGrid>
+      <PropertyFilter properties={properties} filters={filters} actions={actions} />
+      <RevenuePeriodFilter filters={filters} actions={actions} />
+      <StatusFilter filters={filters} actions={actions} />
+      <BookerNameFilter filters={filters} actions={actions} />
+      <DateFilter label="Mulai Tanggal" value={filters.startDate} onChange={actions.setStartDate} />
+      <DateFilter label="Sampai Tanggal" value={filters.endDate} onChange={actions.setEndDate} />
+      <SortFilter filters={filters} actions={actions} />
+      <ResetButton onReset={actions.resetFilters} />
+    </ReportsFilterGrid>
+  </div>
 );
 
 const ReportsFilterGrid: FC<{ children: ReactNode }> = ({ children }) => (
-  <div className="grid grid-cols-1 gap-4 rounded-xl border bg-white p-4 shadow-sm dark:border-slate-700 dark:bg-slate-800 sm:grid-cols-2 xl:grid-cols-8">
+  <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4">
     {children}
   </div>
 );
@@ -86,14 +93,14 @@ interface FilterSectionProps {
 
 const ResetButton: FC<{ onReset: () => void }> = ({ onReset }) => (
   <div className="min-w-0">
-    <div className="invisible">
+    <div className="hidden xl:block invisible">
       <FilterLabel label="Aksi" />
     </div>
     <button
       onClick={onReset}
-      className="h-10 w-full rounded-lg border bg-white px-4 text-sm text-gray-600 hover:bg-gray-50 dark:border-slate-700 dark:bg-slate-900 dark:text-gray-300 dark:hover:bg-slate-700"
+      className="mt-1 flex h-11 w-full items-center justify-center rounded-xl border border-slate-200 bg-white px-4 text-sm font-semibold text-slate-700 transition hover:bg-slate-50 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-300 dark:hover:bg-slate-700"
     >
-      Reset
+      Reset Filter
     </button>
   </div>
 );

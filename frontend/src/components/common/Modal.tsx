@@ -40,13 +40,13 @@ const ModalBackdrop: FC<{ children: ReactNode }> = ({ children }) => (
 );
 
 const ModalPanel: FC<Pick<ModalProps, 'maxWidth' | 'children'>> = ({ maxWidth = 'md', children }) => (
-  <div className={`bg-white dark:bg-slate-800 rounded-2xl w-full ${maxWidthClasses[maxWidth]} shadow-2xl border border-gray-100 dark:border-slate-700 flex flex-col max-h-[90vh]`}>
+  <div className={`bg-white/95 backdrop-blur-xl dark:bg-slate-900/95 rounded-3xl w-full ${maxWidthClasses[maxWidth]} shadow-2xl border border-slate-100 dark:border-slate-800 flex flex-col max-h-[90vh]`}>
     {children}
   </div>
 );
 
 const ModalHeader: FC<Pick<ModalProps, 'title' | 'onClose'>> = ({ title, onClose }) => (
-  <div className="px-6 py-4 border-b border-gray-100 dark:border-slate-700 flex justify-between items-center bg-gray-50/50 dark:bg-slate-800/50 rounded-t-2xl">
+  <div className="px-6 py-4 border-b border-slate-100 dark:border-slate-800 flex justify-between items-center bg-slate-50/50 dark:bg-slate-800/50 rounded-t-3xl">
     <h3 className="text-lg font-bold text-gray-900 dark:text-white">{title}</h3>
     <CloseButton onClose={onClose} />
   </div>

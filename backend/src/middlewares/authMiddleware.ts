@@ -1,14 +1,16 @@
 import { Request, Response, NextFunction } from 'express';
 import jwt from 'jsonwebtoken';
+import { AUTH_COOKIE_NAME } from '../config/authCookie';
+import { env } from '../config/env';
 import { sendError } from '../utils/response';
 import { isTokenBlacklisted } from '../services/tokenBlacklistService';
 import { isAuthJwtPayload } from '../types/authJwt';
 
 const getRequestToken = (req: Request) =>
-  req.headers.authorization?.split(' ')[1] || req.cookies?.auth_token;
+  req.headers.authorization?.split(' ')[1] || req.cookies?.[AUTH_COOKIE_NAME];
 
 const verifyRequestToken = (token: string) => {
-  const decoded = jwt.verify(token, process.env.JWT_SECRET!);
+  const decoded = jwt.verify(token, env.JWT_SECRET);
   return isAuthJwtPayload(decoded) ? decoded : null;
 };
 

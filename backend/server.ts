@@ -2,8 +2,10 @@ import 'dotenv/config';
 import express from 'express';
 import cors from 'cors';
 import cookieParser from 'cookie-parser';
+import { env, getAllowedOrigins } from './src/config/env';
 import { errorHandler } from './src/middlewares/errorHandler';
 import { globalLimiter } from './src/middlewares/rateLimitMiddleware';
+import { securityHeaders } from './src/middlewares/securityHeaders';
 import authRoutes from './src/routes/authRoutes';
 import propertyRoutes from './src/routes/propertyRoutes';
 import locationRoutes from './src/routes/locationRoutes';
@@ -12,15 +14,13 @@ import orderRoutes from './src/routes/orderRoutes';
 import tenantRoutes from './src/routes/tenantRoutes';
 import userRoutes from './src/routes/userRoutes';
 import reviewRoutes from './src/routes/reviewRoutes';
-import { initCronJobs } from './src/cron';
+import { initCronJobs } from './src/cron/cronScheduler';
 
 const app = express();
-const PORT = process.env.PORT || 5000;
+const PORT = env.PORT;
 
-const ALLOWED_ORIGINS = process.env.ALLOWED_ORIGINS
-  ? process.env.ALLOWED_ORIGINS.split(',')
-  : ['http://localhost:5173', 'http://localhost:5174', 'http://localhost:5175', 'http://localhost:5176'];
-app.use(cors({ origin: ALLOWED_ORIGINS, credentials: true }));
+app.use(securityHeaders);
+app.use(cors({ origin: getAllowedOrigins(), credentials: true }));
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(cookieParser());
@@ -51,12 +51,12 @@ app.use((_req, res) => {
 app.use(errorHandler);
 
 // Cron Jobs — hanya aktif di environment yang support persistent process
-if (process.env.ENABLE_CRON === 'true') {
+if (env.ENABLE_CRON === 'true') {
   initCronJobs();
 }
 
 // Server listen — hanya di local/development, tidak di Vercel Serverless
-if (process.env.NODE_ENV !== 'test') {
+if (env.NODE_ENV !== 'test') {
   app.listen(PORT);
 }
 

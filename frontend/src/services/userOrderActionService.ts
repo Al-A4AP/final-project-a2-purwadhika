@@ -13,7 +13,7 @@ export const userOrderActionService = {
     return response.data.data;
   },
   async retryMidtransPayment(orderId: string): Promise<RetryMidtransResult> {
-    const response = await api.post<ApiResponse<RetryMidtransResult>>(`/orders/${orderId}/payment-attempts`);
+    const response = await api.post<ApiResponse<RetryMidtransResult>>(`/orders/${orderId}/payments`, { payment_method: "MIDTRANS" });
     return response.data.data;
   },
   async switchToManualPayment(orderId: string): Promise<Order> {

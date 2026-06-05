@@ -35,6 +35,6 @@ export type BookingPageState = {
   paymentMethod: PaymentMethod;
   setPaymentMethod: (method: PaymentMethod) => void;
   processing: boolean;
-  handleCheckout: () => Promise<void>;
+  handleCheckout: (paymentProofFile?: File | null) => Promise<void>;
   totals: BookingTotals | null;
 };

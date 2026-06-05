@@ -3,7 +3,7 @@ import { LEGAL_SECTIONS } from "./legalData";
 import { LegalHero } from "./LegalHero";
 import { LegalNav } from "./LegalNav";
 import { LegalSection } from "./LegalSection";
-import { useLegalHashScroll } from "./useLegalHashScroll";
+import { useLegalHashScroll } from "../../hooks/legal/useLegalHashScroll";
 
 export const LegalContent: FC = () => {
   useLegalHashScroll();

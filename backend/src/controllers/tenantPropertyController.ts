@@ -2,11 +2,12 @@ import { Request, Response } from 'express';
 import * as svc from '../services/tenantPropertyService';
 import { sendSuccess, sendError } from '../utils/response';
 import { handleControllerError } from './controllerErrors';
+import { tenantDashboardQuerySchema, tenantPropertyQuerySchema } from '../validations/queryValidation';
 
 export const getDashboard = async (req: Request, res: Response) => {
   try {
     const tenantId = req.user!.id as string;
-    const data = await svc.getDashboardStats(tenantId, { revenuePeriod: req.query.revenuePeriod as string });
+    const data = await svc.getDashboardStats(tenantId, tenantDashboardQuerySchema.parse(req.query));
     return sendSuccess(res, data, 'Dashboard berhasil diambil');
   } catch (err) { return handleControllerError(res, err); }
 };
@@ -14,15 +15,7 @@ export const getDashboard = async (req: Request, res: Response) => {
 export const getPropertiesCtrl = async (req: Request, res: Response) => {
   try {
     const tenantId = req.user!.id as string;
-    const { search, categoryId, sortBy, sortOrder, page, limit } = req.query;
-    const data = await svc.getTenantProperties(tenantId, {
-      search: search as string,
-      categoryId: categoryId as string,
-      sortBy: sortBy as string,
-      sortOrder: sortOrder as 'asc' | 'desc',
-      page: page ? Number(page) : undefined,
-      limit: limit ? Number(limit) : undefined,
-    });
+    const data = await svc.getTenantProperties(tenantId, tenantPropertyQuerySchema.parse(req.query));
     return sendSuccess(res, data, 'Properti berhasil diambil');
   } catch (err) { return handleControllerError(res, err); }
 };

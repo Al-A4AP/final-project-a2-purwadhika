@@ -66,3 +66,5 @@ const changeDate = (value: string, setValue: (value: string) => void, booking: B
 
 type PropertyDatesState = ReturnType<typeof usePropertyDetailDates>;
 type BookingState = ReturnType<typeof usePropertyBookingActions>;
+
+export type PropertyDetailPageState = ReturnType<typeof usePropertyDetailPageState>;

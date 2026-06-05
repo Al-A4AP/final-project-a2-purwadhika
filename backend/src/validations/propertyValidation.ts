@@ -46,3 +46,8 @@ export const availabilityRangeSchema = z.object({
   message: 'Tanggal selesai tidak boleh sebelum tanggal mulai',
   path: ['end_date'],
 });
+
+export const updateRoomImageSchema = z.object({
+  is_main: z.boolean().optional(),
+  order: z.number().int().min(0).optional(),
+});

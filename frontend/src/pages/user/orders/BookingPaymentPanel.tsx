@@ -1,0 +1,49 @@
+import type { FC } from "react";
+import { formatPrice } from "@/lib/formatters";
+import { OrderPaymentActions } from "@/components/user/order-card/OrderPaymentActions";
+import type { OrderCardProps } from "@/components/user/order-card/types";
+
+export const BookingPaymentPanel: FC<Pick<OrderCardProps, "order" | "uploading" | "handleUploadClick" | "canceling" | "handleCancelClick" | "paymentActionId" | "retryMidtransPayment" | "switchToManualPayment">> = ({ 
+  order, uploading, handleUploadClick, canceling, handleCancelClick, 
+  paymentActionId, retryMidtransPayment, switchToManualPayment 
+}) => {
+  return (
+    <div className="mb-8 rounded-3xl border border-slate-100 bg-white p-6 md:p-8 shadow-sm dark:border-slate-800 dark:bg-slate-900">
+      <h2 className="mb-6 text-lg font-bold text-slate-900 dark:text-white">Informasi Pembayaran</h2>
+      
+      <div className="flex flex-col md:flex-row md:items-end justify-between gap-6">
+        <div className="space-y-4 flex-1">
+          <div className="flex items-center justify-between border-b border-slate-100 pb-4 dark:border-slate-800">
+            <span className="text-slate-500">Metode Pembayaran</span>
+            <span className="font-semibold text-slate-900 dark:text-white">{order.payment_method === 'MANUAL' ? 'Transfer Bank (Manual)' : 'Otomatis (Midtrans)'}</span>
+          </div>
+          <div className="flex items-center justify-between border-b border-slate-100 pb-4 dark:border-slate-800">
+            <span className="text-slate-500">Bukti Pembayaran</span>
+            <span className="font-semibold text-slate-900 dark:text-white">
+              {order.payment_proof_url ? (
+                <a href={order.payment_proof_url} target="_blank" rel="noreferrer" className="text-blue-600 hover:underline">Lihat Bukti</a>
+              ) : 'Belum Diunggah'}
+            </span>
+          </div>
+          <div className="flex items-center justify-between pt-2">
+            <span className="font-bold text-slate-900 dark:text-white">Total Tagihan</span>
+            <span className="text-2xl font-black text-red-600">{formatPrice(order.total_price)}</span>
+          </div>
+        </div>
+
+        <div className="flex flex-col gap-3 md:w-1/3">
+          <OrderPaymentActions 
+            order={order} 
+            uploading={uploading} 
+            handleUploadClick={handleUploadClick} 
+            canceling={canceling} 
+            handleCancelClick={handleCancelClick} 
+            paymentActionId={paymentActionId} 
+            retryMidtransPayment={retryMidtransPayment} 
+            switchToManualPayment={switchToManualPayment} 
+          />
+        </div>
+      </div>
+    </div>
+  );
+};

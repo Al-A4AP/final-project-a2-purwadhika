@@ -1,0 +1,126 @@
+import assert from 'node:assert/strict';
+import { afterEach, describe, it } from 'node:test';
+
+process.env.DATABASE_URL = process.env.DATABASE_URL || 'postgresql://user:pass@localhost:5432/test';
+process.env.JWT_SECRET = process.env.JWT_SECRET || 'ownership-test-secret';
+
+type PrismaClientInstance = typeof import('../../src/config/prisma').default;
+type UserCancelOrderModule = typeof import('../../src/services/order/userCancelOrder');
+type UserMidtransOrderModule = typeof import('../../src/services/order/userMidtransOrder');
+type RoomOwnershipModule = typeof import('../../src/services/tenantRoom/roomOwnership');
+type ReviewServiceModule = typeof import('../../src/services/reviewService');
+
+const prisma = require('../../src/config/prisma').default as PrismaClientInstance;
+const { cancelUserManualOrder } = require('../../src/services/order/userCancelOrder') as UserCancelOrderModule;
+const { retryUserMidtransPayment } = require('../../src/services/order/userMidtransOrder') as UserMidtransOrderModule;
+const { ensureTenantProperty, verifyPeakRateOwner, verifyRoomOwner } = require('../../src/services/tenantRoom/roomOwnership') as RoomOwnershipModule;
+const { deleteTenantReview, replyReview } = require('../../src/services/reviewService') as ReviewServiceModule;
+const restoreFns: Array<() => void> = [];
+
+afterEach(() => restoreMocks());
+
+describe('ownership regression', () => {
+  it('rejects manual cancellation when order does not belong to user', async () => {
+    let query: unknown;
+    let updateCalls = 0;
+    replaceMethod(prisma.order, 'findFirst', async (args: object) => { query = args; return null; });
+    replaceMethod(prisma.order, 'update', async () => { updateCalls += 1; return { id: 'order-1' }; });
+
+    await expectRejected(cancelUserManualOrder('order-1', 'user-1'), 'Pesanan tidak ditemukan atau akses ditolak', 404);
+
+    assert.deepEqual(getWhere(query), { id: 'order-1', userId: 'user-1' });
+    assert.equal(updateCalls, 0);
+  });
+
+  it('rejects Midtrans retry when order does not belong to user', async () => {
+    let query: unknown;
+    let updateCalls = 0;
+    replaceMethod(prisma.order, 'findFirst', async (args: object) => { query = args; return null; });
+    replaceMethod(prisma.order, 'update', async () => { updateCalls += 1; return { id: 'order-1' }; });
+
+    await expectRejected(retryUserMidtransPayment('order-1', 'user-1'), 'Pesanan tidak ditemukan atau akses ditolak', 404);
+
+    assert.deepEqual(getWhere(query), { id: 'order-1', userId: 'user-1' });
+    assert.equal(updateCalls, 0);
+  });
+
+  it('rejects tenant property access outside owner scope', async () => {
+    let query: unknown;
+    replaceMethod(prisma.property, 'findFirst', async (args: object) => { query = args; return null; });
+
+    await expectRejected(ensureTenantProperty('property-1', 'tenant-1'), 'Properti tidak ditemukan', 404);
+
+    assert.deepEqual(getWhere(query), { id: 'property-1', tenantId: 'tenant-1', deleted_at: null });
+  });
+
+  it('rejects room access when room belongs to another tenant', async () => {
+    replaceMethod(prisma.room, 'findFirst', async () => buildRoomForTenant('tenant-2'));
+
+    await expectRejected(verifyRoomOwner('room-1', 'tenant-1'), 'Kamar tidak ditemukan', 404);
+  });
+
+  it('rejects peak rate access when rate belongs to another tenant', async () => {
+    replaceMethod(prisma.peakSeasonRate, 'findFirst', async () => buildPeakRateForTenant('tenant-2'));
+
+    await expectRejected(verifyPeakRateOwner('rate-1', 'tenant-1'), 'Rate tidak ditemukan', 404);
+  });
+
+  it('rejects review reply when review property belongs to another tenant', async () => {
+    let createCalls = 0;
+    replaceMethod(prisma.review, 'findFirst', async () => buildReviewForTenant('tenant-2'));
+    replaceMethod(prisma.reviewReply, 'create', async () => { createCalls += 1; return { id: 'reply-1' }; });
+
+    await expectRejected(replyReview('tenant-1', 'review-1', 'Terima kasih'), 'Review tidak ditemukan atau Anda tidak berhak membalas');
+
+    assert.equal(createCalls, 0);
+  });
+
+  it('rejects review deletion when review property belongs to another tenant', async () => {
+    let transactionCalls = 0;
+    replaceMethod(prisma.review, 'findFirst', async () => buildReviewForTenant('tenant-2'));
+    replaceMethod(prisma, '$transaction', async () => { transactionCalls += 1; return []; });
+
+    await expectRejected(deleteTenantReview('tenant-1', 'review-1'), 'Review tidak ditemukan atau Anda tidak berhak menghapus');
+
+    assert.equal(transactionCalls, 0);
+  });
+});
+
+const replaceMethod = (target: object, methodName: string, replacement: (...args: Array<unknown>) => unknown) => {
+  const original = Reflect.get(target, methodName);
+  Reflect.set(target, methodName, replacement);
+  restoreFns.push(() => { Reflect.set(target, methodName, original); });
+};
+
+const restoreMocks = () => {
+  while (restoreFns.length) restoreFns.pop()?.();
+};
+
+const expectRejected = async (promise: Promise<unknown>, message: string, statusCode?: number) => {
+  await assert.rejects(promise, (error: unknown) => {
+    assert.equal(getErrorMessage(error), message);
+    if (statusCode) assert.equal(getStatusCode(error), statusCode);
+    return true;
+  });
+};
+
+const getWhere = (query: unknown) =>
+  isRecord(query) ? query.where : undefined;
+
+const getErrorMessage = (error: unknown) =>
+  error instanceof Error ? error.message : '';
+
+const getStatusCode = (error: unknown) =>
+  isRecord(error) ? error.statusCode : undefined;
+
+const isRecord = (value: unknown): value is Record<string, unknown> =>
+  typeof value === 'object' && value !== null;
+
+const buildRoomForTenant = (tenantId: string) =>
+  ({ id: 'room-1', property: { tenantId, category: { name: 'Hotel' } } });
+
+const buildPeakRateForTenant = (tenantId: string) =>
+  ({ id: 'rate-1', room: { property: { tenantId } } });
+
+const buildReviewForTenant = (tenantId: string) =>
+  ({ id: 'review-1', property: { tenantId } });

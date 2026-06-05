@@ -1,4 +1,5 @@
 import { rateLimit } from 'express-rate-limit';
+import { env } from '../config/env';
 
 const createLimiter = (max: number, windowMinutes: number, message: string) =>
   rateLimit({
@@ -9,7 +10,7 @@ const createLimiter = (max: number, windowMinutes: number, message: string) =>
     message: { success: false, message },
   });
 
-const isDev = process.env.NODE_ENV !== 'production';
+const isDev = env.NODE_ENV !== 'production';
 
 export const authLimiter = createLimiter(
   isDev ? 1000 : 10, // Production default: 10 request / 15 menit

@@ -1,7 +1,7 @@
 import type { FC } from "react";
 import { RegisterContent } from "./register/RegisterContent";
 import type { RegisterPageProps } from "./register/registerTypes";
-import { useRegisterPageState } from "./register/useRegisterPageState";
+import { useRegisterPageState } from "../../hooks/auth/register/useRegisterPageState";
 
 const RegisterPage: FC<RegisterPageProps> = ({ targetRole }) => (
   <RegisterContent state={useRegisterPageState(targetRole)} />

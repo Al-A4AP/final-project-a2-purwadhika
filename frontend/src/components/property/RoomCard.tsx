@@ -111,13 +111,13 @@ const PriceBreakdownRow: FC<{ day: PriceDay; small?: boolean }> = ({ day, small 
 );
 
 const PeakTag: FC<{ label?: string; small?: boolean }> = ({ label, small }) => (
-  <span className={`${small ? 'px-1 text-[9px]' : 'px-2 text-[10px]'} rounded bg-red-100 py-0.5 font-semibold text-red-600 dark:bg-red-900/40 dark:text-red-400`}>{label || 'Peak Season'}</span>
+  <span className={`${small ? 'px-1 text-[9px]' : 'px-2 text-[10px]'} rounded-md bg-amber-100 py-0.5 font-semibold text-amber-700 dark:bg-amber-900/30 dark:text-amber-400`}>{label || 'Peak Season'}</span>
 );
 
 const breakdownClass = (small?: boolean) => small ? 'p-3 text-xs' : 'p-4 text-sm';
 
 const bookingClass = (disabled: boolean) =>
-  disabled ? 'cursor-not-allowed bg-gray-400 text-gray-200 dark:bg-slate-700' : 'bg-red-600 text-white hover:bg-red-700';
+  disabled ? 'cursor-not-allowed bg-slate-200 text-slate-400 dark:bg-slate-800 dark:text-slate-500' : 'bg-red-600 text-white hover:bg-red-700 shadow-sm';
 
 const cardTabIndex = (room: Room) => room.is_available === false ? -1 : 0;
 
@@ -128,7 +128,7 @@ const handleCardKey = (event: KeyboardEvent<HTMLDivElement>, props: RoomCardProp
 };
 
 const roomCardClass = (room: Room, selected?: boolean) => [
-  'flex flex-col rounded-xl border p-6 shadow-sm transition',
+  'flex flex-col rounded-2xl border p-6 shadow-sm transition-all',
   selected ? selectedClass : defaultClass,
   room.is_available === false ? disabledCardClass : enabledCardClass,
 ].join(' ');
@@ -138,10 +138,10 @@ const selectRoom = ({ onSelectRoom, room }: RoomCardProps) => {
   onSelectRoom?.(room.id);
 };
 
-const selectedClass = 'border-red-500 bg-red-50/70 ring-2 ring-red-100 dark:border-red-500 dark:bg-red-950/20 dark:ring-red-900/30';
-const defaultClass = 'border-gray-200 bg-white dark:border-slate-700 dark:bg-slate-800';
-const disabledCardClass = 'opacity-80';
-const enabledCardClass = 'cursor-pointer hover:border-red-300 dark:hover:border-red-500';
+const selectedClass = 'border-red-500 bg-red-50/50 ring-2 ring-red-100 dark:border-red-500 dark:bg-red-900/10 dark:ring-red-900/30';
+const defaultClass = 'border-slate-100 bg-white/60 backdrop-blur-sm dark:border-slate-800 dark:bg-slate-900/60';
+const disabledCardClass = 'opacity-70 grayscale-[0.2]';
+const enabledCardClass = 'cursor-pointer hover:border-slate-300 hover:shadow-md dark:hover:border-slate-600';
 
 const getBookingLabel = (room: Room, reason?: string) => {
   if (room.is_available === false) return getUnavailableLabel(room);

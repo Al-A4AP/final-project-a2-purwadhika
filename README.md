@@ -12,9 +12,8 @@ Final Project Purwadhika JCWDBGPM-11, Group 1:
 
 ## Status Audit Terakhir
 
-Audit Final dilakukan pada 03 Juni 2026 pukul 21:30 WIB dengan acuan
-`PURWADHIKA.md` dan `REST_API_GUIDELINES.md`. Laporan detail ada di `AUDIT_PURWADHIKA`
-dan `AUDIT_CLEANCODE_REST.md`.
+Audit final diperbarui pada 05 Juni 2026 dengan acuan `PURWADHIKA.md` dan
+`REST_API_GUIDELINES.md`. Laporan detail ada di folder `docs/audits`.
 
 | Area                       | Status              | Catatan                                                                                                                        |
 | -------------------------- | ------------------- | ------------------------------------------------------------------------------------------------------------------------------ |
@@ -22,17 +21,19 @@ dan `AUDIT_CLEANCODE_REST.md`.
 | Fitur 1                    | Selesai             | Auth/profile, katalog properti, property detail, tenant property/room/category management, dan public calendar sudah tersedia. |
 | Fitur 2                    | Selesai             | Alur transaksi, konfirmasi tenant (pop-up verified), review, dan report sudah tersedia lengkap.                                |
 | Batas file 200 baris       | Sesuai              | Scan: 0 file di backend maupun frontend yang melampaui 200 baris.                                                              |
-| Function maksimal 15 baris | Sesuai              | Seluruh 11 fungsi logika bisnis di backend telah di-refactor mematuhi batas maksimal 15 baris.                                 |
+| Function maksimal 15 baris | Dipantau            | `npm run audit:functions` tersedia sebagai advisory tool; kandidat refactor dinilai manual agar tidak over-refactor.            |
 | Log production             | Sesuai              | Scan: 0 baris `console.log` aktif di seluruh `backend/src` dan `frontend/src`.                                                |
 | Frontend lint              | Lulus               | `npm run lint` dan `npm run build` selesai tanpa error; exit code 0.                                                           |
 | TypeScript no emit         | Lulus               | `tsc -b` backend dan frontend selesai tanpa error.                                                                             |
 | Pop-up konfirmasi tenant   | Selesai             | `TenantOrdersConfirmModal.tsx` menggunakan `ConfirmModal` sebelum setiap perubahan status order.                               |
-| REST API Naming & Format   | Lulus               | Seluruh endpoint non-RESTful & alias route telah didepresiasi; standardisasi response `sendSuccess` selesai 100%.              |
+| REST API Naming & Format   | Lulus               | Endpoint baru mengikuti pola resource-oriented; beberapa legacy alias masih dipertahankan untuk backward compatibility.        |
 | UI/UX & Security           | Lulus               | Identitas visual *Deep Slate*, *Azure Allure*, font *Geomanist*. Keamanan rahasia Frontend (secrets) terjamin aman.            |
-| Test suite                 | Belum ada           | Backend `npm test` masih placeholder.                                                                                          |
+| Test suite                 | Lulus               | Ownership regression test backend tersedia dan lulus.                                                                           |
 
 Laporan lengkap tersedia di
-[`AUDIT_PURWADHIKA`](./AUDIT_PURWADHIKA) dan [`AUDIT_CLEANCODE_REST.md`](./AUDIT_CLEANCODE_REST.md).
+[`docs/audits/AUDIT_PURWADHIKA_FINAL.md`](./docs/audits/AUDIT_PURWADHIKA_FINAL.md),
+[`docs/audits/AUDIT_CLEAN_CODE_REST_API_GUIDELINES.md`](./docs/audits/AUDIT_CLEAN_CODE_REST_API_GUIDELINES.md), dan
+[`docs/audits/AUDIT_OWNERSHIP_SECURITY.md`](./docs/audits/AUDIT_OWNERSHIP_SECURITY.md).
 
 ## Eksternal API yang Digunakan
 

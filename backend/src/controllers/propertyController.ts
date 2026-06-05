@@ -1,47 +1,30 @@
 import { Request, Response } from 'express';
 import * as propertyService from '../services/propertyService';
 import { getPublicRoomAvailability } from '../services/publicAvailabilityService';
-import { geocodeAddress } from '../services/locationIqService';
-import { sendSuccess, sendError } from '../utils/response';
-import type { PropertyFilters } from '../services/propertyQueryService';
-
-interface ApiError {
-  message?: string;
-  statusCode?: number;
-  issues?: Array<{ message?: string }>;
-}
-
-interface PropertyDetailQuery {
-  check_in_date?: string;
-  check_out_date?: string;
-}
-
-interface PublicAvailabilityQuery {
-  start_date?: unknown;
-  end_date?: unknown;
-}
-
-const getErrorMessage = (err: ApiError) => err?.issues?.[0]?.message || err.message || 'Terjadi kesalahan internal';
-const getStatusCode = (err: ApiError, defaultCode: number) => err?.statusCode || defaultCode;
+import { geocodeAddress, reverseGeocodeCoordinates } from '../services/locationIqService';
+import { sendSuccess } from '../utils/response';
+import { handleControllerError } from './controllerErrors';
+import {
+  geocodeQuerySchema, propertyDetailQuerySchema, propertyListQuerySchema,
+  publicAvailabilityQuerySchema, reverseGeocodeQuerySchema,
+} from '../validations/queryValidation';
 
 export const listPropertiesController = async (req: Request, res: Response) => {
   try {
-    const result = await propertyService.getProperties(req.query as PropertyFilters);
+    const result = await propertyService.getProperties(propertyListQuerySchema.parse(req.query));
     return sendSuccess(res, result, 'Data properti berhasil diambil');
   } catch (err: unknown) {
-    const error = err as ApiError;
-    return sendError(res, getErrorMessage(error), getStatusCode(error, 500));
+    return handleControllerError(res, err);
   }
 };
 
 export const getPropertyDetailController = async (req: Request, res: Response) => {
   try {
     const { id } = req.params as { id: string };
-    const property = await propertyService.getPropertyDetail(id, req.query as PropertyDetailQuery);
+    const property = await propertyService.getPropertyDetail(id, propertyDetailQuerySchema.parse(req.query));
     return sendSuccess(res, property, 'Detail properti berhasil diambil');
   } catch (err: unknown) {
-    const error = err as ApiError;
-    return sendError(res, getErrorMessage(error), getStatusCode(error, 404));
+    return handleControllerError(res, err, 404);
   }
 };
 
@@ -50,28 +33,36 @@ export const getCategoriesController = async (_req: Request, res: Response) => {
     const categories = await propertyService.getCategories();
     return sendSuccess(res, categories, 'Kategori berhasil diambil');
   } catch (err: unknown) {
-    const error = err as ApiError;
-    return sendError(res, getErrorMessage(error), getStatusCode(error, 500));
+    return handleControllerError(res, err);
   }
 };
 
 export const getPublicRoomAvailabilityController = async (req: Request, res: Response) => {
   try {
     const { roomId } = req.params as { roomId: string };
-    const data = await getPublicRoomAvailability(roomId, req.query as PublicAvailabilityQuery);
+    const data = await getPublicRoomAvailability(roomId, publicAvailabilityQuerySchema.parse(req.query));
     return sendSuccess(res, data, 'Ketersediaan kamar berhasil diambil');
   } catch (err: unknown) {
-    const error = err as ApiError;
-    return sendError(res, getErrorMessage(error), getStatusCode(error, 500));
+    return handleControllerError(res, err);
   }
 };
 
 export const geocodePropertyLocationController = async (req: Request, res: Response) => {
   try {
-    const data = await geocodeAddress(String(req.query.address || ''));
+    const { address } = geocodeQuerySchema.parse(req.query);
+    const data = await geocodeAddress(address);
     return sendSuccess(res, data, 'Lokasi berhasil ditemukan');
   } catch (err: unknown) {
-    const error = err as ApiError;
-    return sendError(res, getErrorMessage(error), getStatusCode(error, 500));
+    return handleControllerError(res, err);
+  }
+};
+
+export const reverseGeocodeLocationController = async (req: Request, res: Response) => {
+  try {
+    const { lat, lon } = reverseGeocodeQuerySchema.parse(req.query);
+    const data = await reverseGeocodeCoordinates(lat, lon);
+    return sendSuccess(res, data, 'Kota berhasil ditemukan');
+  } catch (err: unknown) {
+    return handleControllerError(res, err);
   }
 };

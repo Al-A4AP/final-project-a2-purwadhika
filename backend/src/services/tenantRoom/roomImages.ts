@@ -1,3 +1,4 @@
+import type { RoomImage } from '@prisma/client';
 import prisma from '../../config/prisma';
 import { uploadBuffer, deleteFromCloudinary } from '../../utils/cloudinaryUpload';
 import { AppError } from '../../middlewares/errorHandler';
@@ -29,22 +30,47 @@ export const deleteRoomImage = async (roomId: string, imageId: string) => {
 
 export const setRoomImageAsMain = async (roomId: string, imageId: string) => {
   const images = await prisma.roomImage.findMany({ where: { roomId }, orderBy: { order: 'asc' } });
-  const targetImage = images.find(img => img.id === imageId);
+  const targetImage = findRoomImage(images, imageId);
   if (!targetImage) throw new AppError('Gambar tidak ditemukan', 404);
-
-  let currentOrder = 1;
-  const updates = images.map(img => {
-    if (img.id === imageId) {
-      return prisma.roomImage.update({ where: { id: img.id }, data: { order: 0 } });
-    } else {
-      return prisma.roomImage.update({ where: { id: img.id }, data: { order: currentOrder++ } });
-    }
-  });
-  await prisma.$transaction(updates);
+  await prisma.$transaction(buildMainImageUpdates(images, imageId));
   return targetImage;
 };
+
+export const updateRoomImageRecord = async (roomId: string, imageId: string, data: UpdateRoomImageData) => {
+  if (data.is_main) return setRoomImageAsMain(roomId, imageId);
+  const image = await findRoomImageOrThrow(roomId, imageId);
+  if (data.order === undefined) return image;
+  return prisma.roomImage.update({ where: { id: imageId }, data: { order: data.order } });
+};
+
+const findRoomImageOrThrow = async (roomId: string, imageId: string) => {
+  const image = await prisma.roomImage.findFirst({ where: { id: imageId, roomId } });
+  if (!image) throw new AppError('Gambar tidak ditemukan', 404);
+  return image;
+};
+
+const findRoomImage = (images: RoomImageRecord[], imageId: string) =>
+  images.find((image) => image.id === imageId);
+
+const buildMainImageUpdates = (images: RoomImageRecord[], imageId: string) => {
+  let currentOrder = 1;
+  return images.map((image) => {
+    const order = image.id === imageId ? 0 : currentOrder++;
+    return buildImageOrderUpdate(image, order);
+  });
+};
+
+const buildImageOrderUpdate = (image: RoomImageRecord, order: number) =>
+  prisma.roomImage.update({ where: { id: image.id }, data: { order } });
 
 const getNextRoomImageOrder = async (roomId: string) => {
   const last = await prisma.roomImage.findFirst({ where: { roomId }, orderBy: { order: 'desc' } });
   return (last?.order ?? -1) + 1;
 };
+
+type RoomImageRecord = RoomImage;
+
+interface UpdateRoomImageData {
+  is_main?: boolean;
+  order?: number;
+}

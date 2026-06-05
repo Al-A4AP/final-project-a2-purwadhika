@@ -12,6 +12,7 @@ export const getRoleHome = (role?: Role) =>
   role === "TENANT" ? "/tenant/dashboard" : "/";
 export const getRoleName = (role?: TargetAuthRole) =>
   role === "TENANT" ? "Tenant" : role === "USER" ? "Penyewa" : "Akun";
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 export const getRoleLoginPath = (role?: TargetAuthRole) => "/auth/login";
 export const getRoleRegisterPath = (role?: TargetAuthRole) =>
   role === "TENANT"

@@ -6,36 +6,38 @@ import { PaymentProofLink } from "./PaymentProofLink";
 
 export const OrderGuestCell: FC<{ order: Order }> = ({ order }) => (
   <td className="px-6 py-4">
-    <p className="font-semibold text-gray-900 dark:text-white">{order.order_number}</p>
-    <p className="text-xs">{order.user?.name}</p>
-    <p className="text-xs">{order.user?.email}</p>
+    <p className="font-semibold text-slate-900 dark:text-white">{order.order_number}</p>
+    <p className="text-xs text-slate-500 mt-0.5">{order.user?.name}</p>
+    <p className="text-xs text-slate-400">{order.user?.email}</p>
   </td>
 );
 
 export const OrderPropertyCell: FC<{ order: Order }> = ({ order }) => (
   <td className="px-6 py-4">
-    <p className="font-semibold text-gray-900 dark:text-white">{order.property?.name}</p>
-    <p className="text-xs">{order.room?.room_type}</p>
+    <p className="font-semibold text-slate-900 dark:text-white">{order.property?.name}</p>
+    <p className="text-xs text-slate-500 mt-0.5">{order.room?.room_type}</p>
   </td>
 );
 
 export const OrderDatesCell: FC<{ order: Order }> = ({ order }) => (
-  <td className="px-6 py-4">
+  <td className="px-6 py-4 text-sm text-slate-600 dark:text-slate-400">
     <p>{formatDate(order.check_in_date)}</p>
-    <p>{formatDate(order.check_out_date)}</p>
+    <p className="text-slate-400">{formatDate(order.check_out_date)}</p>
   </td>
 );
 
 export const OrderPaymentCell: FC<{ order: Order }> = ({ order }) => (
   <td className="px-6 py-4">
-    <p className="font-semibold text-gray-900 dark:text-white">{formatPrice(order.total_price)}</p>
-    <p className="text-xs">{order.payment_method}</p>
+    <p className="font-semibold text-slate-900 dark:text-white">{formatPrice(order.total_price)}</p>
+    <p className="text-xs text-slate-500 mt-0.5">{order.payment_method}</p>
   </td>
 );
 
 export const OrderStatusCell: FC<{ order: Order }> = ({ order }) => (
   <td className="px-6 py-4">
-    <OrderStatusBadge status={order.status} />
-    {order.payment_proof_url && <PaymentProofLink orderNumber={order.order_number} url={order.payment_proof_url} />}
+    <div className="flex flex-col items-start gap-2">
+      <OrderStatusBadge status={order.status} />
+      {order.payment_proof_url && <PaymentProofLink orderNumber={order.order_number} url={order.payment_proof_url} />}
+    </div>
   </td>
 );

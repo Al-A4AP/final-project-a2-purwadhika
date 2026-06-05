@@ -14,7 +14,7 @@ import {
   switchPaymentToManualCtrl,
   midtransNotificationCtrl
 } from '../controllers/orderController';
-import { createOrderSchema, updateOrderStatusSchema } from '../validations/orderValidation';
+import { createOrderSchema, paymentAttemptSchema, updateOrderStatusSchema } from '../validations/orderValidation';
 
 const router = Router();
 
@@ -25,13 +25,14 @@ router.post('/midtrans-notification', webhookLimiter, midtransNotificationCtrl);
 router.post('/', requireAuth, requireRole(['USER']), orderLimiter, validate(createOrderSchema), createOrderCtrl);
 router.get('/user', requireAuth, requireRole(['USER']), getUserOrdersCtrl);
 router.post('/:id/cancellations', requireAuth, requireRole(['USER']), cancelUserManualOrderCtrl);
+router.post('/:id/payments', requireAuth, requireRole(['USER']), validate(paymentAttemptSchema), retryMidtransPaymentCtrl);
 router.post('/:id/payment-attempts', requireAuth, requireRole(['USER']), retryMidtransPaymentCtrl);
 router.patch('/:id/payment-method', requireAuth, requireRole(['USER']), switchPaymentToManualCtrl);
 router.post('/:id/payment-proof', requireAuth, requireRole(['USER']), uploadPaymentProof.single('payment_proof'), uploadPaymentProofCtrl);
 
 // Tenant Routes
 router.get('/tenant', requireAuth, requireRole(['TENANT']), getTenantOrdersCtrl);
+router.post('/:id/status-transitions', requireAuth, requireRole(['TENANT']), validate(updateOrderStatusSchema), updateOrderStatusCtrl);
 router.patch('/:id/status', requireAuth, requireRole(['TENANT']), validate(updateOrderStatusSchema), updateOrderStatusCtrl);
 
 export default router;
-

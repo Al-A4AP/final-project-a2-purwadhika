@@ -14,7 +14,7 @@ export const reviewService = {
   },
 
   async replyReview(reviewId: string, reply_text: string): Promise<null> {
-    const res = await api.post<ApiResponse<null>>(`/reviews/${reviewId}/reply`, { reply_text });
+    const res = await api.post<ApiResponse<null>>(`/reviews/${reviewId}/replies`, { reply_text });
     return res.data.data;
   }
 };

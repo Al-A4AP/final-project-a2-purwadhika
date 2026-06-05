@@ -6,7 +6,7 @@ interface SkeletonProps {
 
 export const Skeleton: FC<SkeletonProps> = ({ className = '' }) => {
   return (
-    <div className={`bg-gray-200 dark:bg-slate-700 animate-pulse rounded-lg ${className}`} />
+    <div className={`bg-slate-200/60 dark:bg-slate-700/60 animate-pulse rounded-xl ${className}`} />
   );
 };
 
@@ -34,7 +34,7 @@ const PropertyCardSkeletonContent: FC = () => (
 );
 
 export const PropertyCardSkeleton: FC = () => (
-  <div className="flex h-full flex-col overflow-hidden rounded-2xl border border-gray-100 bg-white shadow-sm dark:border-slate-700 dark:bg-slate-800">
+  <div className="flex h-full flex-col overflow-hidden rounded-2xl border border-slate-100 bg-white/80 backdrop-blur-md shadow-sm transition-shadow dark:border-slate-800 dark:bg-slate-900/80">
     <Skeleton className="aspect-4/3 w-full rounded-none" />
     <PropertyCardSkeletonContent />
   </div>

@@ -3,12 +3,14 @@ import jwt, { type SignOptions } from 'jsonwebtoken';
 import crypto from 'crypto';
 import type { User } from '@prisma/client';
 import { EmailVerificationPurpose } from '@prisma/client';
+import { env } from '../config/env';
 import prisma from '../config/prisma';
 import { AppError } from '../middlewares/errorHandler';
+import type { AuthJwtPayload } from '../types/authJwt';
 import { sendPasswordResetEmail, sendVerificationEmail } from '../utils/emailService';
 
-const JWT_SECRET = process.env.JWT_SECRET!;
-const JWT_EXPIRES = process.env.JWT_EXPIRES_IN || '7d';
+const JWT_SECRET = env.JWT_SECRET;
+const JWT_EXPIRES = env.JWT_EXPIRES_IN;
 const ONE_HOUR = 60 * 60 * 1000;
 
 export const registerUser = async (data: RegisterUserData) => {
@@ -163,7 +165,7 @@ const createDummyPasswordHash = async () =>
 const canUsePasswordReset = (user: Pick<User, 'auth_provider' | 'password_set_at'>) =>
   user.auth_provider === 'EMAIL' && !!user.password_set_at;
 
-const generateToken = (payload: object) =>
+const generateToken = (payload: AuthTokenPayload) =>
   jwt.sign(payload, JWT_SECRET, { expiresIn: JWT_EXPIRES as SignOptions['expiresIn'] });
 
 const createRawToken = () =>
@@ -187,3 +189,4 @@ interface RegisterUserData {
 }
 
 type SafeUser = Omit<User, 'password_hash'>;
+type AuthTokenPayload = Pick<AuthJwtPayload, 'email' | 'id' | 'role'>;

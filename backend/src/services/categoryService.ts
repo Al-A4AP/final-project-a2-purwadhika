@@ -1,3 +1,4 @@
+import type { Prisma } from "@prisma/client";
 import prisma from "../config/prisma";
 import { AppError } from "../middlewares/errorHandler";
 import type {
@@ -11,14 +12,27 @@ const normalizePagination = (page?: number, limit?: number) => ({
   limit: Math.min(50, Math.max(1, Number(limit || 10))),
 });
 
-const buildWhere = (search?: string) =>
+const buildSearchWhere = (search?: string): Prisma.PropertyCategoryWhereInput =>
   search?.trim()
     ? { name: { contains: search.trim(), mode: "insensitive" as const } }
     : {};
 
-const buildOrderBy = (sortBy = "name", sortOrder = "asc") => ({
+const buildOrderBy = (
+  sortBy = "name",
+  sortOrder = "asc",
+): Prisma.PropertyCategoryOrderByWithRelationInput => ({
   [sortBy === "updated_at" ? "updated_at" : "name"]:
     sortOrder === "desc" ? "desc" : "asc",
+});
+
+const buildNameWhere = (
+  name: string,
+  tenantId: string,
+  exceptId?: string,
+): Prisma.PropertyCategoryWhereInput => ({
+  name,
+  OR: [{ tenantId: null }, { tenantId }],
+  ...(exceptId ? { id: { not: exceptId } } : {}),
 });
 
 const ensureNameAvailable = async (
@@ -26,12 +40,9 @@ const ensureNameAvailable = async (
   tenantId: string,
   exceptId?: string,
 ) => {
-  const where: any = {
-    name,
-    OR: [{ tenantId: null }, { tenantId }],
-  };
-  if (exceptId) where.id = { not: exceptId };
-  const existing = await prisma.propertyCategory.findFirst({ where });
+  const existing = await prisma.propertyCategory.findFirst({
+    where: buildNameWhere(name, tenantId, exceptId),
+  });
   if (existing) throw new AppError("Nama kategori sudah digunakan", 400);
 };
 
@@ -54,7 +65,7 @@ export const listCategories = async (
 ) => {
   const { page, limit } = normalizePagination(query.page, query.limit);
   const where = {
-    ...buildWhere(query.search),
+    ...buildSearchWhere(query.search),
     OR: [{ tenantId: null }, { tenantId }],
   };
   const orderBy = buildOrderBy(query.sortBy, query.sortOrder);

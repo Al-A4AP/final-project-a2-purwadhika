@@ -2,7 +2,7 @@ import type { FC } from "react";
 import type { FieldError, UseFormRegister } from "react-hook-form";
 import type { PropertyFormInput } from "./propertyFormSchema";
 
-export const PROPERTY_INPUT_CLASS = "w-full px-4 py-2.5 border border-gray-300 dark:border-slate-600 dark:bg-slate-700 dark:text-white rounded-lg focus:ring-2 focus:ring-red-500 outline-none";
+export const PROPERTY_INPUT_CLASS = "w-full rounded-xl border border-slate-200 bg-white px-4 py-3 text-sm text-slate-900 outline-none transition focus:border-slate-500 focus:ring-1 focus:ring-slate-500 disabled:opacity-60 dark:border-slate-700 dark:bg-slate-900 dark:text-white";
 
 interface FieldProps {
   error?: FieldError;
@@ -10,20 +10,33 @@ interface FieldProps {
   name: keyof PropertyFormInput;
   placeholder?: string;
   register: UseFormRegister<PropertyFormInput>;
+  helperText?: string;
 }
 
-export const TextField: FC<FieldProps> = ({ error, label, name, placeholder, register }) => (
-  <div><FieldLabel label={label} /><input {...register(name)} placeholder={placeholder} className={PROPERTY_INPUT_CLASS} />{error && <FieldErrorText message={error.message} />}</div>
+export const TextField: FC<FieldProps> = ({ error, label, name, placeholder, register, helperText }) => (
+  <div>
+    <FieldLabel label={label} />
+    <input {...register(name)} placeholder={placeholder} className={`${PROPERTY_INPUT_CLASS} ${error ? 'border-red-500 focus:border-red-500 focus:ring-red-500' : ''}`} />
+    {helperText && !error && <p className="mt-1.5 text-xs text-slate-500 dark:text-slate-400">{helperText}</p>}
+    {error && <FieldErrorText message={error.message} />}
+  </div>
 );
 
-export const TextAreaField: FC<FieldProps & { rows?: number }> = ({ error, label, name, placeholder, register, rows = 4 }) => (
-  <div><FieldLabel label={label} /><textarea {...register(name)} rows={rows} placeholder={placeholder} className={PROPERTY_INPUT_CLASS} />{error && <FieldErrorText message={error.message} />}</div>
+export const TextAreaField: FC<FieldProps & { rows?: number }> = ({ error, label, name, placeholder, register, rows = 4, helperText }) => (
+  <div>
+    <FieldLabel label={label} />
+    <textarea {...register(name)} rows={rows} placeholder={placeholder} className={`${PROPERTY_INPUT_CLASS} resize-y ${error ? 'border-red-500 focus:border-red-500 focus:ring-red-500' : ''}`} />
+    {helperText && !error && <p className="mt-1.5 text-xs text-slate-500 dark:text-slate-400">{helperText}</p>}
+    {error && <FieldErrorText message={error.message} />}
+  </div>
 );
 
 export const FieldLabel: FC<{ label: string }> = ({ label }) => (
-  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">{label}</label>
+  <label className="mb-1.5 block text-sm font-semibold text-slate-700 dark:text-slate-300">
+    {label} <span className="text-red-500">*</span>
+  </label>
 );
 
 export const FieldErrorText: FC<{ message?: string }> = ({ message }) => (
-  <p className="text-red-500 text-xs mt-1">{message}</p>
+  <p className="mt-1.5 text-xs font-medium text-red-500">{message}</p>
 );

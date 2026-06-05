@@ -32,7 +32,7 @@ export const InlineDatePicker: FC<InlineDatePickerProps> = (props) => {
 };
 
 const SectionCard: FC<{ id: string; children: ReactNode }> = ({ id, children }) => (
-  <div id={id} className="bg-white dark:bg-slate-800 rounded-xl p-6 shadow-sm border dark:border-slate-700 mb-8">
+  <div id={id} className="bg-white/60 backdrop-blur-sm dark:bg-slate-900/60 rounded-2xl p-6 sm:p-8 shadow-sm border border-slate-100 dark:border-slate-800 mb-8">
     {children}
   </div>
 );

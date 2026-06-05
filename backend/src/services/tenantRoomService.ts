@@ -1,5 +1,5 @@
 import { AppError } from '../middlewares/errorHandler';
-import { addRoomImage, uploadRoomImage, deleteRoomImage, setRoomImageAsMain } from './tenantRoom/roomImages';
+import { addRoomImage, uploadRoomImage, deleteRoomImage, setRoomImageAsMain, updateRoomImageRecord } from './tenantRoom/roomImages';
 import { buildAvailabilityRangeDates } from './tenantRoom/availabilityRange';
 import { buildTenantAvailabilityView } from './tenantRoom/availabilityView';
 import { buildRoomCreateData, buildRoomUpdateData, normalizeAvailabilityDate } from './tenantRoom/roomData';
@@ -73,14 +73,22 @@ export const setRoomAvailabilityRange = async (roomId: string, tenantId: string,
   return upsertRoomAvailabilityRange(roomId, buildAvailabilityRangeDates(start, end), isAvailable);
 };
 
-export const addRoomImageService = async (roomId: string, file: Express.Multer.File) => {
+export const addRoomImageService = async (roomId: string, tenantId: string, file: Express.Multer.File) => {
+  await verifyRoomOwner(roomId, tenantId);
   return addRoomImage(roomId, file);
 };
 
-export const removeRoomImage = async (roomId: string, imageId: string) => {
+export const removeRoomImage = async (roomId: string, tenantId: string, imageId: string) => {
+  await verifyRoomOwner(roomId, tenantId);  
   return deleteRoomImage(roomId, imageId);
 };
 
-export const setRoomMainImage = async (roomId: string, imageId: string) => {
+export const updateRoomImage = async (roomId: string, tenantId: string, imageId: string, data: { is_main?: boolean; order?: number }) => {
+  await verifyRoomOwner(roomId, tenantId);  
+  return updateRoomImageRecord(roomId, imageId, data);
+};
+
+export const setRoomMainImage = async (roomId: string, imageId: string, tenantId: string) => {
+  await verifyRoomOwner(roomId, tenantId);
   return setRoomImageAsMain(roomId, imageId);
 };
