@@ -1,5 +1,5 @@
 import type { Dispatch, FC, SetStateAction } from 'react';
-import { PANEL_CLASS } from './constants';
+import { INLINE_PANEL_CLASS, PANEL_CLASS } from './constants';
 import { AmenitiesGrid } from './AmenitiesGrid';
 import { FilterActions } from './FilterActions';
 import { PriceRangeFields } from './PriceRangeFields';
@@ -21,13 +21,19 @@ interface FilterPanelProps {
   toggleAmenity: (id: string) => void;
   onClear: () => void;
   onApply: () => void;
+  variant?: FilterPanelVariant;
 }
 
-export const FilterPanel: FC<FilterPanelProps> = (props) => (
-  <div className={PANEL_CLASS}><div className="space-y-5">
+export const FilterPanel: FC<FilterPanelProps> = ({ variant = 'dropdown', ...props }) => (
+  <div className={getPanelClass(variant)}><div className="space-y-5">
     <SearchCategoryFields search={props.search} category={props.category} categories={props.categories} setSearch={props.setSearch} setCategory={props.setCategory} />
     <PriceRangeFields minPrice={props.minPrice} maxPrice={props.maxPrice} setMinPrice={props.setMinPrice} setMaxPrice={props.setMaxPrice} />
     <AmenitiesGrid selectedAmenities={props.selectedAmenities} onToggle={props.toggleAmenity} />
     <FilterActions onClear={props.onClear} onApply={props.onApply} />
   </div></div>
 );
+
+const getPanelClass = (variant: FilterPanelVariant) =>
+  variant === 'inline' ? INLINE_PANEL_CLASS : PANEL_CLASS;
+
+type FilterPanelVariant = 'dropdown' | 'inline';

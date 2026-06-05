@@ -15,8 +15,9 @@ const useExplorePageState = () => {
   const page = useHomePageState({ detectInitialCity: false });
   const currentOrder = (page.activeFilters.order as "asc" | "desc") || "desc";
   const currentSort = page.activeFilters.sort || "created_at";
+  const closeFilters = () => setFiltersOpen(false);
   const toggleFilters = () => setFiltersOpen((open) => !open);
-  return { ...page, currentOrder, currentSort, filtersOpen, toggleFilters };
+  return { ...page, closeFilters, currentOrder, currentSort, filtersOpen, toggleFilters };
 };
 
 const ExplorePageView: FC<{ state: ExploreState }> = ({ state }) => (
@@ -52,24 +53,18 @@ const MobileFilterButton: FC<{ isOpen: boolean; onClick: () => void }> = ({ isOp
   </button>
 );
 
-const MobileFilterPanel: FC<{ state: ExploreState }> = ({ state }) => (
-  <div className="mt-4 rounded-xl border border-slate-200 bg-white p-3 shadow-sm dark:border-slate-800 dark:bg-slate-900 lg:hidden">
-    <ExploreFilterPanel state={state} />
-  </div>
-);
-
 const ExploreMain: FC<{ state: ExploreState }> = ({ state }) => (
   <div className="mx-auto max-w-7xl px-4 py-8">
     <div className="flex flex-col gap-8 lg:flex-row lg:items-start">
-      <DesktopFilterSidebar state={state} />
+      <DesktopFilterPanel state={state} />
       <PropertyResults state={state} />
     </div>
   </div>
 );
 
-const DesktopFilterSidebar: FC<{ state: ExploreState }> = ({ state }) => (
-  <div className="hidden w-72 shrink-0 lg:block">
-    <div className="sticky top-44">
+const DesktopFilterPanel: FC<{ state: ExploreState }> = ({ state }) => (
+  <div className="hidden shrink-0 lg:block lg:w-[22rem] xl:w-96">
+    <div className="sticky top-36">
       <ExploreFilterPanel state={state} />
     </div>
   </div>
@@ -81,8 +76,17 @@ const ExploreFilterPanel: FC<{ state: ExploreState }> = ({ state }) => (
     currentOrder={state.currentOrder}
     currentSort={state.currentSort}
     hasFilterChanges={state.hasFilterChanges}
+    layout="sidebar"
+    onApplied={state.closeFilters}
+    showInlinePropertyFilters
     totalCount={state.propertyState.totalCount}
   />
+);
+
+const MobileFilterPanel: FC<{ state: ExploreState }> = ({ state }) => (
+  <div className="mt-4 rounded-xl border border-slate-200 bg-white p-3 shadow-sm dark:border-slate-800 dark:bg-slate-900 lg:hidden">
+    <ExploreFilterPanel state={state} />
+  </div>
 );
 
 const PropertyResults: FC<{ state: ExploreState }> = ({ state }) => (

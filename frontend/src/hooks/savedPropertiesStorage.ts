@@ -18,7 +18,7 @@ export const loadSavedProperties = () => {
 export const removeSavedProperty = (items: SavedProperty[], id: string) => {
   const next = items.filter((property) => property.id !== id);
   persistSavedProperties(next);
-  toast.success("Properti dihapus.");
+  showSavedToast(id, "Properti dihapus.");
   return next;
 };
 
@@ -28,16 +28,19 @@ export const toggleSavedProperty = (items: SavedProperty[], property: Property) 
 const addToSaved = (items: SavedProperty[], property: Property) => {
   const next = [toSavedProperty(property), ...items];
   persistSavedProperties(next);
-  toast.success("Tersimpan! Lihat di Properti Tersimpan Anda.");
+  showSavedToast(property.id, "Tersimpan! Lihat di Properti Tersimpan Anda.");
   return next;
 };
 
 const removeFromSaved = (items: SavedProperty[], id: string) => {
   const next = items.filter((property) => property.id !== id);
   persistSavedProperties(next);
-  toast.success("Dihapus dari properti tersimpan.");
+  showSavedToast(id, "Dihapus dari properti tersimpan.");
   return next;
 };
+
+const showSavedToast = (id: string, message: string) =>
+  toast.success(message, { id: `saved-property-${id}` });
 
 const persistSavedProperties = (items: SavedProperty[]) =>
   localStorage.setItem(STORAGE_KEY, JSON.stringify(items.slice(0, MAX_SAVED_PROPERTIES)));

@@ -20,10 +20,14 @@ export type SortFilterBarProps = {
   sortGroups: SortGroup[];
   currentSort: string;
   currentOrder: SortOrder;
+  layout?: SortFilterLayout;
   onChange: (sort: string, order: SortOrder) => void;
   resultCount?: number;
   resultLabel?: string;
+  showFilterButton?: boolean;
 };
+
+export type SortFilterLayout = "default" | "stacked";
 
 export type SortDropdownProps = {
   group: SortGroup;

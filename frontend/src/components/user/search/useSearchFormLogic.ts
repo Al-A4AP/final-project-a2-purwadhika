@@ -11,6 +11,7 @@ type SearchFormValues = Partial<Pick<SearchFormInput, "adults" | "babies" | "che
 export type SearchSubmitMode = "explore" | "scroll";
 
 interface SearchFormLogicOptions {
+  onSubmitted?: () => void;
   submitMode?: SearchSubmitMode;
 }
 
@@ -21,15 +22,22 @@ export const useSearchFormLogic = (options: SearchFormLogicOptions = {}) => {
   const filters = useFilterStore();
   const navigate = useNavigate();
   const [guestOpen, setGuestOpen] = useState(false);
-  const form = useSearchFormDefaults(filters);
-  useSyncSearchForm(form, filters.activeFilters, filters.appliedAt);
-  const checkInVal = useWatch({ control: form.control, name: "check_in_date" });
-  const dates = useSearchDates(checkInVal);
+  const search = useSearchFormState(filters);
   const guests = useGuestSummary(filters.adults, filters.children, filters.babies);
-  const onSubmit = (data: SearchFormInput) =>
-    submitSearch(data, { filters, navigate, submitMode: options.submitMode || "scroll", totalGuests: guests.totalGuests }, () => setGuestOpen(false));
+  const onSubmit = createSubmitHandler(data => submitSearch(
+    data,
+    { filters, navigate, submitMode: options.submitMode || "scroll", totalGuests: guests.totalGuests },
+    () => setGuestOpen(false),
+  ), options.onSubmitted);
+  return { dates: search.dates, filters, form: search.form, guestOpen, guests, onSubmit, setGuestOpen };
+};
 
-  return { filters, form, guestOpen, setGuestOpen, dates, guests, onSubmit };
+const createSubmitHandler = (
+  submit: (data: SearchFormInput) => void,
+  onSubmitted?: () => void,
+) => (data: SearchFormInput) => {
+  submit(data);
+  onSubmitted?.();
 };
 
 const useSearchFormDefaults = (filters: FilterStoreState) =>
@@ -37,6 +45,13 @@ const useSearchFormDefaults = (filters: FilterStoreState) =>
     resolver: zodResolver(searchFormSchema),
     defaultValues: toSearchFormValues(filters),
   });
+
+const useSearchFormState = (filters: FilterStoreState) => {
+  const form = useSearchFormDefaults(filters);
+  useSyncSearchForm(form, filters.activeFilters, filters.appliedAt);
+  const checkInVal = useWatch({ control: form.control, name: "check_in_date" });
+  return { dates: useSearchDates(checkInVal), form };
+};
 
 const useSyncSearchForm = (form: UseFormReturn<SearchFormInput>, values: SearchFormValues, appliedAt: number) => {
   useEffect(() => {

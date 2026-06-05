@@ -148,12 +148,12 @@ const TrustItem: FC<{ icon: LucideIcon; text: string; title: string }> = ({ icon
 
 const TenantCta: FC = () => (
   <section className="mx-auto max-w-7xl px-4 py-12">
-    <div className="flex flex-col gap-6 rounded-2xl border border-red-100 bg-white p-8 shadow-sm dark:border-red-900/30 dark:bg-slate-900 md:flex-row md:items-center md:justify-between">
+    <div className="flex flex-col gap-6 rounded-2xl border border-red-100 bg-white p-8 shadow-sm dark:border-red-900/30 dark:bg-slate-900 lg:flex-row lg:items-center lg:justify-between">
       <div>
         <h2 className="text-2xl font-bold text-slate-900 dark:text-white">Ayo daftar sebagai tenant</h2>
         <p className="mt-2 max-w-2xl text-slate-600 dark:text-slate-400">Kelola properti, kamar, harga musiman, dan reservasi tamu dari satu dashboard.</p>
       </div>
-      <Link to="/auth/register/tenant" className="inline-flex items-center justify-center gap-2 rounded-xl bg-red-600 px-5 py-3 text-sm font-bold text-white transition hover:bg-red-700">
+      <Link to="/auth/register/tenant" className="inline-flex w-full items-center justify-center gap-2 rounded-xl bg-red-600 px-5 py-3 text-center text-sm font-bold text-white transition hover:bg-red-700 sm:w-fit lg:shrink-0">
         Mulai Menjadi Tenant <ArrowRight size={16} />
       </Link>
     </div>
