@@ -1,39 +1,41 @@
 # Rencana Perbaikan Sisa Setelah Audit Final
 
-Tanggal update: 05 Juni 2026  
-Acuan: audit final clean code, REST API, ownership, security, dan PURWADHIKA
+Tanggal update: 06 Juni 2026  
+Acuan: audit clean code, REST API guidelines, ownership, security, dan PURWADHIKA
 
 ## Ringkasan
 
-Rencana besar sebelumnya sudah banyak dilaksanakan: clean code residual, validasi query, endpoint REST baru, security hardening dasar, ownership regression test, browser storage cleanup, struktur dokumentasi, dan pemindahan cron scheduler.
+Rencana besar sebelumnya sudah dilaksanakan: clean code residual, validasi query, endpoint REST baru utama, security hardening dasar, ownership regression test, browser storage cleanup, struktur dokumentasi, cron scheduler, UI/UX tenant/user bertahap, dan function-length audit advisory.
 
-File ini hanya menyimpan sisa rekomendasi yang belum dilaksanakan atau masih perlu keputusan final. Item yang sudah selesai tidak lagi dicantumkan sebagai rencana kerja aktif.
+File ini hanya menyimpan sisa rekomendasi yang belum dilaksanakan atau masih perlu keputusan final. Item yang sudah selesai tidak dicatat lagi sebagai rencana kerja aktif.
 
 ## Sudah Dilaksanakan
 
 | Item | Status |
 | --- | --- |
-| Clean code residual | Selesai |
-| Hapus `console.*`, `debugger`, dan `any` pada source utama | Selesai |
-| File sumber <200 baris | Selesai |
+| File source utama <200 baris | Selesai |
+| Hapus `any`, `debugger`, dan `console.*` dari source utama | Selesai |
 | Validasi query backend | Selesai |
-| Endpoint baru resource-oriented | Selesai |
-| Update frontend ke endpoint baru utama | Selesai |
-| Security headers dasar | Selesai |
+| Endpoint resource-oriented utama | Selesai |
+| Update frontend ke endpoint utama | Selesai |
+| Security headers dan rate limiter dasar | Selesai |
 | HTTP-only auth cookie | Selesai |
 | LocationIQ backend proxy | Selesai |
 | Ownership regression test | Selesai |
 | Browser storage cleanup | Selesai |
-| Struktur `docs/audits` dan `docs/plans` | Selesai |
-| Cron scheduler dipindah ke folder `backend/src/cron/` | Selesai |
-| Function length audit otomatis advisory | Selesai |
+| Struktur `docs/audits`, `docs/plans`, `docs/guidelines` | Selesai |
+| README hanya di root dan `docs` | Selesai secara dokumentasi |
+| Cron scheduler di `backend/src/cron/` | Selesai |
+| Function-length audit otomatis advisory | Selesai |
+| Explore desktop sidebar filter dan mobile auto-close filter | Selesai |
+| Tenant reports/reviews/property performance pagination | Selesai |
 
 ## Sisa Rencana yang Belum Dilaksanakan
 
 ### 1. Cleanup Legacy REST Alias
 
 Risiko: Menengah  
-Prioritas: Opsional sebelum final, penting jika penilaian REST ingin sangat ketat
+Prioritas: Opsional sebelum final jika penilaian REST ingin sangat ketat
 
 Masalah:
 
@@ -43,7 +45,6 @@ Endpoint terdampak:
 
 - `GET /api/orders/user`
 - `GET /api/orders/tenant`
-- `POST /api/orders/:id/cancellations`
 - `POST /api/orders/:id/payment-attempts`
 - `PATCH /api/orders/:id/status`
 - `POST /api/reviews/:reviewId/reply`
@@ -59,31 +60,58 @@ File terdampak:
 - `frontend/src/services/reviewService.ts`
 - `frontend/src/services/availabilityService.ts`
 - `frontend/src/services/tenantService.ts`
-- README/API documentation
+- Dokumentasi API bila dibuat terpisah
 
 Tahapan aman:
 
 1. Pastikan seluruh frontend sudah memakai endpoint baru.
 2. Jalankan browser regression untuk booking, payment retry, cancel manual order, tenant status update, reply review, room availability, dan room image main.
-3. Beri komentar/deprecation note sementara jika belum ingin menghapus.
-4. Hapus alias lama satu kelompok per commit/per tahap.
+3. Beri deprecation note sementara jika belum ingin menghapus langsung.
+4. Hapus alias lama satu kelompok per tahap.
 5. Jalankan `frontend npm.cmd run lint`, `frontend npm.cmd run build`, `backend npm.cmd run build`, dan `backend npm.cmd run test:ownership`.
 
-### 2. CSRF Token untuk Cookie Auth Production
+### 2. Review Kandidat Function-Length Advisory
+
+Risiko: Rendah-menengah  
+Prioritas: Opsional clean code jika mentor menilai aturan 15 baris sangat ketat
+
+Masalah:
+
+Script `npm run audit:functions` menemukan 78 kandidat manual review: 76 di `frontend/src` dan 2 di `backend/src`. Mayoritas kandidat frontend adalah JSX presentasional panjang, sehingga perlu review manual sebelum dipecah.
+
+Prioritas kandidat awal:
+
+- `frontend/src/components/tenant/room-form/RoomImageField.tsx`
+- `frontend/src/pages/user/booking/ReservationStepper.tsx`
+- `frontend/src/pages/tenant/rooms-page/RoomsListView.tsx`
+- `frontend/src/pages/tenant/properties-list/PropertiesListView.tsx`
+- `frontend/src/pages/tenant/property-form/PropertyImageField.tsx`
+- `backend/src/services/categoryService.ts`
+- `backend/src/services/tenantPropertyService.ts`
+
+Tahapan aman:
+
+1. Jalankan `npm run audit:functions`.
+2. Prioritaskan kandidat yang mencampur logic dan JSX.
+3. Hindari memecah component presentasional jika hasilnya lebih sulit dibaca.
+4. Refactor satu area per tahap.
+5. Jalankan lint/build sesuai area terdampak.
+
+### 3. CSRF Token untuk Cookie Auth Production
 
 Risiko: Menengah  
 Prioritas: Production hardening
 
 Masalah:
 
-Auth token sudah HTTP-only cookie dengan `sameSite: strict`, tetapi jika deployment production memakai cookie-auth cross-origin atau domain yang lebih kompleks, CSRF token eksplisit akan lebih kuat.
+Auth token sudah HTTP-only cookie dengan `sameSite: strict`. Jika production memakai cookie-auth cross-origin atau domain kompleks, CSRF token eksplisit akan lebih kuat.
 
 File yang kemungkinan terdampak:
 
 - `backend/src/middlewares/`
 - `backend/server.ts`
 - `backend/src/config/authCookie.ts`
-- `frontend/src/services/api.ts`
+- `frontend/src/services/api/`
 
 Tahapan aman:
 
@@ -93,7 +121,7 @@ Tahapan aman:
 4. Terapkan middleware hanya pada state-changing request.
 5. Uji login, logout, profile update, booking, payment proof, tenant CRUD, dan review.
 
-### 3. Persistent Token Blacklist
+### 4. Persistent Token Blacklist
 
 Risiko: Menengah  
 Prioritas: Production hardening jika backend multi-instance
@@ -107,7 +135,7 @@ File yang kemungkinan terdampak:
 - `backend/src/services/tokenBlacklistService.ts`
 - `backend/src/config/prisma.ts`
 - `backend/prisma/schema.prisma` jika memakai database
-- Alternatif: config Redis jika memakai Redis
+- Alternatif config Redis jika memakai Redis
 
 Tahapan aman:
 
@@ -116,7 +144,7 @@ Tahapan aman:
 3. Update service blacklist untuk read/write persistent storage.
 4. Tambahkan test logout dan revoked token.
 
-### 4. Saved Properties Menjadi Data Akun
+### 5. Saved Properties Menjadi Data Akun
 
 Risiko: Menengah-tinggi  
 Prioritas: Product improvement, bukan blocker requirement
@@ -141,43 +169,15 @@ Tahapan aman:
 2. Jika wajib, tambahkan schema/model database.
 3. Buat endpoint user saved properties.
 4. Migrasikan frontend dari localStorage ke API dengan fallback local cache.
-5. Uji login/logout, saved/unsaved, dan refresh page.
-
-### 5. Review Kandidat Function Length Audit
-
-Risiko: Rendah-menengah  
-Prioritas: Opsional clean code jika penilaian 15 baris sangat ketat
-
-Masalah:
-
-Script `npm run audit:functions` sudah tersedia dan berjalan sebagai alat bantu non-blocking. Hasil terakhir menemukan 90 kandidat di atas 15 baris: 88 di `frontend/src` dan 2 di `backend/src`. Mayoritas adalah komponen JSX presentasional panjang yang perlu dinilai manual sebelum dipecah.
-
-File yang kemungkinan terdampak:
-
-- `frontend/src/components/tenant/room-form/RoomImageField.tsx`
-- `frontend/src/pages/user/booking/ReservationStepper.tsx`
-- `frontend/src/pages/tenant/rooms-page/RoomsListView.tsx`
-- `frontend/src/pages/user/HomePage.tsx`
-- `frontend/src/pages/tenant/PeakSeasonPage.tsx`
-- `frontend/src/pages/tenant/properties-list/PropertiesListView.tsx`
-- `backend/src/services/categoryService.ts`
-- `backend/src/services/tenantPropertyService.ts`
-
-Tahapan aman:
-
-1. Jalankan `npm run audit:functions`.
-2. Prioritaskan kandidat yang berisi logic bercampur dengan JSX, bukan markup presentasional murni.
-3. Pecah hanya jika helper/component baru membuat kode lebih jelas.
-4. Hindari memecah component kecil secara berlebihan hanya demi angka 15 baris.
-5. Setelah refactor kandidat tertentu, jalankan lint/build sesuai area terdampak.
+5. Uji login/logout, saved/unsaved, refresh page, dan multi-device.
 
 ## Rekomendasi Urutan
 
 1. Cleanup legacy REST alias jika ingin standar REST paling ketat.
-2. Tambahkan CSRF token jika deployment production membutuhkan.
-3. Pindahkan token blacklist ke storage persistent jika backend multi-instance.
-4. Pertimbangkan saved properties backend hanya jika fitur akun lintas device dibutuhkan.
-5. Review kandidat function length audit jika mentor meminta kepatuhan 15 baris yang lebih ketat.
+2. Review kandidat function-length advisory bila mentor meminta kepatuhan 15 baris lebih ketat.
+3. Tambahkan CSRF token jika deployment production membutuhkan.
+4. Pindahkan token blacklist ke storage persistent jika backend multi-instance.
+5. Pertimbangkan saved properties backend hanya jika fitur akun lintas device dibutuhkan.
 
 ## Status Verifikasi Terakhir
 
@@ -185,5 +185,5 @@ Tahapan aman:
 - Frontend build: lulus.
 - Backend build: lulus.
 - Ownership test: lulus, 7/7.
-- Function length audit advisory: tersedia melalui `npm run audit:functions`; hasil terakhir 90 kandidat manual review.
-- Scan clean code utama: tidak ada `console.*`, `debugger`, `any`, dan tidak ada file sumber >200 baris.
+- Function-length audit advisory: 78 kandidat manual review.
+- Scan clean code utama: tidak ada `any`, `debugger`, `console.*`, dan tidak ada file source utama >200 baris.

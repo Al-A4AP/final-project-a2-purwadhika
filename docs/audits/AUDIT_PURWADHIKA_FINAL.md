@@ -1,16 +1,16 @@
 # Audit Keseluruhan PURWADHIKA
 
-Tanggal audit: 05 Juni 2026  
+Tanggal audit: 06 Juni 2026  
 Project: PURWALOKA - Property Renting Web App  
-Acuan: `PURWADHIKA.md`
+Acuan: `docs/guidelines/PURWADHIKA.md`
 
 ## Ringkasan Eksekutif
 
-Project sudah memenuhi mayoritas requirement utama PURWADHIKA untuk Property Renting Web App. Fitur user, tenant, transaksi, review, report, clean code, dan standardisasi dasar sudah tersedia. Verifikasi terakhir menunjukkan lint/build/test lulus dan tidak ada temuan clean code kritikal pada source utama.
+Project sudah memenuhi mayoritas requirement utama PURWADHIKA untuk Property Renting Web App. Fitur user, tenant, transaksi, review, report, mobile responsiveness, clean code, ownership, dan REST guideline jalur utama sudah tersedia dan terverifikasi.
 
-Status final: siap review dengan catatan kecil pada cleanup legacy REST alias dan opsi hardening production.
+Status final: siap review dengan catatan opsional pada cleanup legacy REST alias, review kandidat function-length advisory, dan hardening production.
 
-## Verifikasi Terakhir
+## Verifikasi Terbaru
 
 | Pemeriksaan | Hasil |
 | --- | --- |
@@ -18,20 +18,23 @@ Status final: siap review dengan catatan kecil pada cleanup legacy REST alias da
 | Frontend build | Lulus |
 | Backend build | Lulus |
 | Backend ownership test | Lulus, 7/7 |
-| File sumber >200 baris | Tidak ditemukan pada `backend/src`, `backend/tests`, `frontend/src` |
-| `console.*`, `debugger`, `any` | Tidak ditemukan pada source utama |
-| Function length audit advisory | `npm run audit:functions` tersedia; hasil dipakai untuk review manual, bukan hard rule |
+| File source >200 baris | Tidak ditemukan pada `backend/src`, `backend/tests`, `frontend/src` |
+| `any`, `debugger`, `console.*` | Tidak ditemukan pada source utama |
+| Function length audit advisory | 78 kandidat manual review; bukan build blocker |
 
 ## Main Features
 
 | Requirement | Status | Catatan |
 | --- | --- | --- |
-| Web app untuk property renting | Terpenuhi | Aplikasi memiliki user flow penyewa dan tenant |
-| User dapat melihat dan memesan properti | Terpenuhi | Homepage, detail property, kamar, booking, order tersedia |
-| Tenant dapat mengelola properti | Terpenuhi | Dashboard tenant, CRUD property, room, category, availability, peak season tersedia |
-| Transaksi dan pembayaran | Terpenuhi | Manual transfer, Midtrans retry, upload proof, konfirmasi tenant tersedia |
-| Review | Terpenuhi | Review user dan reply/delete tenant tersedia |
-| Report dan analitik | Terpenuhi | Laporan pendapatan, occupancy, property report tersedia |
+| Web app property renting | Terpenuhi | User flow penyewa dan tenant tersedia |
+| Role user dan tenant | Terpenuhi | Protected route dan backend role middleware tersedia |
+| User dapat mencari properti berdasarkan destinasi/tanggal | Terpenuhi | Homepage dan Explore memakai search/filter/sort/pagination |
+| Perbandingan harga/ketersediaan | Terpenuhi | Detail properti menampilkan ketersediaan/harga kamar dan status blocked/booked |
+| Tenant kelola harga musiman | Terpenuhi | Halaman `/tenant/peak-season` menjadi pusat pengelolaan peak season |
+| Tenant kelola ketersediaan | Terpenuhi | Availability calendar dan range update tersedia |
+| Tenant memiliki lebih dari satu room | Terpenuhi | Room management per property tersedia |
+| Tenant melihat laporan penjualan | Terpenuhi | Laporan Pendapatan, Laporan Properti, dan Okupasi tersedia |
+| Review satu arah setelah menginap | Terpenuhi | User review dan tenant reply/delete tersedia sesuai role |
 
 ## Feature 1
 
@@ -39,13 +42,14 @@ Status final: siap review dengan catatan kecil pada cleanup legacy REST alias da
 
 Status: terpenuhi.
 
-Tersedia homepage dengan daftar properti, search/filter, filter chips, pagination/load control, city input, dan empty/error/loading state.
+Tersedia homepage dengan carousel hero, search destination/date/guest, kategori, properti terdekat/terbaru, property card, CTA tenant, footer, loading/empty/error state, dan navigasi ke Explore.
 
 File terkait:
 
 - `frontend/src/pages/user/HomePage.tsx`
-- `frontend/src/pages/user/home/`
+- `frontend/src/components/user/HeroSection.tsx`
 - `frontend/src/components/user/SearchForm.tsx`
+- `frontend/src/pages/user/home/`
 - `frontend/src/stores/filterStore.ts`
 
 ### User / Tenant Authentication and Profiles
@@ -56,6 +60,7 @@ Fitur register/login user dan tenant, Google login, email verification, reset pa
 
 File terkait:
 
+- `backend/src/routes/authRoutes.ts`
 - `backend/src/controllers/authController.ts`
 - `backend/src/services/authService.ts`
 - `backend/src/services/authGoogleService.ts`
@@ -64,24 +69,52 @@ File terkait:
 - `frontend/src/pages/user/ProfilePage.tsx`
 - `frontend/src/hooks/auth/`
 
-### Property Management
+### Property Catalog dan Search
 
 Status: terpenuhi.
 
-Katalog, pencarian, detail property, peta lokasi, carousel gambar, fasilitas, room availability, room management, category management, peak season rate, dan tenant property dashboard sudah tersedia.
+Katalog properti memakai search, category, price, amenities, sort, pagination, dan server-side processing untuk endpoint utama. Explore desktop memiliki sidebar kiri untuk search/filter/sort, sedangkan mobile memakai panel filter yang dapat ditutup dan otomatis tertutup setelah aksi utama.
 
 File terkait:
 
 - `backend/src/routes/propertyRoutes.ts`
-- `backend/src/routes/tenantRoutes.ts`
 - `backend/src/services/propertyService.ts`
-- `backend/src/services/propertyDetailService.ts`
-- `backend/src/services/tenantPropertyService.ts`
-- `backend/src/services/tenantRoomService.ts`
+- `backend/src/services/propertyList/`
+- `backend/src/validations/queryValidation.ts`
+- `frontend/src/pages/user/ExplorePage.tsx`
+- `frontend/src/components/user/propertyFilterDropdown/`
+
+### Property Detail
+
+Status: terpenuhi.
+
+Detail properti menampilkan gallery carousel, lokasi peta, fasilitas, review, room card, selected room, availability/pricing, dan booking CTA.
+
+File terkait:
+
 - `frontend/src/pages/user/PropertyDetailPage.tsx`
+- `frontend/src/components/property/`
+- `backend/src/services/propertyDetailService.ts`
+- `backend/src/services/propertyDetail/`
+- `backend/src/services/publicAvailabilityService.ts`
+
+### Tenant Property, Room, Category, Availability, Peak Season
+
+Status: terpenuhi.
+
+Tenant dapat mengelola property, room, images, category, availability, dan peak season. Category default dilindungi dari delete/edit. Peak season dikelola di halaman khusus `/tenant/peak-season`.
+
+File terkait:
+
 - `frontend/src/pages/tenant/PropertiesListPage.tsx`
+- `frontend/src/pages/tenant/PropertyFormPage.tsx`
 - `frontend/src/pages/tenant/RoomsPage.tsx`
 - `frontend/src/pages/tenant/CategoriesPage.tsx`
+- `frontend/src/pages/tenant/PeakSeasonPage.tsx`
+- `backend/src/routes/tenantRoutes.ts`
+- `backend/src/services/tenantPropertyService.ts`
+- `backend/src/services/tenantRoomService.ts`
+- `backend/src/services/categoryService.ts`
 
 ## Feature 2
 
@@ -89,7 +122,7 @@ File terkait:
 
 Status: terpenuhi.
 
-User dapat melakukan reservasi, memilih tanggal, memilih metode pembayaran, upload bukti transfer manual, retry Midtrans, mengganti ke manual transfer, melihat daftar/order detail, dan cancel order manual saat masih menunggu pembayaran.
+User dapat membuat reservasi, memilih metode pembayaran manual/Midtrans, upload bukti transfer, retry Midtrans, switch ke manual, melihat riwayat/order detail, dan cancel manual order saat masih menunggu pembayaran.
 
 File terkait:
 
@@ -105,34 +138,36 @@ File terkait:
 
 Status: terpenuhi.
 
-Tenant dapat melihat order, mengkonfirmasi pembayaran manual, menolak/membatalkan order sesuai rule, dan melihat status order. Auto-cancel unpaid order berjalan melalui cron saat `ENABLE_CRON=true` pada persistent Node.js server.
+Tenant dapat melihat order, konfirmasi pembayaran manual, menolak/membatalkan sesuai rule, dan melihat status order. Auto-cancel unpaid order dan auto-complete processed order tersedia melalui cron saat `ENABLE_CRON=true`.
 
 File terkait:
 
-- `backend/src/cron/cronScheduler.ts`
-- `backend/src/cron/cronTasks.ts`
+- `backend/src/cron/`
+- `backend/src/services/orderService.ts`
 - `frontend/src/pages/tenant/OrdersPage.tsx`
-- `frontend/src/pages/tenant/PaymentConfirmationPage.tsx`
+- `frontend/src/components/tenant/`
 
 ### Review
 
 Status: terpenuhi.
 
-User dapat memberi review setelah order memenuhi rule checkout/status. Tenant dapat reply dan delete review dalam scope ownership.
+User dapat memberi review setelah checkout/status memenuhi rule. Tenant dapat reply dan delete review dalam scope ownership. Halaman ulasan tenant menampilkan rating per kategori dan per properti dengan paginasi.
 
 File terkait:
 
 - `backend/src/routes/reviewRoutes.ts`
 - `backend/src/controllers/reviewController.ts`
 - `backend/src/services/reviewService.ts`
+- `backend/src/services/tenantReviewService.ts`
 - `frontend/src/pages/user/UserReviewsPage.tsx`
 - `frontend/src/pages/tenant/ReviewsPage.tsx`
+- `frontend/src/pages/tenant/reviews/`
 
 ### Report and Analysis
 
 Status: terpenuhi.
 
-Tenant memiliki laporan pendapatan, chart status, report property, dan halaman occupancy terpisah.
+Tenant memiliki Laporan Pendapatan, Laporan Properti, dan Okupasi Kamar sebagai halaman terpisah. Card performa per properti memakai paginasi untuk menjaga UX tenant yang memiliki banyak properti.
 
 File terkait:
 
@@ -141,6 +176,7 @@ File terkait:
 - `frontend/src/pages/tenant/ReportsPage.tsx`
 - `frontend/src/pages/tenant/PropertyReportPage.tsx`
 - `frontend/src/pages/tenant/OccupancyPage.tsx`
+- `frontend/src/pages/tenant/property-report/`
 
 ## Standardization
 
@@ -148,44 +184,53 @@ File terkait:
 
 Status: terpenuhi.
 
-Backend memakai Zod validation dan middleware `validate`. Frontend memakai schema/hook/form validation sesuai kebutuhan.
+Backend memakai Zod validation dan middleware `validate`. Frontend memakai React Hook Form dan Zod pada form penting. Upload file divalidasi lewat middleware dan service.
 
 ### Pagination, Filtering, Sorting
 
-Status: terpenuhi.
+Status: terpenuhi pada jalur utama.
 
-Daftar properti, order, categories, report, dan halaman tenant memakai query pagination/filter/sort. Query backend sudah divalidasi melalui `backend/src/validations/queryValidation.ts`.
+Daftar properti, tenant properties, categories, orders, reports, reviews, dan property performance memakai pagination/filter/sort sesuai kebutuhan. Beberapa ringkasan kecil tetap client-side karena datanya sudah merupakan agregasi tampilan, bukan collection utama yang besar.
 
 ### Frontend
 
 Status: terpenuhi.
 
-Frontend sudah dipisah menjadi `components`, `pages`, `hooks`, `services`, `stores`, `router`, `types`, dan folder domain. UI memiliki loading, empty state, error state, retry, filter chip, modal konfirmasi, dan route error boundary.
+Frontend terstruktur menjadi `components`, `pages`, `hooks`, `services`, `stores`, `router`, `types`, dan `validations`. UI memiliki responsive mobile/web, loading state, empty state, error state, modal konfirmasi, filter chips, route error boundary, dan layout tenant/user terpisah.
 
 ### Backend
 
 Status: terpenuhi.
 
-Backend sudah memakai struktur `routes`, `controllers`, `services`, `middlewares`, `validations`, `utils`, `config`, dan domain service. Cron sudah berada di folder `backend/src/cron/`.
+Backend terstruktur menjadi `routes`, `controllers`, `services`, `middlewares`, `validations`, `utils`, `config`, `cron`, dan domain helper. REST API utama menggunakan route berbasis resource dan role/ownership middleware.
 
 ### Clean Code
 
-Status: terpenuhi dengan catatan advisory review.
+Status: terpenuhi dengan catatan advisory.
 
-Tidak ada file sumber utama >200 baris, tidak ditemukan log/debugger/any, dan build/lint lulus. `schema.prisma` menjadi pengecualian teknis karena sifat Prisma schema yang deklaratif.
+Tidak ada file source utama >200 baris, tidak ada `any`, tidak ada `debugger`, dan tidak ada `console.*` pada source utama. Function-length audit menemukan 78 kandidat manual review. Hasil ini tidak menjadi hard rule karena banyak kandidat berupa JSX presentasional panjang yang perlu dinilai manual.
 
-Script `npm run audit:functions` sudah tersedia untuk membantu menemukan kandidat function/component yang melewati 15 baris. Hasil terakhir menemukan 90 kandidat, mayoritas berupa JSX presentasional panjang di frontend. Script ini tidak menjadi hard rule dan hasilnya perlu dinilai manual agar refactor tidak membuat kode lebih tidak natural.
+## Struktur Dokumentasi
+
+Status: sesuai arahan terbaru.
+
+README hanya dipakai di:
+
+- `README.md`
+- `docs/README.md`
+
+README di folder `frontend` dan `backend` sudah dihapus oleh user dan tidak dibuat ulang.
 
 ## Rekomendasi Final
 
 | Rekomendasi | Risiko | Prioritas |
 | --- | --- | --- |
-| Review kandidat `npm run audit:functions` secara bertahap jika mentor menilai function length sangat ketat | Rendah-menengah | Opsional clean code |
-| Deprecate atau hapus legacy REST alias setelah regression test | Menengah | Opsional sebelum final ketat REST |
-| Tambahkan CSRF token jika cookie-auth production berjalan cross-origin | Menengah | Production hardening |
+| Cleanup legacy REST alias setelah regression test | Menengah | Opsional sebelum final REST ketat |
+| Review kandidat function-length advisory bertahap | Rendah-menengah | Opsional clean code |
+| Tambahkan CSRF token jika cookie-auth production cross-origin | Menengah | Production hardening |
 | Gunakan persistent token blacklist jika backend multi-instance | Menengah | Production hardening |
-| Pindahkan saved properties ke backend jika ingin tersimpan lintas device | Menengah | Product improvement |
+| Pindahkan saved properties ke backend jika ingin sinkron lintas device | Menengah | Product improvement |
 
 ## Kesimpulan
 
-Project sudah siap untuk review final PURWADHIKA. Sisa catatan bukan blocker utama, tetapi dapat meningkatkan kualitas production readiness dan konsistensi REST API jika dikerjakan setelah regression test.
+Project siap untuk review final PURWADHIKA. Sisa catatan bukan blocker fitur utama, tetapi dapat meningkatkan konsistensi REST dan readiness production jika dikerjakan setelah regression test.
