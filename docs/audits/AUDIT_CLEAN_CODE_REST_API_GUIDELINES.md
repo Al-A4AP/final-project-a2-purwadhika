@@ -25,6 +25,14 @@ REST API jalur utama sudah mengikuti pola resource-oriented. Beberapa legacy ali
 
 ## Clean Code
 
+### Frontend Architecture & UI/UX (Update 06 Juni 2026)
+
+Status: sangat baik dan terstruktur (*Clean Architecture*).
+
+*   **Pemisahan Logika (Separation of Concerns):** Seluruh logika bisnis pada area *User* maupun *Tenant* telah dimigrasikan sepenuhnya ke direktori `hooks/` (misal: `hooks/tenant/reports/`), sehingga `pages/` kini 100% bertindak sebagai *Presentational Layer* murni.
+*   **Otorisasi UX Lintas Peran:** Antarmuka secara ketat memblokir akses reservasi bagi peran `TENANT`. Jika diakses oleh Tenant, UI secara cerdas beralih ke *View-Only Mode* dengan menyembunyikan *Reservation Panel*, pemilih tanggal, serta melebarkan tata letak secara dinamis agar estetika tetap elegan dan terpusat (*Quiet Luxury*).
+*   **Konsistensi Komponen Global:** Komponen aksi (seperti *Love Badge* / `SavePropertyButton`) menggunakan pola `variant` (`overlay` vs `outline`) guna menghapus kebergantungan pada *CSS forced-overrides* (`!important`), memecahkan isu visibilitas di *Light Mode*, dan memastikan ikon merah menyala (`fill-rose-500`) seragam di seluruh halaman.
+
 ### Batas File 200 Baris
 
 Status: sesuai.

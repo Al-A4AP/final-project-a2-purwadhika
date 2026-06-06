@@ -27,6 +27,7 @@ README di folder `frontend` dan `backend` sudah dihapus oleh user dan tidak dibu
 
 | Area | Status |
 | --- | --- |
+| Frontend Architecture & UI/UX | Tersentralisasi di `hooks/`, UI *view-only* untuk Tenant, UX konsisten |
 | Frontend lint | Lulus |
 | Frontend build | Lulus |
 | Backend build | Lulus |

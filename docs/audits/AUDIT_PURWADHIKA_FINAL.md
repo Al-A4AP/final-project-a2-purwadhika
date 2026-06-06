@@ -21,6 +21,8 @@ Status final: siap review dengan catatan opsional pada cleanup legacy REST alias
 | File source >200 baris | Tidak ditemukan pada `backend/src`, `backend/tests`, `frontend/src` |
 | `any`, `debugger`, `console.*` | Tidak ditemukan pada source utama |
 | Function length audit advisory | 78 kandidat manual review; bukan build blocker |
+| Pemisahan Hak Akses UI (Role UI) | Lulus (Akses reservasi Tenant 100% terkunci) |
+| Konsistensi Desain (UX) | Lulus (Komponen global rapi & arsitektur *frontend* solid) |
 
 ## Main Features
 
