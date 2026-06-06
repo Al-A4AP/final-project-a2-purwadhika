@@ -22,7 +22,7 @@ const hasNoRooms = (property: PropertyDetail, checkIn: string, checkOut: string)
 
 const RoomList: FC<PropertyRoomsSectionProps> = (props) => (
   <>
-    <BookingAccessNotice message={!props.isTenant ? props.bookingBlockedReason : undefined} />
+    <BookingAccessNotice message={props.isTenant ? "Mode Pantau: Akun Tenant tidak dapat melakukan reservasi. Halaman ini hanya untuk pratinjau." : props.bookingBlockedReason} />
     <h2 className="mb-6 text-2xl font-bold text-gray-900 dark:text-white">Pilihan Kamar</h2>
     <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
       {props.property.rooms?.map((room) => (
@@ -37,7 +37,7 @@ const RoomList: FC<PropertyRoomsSectionProps> = (props) => (
 
 const WholeUnit: FC<PropertyRoomsSectionProps & { room: Room }> = (props) => (
   <>
-    <BookingAccessNotice message={!props.isTenant ? props.bookingBlockedReason : undefined} />
+    <BookingAccessNotice message={props.isTenant ? "Mode Pantau: Akun Tenant tidak dapat melakukan reservasi. Halaman ini hanya untuk pratinjau." : props.bookingBlockedReason} />
     <WholeUnitCard room={props.room} amenities={props.property.amenities} isTenant={props.isTenant}
       isSelected={props.room.id === props.selectedRoomId} bookingBlockedReason={props.bookingBlockedReason}
       onBooking={props.onBooking} onSelectRoom={props.onSelectRoom}

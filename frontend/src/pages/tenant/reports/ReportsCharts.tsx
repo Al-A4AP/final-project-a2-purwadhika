@@ -4,7 +4,7 @@ import type { DashboardAnalytics } from "@/services/tenantReportService";
 import { ChartCard } from "./ChartCard";
 import { ReportOrdersCard } from "./ReportOrdersCard";
 import { TransactionsBarChart } from "./TransactionsBarChart";
-import type { ReportsFilterActions } from "./reportsTypes";
+import type { ReportsFilterActions } from "@/hooks/tenant/reports/reportsTypes";
 
 export const ReportsCharts: FC<{ actions: ReportsFilterActions; analytics: DashboardAnalytics }> = ({ actions, analytics }) => (
   <div className="grid grid-cols-1 gap-4 lg:grid-cols-2 lg:gap-8"><ChartCard title="Status Pesanan"><OrderStatusPieChart data={analytics.ordersByStatus} /></ChartCard><ChartCard title="Perbandingan Transaksi"><TransactionsBarChart data={analytics.ordersByStatus} /></ChartCard><ReportOrdersCard analytics={analytics} onPageChange={actions.setReportPage} /></div>

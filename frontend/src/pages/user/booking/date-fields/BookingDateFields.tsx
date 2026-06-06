@@ -1,6 +1,6 @@
 import type { FC } from "react";
 import { BookingDateInput } from "./BookingDateInput";
-import type { BookingDateFormState } from "./bookingDateFieldTypes";
+import type { BookingDateFormState } from "@/hooks/user/booking/date-fields/bookingDateFieldTypes";
 
 export const BookingDateFields: FC<{ dateForm: BookingDateFormState }> = ({ dateForm }) => (
   <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">

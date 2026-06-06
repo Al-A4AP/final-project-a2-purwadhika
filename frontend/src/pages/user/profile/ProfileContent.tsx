@@ -1,5 +1,5 @@
 import type { FC } from "react";
-import type { useProfileActions } from "./useProfileActions";
+import type { useProfileActions } from "@/hooks/user/profile/useProfileActions";
 import { AvatarUploadSection } from "./AvatarUploadSection";
 import { EmailPanel } from "./EmailPanel";
 import { PasswordPanel } from "./PasswordPanel";

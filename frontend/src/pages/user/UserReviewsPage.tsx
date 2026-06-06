@@ -3,7 +3,7 @@ import { Link } from "react-router-dom";
 import { EmptyState } from "@/components/common/EmptyState";
 import { SectionLoading } from "@/components/common/SectionLoading";
 import { ShoppingBag } from "lucide-react";
-import { useUserReviewsState } from "./reviews/useUserReviewsState";
+import { useUserReviewsState } from "@/hooks/user/reviews/useUserReviewsState";
 import { ReviewSummaryCards } from "./reviews/ReviewSummaryCards";
 import { EligibleReviewCard } from "./reviews/EligibleReviewCard";
 import { SubmittedReviewCard } from "./reviews/SubmittedReviewCard";

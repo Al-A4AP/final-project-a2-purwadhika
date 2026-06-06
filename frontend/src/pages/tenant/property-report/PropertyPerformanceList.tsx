@@ -3,7 +3,7 @@ import { Link } from "react-router-dom";
 import { EmptyState } from "@/components/common/EmptyState";
 import { Pagination } from "@/components/common/Pagination";
 import type { OccupancyProperty } from "@/services/tenantReportService";
-import { getRoomBookings } from "./propertyReportUtils";
+import { getRoomBookings } from "@/hooks/tenant/property-report/propertyReportUtils";
 import { BedDouble, CalendarDays, Building2 } from "lucide-react";
 
 const PROPERTY_PAGE_SIZE = 8;

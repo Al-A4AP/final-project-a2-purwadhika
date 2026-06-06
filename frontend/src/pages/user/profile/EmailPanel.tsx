@@ -1,5 +1,5 @@
 import type { FC } from "react";
-import type { useProfileActions } from "./useProfileActions";
+import type { useProfileActions } from "@/hooks/user/profile/useProfileActions";
 import { EmailChangeForm } from "@/components/user/profile/EmailChangeForm";
 import { profileInputClass } from "./profileStyles";
 

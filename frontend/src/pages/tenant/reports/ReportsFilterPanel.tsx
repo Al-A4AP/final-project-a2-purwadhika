@@ -5,8 +5,8 @@ import type { DashboardRevenuePeriod, TenantProperty } from "@/types";
 import {
   REPORT_REVENUE_PERIOD_OPTIONS,
   REPORT_SORT_OPTIONS,
-} from "./reportOptions";
-import type { ReportsFilterActions, ReportsFilters } from "./reportsTypes";
+} from "@/hooks/tenant/reports/reportOptions";
+import type { ReportsFilterActions, ReportsFilters } from "@/hooks/tenant/reports/reportsTypes";
 import {
   FilterDate,
   FilterLabel,

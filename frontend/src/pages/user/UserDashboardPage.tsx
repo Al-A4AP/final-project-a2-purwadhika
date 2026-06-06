@@ -1,6 +1,6 @@
 import type { FC } from "react";
 import { SectionLoading } from "@/components/common/SectionLoading";
-import { useUserDashboardState } from "./dashboard/useUserDashboardState";
+import { useUserDashboardState } from "@/hooks/user/dashboard/useUserDashboardState";
 import { DashboardWelcome } from "./dashboard/DashboardWelcome";
 import { DashboardUpcomingStay } from "./dashboard/DashboardUpcomingStay";
 import { DashboardActiveSummary } from "./dashboard/DashboardActiveSummary";

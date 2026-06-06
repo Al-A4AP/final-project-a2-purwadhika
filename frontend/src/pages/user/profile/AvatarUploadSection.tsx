@@ -1,5 +1,5 @@
 import type { FC } from "react";
-import type { useProfileActions } from "./useProfileActions";
+import type { useProfileActions } from "@/hooks/user/profile/useProfileActions";
 import { ProfileAvatarCard } from "@/components/user/profile/ProfileAvatarCard";
 import { ImageCropperModal } from "@/components/common/ImageCropperModal";
 

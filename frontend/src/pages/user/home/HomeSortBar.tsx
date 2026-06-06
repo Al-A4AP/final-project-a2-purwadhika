@@ -2,7 +2,7 @@ import type { FC } from "react";
 import SortFilterBar from "@/components/common/SortFilterBar";
 import type { SortFilterLayout } from "@/components/common/sort-filter-bar/sortFilterTypes";
 import { useFilterStore, type FilterValues } from "@/stores/filterStore";
-import { HOME_SORT_GROUPS } from "./homeSortGroups";
+import { HOME_SORT_GROUPS } from "@/hooks/user/home/homeSortGroups";
 
 interface HomeSortBarProps {
   activeFilters: FilterValues;

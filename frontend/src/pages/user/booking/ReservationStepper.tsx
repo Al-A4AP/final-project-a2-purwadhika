@@ -2,7 +2,7 @@ import { useState } from "react";
 import type { FC } from "react";
 import { toast } from "react-hot-toast";
 import { Check, ChevronRight, UploadCloud } from "lucide-react";
-import type { BookingPageState } from "./bookingTypes";
+import type { BookingPageState } from "@/hooks/user/booking/bookingTypes";
 import { TravelDetailsCard } from "./TravelDetailsCard";
 import { GuestCounter } from "@/components/user/GuestCounter";
 import { PaymentMethodSelector } from "@/components/user/PaymentMethodSelector";

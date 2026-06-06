@@ -1,6 +1,6 @@
 import type { FC } from "react";
 import { ReportsContent } from "./reports/ReportsContent";
-import { useReportsPageState } from "./reports/useReportsPageState";
+import { useReportsPageState } from "@/hooks/tenant/reports/useReportsPageState";
 
 const ReportsPage: FC = () => <ReportsContent state={useReportsPageState()} />;
 

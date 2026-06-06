@@ -2,7 +2,7 @@ import type { FC } from "react";
 import { Search, Filter, Calendar } from "lucide-react";
 import { CustomDatePickerPopup } from "@/components/common/CustomDatePickerPopup";
 import { ORDER_STATUS_FILTER_OPTIONS } from "@/lib/constants";
-import type { UserOrderFilterActions, UserOrderFilters } from "./userOrdersTypes";
+import type { UserOrderFilterActions, UserOrderFilters } from "@/hooks/user/orders/userOrdersTypes";
 
 interface UserOrdersFilterProps {
   actions: UserOrderFilterActions;

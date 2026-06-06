@@ -64,7 +64,7 @@ const PropertyActions: FC<{ onShare: () => void; property?: Property }> = ({ onS
     <button onClick={onShare} title="Bagikan properti" aria-label="Bagikan properti" className="flex h-12 w-12 items-center justify-center rounded-full border border-slate-200 bg-white text-slate-600 shadow-sm transition hover:bg-slate-50 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-300 dark:hover:bg-slate-700">
       <Share2 className="h-5 w-5" />
     </button>
-    {property && <SavePropertyButton property={property} className="h-12! w-12! border! border-slate-200! bg-white! shadow-sm! hover:bg-slate-50! dark:border-slate-700! dark:bg-slate-800! dark:hover:bg-slate-700!" />}
+    {property && <SavePropertyButton property={property} variant="outline" />}
   </div>
 );
 

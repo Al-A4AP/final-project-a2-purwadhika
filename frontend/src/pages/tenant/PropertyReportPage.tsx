@@ -1,6 +1,6 @@
 import type { FC } from "react";
 import { PropertyReportContent } from "./property-report/PropertyReportContent";
-import { usePropertyReportState } from "./property-report/usePropertyReportState";
+import { usePropertyReportState } from "@/hooks/tenant/property-report/usePropertyReportState";
 
 const PropertyReportPage: FC = () => <PropertyReportContent state={usePropertyReportState()} />;
 

@@ -1,5 +1,5 @@
 import type { FC } from "react";
-import type { useProfileActions } from "./useProfileActions";
+import type { useProfileActions } from "@/hooks/user/profile/useProfileActions";
 import { PasswordChangeForm } from "@/components/user/profile/PasswordChangeForm";
 import { PasswordUnavailableCard } from "@/components/user/profile/PasswordUnavailableCard";
 import { profileInputClass } from "./profileStyles";

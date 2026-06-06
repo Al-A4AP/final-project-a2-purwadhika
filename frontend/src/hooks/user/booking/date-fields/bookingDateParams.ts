@@ -1,5 +1,5 @@
 import type { SetURLSearchParams } from "react-router-dom";
-import type { BookingQuery } from "../bookingTypes";
+import type { BookingQuery } from "@/hooks/user/booking/bookingTypes";
 import { addDaysInput, getCheckoutMinDate, getTodayInput, isCheckoutAfterCheckIn } from "./bookingDateUtils";
 
 export const useBookingDateParams = (query: BookingQuery, setSearchParams: SetURLSearchParams) => ({

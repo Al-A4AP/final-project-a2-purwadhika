@@ -1,6 +1,6 @@
 import type { FC } from "react";
 import { BookingSummary } from "@/components/user/BookingSummary";
-import type { BookingPageState } from "./bookingTypes";
+import type { BookingPageState } from "@/hooks/user/booking/bookingTypes";
 
 export const BookingSummaryColumn: FC<{ state: BookingPageState }> = ({ state }) => (
   <div className="md:col-span-1">

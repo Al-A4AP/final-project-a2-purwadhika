@@ -2,7 +2,7 @@ import type { FC, ReactNode } from "react";
 import { formatCurrency } from "@/lib/formatters";
 import type { DashboardAnalytics } from "@/services/tenantReportService";
 import type { DashboardRevenuePeriod } from "@/types";
-import { getRevenueStatLabel } from "../tenant-dashboard/dashboardRevenuePeriod";
+import { getRevenueStatLabel } from "@/hooks/tenant/tenant-dashboard/dashboardRevenuePeriod";
 import { KPICard } from "./KPICard";
 import { Wallet, FileText, TrendingUp } from "lucide-react";
 

@@ -3,7 +3,7 @@ import { EmptyState } from "@/components/common/EmptyState";
 import { ErrorState } from "@/components/common/ErrorState";
 import { Pagination } from "@/components/common/Pagination";
 import { OrderCard } from "@/components/user/OrderCard";
-import type { UserOrdersState } from "./userOrdersTypes";
+import type { UserOrdersState } from "@/hooks/user/orders/userOrdersTypes";
 import { UserOrderStatusBadge } from "./UserOrderStatusBadge";
 
 export const UserOrdersList: FC<{ state: UserOrdersState }> = ({ state }) => {

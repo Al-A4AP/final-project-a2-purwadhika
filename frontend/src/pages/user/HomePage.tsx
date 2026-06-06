@@ -19,7 +19,7 @@ import PropertyCard from "@/components/user/PropertyCard";
 import SearchForm from "@/components/user/SearchForm";
 import { PROPERTY_CATEGORIES } from "@/lib/constants";
 import type { Property } from "@/types";
-import { useHomePageState } from "./home/useHomePageState";
+import { useHomePageState } from "@/hooks/user/home/useHomePageState";
 
 const FEATURED_LIMIT = 4;
 const POPULAR_CITIES = ["Jakarta", "Bandung", "Surabaya", "Yogyakarta", "Denpasar", "Medan", "Makassar", "Malang"];

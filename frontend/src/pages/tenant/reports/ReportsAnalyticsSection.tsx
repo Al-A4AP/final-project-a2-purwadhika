@@ -4,7 +4,7 @@ import { ErrorState } from "@/components/common/ErrorState";
 import { SectionLoading } from "@/components/common/SectionLoading";
 import { ReportsCharts } from "./ReportsCharts";
 import { ReportsKpiGrid } from "./ReportsKpiGrid";
-import type { ReportsPageState } from "./reportsTypes";
+import type { ReportsPageState } from "@/hooks/tenant/reports/reportsTypes";
 
 export const ReportsAnalyticsSection: FC<{ state: ReportsPageState }> = ({ state }) => {
   if (state.loading) return <SectionLoading label="Memuat Laporan Penjualan..." size="lg" variant="report" />;

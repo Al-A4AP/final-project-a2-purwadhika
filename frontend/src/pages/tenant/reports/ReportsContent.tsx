@@ -1,7 +1,7 @@
 import type { FC } from "react";
 import { ReportsAnalyticsSection } from "./ReportsAnalyticsSection";
 import { ReportsFilterPanel } from "./ReportsFilterPanel";
-import type { ReportsPageState } from "./reportsTypes";
+import type { ReportsPageState } from "@/hooks/tenant/reports/reportsTypes";
 
 export const ReportsContent: FC<{ state: ReportsPageState }> = ({ state }) => (
   <div className="min-h-screen bg-slate-50 px-4 py-8 md:p-10 dark:bg-slate-900 pb-24">

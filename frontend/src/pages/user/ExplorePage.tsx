@@ -2,8 +2,8 @@ import { useState, type FC } from "react";
 import { SlidersHorizontal, X } from "lucide-react";
 import { HomeFilterPanel } from "./home/HomeFilterPanel";
 import { HomePropertyResults } from "./home/HomePropertyResults";
-import { useExploreQueryFilters } from "./home/useExploreQueryFilters";
-import { useHomePageState } from "./home/useHomePageState";
+import { useExploreQueryFilters } from "@/hooks/user/home/useExploreQueryFilters";
+import { useHomePageState } from "@/hooks/user/home/useHomePageState";
 
 type ExploreState = ReturnType<typeof useExplorePageState>;
 

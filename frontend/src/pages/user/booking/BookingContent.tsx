@@ -1,7 +1,7 @@
 import type { FC } from "react";
 import { SectionLoading } from "@/components/common/SectionLoading";
 import { BookingLayout } from "./BookingLayout";
-import type { BookingPageState } from "./bookingTypes";
+import type { BookingPageState } from "@/hooks/user/booking/bookingTypes";
 
 export const BookingContent: FC<{ state: BookingPageState }> = ({ state }) => {
   if (state.loading || !state.property || !state.room || !state.totals) {

@@ -3,7 +3,7 @@ import { SectionLoading } from "@/components/common/SectionLoading";
 import { ErrorState } from "@/components/common/ErrorState";
 import { PropertyReportSummary } from "./PropertyReportSummary";
 import { PropertyPerformanceList } from "./PropertyPerformanceList";
-import type { PropertyReportState } from "./usePropertyReportState";
+import type { PropertyReportState } from "@/hooks/tenant/property-report/usePropertyReportState";
 
 export const PropertyReportContent: FC<{ state: PropertyReportState }> = ({ state }) => (
   <div className="min-h-screen bg-slate-50 px-4 py-8 md:p-10 dark:bg-slate-900 pb-24">

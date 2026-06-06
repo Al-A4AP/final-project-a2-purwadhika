@@ -1,7 +1,7 @@
 import type { FC } from "react";
 import { Building2, BedDouble, BookOpen } from "lucide-react";
 import type { OccupancyProperty } from "@/services/tenantReportService";
-import { getTotals } from "./propertyReportUtils";
+import { getTotals } from "@/hooks/tenant/property-report/propertyReportUtils";
 
 interface PropertyReportSummaryProps {
   data: OccupancyProperty[];

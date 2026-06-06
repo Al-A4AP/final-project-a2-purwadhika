@@ -1,7 +1,7 @@
 import type { FC } from "react";
 import type { RefObject } from "react";
 import { SectionLoading } from "@/components/common/SectionLoading";
-import type { UserOrdersState } from "./userOrdersTypes";
+import type { UserOrdersState } from "@/hooks/user/orders/userOrdersTypes";
 import { UserCancelOrderModal } from "./UserCancelOrderModal";
 import { UserOrdersFilter } from "./UserOrdersFilter";
 import { UserOrdersList } from "./UserOrdersList";

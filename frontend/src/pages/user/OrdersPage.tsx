@@ -1,6 +1,6 @@
 import type { FC } from "react";
 import { UserOrdersContent } from "./orders/UserOrdersContent";
-import { useUserOrdersPageState } from "./orders/useUserOrdersPageState";
+import { useUserOrdersPageState } from "@/hooks/user/orders/useUserOrdersPageState";
 
 const OrdersPage: FC = () => {
   const { fileInputRef, state } = useUserOrdersPageState();

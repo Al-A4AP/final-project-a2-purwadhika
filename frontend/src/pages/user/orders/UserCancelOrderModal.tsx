@@ -1,6 +1,6 @@
 import type { FC } from "react";
 import { ConfirmModal } from "@/components/common/ConfirmModal";
-import type { UserOrdersState } from "./userOrdersTypes";
+import type { UserOrdersState } from "@/hooks/user/orders/userOrdersTypes";
 
 export const UserCancelOrderModal: FC<{ state: UserOrdersState }> = ({ state }) => (
   <ConfirmModal

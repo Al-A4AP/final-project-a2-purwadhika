@@ -10,8 +10,8 @@ import { InlineAvailabilitySection } from '@/components/property/InlineAvailabil
 import { PropertyBackButton } from './property-detail/PropertyBackButton';
 import { PropertyDetailSkeleton } from './property-detail/PropertyDetailSkeleton';
 import { PropertyRoomsSection } from './property-detail/PropertyRoomsSection';
-import { usePropertyDetailPageState } from './property-detail/usePropertyDetailPageState';
-import type { PropertyDetailPageState } from './property-detail/usePropertyDetailPageState';
+import { usePropertyDetailPageState } from '@/hooks/user/property-detail/usePropertyDetailPageState';
+import type { PropertyDetailPageState } from '@/hooks/user/property-detail/usePropertyDetailPageState';
 import { ReservationPanel } from '@/components/property/ReservationPanel';
 
 const PropertyDetailPage: FC = () => {
@@ -24,7 +24,7 @@ const PropertyDetailPage: FC = () => {
 };
 
 const PropertyDetailView: FC<{ page: PropertyDetailPageState; property: PropertyDetail }> = ({ page, property }) => (
-  <div className="min-h-screen bg-slate-50 dark:bg-slate-900 pb-24 lg:pb-8">
+  <div className={`min-h-screen bg-slate-50 dark:bg-slate-900 ${page.isTenant ? 'pb-8' : 'pb-24 lg:pb-8'}`}>
     <div className="mx-auto max-w-7xl px-4 py-8">
       <PropertyBackButton onBack={() => page.navigate(-1)} />
       
@@ -34,8 +34,8 @@ const PropertyDetailView: FC<{ page: PropertyDetailPageState; property: Property
         name={property.name}
       />
       
-      <div className="mt-8 flex flex-col lg:flex-row gap-8">
-        <div className="lg:w-2/3 space-y-10 min-w-0">
+      <div className={`mt-8 flex flex-col lg:flex-row gap-8 ${page.isTenant ? 'justify-center' : ''}`}>
+        <div className={`space-y-10 min-w-0 ${page.isTenant ? 'w-full max-w-4xl' : 'lg:w-2/3'}`}>
           <PropertyInfo
             categoryName={property.category?.name}
             name={property.name}
@@ -49,8 +49,12 @@ const PropertyDetailView: FC<{ page: PropertyDetailPageState; property: Property
             property={property}
           />
           <PropertyRooms page={page} property={property} />
-          <PropertyInlineDatePicker page={page} />
-          <PropertyInlineAvailability page={page} />
+          {!page.isTenant && (
+            <>
+              <PropertyInlineDatePicker page={page} />
+              <PropertyInlineAvailability page={page} />
+            </>
+          )}
           <PropertyLocationMap
             name={property.name}
             address={property.address}
@@ -61,18 +65,22 @@ const PropertyDetailView: FC<{ page: PropertyDetailPageState; property: Property
           <PropertyReviews reviews={page.data.reviews} />
         </div>
 
-        <div className="hidden lg:block lg:w-1/3">
-          <div className="sticky top-24">
-            <ReservationPanel page={page} property={property} />
+        {!page.isTenant && (
+          <div className="hidden lg:block lg:w-1/3">
+            <div className="sticky top-24">
+              <ReservationPanel page={page} property={property} />
+            </div>
           </div>
-        </div>
+        )}
       </div>
     </div>
 
     {/* Mobile Sticky CTA */}
-    <div className="fixed bottom-0 left-0 right-0 z-50 border-t border-slate-200 bg-white/95 p-4 backdrop-blur-xl shadow-[0_-4px_6px_-1px_rgba(0,0,0,0.05)] transition-all dark:border-slate-800 dark:bg-slate-900/95 lg:hidden">
-      <ReservationPanel page={page} property={property} isMobile />
-    </div>
+    {!page.isTenant && (
+      <div className="fixed bottom-0 left-0 right-0 z-50 border-t border-slate-200 bg-white/95 p-4 backdrop-blur-xl shadow-[0_-4px_6px_-1px_rgba(0,0,0,0.05)] transition-all dark:border-slate-800 dark:bg-slate-900/95 lg:hidden">
+        <ReservationPanel page={page} property={property} isMobile />
+      </div>
+    )}
   </div>
 );
 

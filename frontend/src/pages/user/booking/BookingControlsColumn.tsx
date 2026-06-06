@@ -3,7 +3,7 @@ import { HelpText } from "@/components/common/HelpText";
 import { GuestCounter } from "@/components/user/GuestCounter";
 import { PaymentMethodSelector } from "@/components/user/PaymentMethodSelector";
 import { TravelDetailsCard } from "./TravelDetailsCard";
-import type { BookingPageState } from "./bookingTypes";
+import type { BookingPageState } from "@/hooks/user/booking/bookingTypes";
 
 export const BookingControlsColumn: FC<{ state: BookingPageState }> = ({ state }) => (
   <div className="md:col-span-2 space-y-6">

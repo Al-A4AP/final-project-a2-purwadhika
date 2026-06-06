@@ -1,6 +1,6 @@
 import type { FC } from "react";
 import { ProfileContent } from "./profile/ProfileContent";
-import { useProfileActions } from "./profile/useProfileActions";
+import { useProfileActions } from "@/hooks/user/profile/useProfileActions";
 
 const ProfilePage: FC = () => {
   const state = useProfileActions();
