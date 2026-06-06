@@ -8,7 +8,7 @@ export const AboutHero: FC = () => (
         <BrandName /> is Indonesia's leading destination for authentic stays.
       </h1>
       <p className="text-xl md:text-2xl text-slate-600 dark:text-slate-300 leading-relaxed max-w-3xl">
-        Misi kami adalah menangkap dan menyajikan kreativitas, kenyamanan, serta momen yang berarti dalam perjalanan Anda. PURWALOKA memberdayakan setiap orang untuk menjadi tuan rumah (*host*) langsung dari ponsel mereka, dan berkomitmen membangun komunitas yang saling percaya.
+        Misi kami adalah menangkap dan menyajikan kreativitas, kenyamanan, serta momen yang berarti dalam perjalanan Anda. PURWALOKA memberdayakan setiap orang untuk menjadi tenant (*tenant*) langsung dari ponsel mereka, dan berkomitmen membangun komunitas yang saling percaya.
       </p>
     </div>
   </section>

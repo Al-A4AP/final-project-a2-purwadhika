@@ -2,19 +2,21 @@ import type { FC } from "react";
 import type { DashboardRevenuePeriod } from "@/types";
 import { REVENUE_PERIOD_OPTIONS } from "@/hooks/tenant/tenant-dashboard/dashboardRevenuePeriod";
 import { BarChart3 } from "lucide-react";
+import { RevenueTrendChart } from "./RevenueTrendChart";
 
-interface HostRevenuePanelProps {
+interface TenantRevenuePanelProps {
   revenuePeriod: DashboardRevenuePeriod;
   setRevenuePeriod: (period: DashboardRevenuePeriod) => void;
   revenue: number;
+  revenueTrend?: { label: string; amount: number }[];
 }
 
-export const HostRevenuePanel: FC<HostRevenuePanelProps> = ({ revenuePeriod, setRevenuePeriod }) => {
+export const TenantRevenuePanel: FC<TenantRevenuePanelProps> = ({ revenuePeriod, setRevenuePeriod, revenueTrend }) => {
   return (
     <div className="mb-8 rounded-2xl border border-slate-100 bg-white p-6 shadow-sm dark:border-slate-800 dark:bg-slate-900">
       <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between mb-8">
         <div className="flex items-center gap-3">
-          <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-slate-100 text-slate-600 dark:bg-slate-800 dark:text-slate-400">
+          <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-emerald-100 text-emerald-600 dark:bg-emerald-900/30 dark:text-emerald-400">
             <BarChart3 size={20} />
           </div>
           <div>
@@ -35,13 +37,7 @@ export const HostRevenuePanel: FC<HostRevenuePanelProps> = ({ revenuePeriod, set
         </select>
       </div>
 
-      <div className="flex h-64 items-center justify-center rounded-xl border border-dashed border-slate-200 bg-slate-50 dark:border-slate-700 dark:bg-slate-800/50">
-        <div className="text-center">
-          <BarChart3 size={32} className="mx-auto mb-3 text-slate-400 dark:text-slate-500" />
-          <p className="text-sm font-medium text-slate-500 dark:text-slate-400">Grafik pendapatan belum tersedia.</p>
-          <p className="mt-1 text-xs text-slate-400 dark:text-slate-500">Lihat Laporan Penjualan untuk detail lengkap.</p>
-        </div>
-      </div>
+      <RevenueTrendChart data={revenueTrend || []} />
     </div>
   );
 };

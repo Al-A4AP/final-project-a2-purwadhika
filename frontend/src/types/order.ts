@@ -52,4 +52,5 @@ export interface DashboardStats {
   revenuePeriod: DashboardRevenuePeriod;
   monthlyRevenue: number;
   recentOrders: RecentOrder[];
+  revenueTrend: { label: string; amount: number }[];
 }

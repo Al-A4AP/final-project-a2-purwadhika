@@ -22,8 +22,8 @@ export const SearchFormContent: FC<SearchFormContentProps> = ({ layout = "respon
 
 const SearchFormFields: FC<{ layout: SearchFormLayout; state: SearchFormState }> = ({ layout, state }) => {
   const { filters, form, guestOpen, setGuestOpen, dates, guests, onSubmit } = state;
-  const { register, handleSubmit, formState: { errors } } = form;
-  return <form onSubmit={handleSubmit(onSubmit)}><div className={getGridClass(layout)}><CityField register={register} errors={errors} /><DateField label="Check-in" name="check_in_date" min={dates.today} control={form.control} error={errors.check_in_date} /><DateField label="Check-out" name="check_out_date" min={dates.checkoutMinDate} control={form.control} error={errors.check_out_date} /><GuestSelector adults={filters.adults} babies={filters.babies} children={filters.children} guestSummary={guests.guestSummary} isOpen={guestOpen} onClose={() => setGuestOpen(false)} onToggle={() => setGuestOpen((open) => !open)} setAdults={filters.setAdults} setBabies={filters.setBabies} setChildren={filters.setChildren} /><SearchSubmitButton /></div></form>;
+  const { register, handleSubmit, formState: { errors }, setValue, watch } = form;
+  return <form onSubmit={handleSubmit(onSubmit)}><div className={getGridClass(layout)}><CityField register={register} errors={errors} setValue={setValue} watch={watch} /><DateField label="Check-in" name="check_in_date" min={dates.today} control={form.control} error={errors.check_in_date} /><DateField label="Check-out" name="check_out_date" min={dates.checkoutMinDate} control={form.control} error={errors.check_out_date} /><GuestSelector adults={filters.adults} babies={filters.babies} children={filters.children} guestSummary={guests.guestSummary} isOpen={guestOpen} onClose={() => setGuestOpen(false)} onToggle={() => setGuestOpen((open) => !open)} setAdults={filters.setAdults} setBabies={filters.setBabies} setChildren={filters.setChildren} /><SearchSubmitButton /></div></form>;
 };
 
 const getGridClass = (layout: SearchFormLayout) =>

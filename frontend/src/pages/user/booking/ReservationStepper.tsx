@@ -1,6 +1,7 @@
 import { useState } from "react";
 import type { FC } from "react";
-import { Check, ChevronRight, UploadCloud, FileImage } from "lucide-react";
+import { toast } from "react-hot-toast";
+import { Check, ChevronRight, UploadCloud } from "lucide-react";
 import type { BookingPageState } from "./bookingTypes";
 import { TravelDetailsCard } from "./TravelDetailsCard";
 import { GuestCounter } from "@/components/user/GuestCounter";
@@ -28,9 +29,6 @@ export const ReservationStepper: FC<ReservationStepperProps> = ({ state }) => {
 
   const handleNext = () => setCurrentStep((p) => Math.min(p + 1, totalSteps));
   const handlePrev = () => setCurrentStep((p) => Math.max(p - 1, 1));
-  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    if (e.target.files && e.target.files[0]) setProofFile(e.target.files[0]);
-  };
 
   const submitBooking = () => state.handleCheckout(proofFile);
 
@@ -98,15 +96,17 @@ export const ReservationStepper: FC<ReservationStepperProps> = ({ state }) => {
           <div className="space-y-6 animate-in fade-in slide-in-from-right-4 duration-300">
             <div>
               <h2 className="text-2xl font-bold text-slate-900 dark:text-white">Unggah Bukti Transfer</h2>
-              <p className="text-sm text-slate-500">Format gambar yang didukung: JPG, PNG, WEBP. Maksimal 5MB.</p>
+              <p className="text-sm text-slate-500">Format gambar yang didukung: JPG, PNG. Maksimal 1MB.</p>
             </div>
             
             <label className="flex cursor-pointer flex-col items-center justify-center rounded-2xl border-2 border-dashed border-slate-300 bg-slate-50 p-12 transition hover:border-red-500 hover:bg-red-50 dark:border-slate-700 dark:bg-slate-800 dark:hover:border-red-500 dark:hover:bg-red-900/10">
               {proofFile ? (
                 <>
-                  <FileImage className="mb-4 h-12 w-12 text-red-500" />
-                  <p className="font-semibold text-slate-900 dark:text-white">{proofFile.name}</p>
-                  <p className="text-sm text-slate-500">Klik untuk mengganti gambar</p>
+                  <div className="mb-4 h-32 w-24 overflow-hidden rounded-xl border border-slate-200 shadow-sm dark:border-slate-700">
+                    <img src={URL.createObjectURL(proofFile)} alt="Preview" className="h-full w-full object-cover" />
+                  </div>
+                  <p className="font-semibold text-slate-900 dark:text-white max-w-[200px] truncate">{proofFile.name}</p>
+                  <p className="text-sm text-slate-500 mt-1">Klik untuk mengganti gambar</p>
                 </>
               ) : (
                 <>
@@ -114,7 +114,17 @@ export const ReservationStepper: FC<ReservationStepperProps> = ({ state }) => {
                   <p className="font-semibold text-slate-900 dark:text-white">Pilih atau letakkan gambar di sini</p>
                 </>
               )}
-              <input type="file" accept="image/*" onChange={handleFileChange} className="hidden" />
+              <input type="file" accept="image/jpeg, image/png" onChange={(e) => {
+                const file = e.target.files?.[0];
+                if (file) {
+                  if (file.size > 1 * 1024 * 1024) {
+                    toast.error("Ukuran gambar tidak boleh melebihi 1MB");
+                    e.target.value = '';
+                    return;
+                  }
+                  setProofFile(file);
+                }
+              }} className="hidden" />
             </label>
             {!proofFile && <p className="text-xs text-red-500 text-center">* Bukti transfer wajib diunggah untuk melanjutkan.</p>}
           </div>

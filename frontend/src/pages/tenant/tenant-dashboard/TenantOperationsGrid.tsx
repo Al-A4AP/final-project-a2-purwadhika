@@ -24,7 +24,7 @@ const operations = [
   { title: "Ulasan", desc: "Feedback tamu", icon: Star, href: "/tenant/reviews", color: "text-yellow-500", bg: "bg-yellow-50 dark:bg-yellow-500/10" },
 ];
 
-export const HostOperationsGrid: FC = () => {
+export const TenantOperationsGrid: FC = () => {
   return (
     <div className="mb-8">
       <h2 className="text-xl font-bold text-slate-900 dark:text-white mb-6">Pintasan Operasional</h2>

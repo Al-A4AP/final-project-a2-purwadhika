@@ -63,7 +63,7 @@ const ExploreMain: FC<{ state: ExploreState }> = ({ state }) => (
 );
 
 const DesktopFilterPanel: FC<{ state: ExploreState }> = ({ state }) => (
-  <div className="hidden shrink-0 lg:block lg:w-[22rem] xl:w-96">
+  <div className="hidden shrink-0 lg:block lg:w-88 xl:w-96">
     <div className="sticky top-36">
       <ExploreFilterPanel state={state} />
     </div>
@@ -96,6 +96,7 @@ const PropertyResults: FC<{ state: ExploreState }> = ({ state }) => (
       activeFilters={state.activeFilters}
       currentOrder={state.currentOrder}
       currentSort={state.currentSort}
+      desktopCols={3}
       propertyLimit={state.propertyLimit}
     />
   </div>

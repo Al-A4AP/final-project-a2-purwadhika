@@ -4,11 +4,11 @@ import type { RecentOrder } from "@/types";
 import { formatCurrency } from "@/lib/formatters";
 import { ChevronRight, CalendarDays, User } from "lucide-react";
 
-interface HostRecentReservationsProps {
+interface TenantRecentReservationsProps {
   orders?: RecentOrder[];
 }
 
-export const HostRecentReservations: FC<HostRecentReservationsProps> = ({ orders }) => {
+export const TenantRecentReservations: FC<TenantRecentReservationsProps> = ({ orders }) => {
   if (!orders || orders.length === 0) {
     return (
       <div className="mb-8 rounded-2xl border border-slate-100 bg-white p-8 text-center shadow-sm dark:border-slate-800 dark:bg-slate-900">

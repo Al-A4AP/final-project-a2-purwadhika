@@ -3,3 +3,6 @@ node_modules
 .env
 
 instruction.md
+
+# Local-only AI agent handover notes
+docs/HANDOVER.local.md

@@ -3,11 +3,11 @@ import type { DashboardStats } from "@/types";
 import { formatCurrency } from "@/lib/formatters";
 import { Building2, BedDouble, Wallet, Clock } from "lucide-react";
 
-interface HostKpiGridProps {
+interface TenantKpiGridProps {
   stats: DashboardStats | null;
 }
 
-export const HostKpiGrid: FC<HostKpiGridProps> = ({ stats }) => {
+export const TenantKpiGrid: FC<TenantKpiGridProps> = ({ stats }) => {
   if (!stats) return null;
 
   return (

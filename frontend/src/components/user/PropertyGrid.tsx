@@ -23,6 +23,7 @@ interface Props {
   sort?: string;
   totalCount: number;
   totalPages?: number;
+  desktopCols?: 3 | 4;
 }
 
 const PropertyGrid: FC<Props> = (props) => {
@@ -32,18 +33,18 @@ const PropertyGrid: FC<Props> = (props) => {
 };
 
 const PropertyGridBody: FC<Props> = (props) => {
-  if (props.loading) return <PropertyGridSkeleton count={props.pageSize || ITEMS_PER_PAGE} />;
+  if (props.loading) return <PropertyGridSkeleton count={props.pageSize || ITEMS_PER_PAGE} desktopCols={props.desktopCols} />;
   if (props.error) return <ErrorState title="Properti belum bisa dimuat" message={props.error} onRetry={props.onRetry} />;
   if (!props.properties.length) return <EmptyPropertyResult city={props.city} />;
-  return <><PropertyCards properties={props.properties} /><Pagination currentPage={props.currentPage || 1} totalPages={props.totalPages || 1} onPageChange={(page) => props.onPageChange?.(page)} /></>;
+  return <><PropertyCards properties={props.properties} desktopCols={props.desktopCols} /><Pagination currentPage={props.currentPage || 1} totalPages={props.totalPages || 1} onPageChange={(page) => props.onPageChange?.(page)} /></>;
 };
 
-const PropertyGridSkeleton: FC<{ count: number }> = ({ count }) => (
-  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">{[...Array(count)].map((_, i) => <PropertyCardSkeleton key={i} />)}</div>
+const PropertyGridSkeleton: FC<{ count: number; desktopCols?: 3 | 4 }> = ({ count, desktopCols = 4 }) => (
+  <div className={`grid grid-cols-1 md:grid-cols-2 ${desktopCols === 3 ? 'lg:grid-cols-3' : 'lg:grid-cols-4'} gap-6`}>{[...Array(count)].map((_, i) => <PropertyCardSkeleton key={i} />)}</div>
 );
 
-const PropertyCards: FC<{ properties: Property[] }> = ({ properties }) => (
-  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">{properties.map((property) => <PropertyCard key={property.id} property={property} />)}</div>
+const PropertyCards: FC<{ properties: Property[]; desktopCols?: 3 | 4 }> = ({ properties, desktopCols = 4 }) => (
+  <div className={`grid grid-cols-1 md:grid-cols-2 ${desktopCols === 3 ? 'lg:grid-cols-3' : 'lg:grid-cols-4'} gap-6`}>{properties.map((property) => <PropertyCard key={property.id} property={property} />)}</div>
 );
 
 const EmptyPropertyResult: FC<{ city: string }> = ({ city }) => (

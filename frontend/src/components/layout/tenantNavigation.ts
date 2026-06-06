@@ -2,7 +2,7 @@ import { BarChart2, Building2, CalendarDays, Home, LayoutDashboard, MessageSquar
 
 export const TENANT_NAV = [
   { to: '/', icon: Home, label: 'Home' },
-  { to: '/tenant/dashboard', icon: LayoutDashboard, label: 'Host Dashboard' },
+  { to: '/tenant/dashboard', icon: LayoutDashboard, label: 'Tenant Dashboard' },
   { to: '/tenant/categories', icon: Tags, label: 'Kategori' },
   { to: '/tenant/properties', icon: Building2, label: 'Properti Saya' },
   { to: '/tenant/occupancy', icon: CalendarDays, label: 'Ketersediaan Kamar' },
