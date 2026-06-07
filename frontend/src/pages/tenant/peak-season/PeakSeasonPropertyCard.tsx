@@ -1,9 +1,9 @@
 import type { FC } from "react";
 import { ChevronDown, ChevronUp, MapPin } from "lucide-react";
+import type { PeakSeasonPageState } from "@/hooks/tenant/peak-season/peakSeasonTypes";
 import type { TenantProperty } from "@/types";
 import { amenityLabel, propertyPriceLabel } from "./peakSeasonFormat";
 import { PeakSeasonRoomList } from "./PeakSeasonRoomList";
-import type { PeakSeasonPageState } from "./peakSeasonTypes";
 
 export const PeakSeasonPropertyCard: FC<PeakSeasonPropertyCardProps> = ({ property, state }) => {
   const isOpen = state.roomActions.expandedPropertyId === property.id;

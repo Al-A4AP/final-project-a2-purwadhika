@@ -1,6 +1,6 @@
 import type { FC } from "react";
+import type { TenantReviewsState } from "@/hooks/tenant/reviews/tenantReviewsTypes";
 import type { Review } from "@/types";
-import type { TenantReviewsState } from "./tenantReviewsTypes";
 import { ReviewCardActions } from "./ReviewCardActions";
 import { ReviewAuthor } from "./ReviewAuthor";
 import { ReviewMeta } from "./ReviewMeta";

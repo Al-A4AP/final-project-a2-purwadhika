@@ -1,7 +1,7 @@
 import type { FC } from "react";
 import { ConfirmModal } from "@/components/common/ConfirmModal";
 import { RoomPeakRatesModal } from "@/components/tenant/RoomPeakRatesModal";
-import type { PeakSeasonPageState } from "./peakSeasonTypes";
+import type { PeakSeasonPageState } from "@/hooks/tenant/peak-season/peakSeasonTypes";
 
 export const PeakSeasonModalLayer: FC<{ state: PeakSeasonPageState }> = ({ state }) => (
   <>

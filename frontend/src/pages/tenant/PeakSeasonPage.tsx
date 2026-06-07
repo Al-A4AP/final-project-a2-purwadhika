@@ -1,7 +1,7 @@
 import type { FC } from "react";
+import { usePeakSeasonPageState } from "@/hooks/tenant/peak-season/usePeakSeasonPageState";
 import { PeakSeasonContent } from "./peak-season/PeakSeasonContent";
 import { PeakSeasonModalLayer } from "./peak-season/PeakSeasonModalLayer";
-import { usePeakSeasonPageState } from "./peak-season/usePeakSeasonPageState";
 
 const PeakSeasonPage: FC = () => {
   const state = usePeakSeasonPageState();

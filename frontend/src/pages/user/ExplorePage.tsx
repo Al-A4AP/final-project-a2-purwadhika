@@ -1,24 +1,12 @@
-import { useState, type FC } from "react";
+import type { FC } from "react";
 import { SlidersHorizontal, X } from "lucide-react";
+import { useExplorePageState, type ExplorePageState } from "@/hooks/user/explore/useExplorePageState";
 import { HomeFilterPanel } from "./home/HomeFilterPanel";
 import { HomePropertyResults } from "./home/HomePropertyResults";
-import { useExploreQueryFilters } from "@/hooks/user/home/useExploreQueryFilters";
-import { useHomePageState } from "@/hooks/user/home/useHomePageState";
 
-type ExploreState = ReturnType<typeof useExplorePageState>;
+type ExploreState = ExplorePageState;
 
 const ExplorePage: FC = () => <ExplorePageView state={useExplorePageState()} />;
-
-const useExplorePageState = () => {
-  useExploreQueryFilters();
-  const [filtersOpen, setFiltersOpen] = useState(false);
-  const page = useHomePageState({ detectInitialCity: false });
-  const currentOrder = (page.activeFilters.order as "asc" | "desc") || "desc";
-  const currentSort = page.activeFilters.sort || "created_at";
-  const closeFilters = () => setFiltersOpen(false);
-  const toggleFilters = () => setFiltersOpen((open) => !open);
-  return { ...page, closeFilters, currentOrder, currentSort, filtersOpen, toggleFilters };
-};
 
 const ExplorePageView: FC<{ state: ExploreState }> = ({ state }) => (
   <div className="min-h-screen bg-slate-50 pb-16 dark:bg-slate-900">

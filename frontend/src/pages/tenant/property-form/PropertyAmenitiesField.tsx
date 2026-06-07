@@ -1,6 +1,6 @@
 import type { FC } from "react";
 import { AmenitiesSelector } from "@/components/tenant/AmenitiesSelector";
-import type { PropertyFormState } from "./propertyFormTypes";
+import type { PropertyFormState } from "@/hooks/tenant/property-form/propertyFormTypes";
 import { Sparkles } from "lucide-react";
 
 export const PropertyAmenitiesField: FC<{ state: PropertyFormState }> = ({ state }) => (

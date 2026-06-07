@@ -1,6 +1,6 @@
 import type { FC } from "react";
 import { ConfirmModal } from "@/components/common/ConfirmModal";
-import type { TenantReviewsState } from "./tenantReviewsTypes";
+import type { TenantReviewsState } from "@/hooks/tenant/reviews/tenantReviewsTypes";
 
 export const TenantReviewDeleteModal: FC<{ state: TenantReviewsState }> = ({ state }) => (
   <ConfirmModal

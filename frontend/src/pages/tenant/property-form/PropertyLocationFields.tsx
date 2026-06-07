@@ -1,6 +1,6 @@
 import type { FC } from "react";
+import type { PropertyFormState } from "@/hooks/tenant/property-form/propertyFormTypes";
 import { TextField } from "./FormFields";
-import type { PropertyFormState } from "./propertyFormTypes";
 import { MapPin } from "lucide-react";
 
 export const PropertyLocationFields: FC<{ state: PropertyFormState }> = ({ state }) => {

@@ -1,7 +1,7 @@
 import type { FC } from "react";
 import { Trash2 } from "lucide-react";
+import type { TenantReviewsState } from "@/hooks/tenant/reviews/tenantReviewsTypes";
 import type { Review } from "@/types";
-import type { TenantReviewsState } from "./tenantReviewsTypes";
 
 export const ReviewCardActions: FC<{ review: Review; state: TenantReviewsState }> = ({ review, state }) => {
   const deleting = state.deletingReviewId === review.id;

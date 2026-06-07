@@ -1,6 +1,6 @@
 import type { FC } from "react";
 import { ArrowLeft } from "lucide-react";
-import type { PropertyFormState } from "./propertyFormTypes";
+import type { PropertyFormState } from "@/hooks/tenant/property-form/propertyFormTypes";
 
 export const PropertyFormHeader: FC<{ state: PropertyFormState }> = ({ state }) => (
   <div className="mb-8 flex flex-col gap-4">

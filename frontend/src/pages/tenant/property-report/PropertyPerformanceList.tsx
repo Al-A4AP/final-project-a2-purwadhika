@@ -1,12 +1,11 @@
-import { useMemo, useState, type FC, type ReactNode } from "react";
+import type { FC, ReactNode } from "react";
 import { Link } from "react-router-dom";
 import { EmptyState } from "@/components/common/EmptyState";
 import { Pagination } from "@/components/common/Pagination";
+import { usePerformancePage, type PerformancePage } from "@/hooks/tenant/property-report/usePerformancePage";
 import type { OccupancyProperty } from "@/services/tenantReportService";
 import { getRoomBookings } from "@/hooks/tenant/property-report/propertyReportUtils";
 import { BedDouble, CalendarDays, Building2 } from "lucide-react";
-
-const PROPERTY_PAGE_SIZE = 8;
 
 interface PropertyPerformanceListProps {
   data: OccupancyProperty[];
@@ -94,24 +93,9 @@ const PerformancePagination: FC<{ page: PerformancePage; totalItems: number }> =
   </div>
 );
 
-const usePerformancePage = (data: OccupancyProperty[]) => {
-  const [currentPage, setPage] = useState(1);
-  const totalPages = Math.max(1, Math.ceil(data.length / PROPERTY_PAGE_SIZE));
-  const safePage = Math.min(currentPage, totalPages);
-  const items = useMemo(() => getPageItems(data, safePage), [data, safePage]);
-  return { currentPage: safePage, items, setPage, totalPages };
-};
-
-const getPageItems = (data: OccupancyProperty[], page: number) => {
-  const start = (page - 1) * PROPERTY_PAGE_SIZE;
-  return data.slice(start, start + PROPERTY_PAGE_SIZE);
-};
-
 const Stat: FC<{ icon: ReactNode; label: string; value: string }> = ({ icon, label, value }) => (
   <div className="flex flex-col items-center gap-0.5">
     <div className="flex items-center gap-1 text-slate-400">{icon}<span className="text-[10px] font-semibold uppercase tracking-wider">{label}</span></div>
     <span className="text-xl font-bold text-slate-900 dark:text-white">{value}</span>
   </div>
 );
-
-type PerformancePage = ReturnType<typeof usePerformancePage>;

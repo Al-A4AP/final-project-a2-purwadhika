@@ -1,77 +1,16 @@
 import type { FC } from 'react';
-import { useState } from 'react';
-import { toast } from 'react-hot-toast';
 import { ConfirmModal } from '@/components/common/ConfirmModal';
 import { ErrorState } from '@/components/common/ErrorState';
 import { Pagination } from '@/components/common/Pagination';
-import { useTenantCategories } from '@/hooks/useTenantCategories';
-import { isDefaultCategoryName } from '@/lib/defaultCategories';
-import type { PropertyCategory } from '@/types';
+import { useCategoryViewState, type CategoryViewState } from '@/hooks/tenant/categories/useCategoryViewState';
 import { CategoriesHeader } from './categories/CategoriesHeader';
 import { CategoriesSummary } from './categories/CategoriesSummary';
 import { CategoryListView } from './categories/CategoryListView';
 import { CategoryFormModal } from './categories/CategoryFormModal';
 
-type CategoryData = ReturnType<typeof useTenantCategories>;
-
-interface CategoryViewState {
-  data: CategoryData;
-  editing: PropertyCategory | null;
-  isAddModalOpen: boolean;
-  targetDelete: PropertyCategory | null;
-  totalPages: number;
-  handleDelete: () => Promise<void>;
-  handleSave: (name: string) => Promise<void>;
-  requestDelete: (category: PropertyCategory) => void;
-  requestEdit: (category: PropertyCategory) => void;
-  openAddModal: () => void;
-  closeModal: () => void;
-  resetTargetDelete: () => void;
-}
-
 const CategoriesPage: FC = () => {
   const view = useCategoryViewState();
   return <CategoryPageView view={view} />;
-};
-
-const useCategoryViewState = (): CategoryViewState => {
-  const data = useTenantCategories();
-  const [editing, setEditing] = useState<PropertyCategory | null>(null);
-  const [isAddModalOpen, setIsAddModalOpen] = useState(false);
-  const [targetDelete, setTargetDelete] = useState<PropertyCategory | null>(null);
-
-  const guardDefaultCategory = (category: PropertyCategory, action: 'diubah' | 'dihapus') => {
-    if (!isDefaultCategoryName(category.name)) return false;
-    toast.error(`Kategori default sistem tidak bisa ${action}`);
-    return true;
-  };
-
-  const handleSave = async (name: string) => { 
-    await data.saveCategory(name, editing); 
-    setEditing(null); 
-    setIsAddModalOpen(false);
-  };
-
-  const handleDelete = async () => { 
-    if (!targetDelete) return; 
-    await data.deleteCategory(targetDelete); 
-    setTargetDelete(null); 
-  };
-
-  return {
-    data, 
-    editing, 
-    isAddModalOpen,
-    targetDelete, 
-    totalPages: data.pagination.totalPages || data.pagination.pages || 1,
-    handleDelete,
-    handleSave,
-    requestDelete: (cat) => { if (!guardDefaultCategory(cat, 'dihapus')) setTargetDelete(cat); },
-    requestEdit: (cat) => { if (!guardDefaultCategory(cat, 'diubah')) setEditing(cat); },
-    openAddModal: () => setIsAddModalOpen(true),
-    closeModal: () => { setEditing(null); setIsAddModalOpen(false); },
-    resetTargetDelete: () => setTargetDelete(null),
-  };
 };
 
 const CategoryPageView: FC<{ view: CategoryViewState }> = ({ view }) => (

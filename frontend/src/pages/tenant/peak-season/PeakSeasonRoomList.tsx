@@ -1,9 +1,9 @@
 import type { FC, ReactNode } from "react";
 import { EmptyState } from "@/components/common/EmptyState";
 import { SectionLoading } from "@/components/common/SectionLoading";
+import type { PeakSeasonPageState } from "@/hooks/tenant/peak-season/peakSeasonTypes";
 import type { TenantProperty } from "@/types";
 import { PeakSeasonRoomRow } from "./PeakSeasonRoomRow";
-import type { PeakSeasonPageState } from "./peakSeasonTypes";
 
 export const PeakSeasonRoomList: FC<PeakSeasonRoomListProps> = ({ property, state }) => {
   if (state.roomActions.isLoadingRooms(property.id)) return <RoomListShell><SectionLoading label="Memuat kamar..." variant="table" /></RoomListShell>;

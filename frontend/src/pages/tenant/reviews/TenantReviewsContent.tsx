@@ -6,7 +6,7 @@ import { ReviewsSkeleton } from "./ReviewsSkeleton";
 import { TenantReviewDeleteModal } from "./TenantReviewDeleteModal";
 import { TenantReviewRatingSummary } from "./TenantReviewRatingSummary";
 import { TenantReviewsList } from "./TenantReviewsList";
-import type { TenantReviewsState } from "./tenantReviewsTypes";
+import type { TenantReviewsState } from "@/hooks/tenant/reviews/tenantReviewsTypes";
 
 export const TenantReviewsContent: FC<{ state: TenantReviewsState }> = ({ state }) => {
   if (state.loading && state.reviews.length === 0) return <ReviewsSkeleton />;

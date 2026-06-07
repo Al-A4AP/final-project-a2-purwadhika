@@ -1,6 +1,6 @@
 import type { FC } from 'react';
+import type { PropertyDetailPageState } from '@/hooks/user/property-detail/usePropertyDetailPageState';
 import type { PropertyDetail } from '@/types';
-import type { PropertyDetailPageState } from '@/pages/user/property-detail/usePropertyDetailPageState';
 import { formatPrice } from '@/lib/formatters';
 import { differenceInCalendarDays } from 'date-fns';
 

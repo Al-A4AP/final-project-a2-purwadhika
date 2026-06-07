@@ -1,7 +1,7 @@
 import type { FC } from "react";
 import { formatCurrency } from "@/lib/formatters";
+import type { PeakSeasonPageState } from "@/hooks/tenant/peak-season/peakSeasonTypes";
 import type { RoomWithPeakRates } from "@/types";
-import type { PeakSeasonPageState } from "./peakSeasonTypes";
 
 export const PeakSeasonRoomRow: FC<PeakSeasonRoomRowProps> = ({ propertyId, room, state }) => (
   <div className="flex flex-col gap-3 rounded-xl border border-slate-100 bg-white p-4 dark:border-slate-800 dark:bg-slate-900 sm:flex-row sm:items-center sm:justify-between">

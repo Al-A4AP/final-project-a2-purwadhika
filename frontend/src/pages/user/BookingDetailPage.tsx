@@ -1,6 +1,6 @@
 import type { FC } from "react";
 import { SectionLoading } from "@/components/common/SectionLoading";
-import { useBookingDetailState } from "./orders/useBookingDetailState";
+import { useBookingDetailState } from "@/hooks/user/orders/useBookingDetailState";
 import { BookingDetailHeader } from "./orders/BookingDetailHeader";
 import { BookingStatusTimeline } from "./orders/BookingStatusTimeline";
 import { BookingPropertySummary } from "./orders/BookingPropertySummary";

@@ -1,6 +1,6 @@
 import type { FC, KeyboardEvent } from "react";
-import { PEAK_SORT_OPTIONS, type PeakSortValue } from "./peakSeasonOptions";
-import type { PeakSeasonPageState } from "./peakSeasonTypes";
+import { PEAK_SORT_OPTIONS, type PeakSortValue } from "@/hooks/tenant/peak-season/peakSeasonOptions";
+import type { PeakSeasonPageState } from "@/hooks/tenant/peak-season/peakSeasonTypes";
 
 export const PeakSeasonFilters: FC<{ state: PeakSeasonPageState }> = ({ state }) => (
   <div className="rounded-2xl border border-slate-100 bg-white p-5 shadow-sm dark:border-slate-800 dark:bg-slate-900">

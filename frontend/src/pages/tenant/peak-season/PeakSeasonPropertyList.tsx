@@ -3,8 +3,8 @@ import { EmptyState } from "@/components/common/EmptyState";
 import { ErrorState } from "@/components/common/ErrorState";
 import { Pagination } from "@/components/common/Pagination";
 import { SectionLoading } from "@/components/common/SectionLoading";
+import type { PeakSeasonPageState } from "@/hooks/tenant/peak-season/peakSeasonTypes";
 import { PeakSeasonPropertyCard } from "./PeakSeasonPropertyCard";
-import type { PeakSeasonPageState } from "./peakSeasonTypes";
 
 export const PeakSeasonPropertyList: FC<{ state: PeakSeasonPageState }> = ({ state }) => {
   if (state.isLoading) return <SectionLoading label="Memuat properti..." size="lg" variant="cards" />;

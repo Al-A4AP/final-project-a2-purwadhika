@@ -1,6 +1,6 @@
 import type { FC } from "react";
 import { Upload, Trash2, Star, Plus, Image as ImageIcon } from "lucide-react";
-import type { PropertyFormState } from "./propertyFormTypes";
+import type { PropertyFormState } from "@/hooks/tenant/property-form/propertyFormTypes";
 import { ImageCropperModal } from "@/components/common/ImageCropperModal";
 
 export const PropertyImageField: FC<{ state: PropertyFormState }> = ({ state }) => {

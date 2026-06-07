@@ -56,7 +56,7 @@ export const RevenueTrendChart: FC<RevenueTrendChartProps> = ({ data }) => {
               boxShadow: "0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1)",
               padding: "12px"
             }}
-            formatter={(value: number) => [formatCurrency(value), "Pendapatan"]}
+            formatter={(value) => [formatCurrency(Number(value || 0)), "Pendapatan"]}
             labelStyle={{ color: "#64748b", marginBottom: "4px", fontWeight: "bold" }}
           />
           <Area 

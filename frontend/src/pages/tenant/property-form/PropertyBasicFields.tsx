@@ -1,7 +1,7 @@
 import type { FC } from "react";
 import type { PropertyCategory } from "@/types";
+import type { PropertyFormState } from "@/hooks/tenant/property-form/propertyFormTypes";
 import { FieldErrorText, FieldLabel, PROPERTY_INPUT_CLASS, TextAreaField, TextField } from "./FormFields";
-import type { PropertyFormState } from "./propertyFormTypes";
 import { Building2 } from "lucide-react";
 
 export const PropertyBasicFields: FC<{ state: PropertyFormState }> = ({ state }) => {

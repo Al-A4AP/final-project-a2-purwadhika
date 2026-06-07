@@ -1,6 +1,6 @@
 import type { FC } from "react";
 import { Send } from "lucide-react";
-import type { TenantReviewsState } from "./tenantReviewsTypes";
+import type { TenantReviewsState } from "@/hooks/tenant/reviews/tenantReviewsTypes";
 
 interface ReviewReplyFormProps {
   reviewId: string;

@@ -7,11 +7,11 @@ import { getApiErrorMessage } from "@/lib/errorMessage";
 import { propertyService } from "@/services/propertyService";
 import { tenantService } from "@/services/tenantService";
 import type { PropertyCategory } from "@/types";
-import { useAmenityState, type AmenityState } from "@/pages/tenant/property-form/propertyAmenityState";
-import { buildPropertyFormData, toPropertyFormValues } from "@/pages/tenant/property-form/propertyFormData";
-import { handlePropertyCrop, useGalleryState, useImageState, type GalleryState, type ImageState } from "@/pages/tenant/property-form/propertyFormMediaState";
-import { propertyFormSchema, type PropertyFormInput } from "@/pages/tenant/property-form/propertyFormSchema";
-import type { PropertyFormState } from "@/pages/tenant/property-form/propertyFormTypes";
+import { buildPropertyFormData, toPropertyFormValues } from "./propertyFormData";
+import { propertyFormSchema, type PropertyFormInput } from "./propertyFormSchema";
+import type { PropertyFormState } from "./propertyFormTypes";
+import { useAmenityState, type AmenityState } from "./propertyAmenityState";
+import { handlePropertyCrop, useGalleryState, useImageState, type GalleryState, type ImageState } from "./propertyFormMediaState";
 
 export const usePropertyFormState = () => {
   const context = usePropertyFormContext();

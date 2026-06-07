@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useState } from "react";
 import { tenantService } from "@/services/tenantService";
 import type { PaginationMeta, TenantProperty } from "@/types";
-import { handlePropertiesError } from "@/pages/tenant/properties-list/propertiesError";
+import { handlePropertiesError } from "./propertiesError";
 
 type PropertiesFilters = { activeSearch: string; sortKey: string; sortOrder: "asc" | "desc" };
 type SetProperties = (properties: TenantProperty[]) => void;

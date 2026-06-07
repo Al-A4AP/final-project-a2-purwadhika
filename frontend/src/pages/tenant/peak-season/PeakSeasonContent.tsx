@@ -1,8 +1,8 @@
 import type { FC } from "react";
+import type { PeakSeasonPageState } from "@/hooks/tenant/peak-season/peakSeasonTypes";
 import { PeakSeasonFilters } from "./PeakSeasonFilters";
 import { PeakSeasonHeader } from "./PeakSeasonHeader";
 import { PeakSeasonPropertyList } from "./PeakSeasonPropertyList";
-import type { PeakSeasonPageState } from "./peakSeasonTypes";
 
 export const PeakSeasonContent: FC<{ state: PeakSeasonPageState }> = ({ state }) => (
   <div className="min-h-screen bg-slate-50 px-4 py-8 pb-24 dark:bg-slate-900 md:p-10">

@@ -1,6 +1,6 @@
 import type { FC } from "react";
+import type { BookingDateFormState } from "@/hooks/user/booking/date-fields/bookingDateFieldTypes";
 import { BookingDateFields } from "./date-fields/BookingDateFields";
-import type { BookingDateFormState } from "./date-fields/bookingDateFieldTypes";
 
 export const TravelDetailsCard: FC<{ dateForm: BookingDateFormState }> = ({ dateForm }) => (
   <div className="bg-white dark:bg-slate-800 rounded-xl p-6 border dark:border-slate-700">

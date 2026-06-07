@@ -1,12 +1,7 @@
 import type { FC } from 'react';
-import { useEffect, useState } from 'react';
 import { Link, useParams } from 'react-router-dom';
 import { CheckCircle, Loader2, XCircle } from 'lucide-react';
-import { getApiErrorMessage } from '@/lib/errorMessage';
-import { authService } from '@/services/authService';
-
-const getErrorMessage = (err: unknown) =>
-  getApiErrorMessage(err, 'Verifikasi email baru gagal');
+import { useVerifyEmailChangeStatus, type VerificationStatus } from '@/hooks/auth/verify-email-change/useVerifyEmailChangeStatus';
 
 const VerifyEmailChangePage: FC = () => {
   const { token } = useParams<{ token: string }>();
@@ -21,22 +16,6 @@ const VerifyEmailChangePage: FC = () => {
     </div>
   );
 };
-
-const useVerifyEmailChangeStatus = (token?: string) => {
-  const [state, setState] = useState(() => getInitialState(token));
-  useEffect(() => verifyEmailChangeToken(token, setState), [token]);
-  return state;
-};
-
-const verifyEmailChangeToken = (token: string | undefined, setState: SetVerificationState) => {
-  if (!token) return;
-  authService.verifyEmailChange(token)
-    .then(() => setState({ status: 'success', message: 'Email baru berhasil diverifikasi.' }))
-    .catch((err) => setState({ status: 'error', message: getErrorMessage(err) }));
-};
-
-const getInitialState = (token?: string): VerificationState =>
-  token ? { status: 'loading', message: 'Memproses verifikasi email baru...' } : { status: 'error', message: 'Token verifikasi tidak ditemukan.' };
 
 const StatusIcon: FC<{ status: VerificationStatus }> = ({ status }) => {
   if (status === 'loading') return <Loader2 size={48} className="animate-spin text-red-600 mx-auto mb-4" />;
@@ -56,9 +35,5 @@ const LoginLink: FC<{ status: VerificationStatus }> = ({ status }) =>
       Kembali ke Login
     </Link>
   ) : null;
-
-type VerificationStatus = 'loading' | 'success' | 'error';
-type VerificationState = { status: VerificationStatus; message: string };
-type SetVerificationState = (state: VerificationState) => void;
 
 export default VerifyEmailChangePage;

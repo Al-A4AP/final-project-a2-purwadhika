@@ -1,38 +1,14 @@
 import type { FC } from "react";
-import { useParams, useNavigate } from "react-router-dom";
-import { useRoomsLogic } from "@/hooks/useRoomsLogic";
+import { useRoomsPageState, type RoomsPageState } from "@/hooks/rooms/useRoomsPageState";
 import { RoomsFormSection } from "./rooms-page/RoomsFormSection";
 import { RoomsListSection } from "./rooms-page/RoomsListSection";
 import { RoomsModals } from "./rooms-page/RoomsModals";
 import { RoomsPageHeader } from "./rooms-page/RoomsPageHeader";
 import { RoomsSummary } from "./rooms-page/RoomsSummary";
-import { createEmptyRoomForm, isWholeUnitCategory } from "./rooms-page/roomsPageUtils";
-import { useRoomDeleteActions } from "./rooms-page/useRoomDeleteActions";
 
 const RoomsPage: FC = () => {
   const page = useRoomsPageState();
   return <RoomsPageLayout {...page} />;
-};
-
-const useRoomsPageState = () => {
-  const { id } = useParams<{ id: string }>();
-  const navigate = useNavigate();
-  const state = useRoomsLogic(id);
-  const deleteActions = useRoomDeleteActions(state);
-  const isWholeUnit = isWholeUnitCategory(state.property?.category?.name);
-  const handleToggleForm = createToggleRoomFormHandler(state);
-  const handleCloseForm = () => {
-    state.setShowForm(false);
-    state.setEditingRoom(null);
-    state.setForm(createEmptyRoomForm());
-  };
-  return { deleteActions, handleToggleForm, handleCloseForm, isWholeUnit, navigate, state };
-};
-
-const createToggleRoomFormHandler = (state: ReturnType<typeof useRoomsLogic>) => () => {
-  state.setShowForm(!state.showForm);
-  state.setEditingRoom(null);
-  state.setForm(createEmptyRoomForm());
 };
 
 const RoomsPageLayout: FC<RoomsPageLayoutProps> = ({ deleteActions, handleToggleForm, handleCloseForm, isWholeUnit, navigate, state }) => (
@@ -75,6 +51,6 @@ const RoomsPageLayout: FC<RoomsPageLayoutProps> = ({ deleteActions, handleToggle
   </div>
 );
 
-type RoomsPageLayoutProps = ReturnType<typeof useRoomsPageState>;
+type RoomsPageLayoutProps = RoomsPageState;
 
 export default RoomsPage;
