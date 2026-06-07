@@ -6,7 +6,7 @@
   "scripts": {
     "dev": "ts-node-dev --respawn --transpile-only server.ts",
     "start": "node dist/server.js",
-    "build": "tsc",
+    "build": "npx prisma generate && tsc",
     "seed": "ts-node-dev --transpile-only prisma/seed.ts",
     "backfill:amenities": "ts-node --transpile-only prisma/scripts/backfillAmenities.ts",
     "test": "node -r ts-node/register --test tests/ownership/ownership.test.ts",
