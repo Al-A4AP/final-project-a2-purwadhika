@@ -28,8 +28,8 @@ const getButtonClass = (saved: boolean, className: string, variant: 'overlay' | 
   const base = "flex items-center justify-center rounded-full transition-all duration-300 hover:scale-110 active:scale-95";
   
   const variants = {
-    overlay: `h-9 w-9 shadow-md backdrop-blur-sm border ${saved ? 'bg-white border-transparent' : 'bg-slate-900/40 border-white/30 hover:bg-slate-900/60'}`,
-    outline: `h-12 w-12 shadow-sm border ${saved ? 'bg-rose-50 border-rose-200 dark:bg-rose-900/20 dark:border-rose-800' : 'bg-white border-slate-200 hover:bg-slate-50 dark:bg-slate-800 dark:border-slate-700 dark:hover:bg-slate-700'}`,
+    overlay: `h-9 w-9 shadow-md backdrop-blur-sm border ${saved ? 'bg-white border-transparent' : 'bg-slate-900/50 border-slate-200/50 hover:bg-slate-900/70'}`,
+    outline: `h-12 w-12 shadow-sm border ${saved ? 'bg-red-50 border-red-200 dark:bg-red-900/20 dark:border-red-800' : 'bg-white border-slate-200 hover:bg-slate-50 dark:bg-slate-800 dark:border-slate-700 dark:hover:bg-slate-700'}`,
   };
   
   return `${base} ${variants[variant]} ${className}`;
@@ -38,7 +38,7 @@ const getButtonClass = (saved: boolean, className: string, variant: 'overlay' | 
 const getHeartClass = (saved: boolean, variant: 'overlay' | 'outline') => {
   const base = "transition-colors duration-300";
   if (variant === 'overlay') {
-    return `${base} ${saved ? "fill-rose-500 text-rose-500" : "text-white"}`;
+    return `${base} ${saved ? "fill-red-600 text-red-600" : "text-white drop-shadow-md"}`;
   }
-  return `${base} ${saved ? "fill-rose-500 text-rose-500" : "text-slate-600 dark:text-slate-300"}`;
+  return `${base} ${saved ? "fill-red-600 text-red-600" : "text-slate-700 dark:text-slate-300"}`;
 };

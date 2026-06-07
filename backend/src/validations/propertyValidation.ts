@@ -8,6 +8,7 @@ export const createPropertySchema = z.object({
   province: z.string().optional(),
   amenities: z.string().optional(),
   categoryId: z.string().min(1, 'Kategori wajib dipilih'),
+  rental_type: z.enum(['PER_ROOM', 'WHOLE_PROPERTY']).default('PER_ROOM'),
   latitude: z.string().optional(),
   longitude: z.string().optional(),
 });

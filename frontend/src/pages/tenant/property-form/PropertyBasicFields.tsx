@@ -29,6 +29,7 @@ export const PropertyBasicFields: FC<{ state: PropertyFormState }> = ({ state })
           helperText="Nama yang akan dilihat oleh tamu."
         />
         <CategoryField categories={state.categories} state={state} />
+        <RentalTypeField state={state} />
         <TextAreaField 
           label="Deskripsi" 
           name="description" 
@@ -58,6 +59,38 @@ const CategoryField: FC<{ categories: PropertyCategory[]; state: PropertyFormSta
         ))}
       </select>
       <p className="mt-1.5 text-xs text-slate-500 dark:text-slate-400">Kategori menentukan filter pencarian.</p>
+      {error && <FieldErrorText message={error.message} />}
+    </div>
+  );
+};
+
+const RentalTypeField: FC<{ state: PropertyFormState }> = ({ state }) => {
+  const error = state.form.formState.errors.rental_type;
+  
+  return (
+    <div>
+      <FieldLabel label="Mode Sewa" />
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-3 mt-1.5">
+        <label className={`flex cursor-pointer items-start gap-3 rounded-xl border p-4 transition-all ${state.form.watch('rental_type') === 'PER_ROOM' ? 'border-blue-500 bg-blue-50/50 dark:border-blue-500/50 dark:bg-blue-900/20' : 'border-slate-200 bg-white hover:border-slate-300 dark:border-slate-700 dark:bg-slate-900 dark:hover:border-slate-600'}`}>
+          <div className="flex h-5 items-center">
+            <input type="radio" value="PER_ROOM" {...state.form.register('rental_type')} className="h-4 w-4 border-slate-300 text-blue-600 focus:ring-blue-600 dark:border-slate-600 dark:bg-slate-800" />
+          </div>
+          <div>
+            <div className="font-semibold text-slate-900 dark:text-white">Sewa Kamar</div>
+            <div className="text-xs text-slate-500 dark:text-slate-400 mt-1">Konfigurasi kamar terpisah dengan harga dan fasilitas masing-masing (seperti hotel/apartemen).</div>
+          </div>
+        </label>
+        
+        <label className={`flex cursor-pointer items-start gap-3 rounded-xl border p-4 transition-all ${state.form.watch('rental_type') === 'WHOLE_PROPERTY' ? 'border-blue-500 bg-blue-50/50 dark:border-blue-500/50 dark:bg-blue-900/20' : 'border-slate-200 bg-white hover:border-slate-300 dark:border-slate-700 dark:bg-slate-900 dark:hover:border-slate-600'}`}>
+          <div className="flex h-5 items-center">
+            <input type="radio" value="WHOLE_PROPERTY" {...state.form.register('rental_type')} className="h-4 w-4 border-slate-300 text-blue-600 focus:ring-blue-600 dark:border-slate-600 dark:bg-slate-800" />
+          </div>
+          <div>
+            <div className="font-semibold text-slate-900 dark:text-white">Sewa Seluruh Properti</div>
+            <div className="text-xs text-slate-500 dark:text-slate-400 mt-1">Sewa seluruh fasilitas properti secara bersama tanpa rincian kamar (seperti rumah/villa).</div>
+          </div>
+        </label>
+      </div>
       {error && <FieldErrorText message={error.message} />}
     </div>
   );

@@ -1,3 +1,4 @@
+import { useState } from 'react';
 import type { FC, ReactNode } from 'react';
 
 interface ConfirmModalProps {
@@ -6,15 +7,17 @@ interface ConfirmModalProps {
   message: string;
   confirmText?: string;
   confirmDisabled?: boolean;
-  onConfirm: () => void | Promise<void>;
+  onConfirm: (reason?: string) => void | Promise<void>;
   onCancel: () => void;
+  showReasonInput?: boolean;
 }
 
 export const ConfirmModal: FC<ConfirmModalProps> = (props) => {
+  const [reason, setReason] = useState("");
   if (!props.isOpen) return null;
   return (
     <ConfirmModalShell>
-      <ConfirmModalBody {...props} />
+      <ConfirmModalBody {...props} reason={reason} setReason={setReason} />
     </ConfirmModalShell>
   );
 };
@@ -27,18 +30,28 @@ const ConfirmModalShell: FC<{ children: ReactNode }> = ({ children }) => (
   </div>
 );
 
-const ConfirmModalBody: FC<ConfirmModalProps> = (props) => (
+const ConfirmModalBody: FC<ConfirmModalProps & { reason: string, setReason: (v: string) => void }> = (props) => (
   <>
     <h3 className="mb-2 text-lg font-bold text-gray-900 dark:text-white">{props.title}</h3>
-    <p className="mb-6 text-sm leading-relaxed text-gray-600 dark:text-gray-350">{props.message}</p>
-    <ConfirmModalActions {...props} />
+    <p className={props.showReasonInput ? "mb-2 text-sm leading-relaxed text-gray-600 dark:text-gray-350" : "mb-6 text-sm leading-relaxed text-gray-600 dark:text-gray-350"}>{props.message}</p>
+    {props.showReasonInput && (
+      <textarea
+        className="mb-6 w-full resize-none rounded-lg border border-slate-200 p-3 text-sm focus:border-slate-400 focus:outline-none dark:border-slate-600 dark:bg-slate-900 dark:text-white"
+        placeholder="Tulis alasan penolakan..."
+        rows={3}
+        value={props.reason}
+        onChange={(e) => props.setReason(e.target.value)}
+        required
+      />
+    )}
+    <ConfirmModalActions {...props} confirmDisabled={props.confirmDisabled || (props.showReasonInput ? !props.reason.trim() : false)} onConfirm={() => props.onConfirm(props.reason)} />
   </>
 );
 
 const ConfirmModalActions: FC<ConfirmModalProps> = (props) => (
   <div className="flex justify-end gap-3">
     <button type="button" onClick={props.onCancel} className={cancelButtonClass}>Batal</button>
-    <button type="button" onClick={props.onConfirm} disabled={props.confirmDisabled} className={confirmButtonClass}>
+    <button type="button" onClick={() => props.onConfirm()} disabled={props.confirmDisabled} className={confirmButtonClass}>
       {props.confirmText || 'Ya, Hapus'}
     </button>
   </div>

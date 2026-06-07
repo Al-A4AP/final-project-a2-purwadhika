@@ -5,6 +5,7 @@ export const toPropertyFormValues = (property: TenantPropertyDetail): PropertyFo
   name: property.name,
   description: property.description,
   categoryId: property.categoryId,
+  rental_type: property.rental_type || "PER_ROOM",
   address: property.address,
   city: property.city,
   province: property.province || "",

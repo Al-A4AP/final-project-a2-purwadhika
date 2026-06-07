@@ -9,21 +9,27 @@ interface CategoryFormModalProps {
   editing: PropertyCategory | null;
   saving: boolean;
   onClose: () => void;
-  onSubmit: (name: string) => Promise<void> | void;
+  onSubmit: (data: { name: string; description?: string; default_rental_type?: string }) => Promise<void> | void;
 }
 
 export const CategoryFormModal: FC<CategoryFormModalProps> = ({ isOpen, editing, saving, onClose, onSubmit }) => {
   const [name, setName] = useState("");
+  const [description, setDescription] = useState("");
+  const [rentalType, setRentalType] = useState<"PER_ROOM" | "WHOLE_PROPERTY">("PER_ROOM");
 
   useEffect(() => {
     if (isOpen) {
-      Promise.resolve().then(() => setName(editing?.name || ""));
+      Promise.resolve().then(() => {
+        setName(editing?.name || "");
+        setDescription(editing?.description || "");
+        setRentalType(editing?.default_rental_type || "PER_ROOM");
+      });
     }
   }, [isOpen, editing]);
 
   const handleSubmit = async (event: FormEvent) => {
     event.preventDefault();
-    await onSubmit(name);
+    await onSubmit({ name, description, default_rental_type: rentalType });
   };
 
   return (
@@ -57,6 +63,37 @@ export const CategoryFormModal: FC<CategoryFormModalProps> = ({ isOpen, editing,
           <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">
             Gunakan nama yang singkat dan deskriptif untuk filter pencarian.
           </p>
+        </div>
+
+        <div className="mb-6 space-y-1">
+          <label htmlFor="categoryDescription" className="block text-sm font-semibold text-slate-700 dark:text-slate-300">
+            Deskripsi Kategori
+          </label>
+          <textarea
+            id="categoryDescription"
+            value={description}
+            onChange={(e) => setDescription(e.target.value)}
+            disabled={saving}
+            placeholder="Opsional: Deskripsi tambahan"
+            className="w-full rounded-xl border border-slate-200 bg-white px-4 py-3 text-sm text-slate-900 outline-none transition focus:border-slate-500 focus:ring-1 focus:ring-slate-500 disabled:opacity-60 dark:border-slate-700 dark:bg-slate-900 dark:text-white"
+            rows={3}
+          />
+        </div>
+
+        <div className="mb-8 space-y-1">
+          <label htmlFor="categoryRentalType" className="block text-sm font-semibold text-slate-700 dark:text-slate-300">
+            Mode Sewa Default <span className="text-red-500">*</span>
+          </label>
+          <select
+            id="categoryRentalType"
+            value={rentalType}
+            onChange={(e) => setRentalType(e.target.value as "PER_ROOM" | "WHOLE_PROPERTY")}
+            disabled={saving}
+            className="w-full rounded-xl border border-slate-200 bg-white px-4 py-3 text-sm text-slate-900 outline-none transition focus:border-slate-500 focus:ring-1 focus:ring-slate-500 disabled:opacity-60 dark:border-slate-700 dark:bg-slate-900 dark:text-white"
+          >
+            <option value="PER_ROOM">Sewa Kamar</option>
+            <option value="WHOLE_PROPERTY">Sewa Seluruh Properti</option>
+          </select>
         </div>
 
         <div className="flex gap-3">

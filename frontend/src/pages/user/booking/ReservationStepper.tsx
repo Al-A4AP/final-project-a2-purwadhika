@@ -47,6 +47,10 @@ export const ReservationStepper: FC<ReservationStepperProps> = ({ state }) => {
 };
 
 const canContinueStep = (step: number, isManual: boolean, proofFile: File | null, state: BookingPageState) => {
+  if (step === 2) {
+    const { name, phone, email, legalName, ktpAddress, domicileAddress } = state.guestIdentity;
+    if (!name.trim() || !phone.trim() || !email.trim() || !legalName.trim() || !ktpAddress.trim() || !domicileAddress.trim()) return false;
+  }
   if (step === 3) return state.agreementAccepted;
   if (step === 5 && isManual) return Boolean(proofFile);
   return true;

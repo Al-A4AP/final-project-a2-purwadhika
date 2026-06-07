@@ -23,8 +23,9 @@ export interface ConfirmModalState {
   confirmText: string;
   isOpen: boolean;
   message: string;
-  onConfirm: () => void;
+  onConfirm: (reason?: string) => void;
   title: string;
+  showReasonInput?: boolean;
 }
 
 export interface TenantOrdersState {

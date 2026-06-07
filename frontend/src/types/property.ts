@@ -3,6 +3,8 @@ import type { Room, RoomWithPeakRates } from './room';
 export interface PropertyCategory {
   id: string;
   name: string;
+  description?: string;
+  default_rental_type?: 'PER_ROOM' | 'WHOLE_PROPERTY';
   updated_at?: string;
 }
 
@@ -11,6 +13,7 @@ export interface Property {
   tenantId: string;
   name: string;
   description: string;
+  rental_type?: 'PER_ROOM' | 'WHOLE_PROPERTY';
   category: PropertyCategory;
   featured_image_url?: string;
   address: string;
@@ -70,6 +73,7 @@ export interface TenantProperty {
   province?: string;
   address: string;
   description: string;
+  rental_type?: 'PER_ROOM' | 'WHOLE_PROPERTY';
   amenities?: string[];
   featured_image_url: string | null;
   categoryId: string;

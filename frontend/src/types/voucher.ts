@@ -1,4 +1,4 @@
-export type VoucherDiscountType = "PERCENTAGE" | "NOMINAL";
+export type VoucherDiscountType = "PERCENTAGE" | "NOMINAL" | "FREE_NIGHTS";
 
 export interface Voucher {
   id: string;
@@ -26,7 +26,7 @@ export interface VoucherFormInput {
   expires_at: string;
   is_active?: boolean;
   max_discount?: number | null;
-  name: string;
+  name?: string;
   new_user_only?: boolean;
   quota?: number | null;
   starts_at: string;

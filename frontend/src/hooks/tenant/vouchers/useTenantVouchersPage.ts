@@ -36,7 +36,6 @@ const saveVoucherData = async (data: VoucherFormInput, editing: Voucher | null, 
 };
 
 const deleteVoucherData = async (voucher: Voucher, load: () => void) => {
-  if (!confirm(`Hapus voucher ${voucher.code}?`)) return;
   try { await voucherService.deleteTenantVoucher(voucher.id); toast.success("Voucher dihapus"); load(); }
   catch (err) { toast.error(getApiErrorMessage(err, "Voucher gagal dihapus.")); }
 };

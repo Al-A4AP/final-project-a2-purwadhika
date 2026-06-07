@@ -10,6 +10,8 @@ Ownership dan keamanan berada pada kondisi baik. Route tenant dan user utama sud
 
 Auth token disimpan sebagai HTTP-only cookie dari backend, bukan localStorage. LocalStorage frontend hanya dipakai untuk preferensi UI dan saved properties lokal. Risiko keamanan yang tersisa bersifat production hardening, bukan blocker fitur final.
 
+Catatan UAT browser terbaru: rencana perbaikan 07 Juni 2026 menambah pekerjaan aktif yang menyentuh ownership data kategori, properti, voucher, dan order rejection. Detail rencana ada di `docs/plans/RENCANA_PERBAIKAN_UAT_BROWSER_2026_06_07.md`.
+
 ## Verifikasi
 
 | Pemeriksaan | Hasil |
@@ -22,6 +24,20 @@ Auth token disimpan sebagai HTTP-only cookie dari backend, bukan localStorage. L
 | Scan `document.cookie` frontend | Tidak ditemukan penggunaan langsung di frontend |
 
 ## Ownership
+
+### Dampak Rencana UAT Browser 07 Juni 2026
+
+Area yang perlu dijaga saat implementasi:
+
+| Area | Risiko Ownership | Mitigasi |
+| --- | --- | --- |
+| Category description dan rental type | Tenant mencoba edit/delete kategori default sistem | Default category tetap `tenantId = null` dan read-only untuk tenant |
+| Property rental type | Tenant mengubah property milik tenant lain | Tetap gunakan `verifyPropertyOwnership` dan filter `tenantId` di service |
+| Voucher tenant | Tenant melihat/mengubah voucher reward private user | Voucher reward dengan `user_vouchers` tetap tidak muncul di voucher management tenant |
+| Tenant reject payment reason | Tenant mengubah order tenant lain atau user melihat alasan order lain | Tetap validasi property ownership pada order dan filter user order by `userId` |
+| Booking guest data | Data guest milik order user terekspos ke user lain | User order endpoint tetap filter by authenticated `userId` |
+
+Tambahkan regression test jika perubahan membuka surface ownership baru, terutama pada category/property rental type dan tenant order rejection reason.
 
 ### Proteksi Tenant Resource
 

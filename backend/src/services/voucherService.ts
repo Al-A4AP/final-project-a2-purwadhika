@@ -29,7 +29,7 @@ export const previewUserVoucher = async (userId: string, input: VoucherPreviewIn
   const voucher = await findActiveVoucherForProperty(prisma, input.propertyId, input.voucher_code);
   await assertAssignedVoucherAccess(prisma, userId, voucher.id);
   await assertNewUserVoucherAllowed(prisma, userId, voucher);
-  const discountAmount = calculateDiscount(input.subtotal, voucher);
+  const discountAmount = calculateDiscount(input.subtotal, voucher, input.total_nights);
   return { discountAmount, finalPrice: input.subtotal - discountAmount, voucher: serializeVoucher(voucher) };
 };
 
@@ -39,13 +39,13 @@ export const getUserVoucherSummary = async (userId: string) => {
   return { referralCode: user.referral_code, vouchers: vouchers.map(serializeVoucher) };
 };
 
-export const applyVoucherToOrder = async (tx: Prisma.TransactionClient, propertyId: string, code: string | undefined, subtotal: number, userId: string) => {
+export const applyVoucherToOrder = async (tx: Prisma.TransactionClient, propertyId: string, code: string | undefined, subtotal: number, userId: string, total_nights = 1) => {
   if (!code?.trim()) return buildNoVoucherResult(subtotal);
   const voucher = await findActiveVoucherForProperty(tx, propertyId, code);
   await assertAssignedVoucherAccess(tx, userId, voucher.id);
   await assertNewUserVoucherAllowed(tx, userId, voucher);
   assertVoucherQuota(voucher);
-  const discountAmount = calculateDiscount(subtotal, voucher);
+  const discountAmount = calculateDiscount(subtotal, voucher, total_nights);
   await tx.voucher.update({ where: { id: voucher.id }, data: { used_count: { increment: 1 } } });
   await markAssignedVoucherUsed(tx, userId, voucher.id);
   return { discountAmount, subtotalPrice: subtotal, totalPrice: subtotal - discountAmount, voucherId: voucher.id };
@@ -107,11 +107,20 @@ const markAssignedVoucherUsed = async (db: DbClient, userId: string, voucherId: 
   await db.userVoucher.update({ where: { id: assignment.id }, data: { used_at: new Date() } });
 };
 
-const calculateDiscount = (subtotal: number, voucher: Pick<Voucher, 'discount_type' | 'discount_value' | 'max_discount'>) => {
-  const raw = voucher.discount_type === VoucherDiscountType.PERCENTAGE
-    ? Math.floor((subtotal * voucher.discount_value) / 100)
-    : voucher.discount_value;
-  return Math.min(subtotal, voucher.max_discount ? Math.min(raw, voucher.max_discount) : raw);
+const calculateDiscount = (subtotal: number, voucher: Pick<Voucher, 'discount_type' | 'discount_value' | 'max_discount'>, total_nights = 1) => {
+  let raw = 0;
+  if (voucher.discount_type === 'FREE_NIGHTS') {
+    raw = Math.floor((subtotal / total_nights) * voucher.discount_value);
+  } else if (voucher.discount_type === VoucherDiscountType.PERCENTAGE) {
+    raw = Math.floor((subtotal * voucher.discount_value) / 100);
+  } else {
+    raw = voucher.discount_value;
+  }
+  const cappedDiscount = voucher.max_discount ? Math.min(raw, voucher.max_discount) : raw;
+  if (voucher.discount_type !== 'FREE_NIGHTS') {
+    return Math.min(cappedDiscount, Math.floor(subtotal * 0.9));
+  }
+  return Math.min(cappedDiscount, subtotal);
 };
 
 const ensureUserReferralCode = async (userId: string) => {
@@ -152,19 +161,25 @@ const mergeVouchers = (primary: Voucher[], secondary: Voucher[]) => {
 
 const buildVoucherCreateData = (tenantId: string, data: VoucherInput) => ({ ...buildVoucherUpdateData(data), tenantId });
 
-const buildVoucherUpdateData = (data: VoucherInput) => ({
-  code: normalizeVoucherCode(data.code),
-  description: data.description || null,
-  discount_type: data.discount_type,
-  discount_value: data.discount_value,
-  expires_at: new Date(data.expires_at),
-  is_active: data.is_active ?? true,
-  max_discount: data.max_discount || null,
-  name: data.name,
-  new_user_only: data.new_user_only ?? false,
-  quota: data.quota || null,
-  starts_at: new Date(data.starts_at),
-});
+const buildVoucherUpdateData = (data: VoucherInput) => {
+  const starts_at = new Date(data.starts_at);
+  starts_at.setHours(0, 0, 0, 0);
+  const expires_at = new Date(data.expires_at);
+  expires_at.setHours(23, 59, 59, 999);
+  return {
+    code: normalizeVoucherCode(data.code),
+    description: data.description || null,
+    discount_type: data.discount_type,
+    discount_value: data.discount_value,
+    expires_at,
+    is_active: data.is_active ?? true,
+    max_discount: data.max_discount || null,
+    name: data.name || normalizeVoucherCode(data.code),
+    new_user_only: data.new_user_only ?? false,
+    quota: data.quota || null,
+    starts_at,
+  };
+};
 
 const serializeVoucher = (voucher: Voucher) => ({ ...voucher, code: voucher.code });
 const normalizeVoucherCode = (code: string) => code.trim().toUpperCase();

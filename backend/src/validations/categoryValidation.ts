@@ -2,6 +2,8 @@ import { z } from 'zod';
 
 export const categorySchema = z.object({
   name: z.string().trim().min(2, 'Nama kategori minimal 2 karakter').max(50, 'Maksimal 50 karakter'),
+  description: z.string().optional(),
+  default_rental_type: z.enum(['PER_ROOM', 'WHOLE_PROPERTY']).default('PER_ROOM'),
 });
 
 export const categoryQuerySchema = z.object({

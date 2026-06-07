@@ -8,7 +8,25 @@ Acuan: `docs/guidelines/PURWADHIKA.md`
 
 Project sudah memenuhi mayoritas requirement utama PURWADHIKA untuk Property Renting Web App. Fitur user, tenant, transaksi, review, report, mobile responsiveness, clean code, ownership, dan REST guideline jalur utama sudah tersedia dan terverifikasi.
 
-Status final: siap review dengan catatan opsional pada cleanup legacy REST alias, review kandidat function-length advisory, dan hardening production.
+Status audit teknis terakhir: fitur utama tersedia dan verifikasi teknis lulus. Namun, hasil UAT browser terbaru pada 07 Juni 2026 menambahkan rencana perbaikan aktif sebelum klaim final benar-benar ditutup. Lihat `docs/plans/RENCANA_PERBAIKAN_UAT_BROWSER_2026_06_07.md`.
+
+## Catatan UAT Browser Terbaru
+
+Temuan browser terbaru belum dieksekusi dan perlu diprioritaskan secara bertahap:
+
+| Area | Status | Rencana |
+| --- | --- | --- |
+| Dashboard tenant date logic | Perlu perbaikan | Batasi data historis sampai tanggal saat ini; tambah periode minggu/bulan/tahun/seluruh data max 3 tahun |
+| Tenant category data | Perlu migration | Tambah deskripsi kategori dan default rental type untuk default/custom category |
+| Tenant property rental mode | Perlu perbaikan | Tambah pilihan `PER_ROOM`/`WHOLE_PROPERTY`; sembunyikan Kelola Kamar untuk whole property |
+| Voucher tenant | Perlu perbaikan | Sederhanakan form, validasi kode 8 alfanumerik, date-only calendar, hapus native confirm |
+| Booking guest data | Perlu perbaikan UX | Validasi step Data Tamu sebelum lanjut dan perjelas CTA self-booking |
+| Tenant order rejection | Perlu migration dan flow | Wajib alasan tolak pembayaran, simpan alasan, kirim notifikasi/email, tampilkan ke user |
+| Profile navigation | Perlu perbaikan kecil | Tombol kembali ke dashboard sesuai role |
+
+Dokumen rencana aktif:
+
+- `docs/plans/RENCANA_PERBAIKAN_UAT_BROWSER_2026_06_07.md`
 
 ## Verifikasi Terbaru
 
@@ -227,6 +245,7 @@ README di folder `frontend` dan `backend` sudah dihapus oleh user dan tidak dibu
 
 | Rekomendasi | Risiko | Prioritas |
 | --- | --- | --- |
+| Eksekusi rencana UAT browser 07 Juni 2026 | Menengah | Prioritas aktif |
 | Cleanup legacy REST alias setelah regression test | Menengah | Opsional sebelum final REST ketat |
 | Review kandidat function-length advisory bertahap | Rendah-menengah | Opsional clean code |
 | Tambahkan CSRF token jika cookie-auth production cross-origin | Menengah | Production hardening |
@@ -235,4 +254,4 @@ README di folder `frontend` dan `backend` sudah dihapus oleh user dan tidak dibu
 
 ## Kesimpulan
 
-Project siap untuk review final PURWADHIKA. Sisa catatan bukan blocker fitur utama, tetapi dapat meningkatkan konsistensi REST dan readiness production jika dikerjakan setelah regression test.
+Project memiliki fitur utama yang lengkap dan verifikasi teknis terakhir lulus. Untuk menutup klaim final setelah UAT browser, jalankan rencana aktif di `docs/plans/RENCANA_PERBAIKAN_UAT_BROWSER_2026_06_07.md`, lalu update audit ini kembali berdasarkan hasil implementasi dan verifikasi.

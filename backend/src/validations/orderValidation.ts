@@ -36,7 +36,8 @@ function requireField(value: unknown, path: string, message: string, ctx: z.Refi
 }
 
 export const updateOrderStatusSchema = z.object({
-  status: z.enum(['PROCESSED', 'CANCELLED']),
+  status: z.enum(['PROCESSED', 'CANCELLED', 'WAITING_PAYMENT']),
+  payment_rejection_reason: z.string().trim().optional(),
 });
 
 export const paymentAttemptSchema = z.object({

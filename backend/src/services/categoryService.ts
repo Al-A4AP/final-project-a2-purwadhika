@@ -87,7 +87,12 @@ export const listCategories = async (
 export const createCategory = async (tenantId: string, data: CategoryInput) => {
   await ensureNameAvailable(data.name, tenantId);
   return prisma.propertyCategory.create({
-    data: { name: data.name, tenantId },
+    data: { 
+      name: data.name, 
+      description: data.description,
+      default_rental_type: data.default_rental_type,
+      tenantId 
+    },
   });
 };
 
@@ -101,7 +106,11 @@ export const updateCategory = async (
   await ensureNameAvailable(data.name, tenantId, id);
   return prisma.propertyCategory.update({
     where: { id },
-    data: { name: data.name },
+    data: { 
+      name: data.name,
+      description: data.description,
+      default_rental_type: data.default_rental_type
+    },
   });
 };
 

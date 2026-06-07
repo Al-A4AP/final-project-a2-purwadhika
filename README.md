@@ -25,6 +25,7 @@ Audit dokumentasi diperbarui pada 07 Juni 2026 dengan acuan `docs/guidelines/PUR
 | Ownership test | Lulus | `npm.cmd run test:ownership` lulus, 7/7 |
 | REST API | Sesuai pada jalur utama | Legacy alias masih aktif untuk backward compatibility |
 | Browser storage | Aman | Auth token tidak disimpan di localStorage |
+| UAT browser lanjutan | Perlu perbaikan terencana | Temuan 07 Juni 2026 dicatat di `docs/plans/RENCANA_PERBAIKAN_UAT_BROWSER_2026_06_07.md` |
 
 Laporan lengkap tersedia di:
 
@@ -32,6 +33,7 @@ Laporan lengkap tersedia di:
 - [`docs/audits/AUDIT_CLEAN_CODE_REST_API_GUIDELINES.md`](./docs/audits/AUDIT_CLEAN_CODE_REST_API_GUIDELINES.md)
 - [`docs/audits/AUDIT_OWNERSHIP_SECURITY.md`](./docs/audits/AUDIT_OWNERSHIP_SECURITY.md)
 - [`docs/plans/RENCANA_PERBAIKAN_DETAIL.md`](./docs/plans/RENCANA_PERBAIKAN_DETAIL.md)
+- [`docs/plans/RENCANA_PERBAIKAN_UAT_BROWSER_2026_06_07.md`](./docs/plans/RENCANA_PERBAIKAN_UAT_BROWSER_2026_06_07.md)
 
 ## Kebijakan Dokumentasi
 
@@ -259,4 +261,4 @@ Frontend dapat dideploy sebagai static Vite app. Backend harus memiliki environm
 
 ## Catatan Final
 
-Project siap untuk review final. Sisa rencana yang masih opsional tersedia di [`docs/plans/RENCANA_PERBAIKAN_DETAIL.md`](./docs/plans/RENCANA_PERBAIKAN_DETAIL.md), terutama cleanup legacy REST alias, review function-length advisory, CSRF hardening, persistent token blacklist, dan saved properties lintas device.
+Project memiliki fondasi fitur utama yang lengkap dan verifikasi teknis terakhir lulus. Namun, hasil UAT browser terbaru pada 07 Juni 2026 menambahkan rencana perbaikan aktif yang perlu dieksekusi sebelum klaim final benar-benar ditutup. Rencana aktif tersedia di [`docs/plans/RENCANA_PERBAIKAN_UAT_BROWSER_2026_06_07.md`](./docs/plans/RENCANA_PERBAIKAN_UAT_BROWSER_2026_06_07.md). Sisa rencana opsional jangka panjang tetap tersedia di [`docs/plans/RENCANA_PERBAIKAN_DETAIL.md`](./docs/plans/RENCANA_PERBAIKAN_DETAIL.md).

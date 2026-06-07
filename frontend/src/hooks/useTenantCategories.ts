@@ -32,9 +32,9 @@ const initialState: CategoryState = {
 
 const reducer = (state: CategoryState, action: { patch: Patch }) => ({ ...state, ...action.patch });
 
-const persistCategory = async (name: string, editing?: PropertyCategory | null) => {
-  if (editing) return tenantService.updateCategory(editing.id, name);
-  return tenantService.createCategory(name);
+const persistCategory = async (data: { name: string; description?: string; default_rental_type?: string }, editing?: PropertyCategory | null) => {
+  if (editing) return tenantService.updateCategory(editing.id, data);
+  return tenantService.createCategory(data);
 };
 
 const useCategoryLoad = (dispatch: React.Dispatch<{ patch: Patch }>, sortBy: CategorySortBy, sortOrder: CategorySortOrder) => {
@@ -57,11 +57,11 @@ const handleCategoryLoadError = (err: unknown, dispatch: React.Dispatch<{ patch:
 };
 
 const useCategorySave = (state: CategoryState, dispatch: React.Dispatch<{ patch: Patch }>, load: (page?: number) => Promise<void>) => (
-  useCallback(async (name: string, editing?: PropertyCategory | null) => {
-    if (name.trim().length < 2) return toast.error('Nama kategori minimal 2 karakter');
+  useCallback(async (data: { name: string; description?: string; default_rental_type?: string }, editing?: PropertyCategory | null) => {
+    if (data.name.trim().length < 2) return toast.error('Nama kategori minimal 2 karakter');
     dispatch({ patch: { saving: true } });
     try {
-      await persistCategory(name.trim(), editing);
+      await persistCategory({ ...data, name: data.name.trim() }, editing);
       toast.success(editing ? 'Kategori berhasil diperbarui' : 'Kategori berhasil dibuat');
       await load(editing ? state.pagination.page : 1);
     } catch (err) { toast.error(getApiErrorMessage(err, getCategorySaveFallback(editing))); }

@@ -16,7 +16,7 @@ interface PropertyRoomsSectionProps {
   property: PropertyDetail;
 }
 
-const isWholeUnitCategory = (name?: string) => ["Villa", "Rumah"].includes(name || "");
+const isWholeUnit = (property: PropertyDetail) => property.rental_type === "WHOLE_PROPERTY" || ["Villa", "Rumah"].includes(property.category?.name || "");
 const hasNoRooms = (property: PropertyDetail, checkIn: string, checkOut: string) =>
   Boolean(checkIn && checkOut && (!property.rooms || property.rooms.length === 0));
 
@@ -49,6 +49,6 @@ const WholeUnit: FC<PropertyRoomsSectionProps & { room: Room }> = (props) => (
 export const PropertyRoomsSection: FC<PropertyRoomsSectionProps> = (props) => {
   const firstRoom = props.property.rooms?.[0];
   if (hasNoRooms(props.property, props.checkIn, props.checkOut)) return <NoRoomsNotice />;
-  if (isWholeUnitCategory(props.property.category?.name) && firstRoom) return <WholeUnit {...props} room={firstRoom} />;
+  if (isWholeUnit(props.property) && firstRoom) return <WholeUnit {...props} room={firstRoom} />;
   return <RoomList {...props} />;
 };

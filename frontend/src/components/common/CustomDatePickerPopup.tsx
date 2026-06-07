@@ -13,6 +13,7 @@ interface CustomDatePickerPopupProps {
   isOpen?: boolean;
   onOpenChange?: (open: boolean) => void;
   display?: 'popover' | 'inline';
+  direction?: 'up' | 'down';
 }
 
 const formatDate = (date: Date) => {
@@ -22,7 +23,7 @@ const formatDate = (date: Date) => {
 };
 
 export const CustomDatePickerPopup = forwardRef<HTMLInputElement, CustomDatePickerPopupProps>(
-  ({ value, onChange, min, className = '', placeholder = 'Pilih tanggal', name, isOpen, onOpenChange, display = 'popover' }, ref) => {
+  ({ value, onChange, min, className = '', placeholder = 'Pilih tanggal', name, isOpen, onOpenChange, display = 'popover', direction = 'down' }, ref) => {
     const [internalOpen, setInternalOpen] = useState(false);
     const containerRef = useRef<HTMLDivElement>(null);
     const open = isOpen ?? internalOpen;
@@ -66,7 +67,7 @@ export const CustomDatePickerPopup = forwardRef<HTMLInputElement, CustomDatePick
         {/* Hidden input to support form libraries like react-hook-form */}
         <input type="hidden" ref={ref} name={name} value={value || ''} />
 
-        {open && <CalendarPanel display={display} minDate={minDate} selectedDate={selectedDate} onSelect={handleSelect} />}
+        {open && <CalendarPanel display={display} direction={direction} minDate={minDate} selectedDate={selectedDate} onSelect={handleSelect} />}
       </div>
     );
   }
@@ -74,8 +75,8 @@ export const CustomDatePickerPopup = forwardRef<HTMLInputElement, CustomDatePick
 
 CustomDatePickerPopup.displayName = 'CustomDatePickerPopup';
 
-const CalendarPanel = ({ display, minDate, onSelect, selectedDate }: CalendarPanelProps) => (
-  <div className={panelClass(display)}>
+const CalendarPanel = ({ display, direction, minDate, onSelect, selectedDate }: CalendarPanelProps) => (
+  <div className={panelClass(display, direction)}>
     <DayPicker
       mode="single"
       selected={selectedDate}
@@ -86,10 +87,10 @@ const CalendarPanel = ({ display, minDate, onSelect, selectedDate }: CalendarPan
   </div>
 );
 
-const panelClass = (display: CustomDatePickerPopupProps['display']) =>
+const panelClass = (display: CustomDatePickerPopupProps['display'], direction?: 'up' | 'down') =>
   display === 'inline'
     ? 'mt-2 w-fit max-w-full overflow-x-auto rounded-xl border border-slate-200 bg-white p-3 shadow-sm dark:border-slate-700 dark:bg-slate-800'
-    : 'absolute z-50 mt-1 rounded-xl border border-slate-200 bg-white p-3 shadow-lg dark:border-slate-700 dark:bg-slate-800';
+    : `absolute z-50 ${direction === 'up' ? 'bottom-full mb-1' : 'mt-1'} rounded-xl border border-slate-200 bg-white p-3 shadow-lg dark:border-slate-700 dark:bg-slate-800`;
 
 const DATE_PICKER_MODIFIERS = {
   selected: 'bg-red-600 text-white font-bold rounded-lg hover:bg-red-700 hover:text-white dark:bg-red-600 dark:hover:bg-red-700',
@@ -98,6 +99,7 @@ const DATE_PICKER_MODIFIERS = {
 
 interface CalendarPanelProps {
   display: CustomDatePickerPopupProps['display'];
+  direction?: 'up' | 'down';
   minDate?: Date;
   onSelect: (date?: Date) => void;
   selectedDate?: Date;

@@ -35,8 +35,8 @@ export const updateOrderStatusCtrl = async (req: Request, res: Response) => {
   try {
     const tenantId = req.user!.id as string;
     const { id } = req.params as { id: string };
-    const { status } = req.body;
-    const data = await orderService.updateOrderStatus(id, tenantId, status);
+    const { status, payment_rejection_reason } = req.body;
+    const data = await orderService.updateOrderStatus(id, tenantId, status, payment_rejection_reason);
     return sendSuccess(res, data, 'Status pesanan diperbarui');
   } catch (err) { return handleControllerError(res, err); }
 };

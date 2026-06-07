@@ -19,8 +19,8 @@ const useCategoryModalState = () => {
   return { editing, isAddModalOpen, setEditing, setIsAddModalOpen, setTargetDelete, targetDelete };
 };
 
-const useCategorySave = (data: CategoryData, modal: CategoryModalState) => async (name: string) => {
-  await data.saveCategory(name, modal.editing);
+const useCategorySave = (data: CategoryData, modal: CategoryModalState) => async (categoryData: { name: string; description?: string; default_rental_type?: string }) => {
+  await data.saveCategory(categoryData, modal.editing);
   modal.setEditing(null);
   modal.setIsAddModalOpen(false);
 };
@@ -34,7 +34,7 @@ const useCategoryDelete = (data: CategoryData, modal: CategoryModalState) => asy
 const buildCategoryViewState = (
   data: CategoryData,
   modal: CategoryModalState,
-  handleSave: (name: string) => Promise<void>,
+  handleSave: (data: { name: string; description?: string; default_rental_type?: string }) => Promise<void>,
   handleDelete: () => Promise<void>,
 ): CategoryViewState => ({
   data,
@@ -51,7 +51,7 @@ const pickModalState = (modal: CategoryModalState) => ({
 
 const buildCategoryActions = (
   modal: CategoryModalState,
-  handleSave: (name: string) => Promise<void>,
+  handleSave: (data: { name: string; description?: string; default_rental_type?: string }) => Promise<void>,
   handleDelete: () => Promise<void>,
 ) => ({
   closeModal: () => closeCategoryModal(modal),
@@ -94,7 +94,7 @@ export interface CategoryViewState {
   data: CategoryData;
   editing: PropertyCategory | null;
   handleDelete: () => Promise<void>;
-  handleSave: (name: string) => Promise<void>;
+  handleSave: (data: { name: string; description?: string; default_rental_type?: string }) => Promise<void>;
   isAddModalOpen: boolean;
   openAddModal: () => void;
   requestDelete: (category: PropertyCategory) => void;

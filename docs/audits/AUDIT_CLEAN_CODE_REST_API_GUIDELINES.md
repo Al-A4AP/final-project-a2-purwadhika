@@ -6,9 +6,11 @@ Acuan: `docs/guidelines/PURWADHIKA.md` bagian Clean Code dan `docs/guidelines/RE
 
 ## Ringkasan
 
-Audit terbaru menunjukkan source utama sudah aman untuk review final dari sisi clean code, build, lint, dan type-safety. Tidak ada file `.ts`, `.tsx`, `.js`, atau `.jsx` di `backend/src`, `backend/tests`, dan `frontend/src` yang melebihi 200 baris. Tidak ditemukan `any`, `debugger`, atau `console.*` pada source utama. `console.*` hanya ditemukan di `tools/audit-function-length.js`, karena file tersebut memang script audit CLI.
+Audit teknis terakhir menunjukkan source utama aman dari sisi clean code, build, lint, dan type-safety. Tidak ada file `.ts`, `.tsx`, `.js`, atau `.jsx` di `backend/src`, `backend/tests`, dan `frontend/src` yang melebihi 200 baris. Tidak ditemukan `any`, `debugger`, atau `console.*` pada source utama. `console.*` hanya ditemukan di `tools/audit-function-length.js`, karena file tersebut memang script audit CLI.
 
 REST API jalur utama sudah mengikuti pola resource-oriented. Beberapa legacy alias masih aktif untuk backward compatibility dan dicatat sebagai rencana cleanup opsional sebelum standar REST dibuat sangat ketat.
+
+Catatan terbaru: temuan UAT browser 07 Juni 2026 membutuhkan perubahan lanjutan pada dashboard, category/property schema, voucher, booking, tenant order rejection, dan profile navigation. Rencana aktif ada di `docs/plans/RENCANA_PERBAIKAN_UAT_BROWSER_2026_06_07.md`. Saat rencana itu dieksekusi, audit clean code dan REST API harus dijalankan ulang.
 
 ## Verifikasi yang Dijalankan
 
@@ -183,6 +185,21 @@ Tidak ditemukan `any`, `as any`, `unknown as`, atau `as unknown` pada area audit
 
 ## REST API Guidelines
 
+### Rencana Aktif yang Menyentuh REST dan Clean Code
+
+Rencana UAT browser terbaru memiliki dampak REST dan clean code berikut:
+
+| Tahap | Dampak REST | Dampak Clean Code |
+| --- | --- | --- |
+| Dashboard tenant date logic | Query `GET /api/tenants/me/dashboard` perlu enum periode baru dan validasi query | Pisahkan date range helper agar service dashboard tetap ringkas |
+| Category description dan rental type | Body `POST/PATCH /api/tenants/me/categories` bertambah field resource | Update schema Zod dan service tanpa controller logic panjang |
+| Property rental type | Body property create/update bertambah `rental_type` | Form/schema/payload dipisahkan agar page tetap presentasional |
+| Voucher UX dan validasi | Endpoint voucher tetap sama; validasi body diperketat | Hindari native confirm, pecah form date/value/code field |
+| Tenant reject payment reason | `POST /api/orders/:id/status-transitions` menerima `reason` untuk transisi reject | Modal alasan dan service transition tetap terpisah |
+| Booking guest data validation | Tidak perlu endpoint baru | Validasi step frontend dipisah dari checkout submit akhir |
+
+Prinsip: jangan membuat endpoint pseudo-action baru jika endpoint resource-oriented yang ada masih cukup.
+
 ### Endpoint Jalur Utama yang Sudah Sesuai
 
 Contoh endpoint resource-oriented yang aktif:
@@ -257,4 +274,4 @@ README di folder `frontend` dan `backend` sudah dihapus oleh user dan tidak dibu
 
 ## Kesimpulan
 
-Clean code dan REST API berada pada kondisi siap review final. Sisa pekerjaan bersifat opsional: cleanup legacy alias REST dan review kandidat function-length advisory jika mentor meminta interpretasi 15 baris yang lebih ketat.
+Clean code dan REST API berada pada kondisi teknis baik berdasarkan verifikasi terakhir. Namun, setelah rencana UAT browser dieksekusi, audit ini harus diperbarui ulang karena beberapa perubahan menyentuh schema, validasi REST body/query, dan flow transaksi.

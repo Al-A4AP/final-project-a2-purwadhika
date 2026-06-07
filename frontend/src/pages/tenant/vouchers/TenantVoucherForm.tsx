@@ -2,6 +2,7 @@ import type { FC, FormEvent } from "react";
 import { useState } from "react";
 import type { Voucher, VoucherFormInput } from "@/types";
 import type { useTenantVouchersPage } from "@/hooks/tenant/vouchers/useTenantVouchersPage";
+import { CustomDatePickerPopup } from "@/components/common/CustomDatePickerPopup";
 
 type State = ReturnType<typeof useTenantVouchersPage>;
 
@@ -24,8 +25,7 @@ const TenantVoucherFormFields: FC<{ initialForm: VoucherFormInput; state: State 
 
 const VoucherFormBody: FC<FormPartProps> = ({ form, setForm }) => (
   <>
-    <VoucherTextField label="Kode" value={form.code} onChange={(value) => setForm({ ...form, code: value })} />
-    <VoucherTextField label="Nama" value={form.name} onChange={(value) => setForm({ ...form, name: value })} />
+    <VoucherTextField label="Kode" value={form.code} onChange={(value) => setForm({ ...form, code: value.toUpperCase().replace(/[^A-Z0-9]/g, '').slice(0, 8) })} />
     <VoucherTextField label="Deskripsi" value={form.description || ""} onChange={(value) => setForm({ ...form, description: value })} />
     <VoucherDiscountFields form={form} setForm={setForm} />
     <VoucherDateFields form={form} setForm={setForm} />
@@ -36,25 +36,44 @@ const VoucherFormBody: FC<FormPartProps> = ({ form, setForm }) => (
 const VoucherTextField: FC<{ label: string; onChange: (value: string) => void; value: string }> = ({ label, onChange, value }) => (
   <label className="block space-y-1.5">
     <span className={labelClass}>{label}</span>
-    <input value={value} onChange={(event) => onChange(event.target.value)} required={label !== "Deskripsi"} className={inputClass} />
+    <input value={value} onChange={(event) => onChange(event.target.value)} required={label !== "Deskripsi"} className={inputClass} placeholder={label === "Kode" ? "Maks. 8 huruf/angka" : ""} />
   </label>
 );
 
-const VoucherDiscountFields: FC<FormPartProps> = ({ form, setForm }) => (
-  <div className="grid gap-3 sm:grid-cols-2">
-    <label className="space-y-1.5"><span className={labelClass}>Tipe</span><select value={form.discount_type} onChange={(event) => setForm({ ...form, discount_type: event.target.value as VoucherFormInput["discount_type"] })} className={inputClass}><option value="PERCENTAGE">Persentase</option><option value="NOMINAL">Nominal</option></select></label>
-    <label className="space-y-1.5"><span className={labelClass}>Nilai</span><input type="number" min={1} value={form.discount_value} onChange={(event) => setForm({ ...form, discount_value: Number(event.target.value) })} className={inputClass} /></label>
-    <label className="space-y-1.5"><span className={labelClass}>Maks. Diskon</span><input type="number" min={0} value={form.max_discount || ""} onChange={(event) => setForm({ ...form, max_discount: numberOrNull(event.target.value) })} className={inputClass} /></label>
-    <label className="space-y-1.5"><span className={labelClass}>Kuota</span><input type="number" min={0} value={form.quota || ""} onChange={(event) => setForm({ ...form, quota: numberOrNull(event.target.value) })} className={inputClass} /></label>
-  </div>
-);
+const VoucherDiscountFields: FC<FormPartProps> = ({ form, setForm }) => {
+  const isPercentage = form.discount_type === 'PERCENTAGE';
+  const isFreeNights = form.discount_type === 'FREE_NIGHTS';
+  const handleTypeChange = (event: React.ChangeEvent<HTMLSelectElement>) => {
+    const newType = event.target.value as VoucherFormInput["discount_type"];
+    setForm({ ...form, discount_type: newType, discount_value: 0 });
+  };
+  const handleValueChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    let val = event.target.value ? Number(event.target.value) : 0;
+    if (isPercentage && val > 90) val = 90;
+    if (isFreeNights && val > 30) val = 30; // sensible limit for free nights
+    setForm({ ...form, discount_value: val });
+  };
+  return (
+    <div className="grid gap-3 sm:grid-cols-2">
+      <label className="space-y-1.5"><span className={labelClass}>Tipe</span><select value={form.discount_type} onChange={handleTypeChange} className={inputClass}><option value="PERCENTAGE">Persentase</option><option value="NOMINAL">Nominal</option><option value="FREE_NIGHTS">Menginap Gratis</option></select></label>
+      <label className="space-y-1.5"><span className={labelClass}>{isFreeNights ? "Jumlah Malam Gratis" : "Nilai"}</span><input type="number" min={isPercentage ? 1 : isFreeNights ? 1 : 10000} max={isPercentage ? 90 : isFreeNights ? 30 : undefined} value={form.discount_value || ""} onChange={handleValueChange} className={inputClass} placeholder={isFreeNights ? "Misal: 1" : isPercentage ? "Misal: 15" : "Misal: 50000"} required /></label>
+      <label className="space-y-1.5 sm:col-span-2"><span className={labelClass}>Kuota (Opsional)</span><input type="number" min={1} value={form.quota || ""} onChange={(event) => setForm({ ...form, quota: numberOrNull(event.target.value) })} className={inputClass} placeholder="Kosongkan untuk tanpa batas" /></label>
+    </div>
+  );
+};
 
-const VoucherDateFields: FC<FormPartProps> = ({ form, setForm }) => (
-  <div className="grid gap-3 sm:grid-cols-2">
-    <label className="space-y-1.5"><span className={labelClass}>Mulai</span><input type="datetime-local" value={form.starts_at} onChange={(event) => setForm({ ...form, starts_at: event.target.value })} className={inputClass} /></label>
-    <label className="space-y-1.5"><span className={labelClass}>Berakhir</span><input type="datetime-local" value={form.expires_at} onChange={(event) => setForm({ ...form, expires_at: event.target.value })} className={inputClass} /></label>
-  </div>
-);
+const VoucherDateFields: FC<FormPartProps> = ({ form, setForm }) => {
+  const today = new Date();
+  today.setMinutes(today.getMinutes() - today.getTimezoneOffset());
+  const todayStr = today.toISOString().slice(0, 10);
+  
+  return (
+    <div className="grid gap-3 sm:grid-cols-2">
+      <label className="space-y-1.5"><span className={labelClass}>Mulai</span><CustomDatePickerPopup value={form.starts_at} onChange={(value) => setForm({ ...form, starts_at: value })} className={inputClass} direction="up" min={todayStr} /></label>
+      <label className="space-y-1.5"><span className={labelClass}>Berakhir</span><CustomDatePickerPopup value={form.expires_at} onChange={(value) => setForm({ ...form, expires_at: value })} className={inputClass} direction="up" min={form.starts_at || todayStr} /></label>
+    </div>
+  );
+};
 
 const VoucherToggleFields: FC<FormPartProps> = ({ form, setForm }) => (
   <div className="space-y-2 text-sm text-slate-600 dark:text-slate-300">
@@ -70,24 +89,26 @@ const VoucherFormActions: FC<{ editing: boolean; onCancel: () => void; saving: b
   </div>
 );
 
-const defaultVoucherForm = (): VoucherFormInput => ({ code: "", discount_type: "PERCENTAGE", discount_value: 5, expires_at: toDateTimeLocal(addDays(30)), is_active: true, name: "", new_user_only: false, starts_at: toDateTimeLocal(new Date()) });
+const defaultVoucherForm = (): VoucherFormInput => ({ code: "", discount_type: "PERCENTAGE", discount_value: 0, expires_at: toDateString(addDays(30)), is_active: true, new_user_only: false, starts_at: toDateString(new Date()) });
 const voucherToForm = (voucher: Voucher): VoucherFormInput => ({
   code: voucher.code,
   description: voucher.description || "",
   discount_type: voucher.discount_type,
   discount_value: voucher.discount_value,
-  expires_at: toDateTimeLocal(new Date(voucher.expires_at)),
+  expires_at: toDateString(new Date(voucher.expires_at)),
   is_active: voucher.is_active,
-  max_discount: voucher.max_discount,
-  name: voucher.name,
   new_user_only: voucher.new_user_only,
   quota: voucher.quota,
-  starts_at: toDateTimeLocal(new Date(voucher.starts_at)),
+  starts_at: toDateString(new Date(voucher.starts_at)),
 });
 const normalizeForm = (form: VoucherFormInput) => ({ ...form, code: form.code.toUpperCase(), expires_at: new Date(form.expires_at).toISOString(), starts_at: new Date(form.starts_at).toISOString() });
 const numberOrNull = (value: string) => value ? Number(value) : null;
 const addDays = (days: number) => new Date(Date.now() + days * 86400000);
-const toDateTimeLocal = (date: Date) => date.toISOString().slice(0, 16);
+const toDateString = (date: Date) => {
+  const d = new Date(date);
+  d.setMinutes(d.getMinutes() - d.getTimezoneOffset());
+  return d.toISOString().slice(0, 10);
+};
 
 const labelClass = "text-xs font-bold uppercase tracking-wide text-slate-500 dark:text-slate-400";
 const inputClass = "h-11 w-full rounded-xl border border-slate-200 bg-white px-3 text-sm text-slate-900 outline-none focus:border-amber-400 focus:ring-2 focus:ring-amber-100 dark:border-slate-700 dark:bg-slate-800 dark:text-white";

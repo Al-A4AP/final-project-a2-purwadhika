@@ -19,21 +19,34 @@ export const buildTenantPropertyWhere = (tenantId: string, options: NormalizedTe
   ...(options.search ? { OR: buildPropertySearch(options.search) } : {}),
 });
 
-export const buildPropertyCreateData = (tenantId: string, data: PropertyFormData, featuredImageUrl?: string) => ({
-  tenantId,
-  categoryId: data.categoryId,
-  name: data.name,
-  description: data.description,
-  address: data.address,
-  city: data.city,
+export const buildPropertyCreateData = (tenantId: string, data: PropertyFormData, featuredImageUrl?: string): Prisma.PropertyCreateInput => ({
+  tenant: { connect: { id: tenantId } },
+  category: { connect: { id: data.categoryId } },
+  rental_type: (data.rental_type as any) || 'PER_ROOM',
+  name: data.name!,
+  description: data.description!,
+  address: data.address!,
+  city: data.city!,
   province: data.province || undefined,
   amenities: parseAmenities(data.amenities),
   ...buildCoordinateData(data),
   featured_image_url: featuredImageUrl,
+  ...(data.rental_type === 'WHOLE_PROPERTY' ? {
+    rooms: {
+      create: {
+        room_type: 'Seluruh Properti',
+        description: 'Menyewakan seluruh area properti.',
+        base_price: 0,
+        quantity: 1,
+        capacity: 1,
+      }
+    }
+  } : {})
 });
 
 export const buildPropertyUpdateData = (data: PropertyFormData, existing: Property, featuredImageUrl?: string) => ({
   ...buildPropertyTextUpdate(data, existing),
+  rental_type: (data.rental_type as any) || existing.rental_type,
   amenities: data.amenities !== undefined ? parseAmenities(data.amenities) : existing.amenities,
   ...buildCoordinateUpdate(data, existing),
   featured_image_url: featuredImageUrl,

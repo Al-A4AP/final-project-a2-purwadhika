@@ -67,10 +67,22 @@ const pickGalleryState = (gallery: GalleryState) => ({
 const usePropertyFormLoader = (options: PropertyFormLoaderOptions) => {
   const [categories, setCategories] = useState<PropertyCategory[]>([]);
   const { amenity, form, gallery, id, image, isEdit, navigate } = options;
-  const { reset } = form;
+  const { reset, watch, setValue } = form;
+  
   useEffect(() => {
     loadPropertyFormData(setCategories, { id, isEdit, navigate, resetForm: reset, setGalleryImages: gallery.setGalleryImages, setPreview: image.setPreview, setSelectedAmenities: amenity.setSelectedAmenities });
   }, [amenity.setSelectedAmenities, gallery.setGalleryImages, id, image.setPreview, isEdit, navigate, reset]);
+
+  const watchCategory = watch("categoryId");
+  useEffect(() => {
+    if (!isEdit && watchCategory && categories.length > 0) {
+      const category = categories.find(c => c.id === watchCategory);
+      if (category?.default_rental_type) {
+        setValue("rental_type", category.default_rental_type);
+      }
+    }
+  }, [watchCategory, categories, isEdit, setValue]);
+
   return categories;
 };
 

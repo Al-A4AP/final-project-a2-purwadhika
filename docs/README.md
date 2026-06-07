@@ -10,6 +10,7 @@ Tanggal audit dokumentasi terbaru: 07 Juni 2026.
 - `audits/AUDIT_OWNERSHIP_SECURITY.md`: audit ownership, authorization, browser storage, dan keamanan.
 - `audits/AUDIT_PURWADHIKA_FINAL.md`: audit keseluruhan berdasarkan requirement PURWADHIKA.
 - `plans/RENCANA_PERBAIKAN_DETAIL.md`: sisa rencana yang belum dilaksanakan atau masih opsional.
+- `plans/RENCANA_PERBAIKAN_UAT_BROWSER_2026_06_07.md`: rencana aktif berdasarkan temuan UAT browser 07 Juni 2026.
 - `guidelines/PURWADHIKA.md`: requirement final project.
 - `guidelines/REST_API_GUIDELINES.md`: panduan REST resource naming.
 - `guidelines/CODE_LINE_CHECK_GUIDELINES.md`: panduan pengecekan batas baris.
@@ -38,6 +39,7 @@ README di folder `frontend` dan `backend` sudah dihapus oleh user dan tidak dibu
 | REST API | Jalur utama sesuai resource-oriented; legacy alias masih dicatat |
 | Ownership | Baik dan teruji |
 | Browser storage | Tidak ada JWT auth token di localStorage |
+| UAT browser lanjutan | Ada rencana aktif sebelum klaim final ditutup |
 
 ## Catatan Clean Code
 
@@ -67,6 +69,22 @@ Legacy alias masih aktif untuk backward compatibility dan dicatat di plan cleanu
 - Auth token memakai HTTP-only cookie backend.
 - LocalStorage hanya dipakai untuk tema, saved properties lokal, dan cleanup legacy storage.
 - SessionStorage dipakai untuk auth notice sementara.
+
+## Rencana Aktif UAT Browser
+
+Temuan browser terbaru pada 07 Juni 2026 dicatat sebagai rencana aktif di:
+
+- `plans/RENCANA_PERBAIKAN_UAT_BROWSER_2026_06_07.md`
+
+Area utama:
+
+- dashboard tenant harus membatasi data historis sampai tanggal saat ini;
+- kategori tenant perlu deskripsi dan mode sewa default;
+- properti tenant perlu membedakan `PER_ROOM` dan `WHOLE_PROPERTY`;
+- voucher tenant perlu penyederhanaan UI dan validasi bisnis;
+- booking perlu validasi step Data Tamu sebelum lanjut;
+- tenant order rejection perlu alasan wajib dan tampil ke user;
+- profile perlu tombol kembali ke dashboard sesuai role.
 
 ## Cara Verifikasi Cepat
 

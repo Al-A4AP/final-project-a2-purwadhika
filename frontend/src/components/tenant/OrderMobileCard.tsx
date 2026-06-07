@@ -62,7 +62,7 @@ const OrderMobileActions: FC<OrderMobileCardProps> = (props) => {
 const ReviewActions: FC<OrderMobileCardProps> = (props) => (
   <div className="grid grid-cols-2 gap-3">
     <StatusButton {...props} status="PROCESSED" label="Terima" icon={<Check size={16} />} />
-    <StatusButton {...props} status="CANCELLED" label="Tolak" icon={<X size={16} />} danger />
+    <StatusButton {...props} status="WAITING_PAYMENT" label="Tolak" icon={<X size={16} />} danger />
   </div>
 );
 

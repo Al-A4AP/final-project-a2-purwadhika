@@ -1,8 +1,8 @@
-export type DashboardRevenuePeriod = 'weekly' | 'monthly' | 'quarterly' | 'six_months' | 'yearly';
+export type DashboardRevenuePeriod = 'weekly' | 'monthly' | 'quarterly' | 'six_months' | 'yearly' | 'all_time';
 
 export const DEFAULT_REVENUE_PERIOD: DashboardRevenuePeriod = 'monthly';
 
-const REVENUE_PERIODS: DashboardRevenuePeriod[] = ['weekly', 'monthly', 'quarterly', 'six_months', 'yearly'];
+const REVENUE_PERIODS: DashboardRevenuePeriod[] = ['weekly', 'monthly', 'quarterly', 'six_months', 'yearly', 'all_time'];
 
 export const normalizeRevenuePeriod = (value?: string): DashboardRevenuePeriod =>
   REVENUE_PERIODS.includes(value as DashboardRevenuePeriod) ? value as DashboardRevenuePeriod : DEFAULT_REVENUE_PERIOD;
@@ -10,6 +10,7 @@ export const normalizeRevenuePeriod = (value?: string): DashboardRevenuePeriod =
 export const getRevenueDateRange = (period: DashboardRevenuePeriod) => {
   if (period === 'weekly') return buildWeeklyRange(new Date());
   if (period === 'yearly') return buildYearRange(new Date());
+  if (period === 'all_time') return buildAllTimeRange(new Date());
   return buildMonthSpanRange(new Date(), getMonthSpan(period));
 };
 
@@ -26,6 +27,11 @@ const buildMonthSpanRange = (now: Date, months: number) => ({
 
 const buildYearRange = (now: Date) => ({
   start: new Date(now.getFullYear(), 0, 1),
+  end: now,
+});
+
+const buildAllTimeRange = (now: Date) => ({
+  start: new Date(now.getFullYear() - 3, now.getMonth(), now.getDate()),
   end: now,
 });
 

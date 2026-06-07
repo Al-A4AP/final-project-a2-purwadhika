@@ -20,7 +20,7 @@ const StatusActionButton: FC<ActionButtonProps> = ({ className, handleUpdateStat
 const ConfirmationActions: FC<OrderRowProps> = (props) => (
   <div className="flex gap-2">
     <StatusActionButton {...props} className="flex h-9 items-center justify-center gap-1.5 rounded-lg border border-slate-900 bg-slate-900 px-3 text-xs font-bold text-white transition hover:bg-slate-800 disabled:opacity-50 dark:border-white dark:bg-white dark:text-slate-900 dark:hover:bg-slate-200" icon="check" label="Terima" nextStatus="PROCESSED" />
-    <StatusActionButton {...props} className="flex h-9 items-center justify-center gap-1.5 rounded-lg border border-red-200 bg-white px-3 text-xs font-bold text-red-600 transition hover:bg-red-50 disabled:opacity-50 dark:border-red-900/40 dark:bg-slate-800 dark:text-red-400 dark:hover:bg-red-900/20" icon="x" label="Tolak" nextStatus="CANCELLED" />
+    <StatusActionButton {...props} className="flex h-9 items-center justify-center gap-1.5 rounded-lg border border-red-200 bg-white px-3 text-xs font-bold text-red-600 transition hover:bg-red-50 disabled:opacity-50 dark:border-red-900/40 dark:bg-slate-800 dark:text-red-400 dark:hover:bg-red-900/20" icon="x" label="Tolak" nextStatus="WAITING_PAYMENT" />
   </div>
 );
 

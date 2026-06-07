@@ -16,7 +16,7 @@ const buildRoomsPageState = (state: RoomsLogic, navigate: Navigate, deleteAction
   deleteActions,
   handleCloseForm: () => closeRoomForm(state),
   handleToggleForm: () => toggleRoomForm(state),
-  isWholeUnit: isWholeUnitCategory(state.property?.category?.name),
+  isWholeUnit: isWholeUnitCategory(state.property?.category?.name, state.property?.rental_type),
   navigate,
   state,
 });

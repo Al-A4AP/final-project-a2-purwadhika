@@ -5,9 +5,9 @@ import { AppError } from '../../middlewares/errorHandler';
 import { issueReferralRewardForProcessedOrder } from '../referralRewardService';
 import { sendPaymentConfirmationEmail, sendPaymentRejectionEmail } from '../../utils/emailService';
 
-export const updateTenantOrderStatus = async (orderId: string, tenantId: string, status: string) => {
+export const updateTenantOrderStatus = async (orderId: string, tenantId: string, status: string, payment_rejection_reason?: string) => {
   const order = await findTenantOrderForStatus(orderId, tenantId);
-  const transition = buildTenantStatusUpdate(order.status, status);
+  const transition = buildTenantStatusUpdate(order.status, status, payment_rejection_reason);
   const updatedOrder = await prisma.order.update({ where: { id: orderId }, data: transition.updateData });
   await issueRewardIfProcessed(updatedOrder.id, transition.finalStatus);
   await handleOrderStatusEmail(order, transition.finalStatus, status);
@@ -20,9 +20,9 @@ const findTenantOrderForStatus = async (orderId: string, tenantId: string) => {
   return order;
 };
 
-const buildTenantStatusUpdate = (currentStatus: OrderStatus, requestedStatus: string): TenantStatusTransition => {
+const buildTenantStatusUpdate = (currentStatus: OrderStatus, requestedStatus: string, payment_rejection_reason?: string): TenantStatusTransition => {
   if (currentStatus === OrderStatus.WAITING_CONFIRMATION && requestedStatus === OrderStatus.PROCESSED) return processedTransition();
-  if (currentStatus === OrderStatus.WAITING_CONFIRMATION && requestedStatus === OrderStatus.CANCELLED) return rejectedManualTransition();
+  if (currentStatus === OrderStatus.WAITING_CONFIRMATION && requestedStatus === OrderStatus.WAITING_PAYMENT) return rejectedManualTransition(payment_rejection_reason);
   if (currentStatus === OrderStatus.WAITING_PAYMENT && requestedStatus === OrderStatus.CANCELLED) return cancelledTransition();
   throw new AppError(`Transisi status dari ${currentStatus} ke ${requestedStatus} tidak diperbolehkan`, 400);
 };
@@ -40,14 +40,16 @@ const issueRewardIfProcessed = (orderId: string, finalStatus: OrderStatus) => {
 const processedTransition = (): TenantStatusTransition =>
   ({ finalStatus: OrderStatus.PROCESSED, updateData: { status: OrderStatus.PROCESSED, payment_verified_at: new Date() } });
 
-const rejectedManualTransition = (): TenantStatusTransition =>
-  ({ finalStatus: OrderStatus.WAITING_PAYMENT, updateData: { status: OrderStatus.WAITING_PAYMENT, payment_proof_url: null, expires_at: createPaymentDeadline() } });
+const rejectedManualTransition = (payment_rejection_reason?: string): TenantStatusTransition => {
+  if (!payment_rejection_reason?.trim()) throw new AppError('Alasan penolakan wajib diisi', 400);
+  return { finalStatus: OrderStatus.WAITING_PAYMENT, updateData: { status: OrderStatus.WAITING_PAYMENT, payment_proof_url: null, expires_at: createPaymentDeadline(), payment_rejection_reason } };
+};
 
 const cancelledTransition = (): TenantStatusTransition =>
   ({ finalStatus: OrderStatus.CANCELLED, updateData: { status: OrderStatus.CANCELLED, canceled_at: new Date() } });
 
 const shouldSendRejectionEmail = (currentStatus: OrderStatus, requestedStatus: string) =>
-  currentStatus === OrderStatus.WAITING_CONFIRMATION && requestedStatus === OrderStatus.CANCELLED;
+  currentStatus === OrderStatus.WAITING_CONFIRMATION && requestedStatus === OrderStatus.WAITING_PAYMENT;
 
 const tenantStatusInclude = { property: true, user: true } satisfies Prisma.OrderInclude;
 

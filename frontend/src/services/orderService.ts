@@ -77,8 +77,8 @@ export const orderService = {
     return fetchOrderList('/tenants/me/orders', query);
   },
 
-  async updateOrderStatus(orderId: string, status: string): Promise<Order> {
-    const res = await api.post<ApiResponse<Order>>(`/orders/${orderId}/status-transitions`, { status });
+  async updateOrderStatus(orderId: string, status: string, payment_rejection_reason?: string): Promise<Order> {
+    const res = await api.post<ApiResponse<Order>>(`/orders/${orderId}/status-transitions`, { status, payment_rejection_reason });
     return res.data.data;
   },
 

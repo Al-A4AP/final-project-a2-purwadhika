@@ -8,6 +8,7 @@ export const REVENUE_PERIOD_OPTIONS: Array<{ label: string; statLabel: string; v
   { value: "quarterly", label: "Per 3 Bulan", statLabel: "Pendapatan 3 Bulan Ini" },
   { value: "six_months", label: "Per 6 Bulan", statLabel: "Pendapatan 6 Bulan Ini" },
   { value: "yearly", label: "Tahunan", statLabel: "Pendapatan Tahun Ini" },
+  { value: "all_time", label: "Semua Waktu (Maks 3 Tahun)", statLabel: "Total Pendapatan (3 Tahun)" },
 ];
 
 export const getRevenueStatLabel = (period: DashboardRevenuePeriod) =>

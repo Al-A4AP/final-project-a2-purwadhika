@@ -17,7 +17,7 @@ export const voucherService = {
     const res = await api.get<ApiResponse<UserVoucherSummary>>('/users/me/vouchers');
     return res.data.data;
   },
-  async previewVoucher(data: { propertyId: string; subtotal: number; voucher_code: string }): Promise<VoucherPreview> {
+  async previewVoucher(data: { propertyId: string; subtotal: number; voucher_code: string; total_nights?: number }): Promise<VoucherPreview> {
     const res = await api.post<ApiResponse<VoucherPreview>>('/users/me/voucher-previews', data);
     return res.data.data;
   },

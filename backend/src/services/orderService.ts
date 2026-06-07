@@ -63,7 +63,7 @@ const executeOrderTransaction = (context: OrderContext) =>
     const room = await loadOrderRoom(tx, context);
     validateCapacity(context.guests, room.capacity);
     const price = await getStayPriceOrThrow(tx, context);
-    const voucher = await applyVoucherToOrder(tx, context.propertyId, context.voucher_code, price.totalPrice, context.userId);
+    const voucher = await applyVoucherToOrder(tx, context.propertyId, context.voucher_code, price.totalPrice, context.userId, context.nights);
     const referral = await buildReferralOrderData(tx, context.userId, context.referral_code);
     return tx.order.create({ data: buildOrderCreateData(context, voucher, referral), include: orderCreateInclude });
   });

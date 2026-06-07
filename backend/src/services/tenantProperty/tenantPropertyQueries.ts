@@ -64,7 +64,7 @@ export const findTenantProperty = (id: string, tenantId: string) =>
   prisma.property.findFirst({ where: { id, tenantId, deleted_at: null } });
 export const findTenantPropertyDetail = (id: string, tenantId: string) =>
   prisma.property.findFirst({ where: { id, tenantId, deleted_at: null }, include: propertyDetailInclude });
-export const createTenantProperty = (data: Prisma.PropertyUncheckedCreateInput) => prisma.property.create({ data });
+export const createTenantProperty = (data: Prisma.PropertyCreateInput) => prisma.property.create({ data });
 export const updateTenantProperty = (id: string, data: Prisma.PropertyUncheckedUpdateInput) =>
   prisma.property.update({ where: { id }, data });
 export const softDeleteTenantProperty = (id: string) =>

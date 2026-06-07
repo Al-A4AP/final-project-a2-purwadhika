@@ -2,13 +2,16 @@ import type { OrderStatus } from '@prisma/client';
 
 export const DEFAULT_PASSWORD = 'Password123!';
 
-export const CATEGORY_NAMES = [
-  'Hotel',
-  'Apartemen',
-  'Rumah',
-  'Villa',
-  'Kost',
+export const CATEGORIES_DATA = [
+  { name: 'Hotel', description: 'Akomodasi dengan layanan kamar/fasilitas harian.', default_rental_type: 'PER_ROOM' },
+  { name: 'Apartemen', description: 'Unit tinggal modern, dapat dikelola sebagai unit/kamar.', default_rental_type: 'PER_ROOM' },
+  { name: 'Rumah', description: 'Properti hunian yang disewakan sebagai satu unit utuh.', default_rental_type: 'WHOLE_PROPERTY' },
+  { name: 'Villa', description: 'Properti liburan yang disewakan sebagai satu unit utuh.', default_rental_type: 'WHOLE_PROPERTY' },
+  { name: 'Kost', description: 'Kamar sewa jangka pendek/menengah.', default_rental_type: 'PER_ROOM' },
 ] as const;
+
+export const CATEGORY_NAMES = CATEGORIES_DATA.map(c => c.name);
+export type CategoryName = (typeof CATEGORIES_DATA)[number]['name'];
 
 export const IMAGE_URLS = {
   hotel1: 'https://images.unsplash.com/photo-1566073771259-6a8506099945?w=800&q=80',
@@ -25,7 +28,6 @@ export const IMAGE_URLS = {
   kost3: 'https://images.unsplash.com/photo-1586023492125-27b2c045efd7?w=800&q=80',
 } as const;
 
-export type CategoryName = (typeof CATEGORY_NAMES)[number];
 export type ImageKey = keyof typeof IMAGE_URLS;
 
 export const USER_SEEDS = [
@@ -43,6 +45,7 @@ export const PROPERTY_SEEDS = [
     latitude: -6.1944,
     longitude: 106.8343,
     category: 'Hotel',
+    rental_type: 'PER_ROOM',
     featured: 'hotel1',
     images: ['hotel1', 'hotel2', 'hotel3'],
   },
@@ -54,6 +57,7 @@ export const PROPERTY_SEEDS = [
     latitude: -7.7956,
     longitude: 110.3695,
     category: 'Hotel',
+    rental_type: 'PER_ROOM',
     featured: 'hotel2',
     images: ['hotel2', 'hotel1'],
   },
@@ -65,6 +69,7 @@ export const PROPERTY_SEEDS = [
     latitude: -6.2141,
     longitude: 106.8195,
     category: 'Apartemen',
+    rental_type: 'PER_ROOM',
     featured: 'apt1',
     images: ['apt1', 'apt2', 'apt3'],
   },
@@ -76,6 +81,7 @@ export const PROPERTY_SEEDS = [
     latitude: -7.2576,
     longitude: 112.7521,
     category: 'Apartemen',
+    rental_type: 'PER_ROOM',
     featured: 'apt2',
     images: ['apt2', 'apt3'],
   },
@@ -87,6 +93,7 @@ export const PROPERTY_SEEDS = [
     latitude: -8.5069,
     longitude: 115.2625,
     category: 'Villa',
+    rental_type: 'WHOLE_PROPERTY',
     featured: 'villa1',
     images: ['villa1', 'villa2', 'villa3'],
   },
@@ -98,6 +105,7 @@ export const PROPERTY_SEEDS = [
     latitude: -8.8556,
     longitude: 116.2131,
     category: 'Rumah',
+    rental_type: 'WHOLE_PROPERTY',
     featured: 'villa2',
     images: ['villa2', 'villa3'],
   },
@@ -109,6 +117,7 @@ export const PROPERTY_SEEDS = [
     latitude: -6.8914,
     longitude: 107.6107,
     category: 'Kost',
+    rental_type: 'PER_ROOM',
     featured: 'kost1',
     images: ['kost1', 'kost2'],
   },
@@ -120,6 +129,7 @@ export const PROPERTY_SEEDS = [
     latitude: -6.9824,
     longitude: 110.41,
     category: 'Kost',
+    rental_type: 'PER_ROOM',
     featured: 'kost2',
     images: ['kost2', 'kost3'],
   },
@@ -131,6 +141,7 @@ export const PROPERTY_SEEDS = [
   latitude: number;
   longitude: number;
   category: CategoryName;
+  rental_type: 'PER_ROOM' | 'WHOLE_PROPERTY';
   featured: ImageKey;
   images: ImageKey[];
 }>;

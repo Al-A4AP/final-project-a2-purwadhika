@@ -30,7 +30,7 @@ export const TenantKpiGrid: FC<TenantKpiGridProps> = ({ stats }) => {
             <Clock size={24} />
           </div>
           <div>
-            <p className="text-sm font-medium text-slate-500 dark:text-slate-400">Menunggu Pembayaran</p>
+            <p className="text-sm font-medium text-slate-500 dark:text-slate-400">Menunggu Konfirmasi</p>
             <p className="text-2xl font-bold text-slate-900 dark:text-white">{stats.pendingOrders}</p>
           </div>
         </div>

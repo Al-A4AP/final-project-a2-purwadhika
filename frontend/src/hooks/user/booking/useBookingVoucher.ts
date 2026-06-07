@@ -21,7 +21,7 @@ const previewVoucher = async (query: BookingQuery, totals: BookingTotals | null,
   }
   setLoading(true);
   try {
-    setPreview(await voucherService.previewVoucher({ propertyId: query.propertyId, subtotal: totals.totalPrice, voucher_code: code }));
+    setPreview(await voucherService.previewVoucher({ propertyId: query.propertyId, subtotal: totals.totalPrice, voucher_code: code, total_nights: totals.nights }));
     toast.success("Voucher diterapkan");
   } catch (err) {
     setPreview(null);

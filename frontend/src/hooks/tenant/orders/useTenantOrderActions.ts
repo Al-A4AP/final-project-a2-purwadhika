@@ -9,7 +9,7 @@ import type { ConfirmModalState } from "./tenantOrdersTypes";
 
 type SubmitGuard = { current: boolean };
 
-const initialModal: ConfirmModalState = { confirmText: "Ya", isOpen: false, message: "", onConfirm: () => {}, title: "" };
+const initialModal: ConfirmModalState = { confirmText: "Ya", isOpen: false, message: "", onConfirm: () => {}, title: "", showReasonInput: false };
 
 export const useTenantOrderActions = (orders: Order[], refetch: () => void) => {
   const submitGuard = useRef(false);
@@ -37,16 +37,17 @@ const createConfirmModal = (options: StatusRequestOptions): ConfirmModalState =>
   confirmText: "Ya",
   isOpen: true,
   message: getConfirmMessage(options.status),
-  onConfirm: () => confirmStatusUpdate(options),
+  onConfirm: (reason) => confirmStatusUpdate({ ...options, reason }),
   title: "Konfirmasi Aksi",
+  showReasonInput: options.status === "WAITING_PAYMENT",
 });
 
-const confirmStatusUpdate = async (options: StatusRequestOptions) => {
+const confirmStatusUpdate = async (options: StatusRequestOptions & { reason?: string }) => {
   if (options.submitGuard.current) return;
   options.submitGuard.current = true;
   options.setUpdating(options.orderId);
   try {
-    await orderService.updateOrderStatus(options.orderId, options.status);
+    await orderService.updateOrderStatus(options.orderId, options.status, options.reason);
     handleStatusSuccess(options);
   } catch (err) {
     handleStatusError(err, options);

@@ -65,12 +65,12 @@ export const tenantService = {
     const res = await api.get<ApiResponse<{ categories: PropertyCategory[]; pagination: PaginationMeta }>>(buildUrl('/tenants/me/categories', params));
     return res.data.data;
   },
-  async createCategory(name: string): Promise<PropertyCategory> {
-    const res = await api.post<ApiResponse<PropertyCategory>>('/tenants/me/categories', { name });
+  async createCategory(data: { name: string; description?: string; default_rental_type?: string }): Promise<PropertyCategory> {
+    const res = await api.post<ApiResponse<PropertyCategory>>('/tenants/me/categories', data);
     return res.data.data;
   },
-  async updateCategory(id: string, name: string): Promise<PropertyCategory> {
-    const res = await api.patch<ApiResponse<PropertyCategory>>(`/tenants/me/categories/${id}`, { name });
+  async updateCategory(id: string, data: { name: string; description?: string; default_rental_type?: string }): Promise<PropertyCategory> {
+    const res = await api.patch<ApiResponse<PropertyCategory>>(`/tenants/me/categories/${id}`, data);
     return res.data.data;
   },
   async deleteCategory(id: string): Promise<void> {

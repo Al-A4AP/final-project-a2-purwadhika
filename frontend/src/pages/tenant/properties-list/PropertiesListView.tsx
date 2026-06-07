@@ -39,7 +39,9 @@ export const PropertiesListView: FC<PropertiesListViewProps> = ({ properties, de
                     {property._count?.rooms || 0} Kamar
                   </span>
                   <div className="flex items-center gap-1">
-                    <Link to={`/tenant/properties/${property.id}/rooms`} className="rounded-lg border border-slate-200 px-3 py-1.5 text-xs font-semibold text-slate-600 transition hover:bg-slate-100 dark:border-slate-700 dark:text-slate-300 dark:hover:bg-slate-800">Kamar</Link>
+                    {property.rental_type !== 'WHOLE_PROPERTY' && (
+                      <Link to={`/tenant/properties/${property.id}/rooms`} className="rounded-lg border border-slate-200 px-3 py-1.5 text-xs font-semibold text-slate-600 transition hover:bg-slate-100 dark:border-slate-700 dark:text-slate-300 dark:hover:bg-slate-800">Kamar</Link>
+                    )}
                     <Link to={`/tenant/properties/${property.id}/edit`} className="flex h-8 w-8 items-center justify-center rounded-lg border border-slate-200 text-blue-600 transition hover:bg-blue-50 dark:border-slate-700 dark:text-blue-400 dark:hover:bg-blue-900/20"><Pencil size={14} /></Link>
                     <button onClick={() => onDelete(property.id, property.name)} disabled={deletingId === property.id} className="flex h-8 w-8 items-center justify-center rounded-lg border border-slate-200 text-red-600 transition hover:bg-red-50 disabled:opacity-50 dark:border-slate-700 dark:text-red-400 dark:hover:bg-red-900/20"><Trash2 size={14} /></button>
                   </div>
@@ -105,9 +107,11 @@ export const PropertiesListView: FC<PropertiesListViewProps> = ({ properties, de
                   </td>
                   <td className="px-6 py-4">
                     <div className="flex items-center gap-2">
-                      <Link to={`/tenant/properties/${property.id}/rooms`} className="rounded-xl border border-slate-200 bg-white px-4 py-2 text-xs font-semibold text-slate-700 shadow-sm transition hover:bg-slate-50 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-300 dark:hover:bg-slate-700">
-                        Kelola Kamar
-                      </Link>
+                      {property.rental_type !== 'WHOLE_PROPERTY' && (
+                        <Link to={`/tenant/properties/${property.id}/rooms`} className="rounded-xl border border-slate-200 bg-white px-4 py-2 text-xs font-semibold text-slate-700 shadow-sm transition hover:bg-slate-50 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-300 dark:hover:bg-slate-700">
+                          Kelola Kamar
+                        </Link>
+                      )}
                       <Link
                         to={`/tenant/properties/${property.id}/edit`}
                         className="flex h-9 w-9 items-center justify-center rounded-xl border border-slate-200 text-slate-500 transition hover:bg-blue-50 hover:text-blue-600 dark:border-slate-700 dark:text-slate-400 dark:hover:border-blue-900/50 dark:hover:bg-blue-900/20 dark:hover:text-blue-400"

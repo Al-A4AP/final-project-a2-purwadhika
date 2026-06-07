@@ -8,7 +8,7 @@ export type OrderStatus =
   | 'COMPLETED';
 
 export type PaymentMethod = 'MANUAL' | 'MIDTRANS';
-export type DashboardRevenuePeriod = 'weekly' | 'monthly' | 'quarterly' | 'six_months' | 'yearly';
+export type DashboardRevenuePeriod = 'weekly' | 'monthly' | 'quarterly' | 'six_months' | 'yearly' | 'all_time';
 
 export interface Order {
   id: string;
@@ -32,6 +32,7 @@ export interface Order {
   status: OrderStatus;
   payment_method: PaymentMethod;
   payment_proof_url?: string;
+  payment_rejection_reason?: string | null;
   midtrans_transaction_id?: string;
   payment_verified_at?: string;
   expires_at?: string;
