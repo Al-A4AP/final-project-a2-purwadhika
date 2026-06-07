@@ -1,6 +1,6 @@
 import type { FC } from 'react';
 import { useState, useCallback } from 'react';
-import Cropper from 'react-easy-crop';
+import CropperComponent from 'react-easy-crop';
 import { ZoomIn, ZoomOut } from 'lucide-react';
 import { Modal } from './Modal';
 import type { Area } from '@/lib/cropImage';
@@ -14,6 +14,23 @@ interface Props {
   aspect: number;
   onCropComplete: (croppedBlob: Blob) => void;
 }
+
+type CropPoint = {
+  x: number;
+  y: number;
+};
+
+type EasyCropperProps = {
+  image: string;
+  crop: CropPoint;
+  zoom: number;
+  aspect: number;
+  onCropChange: (crop: CropPoint) => void;
+  onZoomChange: (zoom: number) => void;
+  onCropComplete: (croppedArea: Area, croppedAreaPixels: Area) => void;
+};
+
+const EasyCropper = CropperComponent as unknown as FC<EasyCropperProps>;
 
 export const ImageCropperModal: FC<Props> = ({
   isOpen,
@@ -54,7 +71,7 @@ export const ImageCropperModal: FC<Props> = ({
     <Modal isOpen={isOpen} onClose={onClose} title="Sesuaikan Gambar" maxWidth="md">
       <div className="flex flex-col gap-6">
         <div className="relative w-full h-80 bg-slate-900 rounded-xl overflow-hidden border border-slate-200 dark:border-slate-700">
-          <Cropper
+          <EasyCropper
             image={imageSrc}
             crop={crop}
             zoom={zoom}
