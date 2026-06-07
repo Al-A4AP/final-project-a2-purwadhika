@@ -5,6 +5,7 @@ const productionSecrets = [
   'EMAIL_USER', 'EMAIL_PASSWORD', 'EMAIL_HOST',
   'CLOUDINARY_NAME', 'CLOUDINARY_API_KEY', 'CLOUDINARY_API_SECRET',
   'MIDTRANS_SERVER_KEY', 'MIDTRANS_CLIENT_KEY', 'LOCATIONIQ_TOKEN',
+  'CRON_SECRET',
 ] as const;
 
 const localOrigins = ['http://localhost:5173', 'http://localhost:5174', 'http://localhost:5175', 'http://localhost:5176'];
@@ -26,6 +27,7 @@ const baseEnvSchema = z.object({
   CLOUDINARY_API_KEY: optionalText(),
   CLOUDINARY_API_SECRET: optionalText(),
   CLOUDINARY_NAME: optionalText(),
+  CRON_SECRET: optionalText(),
   DATABASE_URL: requiredText('DATABASE_URL'),
   EMAIL_HOST: optionalText(),
   EMAIL_PASSWORD: optionalText(),

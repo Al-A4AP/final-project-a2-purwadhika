@@ -14,7 +14,7 @@ import orderRoutes from './src/routes/orderRoutes';
 import tenantRoutes from './src/routes/tenantRoutes';
 import userRoutes from './src/routes/userRoutes';
 import reviewRoutes from './src/routes/reviewRoutes';
-import { initCronJobs } from './src/cron/cronScheduler';
+import webhookRoutes from './src/routes/webhookRoutes';
 
 const app = express();
 const PORT = env.PORT;
@@ -40,6 +40,7 @@ app.use('/api/rooms', roomRoutes);
 app.use('/api/tenants/me', tenantRoutes);      // RESTful — Tahap 4
 app.use('/api/orders', orderRoutes);
 app.use('/api/users', userRoutes);
+app.use('/api/webhooks', webhookRoutes);
 app.use('/api', reviewRoutes);
 
 // 404
@@ -49,11 +50,6 @@ app.use((_req, res) => {
 
 // Global error handler
 app.use(errorHandler);
-
-// Cron Jobs — hanya aktif di environment yang support persistent process
-if (env.ENABLE_CRON === 'true') {
-  initCronJobs();
-}
 
 // Server listen — hanya di local/development, tidak di Vercel Serverless
 if (env.NODE_ENV !== 'test') {
