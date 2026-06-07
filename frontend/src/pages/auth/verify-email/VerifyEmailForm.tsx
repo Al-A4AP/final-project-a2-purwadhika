@@ -2,7 +2,7 @@ import type { FC } from "react";
 import { VerifyEmailHeader } from "./VerifyEmailHeader";
 import { VerifyEmailSubmitButton } from "./VerifyEmailSubmitButton";
 import { VerifyPasswordFields } from "./VerifyPasswordFields";
-import type { VerifyEmailPageState } from "./verifyEmailTypes";
+import type { VerifyEmailPageState } from "@/hooks/auth/verify-email/verifyEmailTypes";
 
 export const VerifyEmailForm: FC<{ state: VerifyEmailPageState }> = ({ state }) => (
   <>

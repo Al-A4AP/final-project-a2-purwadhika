@@ -1,6 +1,6 @@
 # Audit Keseluruhan PURWADHIKA
 
-Tanggal audit: 06 Juni 2026  
+Tanggal audit: 07 Juni 2026  
 Project: PURWALOKA - Property Renting Web App  
 Acuan: `docs/guidelines/PURWADHIKA.md`
 
@@ -20,7 +20,7 @@ Status final: siap review dengan catatan opsional pada cleanup legacy REST alias
 | Backend ownership test | Lulus, 7/7 |
 | File source >200 baris | Tidak ditemukan pada `backend/src`, `backend/tests`, `frontend/src` |
 | `any`, `debugger`, `console.*` | Tidak ditemukan pada source utama |
-| Function length audit advisory | 78 kandidat manual review; bukan build blocker |
+| Function length audit advisory | 87 kandidat manual review; bukan build blocker |
 | Pemisahan Hak Akses UI (Role UI) | Lulus (Akses reservasi Tenant 100% terkunci) |
 | Konsistensi Desain (UX) | Lulus (Komponen global rapi & arsitektur *frontend* solid) |
 
@@ -210,7 +210,7 @@ Backend terstruktur menjadi `routes`, `controllers`, `services`, `middlewares`, 
 
 Status: terpenuhi dengan catatan advisory.
 
-Tidak ada file source utama >200 baris, tidak ada `any`, tidak ada `debugger`, dan tidak ada `console.*` pada source utama. Function-length audit menemukan 78 kandidat manual review. Hasil ini tidak menjadi hard rule karena banyak kandidat berupa JSX presentasional panjang yang perlu dinilai manual.
+Tidak ada file source utama >200 baris, tidak ada `any`, tidak ada `debugger`, dan tidak ada `console.*` pada source utama. Function-length audit menemukan 87 kandidat manual review. Hasil ini tidak menjadi hard rule karena banyak kandidat berupa JSX presentasional panjang yang perlu dinilai manual.
 
 ## Struktur Dokumentasi
 

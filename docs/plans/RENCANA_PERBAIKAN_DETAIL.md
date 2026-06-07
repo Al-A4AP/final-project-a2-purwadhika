@@ -1,6 +1,6 @@
 # Rencana Perbaikan Sisa Setelah Audit Final
 
-Tanggal update: 06 Juni 2026  
+Tanggal update: 07 Juni 2026  
 Acuan: audit clean code, REST API guidelines, ownership, security, dan PURWADHIKA
 
 ## Ringkasan
@@ -77,17 +77,24 @@ Prioritas: Opsional clean code jika mentor menilai aturan 15 baris sangat ketat
 
 Masalah:
 
-Script `npm run audit:functions` menemukan 78 kandidat manual review: 76 di `frontend/src` dan 2 di `backend/src`. Mayoritas kandidat frontend adalah JSX presentasional panjang, sehingga perlu review manual sebelum dipecah.
+Script `npm run audit:functions` menemukan 87 kandidat manual review: 84 di `frontend/src` dan 3 di `backend/src`. Mayoritas kandidat frontend adalah JSX presentasional panjang, sehingga perlu review manual sebelum dipecah.
 
 Prioritas kandidat awal:
 
-- `frontend/src/components/tenant/room-form/RoomImageField.tsx`
-- `frontend/src/pages/user/booking/ReservationStepper.tsx`
 - `frontend/src/pages/tenant/rooms-page/RoomsListView.tsx`
 - `frontend/src/pages/tenant/properties-list/PropertiesListView.tsx`
 - `frontend/src/pages/tenant/property-form/PropertyImageField.tsx`
+- `frontend/src/hooks/tenant/room-form/useRoomImageField.ts`
+- `frontend/src/components/user/OrderCard.tsx`
 - `backend/src/services/categoryService.ts`
 - `backend/src/services/tenantPropertyService.ts`
+
+Catatan update 07 Juni 2026:
+
+- `RoomImageField.tsx` sudah dipisah menjadi hook `useRoomImageField`, `RoomImageDropzone`, dan `RoomGalleryGrid`.
+- `ReservationStepper.tsx` sudah dipisah menjadi indikator step, konten step, upload bukti transfer, dan action footer.
+- `components/ui` sudah ditambahkan sebagai fondasi UI primitive kecil.
+- Action/type auth dan tenant orders sudah dipindahkan keluar dari `pages` agar hooks tidak bergantung pada page files.
 
 Tahapan aman:
 
@@ -185,5 +192,5 @@ Tahapan aman:
 - Frontend build: lulus.
 - Backend build: lulus.
 - Ownership test: lulus, 7/7.
-- Function-length audit advisory: 78 kandidat manual review.
+- Function-length audit advisory: 87 kandidat manual review.
 - Scan clean code utama: tidak ada `any`, `debugger`, `console.*`, dan tidak ada file source utama >200 baris.

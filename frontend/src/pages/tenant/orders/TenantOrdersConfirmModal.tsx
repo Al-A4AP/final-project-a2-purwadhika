@@ -1,6 +1,6 @@
 import type { FC } from "react";
 import { ConfirmModal } from "@/components/common/ConfirmModal";
-import type { TenantOrdersState } from "./tenantOrdersTypes";
+import type { TenantOrdersState } from "@/hooks/tenant/orders/tenantOrdersTypes";
 
 export const TenantOrdersConfirmModal: FC<{ onCancel: () => void; state: TenantOrdersState }> = ({ onCancel, state }) => (
   <ConfirmModal

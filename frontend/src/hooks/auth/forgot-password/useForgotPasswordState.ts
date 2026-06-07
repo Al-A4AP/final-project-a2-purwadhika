@@ -2,7 +2,7 @@ import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { forgotPasswordSchema, type ForgotPasswordInput } from "@/validations/auth";
-import { forgotPasswordAction } from "../../../pages/auth/forgot-password/forgotPasswordActions";
+import { forgotPasswordAction } from "./forgotPasswordActions";
 
 export const useForgotPasswordState = () => {
   const [sent, setSent] = useState(false);

@@ -3,7 +3,7 @@ import { RegisterErrorNotice } from "./RegisterErrorNotice";
 import { RegisterForm } from "./RegisterForm";
 import { RegisterHeader } from "./RegisterHeader";
 import { RegisterLoginLink } from "./RegisterLoginLink";
-import type { RegisterPageState } from "./registerTypes";
+import type { RegisterPageState } from "@/hooks/auth/register/registerTypes";
 
 export const RegisterFormContent: FC<{ state: RegisterPageState }> = ({ state }) => (
   <>

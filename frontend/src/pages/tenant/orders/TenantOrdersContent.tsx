@@ -1,6 +1,6 @@
 import type { FC } from "react";
 
-import type { TenantOrdersState } from "./tenantOrdersTypes";
+import type { TenantOrdersState } from "@/hooks/tenant/orders/tenantOrdersTypes";
 import { TenantOrdersConfirmModal } from "./TenantOrdersConfirmModal";
 import { TenantOrdersFilterPanel } from "./TenantOrdersFilterPanel";
 import { TenantOrdersTableSection } from "./TenantOrdersTableSection";

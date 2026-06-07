@@ -4,7 +4,7 @@ import { ErrorState } from "@/components/common/ErrorState";
 import { Pagination } from "@/components/common/Pagination";
 import { SectionLoading } from "@/components/common/SectionLoading";
 import { OrdersTable } from "@/components/tenant/OrdersTable";
-import type { TenantOrdersState } from "./tenantOrdersTypes";
+import type { TenantOrdersState } from "@/hooks/tenant/orders/tenantOrdersTypes";
 
 export const TenantOrdersTableSection: FC<{ state: TenantOrdersState }> = ({ state }) => {
   if (state.loading) return <SectionLoading label="Memuat data pesanan..." size="md" variant="table" />;

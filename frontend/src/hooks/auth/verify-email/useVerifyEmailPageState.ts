@@ -5,8 +5,8 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { toast } from "react-hot-toast";
 import { authService } from "@/services/authService";
 import { verifyEmailSchema, type VerifyEmailInput } from "@/validations/auth";
-import { getVerifyEmailError, setVerifyEmailError } from "../../../pages/auth/verify-email/verifyEmailActions";
-import type { VerifyEmailPageState, VerifyEmailStatus } from "../../../pages/auth/verify-email/verifyEmailTypes";
+import { getVerifyEmailError, setVerifyEmailError } from "./verifyEmailActions";
+import type { VerifyEmailPageState, VerifyEmailStatus } from "./verifyEmailTypes";
 
 export const useVerifyEmailPageState = (): VerifyEmailPageState => {
   const { token } = useParams<{ token: string }>();

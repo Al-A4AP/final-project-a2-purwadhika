@@ -6,7 +6,7 @@ import { useAuthStore } from "@/stores/authStore";
 import { getAuthRoleFromPath, type TargetAuthRole } from "@/lib/authRole";
 import { registerSchema, type RegisterInput } from "@/validations/auth";
 import type { Role, User } from "@/types";
-import type { RegisterPageState } from "../../../pages/auth/register/registerTypes";
+import type { RegisterPageState } from "./registerTypes";
 import { useRegisterGoogle } from "./useRegisterGoogle";
 import { useRegisterSubmit } from "./useRegisterSubmit";
 

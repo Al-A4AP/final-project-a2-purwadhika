@@ -8,7 +8,10 @@ interface ForgotPasswordActionOptions {
   setSent: (sent: boolean) => void;
 }
 
-export const forgotPasswordAction = async (data: ForgotPasswordInput, options: ForgotPasswordActionOptions) => {
+export const forgotPasswordAction = async (
+  data: ForgotPasswordInput,
+  options: ForgotPasswordActionOptions,
+) => {
   try {
     await authService.forgotPassword(data.email);
     options.setSent(true);

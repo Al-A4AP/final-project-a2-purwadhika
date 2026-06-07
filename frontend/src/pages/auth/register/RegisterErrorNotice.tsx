@@ -1,5 +1,5 @@
 import type { FC } from "react";
-import type { RegisterPageState } from "./registerTypes";
+import type { RegisterPageState } from "@/hooks/auth/register/registerTypes";
 
 export const RegisterErrorNotice: FC<{ state: RegisterPageState }> = ({ state }) => {
   const error = state.form.formState.errors.root;

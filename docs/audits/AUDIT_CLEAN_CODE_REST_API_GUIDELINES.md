@@ -1,6 +1,6 @@
 # Audit Clean Code dan REST API Guidelines
 
-Tanggal audit: 06 Juni 2026  
+Tanggal audit: 07 Juni 2026  
 Project: PURWALOKA - Property Renting Web App  
 Acuan: `docs/guidelines/PURWADHIKA.md` bagian Clean Code dan `docs/guidelines/REST_API_GUIDELINES.md`
 
@@ -21,11 +21,11 @@ REST API jalur utama sudah mengikuti pola resource-oriented. Beberapa legacy ali
 | Scan file source >200 baris | Tidak ditemukan di `backend/src`, `backend/tests`, `frontend/src` |
 | Scan `console.*` dan `debugger` | Tidak ditemukan di source utama; hanya ada di `tools/audit-function-length.js` |
 | Scan `any`, `as any`, `unknown as`, `as unknown` | Tidak ditemukan di area audit |
-| `npm run audit:functions` | Advisory only; 78 kandidat manual review, 76 frontend dan 2 backend |
+| `npm run audit:functions` | Advisory only; 87 kandidat manual review, 84 frontend dan 3 backend |
 
 ## Clean Code
 
-### Frontend Architecture & UI/UX (Update 06 Juni 2026)
+### Frontend Architecture & UI/UX (Update 07 Juni 2026)
 
 Status: sangat baik dan terstruktur (*Clean Architecture*).
 
@@ -57,14 +57,24 @@ npm run audit:functions
 
 Hasil terbaru:
 
-- 78 kandidat di atas 15 baris.
-- 76 kandidat berada di `frontend/src`.
-- 2 kandidat berada di `backend/src`.
+- 87 kandidat di atas 15 baris.
+- 84 kandidat berada di `frontend/src`.
+- 3 kandidat berada di `backend/src`.
 - Script selalu exit `0` dan tidak menjadi hard rule.
 
-### Daftar Lengkap Kandidat Function-Length Advisory
+### Snapshot Kandidat Function-Length Advisory
 
-Daftar ini dihasilkan dari `npm run audit:functions` pada 06 Juni 2026. Kolom `Baris` adalah baris awal function/component yang terdeteksi. Daftar ini perlu diperbarui setiap kali ada refactor yang mengubah hasil audit function length.
+Daftar ini adalah snapshot tracking, bukan hard rule dan bukan daftar final yang harus dipecah semuanya. Ringkasan terbaru per 07 Juni 2026 menunjukkan 87 kandidat. Untuk daftar lengkap aktual, jalankan `npm run audit:functions` karena hasil dapat berubah setiap kali ada refactor.
+
+Kandidat prioritas terbaru:
+
+- `frontend/src/pages/tenant/rooms-page/RoomsListView.tsx`
+- `frontend/src/pages/tenant/properties-list/PropertiesListView.tsx`
+- `frontend/src/pages/tenant/property-form/PropertyImageField.tsx`
+- `frontend/src/hooks/tenant/room-form/useRoomImageField.ts`
+- `frontend/src/components/user/OrderCard.tsx`
+- `backend/src/services/categoryService.ts`
+- `backend/src/services/tenantPropertyService.ts`
 
 | No | File | Baris | Fungsi/Component | Kind | Jumlah Baris |
 | --- | --- | ---: | --- | --- | ---: |

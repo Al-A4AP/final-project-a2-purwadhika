@@ -1,5 +1,5 @@
 import { useCallback, useMemo, useState } from "react";
-import type { TenantOrderFilterActions, TenantOrderFilters } from "../../../pages/tenant/orders/tenantOrdersTypes";
+import type { TenantOrderFilterActions, TenantOrderFilters } from "./tenantOrdersTypes";
 
 export const useTenantOrderFilters = () => {
   const [selectedPropertyId, setSelectedPropertyId] = useState("");

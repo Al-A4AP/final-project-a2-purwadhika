@@ -1,6 +1,6 @@
 import type { FC } from "react";
 import { LoginContent } from "./login/LoginContent";
-import type { LoginPageProps } from "./login/loginTypes";
+import type { LoginPageProps } from "@/hooks/auth/login/loginTypes";
 import { useLoginPageState } from "../../hooks/auth/login/useLoginPageState";
 
 const LoginPage: FC<LoginPageProps> = ({ targetRole }) => (

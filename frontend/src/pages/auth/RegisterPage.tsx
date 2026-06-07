@@ -1,6 +1,6 @@
 import type { FC } from "react";
 import { RegisterContent } from "./register/RegisterContent";
-import type { RegisterPageProps } from "./register/registerTypes";
+import type { RegisterPageProps } from "@/hooks/auth/register/registerTypes";
 import { useRegisterPageState } from "../../hooks/auth/register/useRegisterPageState";
 
 const RegisterPage: FC<RegisterPageProps> = ({ targetRole }) => (

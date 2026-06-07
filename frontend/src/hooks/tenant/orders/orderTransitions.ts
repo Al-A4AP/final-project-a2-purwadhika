@@ -1,5 +1,5 @@
-import type { OrderStatus } from "@/types";
 import { getOrderStatusLabel } from "@/lib/orderStatus";
+import type { OrderStatus } from "@/types";
 
 export const ALLOWED_ORDER_TRANSITIONS: Partial<Record<OrderStatus, OrderStatus[]>> = {
   WAITING_CONFIRMATION: ["PROCESSED", "CANCELLED"],

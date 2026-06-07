@@ -1,6 +1,6 @@
 import type { FC } from "react";
 import { REGISTER_INPUT_CLASS } from "./registerStyles";
-import type { RegisterPageState } from "./registerTypes";
+import type { RegisterPageState } from "@/hooks/auth/register/registerTypes";
 
 export const RegisterRoleSelect: FC<{ state: RegisterPageState }> = ({ state }) => (
   <div>

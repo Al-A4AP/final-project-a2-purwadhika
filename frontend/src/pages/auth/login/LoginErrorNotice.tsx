@@ -1,6 +1,6 @@
 import type { FC } from "react";
 import { Check } from "lucide-react";
-import type { LoginPageState } from "./loginTypes";
+import type { LoginPageState } from "@/hooks/auth/login/loginTypes";
 
 export const LoginErrorNotice: FC<{ state: LoginPageState }> = ({ state }) => {
   const error = state.form.formState.errors.root;

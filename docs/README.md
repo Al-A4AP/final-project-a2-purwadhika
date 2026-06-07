@@ -2,7 +2,7 @@
 
 Folder ini menyimpan dokumentasi pendukung final project agar root project tetap ringkas dan mudah diperiksa.
 
-Tanggal audit dokumentasi terbaru: 06 Juni 2026.
+Tanggal audit dokumentasi terbaru: 07 Juni 2026.
 
 ## Struktur
 
@@ -34,7 +34,7 @@ README di folder `frontend` dan `backend` sudah dihapus oleh user dan tidak dibu
 | Ownership test | Lulus, 7/7 |
 | File source >200 baris | Tidak ditemukan pada `backend/src`, `backend/tests`, `frontend/src` |
 | `any`, `debugger`, `console.*` | Tidak ditemukan pada source utama |
-| Function length audit | 78 kandidat manual review; advisory only |
+| Function length audit | 87 kandidat manual review; advisory only |
 | REST API | Jalur utama sesuai resource-oriented; legacy alias masih dicatat |
 | Ownership | Baik dan teruji |
 | Browser storage | Tidak ada JWT auth token di localStorage |

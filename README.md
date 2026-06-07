@@ -9,7 +9,7 @@ Final Project Purwadhika JCWDBGPM-11, Group 1:
 
 ## Status Audit Terakhir
 
-Audit dokumentasi diperbarui pada 06 Juni 2026 dengan acuan `docs/guidelines/PURWADHIKA.md` dan `docs/guidelines/REST_API_GUIDELINES.md`.
+Audit dokumentasi diperbarui pada 07 Juni 2026 dengan acuan `docs/guidelines/PURWADHIKA.md` dan `docs/guidelines/REST_API_GUIDELINES.md`.
 
 | Area | Status | Catatan |
 | --- | --- | --- |
@@ -18,7 +18,7 @@ Audit dokumentasi diperbarui pada 06 Juni 2026 dengan acuan `docs/guidelines/PUR
 | Fitur 1 | Selesai | Homepage, auth/profile, katalog properti, detail properti, tenant CRUD property/room/category, availability, peak season |
 | Fitur 2 | Selesai | Booking, manual payment, Midtrans, tenant order management, review, laporan pendapatan/properti/okupasi |
 | File source >200 baris | Sesuai | Tidak ditemukan pada `backend/src`, `backend/tests`, `frontend/src` |
-| Function maksimal 15 baris | Dipantau | `npm run audit:functions` tersedia sebagai advisory tool; hasil terbaru 78 kandidat manual review |
+| Function maksimal 15 baris | Dipantau | `npm run audit:functions` tersedia sebagai advisory tool; hasil terbaru 87 kandidat manual review |
 | `any`, `debugger`, `console.*` | Sesuai | Tidak ditemukan pada source utama |
 | Frontend lint/build | Lulus | `npm.cmd run lint` dan `npm.cmd run build` lulus |
 | Backend build | Lulus | `npm.cmd run build` lulus |

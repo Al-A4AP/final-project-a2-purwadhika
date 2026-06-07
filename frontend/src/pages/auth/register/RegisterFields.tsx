@@ -1,7 +1,7 @@
 import type { FC } from "react";
 import { RegisterRoleSelect } from "./RegisterRoleSelect";
 import { RegisterTextField } from "./RegisterTextField";
-import type { RegisterPageState } from "./registerTypes";
+import type { RegisterPageState } from "@/hooks/auth/register/registerTypes";
 
 export const RegisterFields: FC<{ state: RegisterPageState }> = ({ state }) => (
   <>

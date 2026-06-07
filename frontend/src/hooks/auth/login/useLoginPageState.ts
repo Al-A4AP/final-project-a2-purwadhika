@@ -10,8 +10,8 @@ import { authService } from "@/services/authService";
 import { getAuthRoleFromPath, getRoleHome, getRoleMismatchMessage } from "@/lib/authRole";
 import { loginSchema, type LoginInput } from "@/validations/auth";
 import type { Role, User } from "@/types";
-import { handleLoginError, loginWithPassword } from "../../../pages/auth/login/loginActions";
-import type { LoginPageState, ResendStatus } from "../../../pages/auth/login/loginTypes";
+import { handleLoginError, loginWithPassword } from "./loginActions";
+import type { LoginPageState, ResendStatus } from "./loginTypes";
 
 type SetLoginError = ReturnType<typeof useForm<LoginInput>>["setError"];
 type LoginNavigate = ReturnType<typeof useNavigate>;

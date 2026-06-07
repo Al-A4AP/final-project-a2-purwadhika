@@ -4,8 +4,8 @@ import { getApiErrorMessage } from "@/lib/errorMessage";
 import { getOrderStatusLabel } from "@/lib/orderStatus";
 import { orderService } from "@/services/orderService";
 import type { Order } from "@/types";
-import { canTransitionOrder, getConfirmMessage } from "../../../pages/tenant/orders/orderTransitions";
-import type { ConfirmModalState } from "../../../pages/tenant/orders/tenantOrdersTypes";
+import { canTransitionOrder, getConfirmMessage } from "./orderTransitions";
+import type { ConfirmModalState } from "./tenantOrdersTypes";
 
 type SubmitGuard = { current: boolean };
 

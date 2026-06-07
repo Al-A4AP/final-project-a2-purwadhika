@@ -1,6 +1,6 @@
 # Audit Ownership dan Keamanan
 
-Tanggal audit: 06 Juni 2026  
+Tanggal audit: 07 Juni 2026  
 Project: PURWALOKA - Property Renting Web App  
 Acuan: ownership data, authorization, browser storage, dan hardening backend
 

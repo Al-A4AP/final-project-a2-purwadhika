@@ -1,6 +1,6 @@
 import type { FC } from "react";
 import { getRoleName } from "@/lib/authRole";
-import type { LoginPageState } from "./loginTypes";
+import type { LoginPageState } from "@/hooks/auth/login/loginTypes";
 
 export const LoginHeader: FC<{ role: LoginPageState["role"] }> = ({ role }) => (
   <>

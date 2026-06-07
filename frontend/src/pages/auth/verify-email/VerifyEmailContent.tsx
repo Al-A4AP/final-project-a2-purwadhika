@@ -3,7 +3,7 @@ import { ErrorPanel } from "./VerifyEmailPanels";
 import { LoadingPanel } from "./VerifyEmailPanels";
 import { SuccessPanel } from "./VerifyEmailPanels";
 import { VerifyEmailForm } from "./VerifyEmailForm";
-import type { VerifyEmailPageState } from "./verifyEmailTypes";
+import type { VerifyEmailPageState } from "@/hooks/auth/verify-email/verifyEmailTypes";
 
 export const VerifyEmailContent: FC<{ state: VerifyEmailPageState }> = ({ state }) => (
   <div className="max-w-md mx-auto py-6">

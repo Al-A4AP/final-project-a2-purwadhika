@@ -1,7 +1,7 @@
 import type { FC } from "react";
 import { Link } from "react-router-dom";
 import { CheckCircle, Loader2, XCircle } from "lucide-react";
-import type { VerifyEmailPageState } from "./verifyEmailTypes";
+import type { VerifyEmailPageState } from "@/hooks/auth/verify-email/verifyEmailTypes";
 
 export const LoadingPanel: FC = () => (
   <div className="text-center py-8"><Loader2 size={48} className="animate-spin text-red-600 mx-auto mb-4" /><h2 className="text-xl font-bold text-gray-900 dark:text-white">Memproses verifikasi...</h2></div>

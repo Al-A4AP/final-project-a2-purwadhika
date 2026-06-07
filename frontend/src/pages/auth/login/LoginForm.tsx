@@ -4,7 +4,7 @@ import { GoogleAuthButton } from "@/components/auth/GoogleAuthButton";
 import { EmailField, PasswordField } from "./LoginFields";
 import { LoginDivider } from "./LoginDivider";
 import { LoginSubmitButton } from "./LoginSubmitButton";
-import type { LoginPageState } from "./loginTypes";
+import type { LoginPageState } from "@/hooks/auth/login/loginTypes";
 
 export const LoginForm: FC<{ state: LoginPageState }> = ({ state }) => (
   <form onSubmit={state.form.handleSubmit(state.onSubmit)} className="space-y-4">

@@ -11,7 +11,10 @@ interface ResetPasswordActionOptions {
   token: string;
 }
 
-export const resetPasswordAction = async (data: ResetPasswordInput, options: ResetPasswordActionOptions) => {
+export const resetPasswordAction = async (
+  data: ResetPasswordInput,
+  options: ResetPasswordActionOptions,
+) => {
   if (!options.token) return options.setError("root", { message: "Token tidak ditemukan di URL." });
   try {
     await authService.resetPassword(options.token, data.password);

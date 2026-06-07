@@ -2,7 +2,7 @@ import { useCallback } from "react";
 import type { UseFormSetError } from "react-hook-form";
 import { authService } from "@/services/authService";
 import type { RegisterInput } from "@/validations/auth";
-import { getRegisterErrorMessage, notifyRegisterSuccess } from "../../../pages/auth/register/registerActions";
+import { getRegisterErrorMessage, notifyRegisterSuccess } from "./registerActions";
 
 export const useRegisterSubmit = (
   setError: UseFormSetError<RegisterInput>,

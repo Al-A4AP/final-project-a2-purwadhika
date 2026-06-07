@@ -1,7 +1,7 @@
 import type { FC } from "react";
 import type { RegisterInput } from "@/validations/auth";
 import { REGISTER_INPUT_CLASS } from "./registerStyles";
-import type { RegisterPageState } from "./registerTypes";
+import type { RegisterPageState } from "@/hooks/auth/register/registerTypes";
 
 type RegisterTextFieldProps = { label: string; name: keyof Pick<RegisterInput, "name" | "email">; placeholder: string; state: RegisterPageState; type?: string };
 

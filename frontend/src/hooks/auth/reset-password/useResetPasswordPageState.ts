@@ -3,7 +3,7 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { resetPasswordSchema, type ResetPasswordInput } from "@/validations/auth";
-import { resetPasswordAction } from "../../../pages/auth/reset-password/resetPasswordActions";
+import { resetPasswordAction } from "./resetPasswordActions";
 
 export const useResetPasswordPageState = () => {
   const [searchParams] = useSearchParams();

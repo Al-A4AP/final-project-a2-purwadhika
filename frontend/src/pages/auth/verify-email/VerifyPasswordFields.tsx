@@ -1,6 +1,6 @@
 import type { FC } from "react";
 import { VerifyPasswordField } from "./VerifyPasswordField";
-import type { VerifyEmailPageState } from "./verifyEmailTypes";
+import type { VerifyEmailPageState } from "@/hooks/auth/verify-email/verifyEmailTypes";
 
 export const VerifyPasswordFields: FC<{ state: VerifyEmailPageState }> = ({ state }) => {
   const errors = state.form.formState.errors;

@@ -6,8 +6,8 @@ import { authService } from "@/services/authService";
 import { getRoleHome } from "@/lib/authRole";
 import type { Role } from "@/types";
 import type { RegisterInput } from "@/validations/auth";
-import type { SetUser } from "../../../pages/auth/register/registerTypes";
-import { notifyGoogleSuccess } from "../../../pages/auth/register/registerActions";
+import { notifyGoogleSuccess } from "./registerActions";
+import type { SetUser } from "./registerTypes";
 
 export const useRegisterGoogle = (
   role: Role,

@@ -4,7 +4,7 @@ import { orderService } from "@/services/orderService";
 import { tenantService } from "@/services/tenantService";
 import type { Order, PaginationMeta, TenantProperty } from "@/types";
 import { useTenantOrderFilters } from "./useTenantOrderFilters";
-import type { TenantOrderFilters } from "../../../pages/tenant/orders/tenantOrdersTypes";
+import type { TenantOrderFilters } from "./tenantOrdersTypes";
 
 export const useTenantOrders = () => {
   const [orders, setOrders] = useState<Order[]>([]);

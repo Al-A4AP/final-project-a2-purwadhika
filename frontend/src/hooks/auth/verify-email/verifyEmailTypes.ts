@@ -4,13 +4,13 @@ import type { VerifyEmailInput } from "@/validations/auth";
 export type VerifyEmailStatus = "form" | "loading" | "success" | "error";
 
 export type VerifyEmailPageState = {
-  form: UseFormReturn<VerifyEmailInput>;
-  status: VerifyEmailStatus;
   errorMessage: string;
-  showPassword: boolean;
-  showConfirmPassword: boolean;
-  togglePassword: () => void;
-  toggleConfirmPassword: () => void;
+  form: UseFormReturn<VerifyEmailInput>;
   onSubmit: SubmitHandler<VerifyEmailInput>;
   retry: () => void;
+  showConfirmPassword: boolean;
+  showPassword: boolean;
+  status: VerifyEmailStatus;
+  toggleConfirmPassword: () => void;
+  togglePassword: () => void;
 };
