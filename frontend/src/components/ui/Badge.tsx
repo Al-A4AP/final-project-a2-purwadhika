@@ -1,9 +1,8 @@
 import type { FC, HTMLAttributes, ReactNode } from "react";
 import { cn } from "@/lib/formatters";
+import type { BadgeTone } from "@/types/ui";
 
-type BadgeTone = "green" | "neutral" | "red" | "yellow";
-
-interface BadgeProps extends HTMLAttributes<HTMLSpanElement> {
+export interface BadgeProps extends HTMLAttributes<HTMLSpanElement> {
   children: ReactNode;
   tone?: BadgeTone;
 }

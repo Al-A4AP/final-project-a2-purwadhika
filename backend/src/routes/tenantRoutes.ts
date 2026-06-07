@@ -26,7 +26,7 @@ import { getDashboardAnalyticsCtrl, getOccupancyCalendarCtrl } from '../controll
 import { getTenantReviewsCtrl } from '../controllers/tenantReviewController';
 import { createCategoryCtrl, deleteCategoryCtrl, getCategoriesCtrl, updateCategoryCtrl } from '../controllers/categoryController';
 import { getTenantOrdersCtrl } from '../controllers/orderController';
-import { createTenantVoucherCtrl, deleteTenantVoucherCtrl, getTenantVouchersCtrl, updateTenantVoucherCtrl } from '../controllers/voucherController';
+import { assignVoucherCtrl, createTenantVoucherCtrl, deleteTenantVoucherCtrl, getTenantVouchersCtrl, updateTenantVoucherCtrl } from '../controllers/voucherController';
 import { voucherSchema } from '../validations/voucherValidation';
 
 const router = Router();
@@ -86,6 +86,7 @@ router.delete('/categories/:id', ...isTenant, deleteCategoryCtrl);
 router.get('/vouchers', ...isTenant, getTenantVouchersCtrl);
 router.post('/vouchers', ...isTenant, validate(voucherSchema), createTenantVoucherCtrl);
 router.patch('/vouchers/:id', ...isTenant, validate(voucherSchema), updateTenantVoucherCtrl);
+router.post('/vouchers/:id/assign', ...isTenant, assignVoucherCtrl);
 router.delete('/vouchers/:id', ...isTenant, deleteTenantVoucherCtrl);
 
 export default router;

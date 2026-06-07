@@ -1,7 +1,7 @@
 import { z } from 'zod';
 
 export const voucherSchema = z.object({
-  code: z.string().trim().toUpperCase().regex(/^[A-Z0-9]+$/, 'Kode voucher hanya boleh berisi huruf dan angka').min(3, 'Kode voucher minimal 3 karakter').max(8, 'Kode voucher maksimal 8 karakter'),
+  code: z.string().trim().toUpperCase().regex(/^[A-Z0-9]+$/, 'Kode voucher hanya boleh berisi huruf dan angka').min(3, 'Kode voucher minimal 3 karakter').max(15, 'Kode voucher maksimal 15 karakter'),
   description: z.string().trim().max(160, 'Deskripsi maksimal 160 karakter').optional().or(z.literal('')),
   discount_type: z.enum(['PERCENTAGE', 'NOMINAL', 'FREE_NIGHTS']).default('PERCENTAGE'),
   discount_value: z.coerce.number().int().positive('Nilai diskon wajib lebih dari 0'),
@@ -35,7 +35,12 @@ function validateVoucherRules(data: VoucherInput, ctx: z.RefinementCtx) {
   if (new Date(data.starts_at) >= new Date(data.expires_at)) {
     addIssue(ctx, 'expires_at', 'Tanggal berakhir harus setelah tanggal mulai');
   }
-  if (new Date(data.expires_at) < new Date(new Date().setHours(0,0,0,0))) {
+  const today = new Date();
+  today.setHours(0,0,0,0);
+  if (new Date(data.starts_at) < today) {
+    addIssue(ctx, 'starts_at', 'Tanggal mulai tidak boleh di masa lalu');
+  }
+  if (new Date(data.expires_at) < today) {
     addIssue(ctx, 'expires_at', 'Tanggal berakhir tidak boleh di masa lalu');
   }
 }

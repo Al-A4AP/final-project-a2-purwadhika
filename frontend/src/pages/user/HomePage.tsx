@@ -43,7 +43,7 @@ const HomePageView: FC<{ state: HomePageState }> = ({ state }) => (
     <FeaturedProperties city={state.activeFilters.city} state={state.propertyState} />
     <PopularCities />
     <TrustSection />
-    <TenantCta />
+    <PromosCta />
   </div>
 );
 
@@ -146,16 +146,34 @@ const TrustItem: FC<{ icon: LucideIcon; text: string; title: string }> = ({ icon
   </div>
 );
 
-const TenantCta: FC = () => (
+const PromosCta: FC = () => (
   <section className="mx-auto max-w-7xl px-4 py-12">
-    <div className="flex flex-col gap-6 rounded-2xl border border-red-100 bg-white p-8 shadow-sm dark:border-red-900/30 dark:bg-slate-900 lg:flex-row lg:items-center lg:justify-between">
-      <div>
-        <h2 className="text-2xl font-bold text-slate-900 dark:text-white">Ayo daftar sebagai tenant</h2>
-        <p className="mt-2 max-w-2xl text-slate-600 dark:text-slate-400">Kelola properti, kamar, harga musiman, dan reservasi tamu dari satu dashboard.</p>
+    <div className="grid gap-6 lg:grid-cols-2">
+      <div className="flex flex-col gap-6 rounded-3xl border border-blue-100 bg-blue-50/50 p-8 shadow-sm dark:border-slate-800 dark:bg-slate-800">
+        <div>
+          <div className="mb-4 inline-block rounded-xl bg-blue-100 p-3 text-blue-600 dark:bg-blue-900/30 dark:text-blue-400">
+            <ShieldCheck size={24} />
+          </div>
+          <h2 className="text-2xl font-bold text-slate-900 dark:text-white">Dapatkan Voucher 5%</h2>
+          <p className="mt-2 text-slate-600 dark:text-slate-400">Gunakan kode referral teman Anda di pesanan pertama dan dapatkan potongan eksklusif!</p>
+        </div>
+        <Link to="/auth/register" className="mt-auto inline-flex w-full items-center justify-center gap-2 rounded-xl bg-slate-900 px-5 py-3 text-center text-sm font-bold text-white transition hover:bg-slate-800 dark:bg-white dark:text-slate-900 dark:hover:bg-slate-200 sm:w-fit">
+          Daftar Sekarang <ArrowRight size={16} />
+        </Link>
       </div>
-      <Link to="/auth/register/tenant" className="inline-flex w-full items-center justify-center gap-2 rounded-xl bg-red-600 px-5 py-3 text-center text-sm font-bold text-white transition hover:bg-red-700 sm:w-fit lg:shrink-0">
-        Mulai Menjadi Tenant <ArrowRight size={16} />
-      </Link>
+      
+      <div className="flex flex-col gap-6 rounded-3xl border border-red-100 bg-red-50/50 p-8 shadow-sm dark:border-slate-800 dark:bg-slate-800">
+        <div>
+          <div className="mb-4 inline-block rounded-xl bg-red-100 p-3 text-red-600 dark:bg-red-900/30 dark:text-red-400">
+            <Building2 size={24} />
+          </div>
+          <h2 className="text-2xl font-bold text-slate-900 dark:text-white">Ayo daftar sebagai tenant</h2>
+          <p className="mt-2 text-slate-600 dark:text-slate-400">Kelola properti, kamar, harga musiman, dan reservasi tamu dari satu dashboard sentral.</p>
+        </div>
+        <Link to="/auth/register/tenant" className="mt-auto inline-flex w-full items-center justify-center gap-2 rounded-xl bg-red-600 px-5 py-3 text-center text-sm font-bold text-white transition hover:bg-red-700 sm:w-fit">
+          Mulai Menjadi Tenant <ArrowRight size={16} />
+        </Link>
+      </div>
     </div>
   </section>
 );

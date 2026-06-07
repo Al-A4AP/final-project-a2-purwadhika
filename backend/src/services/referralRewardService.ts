@@ -27,9 +27,14 @@ const createReferralReward = async (tx: Prisma.TransactionClient, order: Rewarda
   const referrer = await findReferrerByCode(tx, order.referral_code!);
   if (!referrer || referrer.id === order.userId) return null;
   if (await findTriggeredReward(tx, order.userId)) return null;
-  const voucher = await createRewardVoucher(tx, order, referrer.id);
-  await createRewardAssignment(tx, referrer.id, voucher.id, voucher.expires_at);
-  return tx.referralReward.create({ data: buildRewardCreateData(order, referrer.id, voucher) });
+  
+  const referrerVoucher = await createRewardVoucher(tx, order, referrer.id, 'SND');
+  await createRewardAssignment(tx, referrer.id, referrerVoucher.id, referrerVoucher.expires_at);
+
+  const refereeVoucher = await createRewardVoucher(tx, order, order.userId, 'RCV');
+  await createRewardAssignment(tx, order.userId, refereeVoucher.id, refereeVoucher.expires_at);
+
+  return tx.referralReward.create({ data: buildRewardCreateData(order, referrer.id, referrerVoucher) });
 };
 
 const assertReferralUsable = async (tx: Prisma.TransactionClient, userId: string, code: string) => {
@@ -49,8 +54,8 @@ const rewardableOrderWhere = (orderId: string): Prisma.OrderWhereInput => ({
   status: OrderStatus.PROCESSED,
 });
 
-const createRewardVoucher = (tx: Prisma.TransactionClient, order: RewardableOrder, referrerId: string) =>
-  tx.voucher.create({ data: buildRewardVoucherData(order, referrerId) });
+const createRewardVoucher = (tx: Prisma.TransactionClient, order: RewardableOrder, referrerId: string, prefix: string) =>
+  tx.voucher.create({ data: buildRewardVoucherData(order, referrerId, prefix) });
 
 const createRewardAssignment = (tx: Prisma.TransactionClient, userId: string, voucherId: string, expiresAt: Date) =>
   tx.userVoucher.create({ data: { expires_at: expiresAt, userId, voucherId } });
@@ -63,8 +68,8 @@ const buildRewardCreateData = (order: RewardableOrder, referrerId: string, vouch
   voucherId: voucher.id,
 });
 
-const buildRewardVoucherData = (order: RewardableOrder, referrerId: string): Prisma.VoucherCreateInput => ({
-  code: buildRewardCode(order.id),
+const buildRewardVoucherData = (order: RewardableOrder, referrerId: string, prefix: string): Prisma.VoucherCreateInput => ({
+  code: buildRewardCode(order.id, prefix),
   discount_type: VoucherDiscountType.PERCENTAGE,
   discount_value: REWARD_PERCENT,
   expires_at: addRewardDays(new Date()),
@@ -90,8 +95,8 @@ const addRewardDays = (date: Date) => {
   return value;
 };
 
-const buildRewardCode = (orderId: string) =>
-  `REF${Date.now().toString(36).toUpperCase()}${orderId.slice(-4).toUpperCase()}`;
+const buildRewardCode = (orderId: string, prefix: string) =>
+  `${prefix}${Date.now().toString(36).toUpperCase()}${Math.random().toString(36).substring(2, 5).toUpperCase()}${orderId.slice(-4).toUpperCase()}`;
 
 const normalizeReferralCode = (code?: string) => code?.trim().toUpperCase() || '';
 

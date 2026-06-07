@@ -80,6 +80,7 @@ const CalendarPanel = ({ display, direction, minDate, onSelect, selectedDate }: 
     <DayPicker
       mode="single"
       selected={selectedDate}
+      defaultMonth={selectedDate || minDate || new Date()}
       onSelect={onSelect}
       disabled={minDate ? { before: minDate } : undefined}
       modifiersClassNames={DATE_PICKER_MODIFIERS}

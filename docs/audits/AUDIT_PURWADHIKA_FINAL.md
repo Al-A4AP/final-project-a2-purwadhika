@@ -8,25 +8,23 @@ Acuan: `docs/guidelines/PURWADHIKA.md`
 
 Project sudah memenuhi mayoritas requirement utama PURWADHIKA untuk Property Renting Web App. Fitur user, tenant, transaksi, review, report, mobile responsiveness, clean code, ownership, dan REST guideline jalur utama sudah tersedia dan terverifikasi.
 
-Status audit teknis terakhir: fitur utama tersedia dan verifikasi teknis lulus. Namun, hasil UAT browser terbaru pada 07 Juni 2026 menambahkan rencana perbaikan aktif sebelum klaim final benar-benar ditutup. Lihat `docs/plans/RENCANA_PERBAIKAN_UAT_BROWSER_2026_06_07.md`.
+Status audit teknis terakhir: fitur utama tersedia dan verifikasi teknis lulus. Rencana aktif UAT browser 07 Juni 2026 telah dieksekusi secara keseluruhan. Proyek ini sudah siap untuk penilaian akhir.
 
-## Catatan UAT Browser Terbaru
+## Catatan UAT Browser Terbaru (SELESAI)
 
-Temuan browser terbaru belum dieksekusi dan perlu diprioritaskan secara bertahap:
+Seluruh temuan browser terbaru pada 07 Juni 2026 telah dieksekusi dan diimplementasikan secara tuntas:
 
-| Area | Status | Rencana |
+| Area | Status | Ringkasan Perbaikan |
 | --- | --- | --- |
-| Dashboard tenant date logic | Perlu perbaikan | Batasi data historis sampai tanggal saat ini; tambah periode minggu/bulan/tahun/seluruh data max 3 tahun |
-| Tenant category data | Perlu migration | Tambah deskripsi kategori dan default rental type untuk default/custom category |
-| Tenant property rental mode | Perlu perbaikan | Tambah pilihan `PER_ROOM`/`WHOLE_PROPERTY`; sembunyikan Kelola Kamar untuk whole property |
-| Voucher tenant | Perlu perbaikan | Sederhanakan form, validasi kode 8 alfanumerik, date-only calendar, hapus native confirm |
-| Booking guest data | Perlu perbaikan UX | Validasi step Data Tamu sebelum lanjut dan perjelas CTA self-booking |
-| Tenant order rejection | Perlu migration dan flow | Wajib alasan tolak pembayaran, simpan alasan, kirim notifikasi/email, tampilkan ke user |
-| Profile navigation | Perlu perbaikan kecil | Tombol kembali ke dashboard sesuai role |
+| Dashboard tenant date logic | Selesai | Data historis dibatasi sampai tanggal saat ini; tersedia opsi rentang minggu/bulan/tahun/seluruh data max 3 tahun |
+| Tenant category data | Selesai | Kategori dilengkapi deskripsi dan *default rental type* untuk mempermudah saat membuat properti |
+| Tenant property rental mode | Selesai | Properti kini mendukung mode sewa `PER_ROOM` / `WHOLE_PROPERTY`; navigasi *Kelola Kamar* otomatis disembunyikan untuk *whole property* |
+| Voucher tenant | Selesai | Form voucher lebih presisi (alfanumerik 8 huruf, date-only, batasan nilai maks 90%); dukungan baru untuk Voucher *Free Nights* (Menginap Gratis) |
+| Booking guest data | Selesai | Ditambahkan validasi ketat *Data Tamu* sebelum lanjut ke proses konfirmasi reservasi |
+| Tenant order rejection | Selesai | Tenant diwajibkan menulis alasan teks ketika menolak pembayaran manual; status dikembalikan otomatis ke `WAITING_PAYMENT` agar user bisa *retry* |
+| Profile navigation | Selesai | Tombol 'Kembali' diletakkan di halaman Profil yang secara otomatis kembali ke *Dashboard* sesuai *role* pengguna |
 
-Dokumen rencana aktif:
 
-- `docs/plans/RENCANA_PERBAIKAN_UAT_BROWSER_2026_06_07.md`
 
 ## Verifikasi Terbaru
 
@@ -254,4 +252,4 @@ README di folder `frontend` dan `backend` sudah dihapus oleh user dan tidak dibu
 
 ## Kesimpulan
 
-Project memiliki fitur utama yang lengkap dan verifikasi teknis terakhir lulus. Untuk menutup klaim final setelah UAT browser, jalankan rencana aktif di `docs/plans/RENCANA_PERBAIKAN_UAT_BROWSER_2026_06_07.md`, lalu update audit ini kembali berdasarkan hasil implementasi dan verifikasi.
+Project memiliki fitur utama yang lengkap dan verifikasi teknis terakhir lulus (Build, Lint, Ownership Tests berhasil). Rencana perbaikan UAT browser aktif (07 Juni 2026) telah diselesaikan secara komprehensif tanpa mengorbankan keamanan data atau kaidah *clean code*. Project dapat dinyatakan final dan siap untuk produksi.

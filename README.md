@@ -11,21 +11,21 @@ Final Project Purwadhika JCWDBGPM-11, Group 1:
 
 Audit dokumentasi diperbarui pada 07 Juni 2026 dengan acuan `docs/guidelines/PURWADHIKA.md` dan `docs/guidelines/REST_API_GUIDELINES.md`.
 
-| Area | Status | Catatan |
-| --- | --- | --- |
-| Fitur utama | Selesai | User, tenant, booking, payment, review, report, dan ownership tersedia |
-| Frontend Architecture & UI/UX | Selesai | Logika tersentralisasi di hooks, otorisasi UI tenant ketat (view-only mode), dan komponen premium (Love Badge konsisten) |
-| Fitur 1 | Selesai | Homepage, auth/profile, katalog properti, detail properti, tenant CRUD property/room/category, availability, peak season |
-| Fitur 2 | Selesai | Booking, manual payment, Midtrans, tenant order management, review, laporan pendapatan/properti/okupasi |
-| File source >200 baris | Sesuai | Tidak ditemukan pada `backend/src`, `backend/tests`, `frontend/src` |
-| Function maksimal 15 baris | Dipantau | `npm run audit:functions` tersedia sebagai advisory tool; hasil terbaru 87 kandidat manual review |
-| `any`, `debugger`, `console.*` | Sesuai | Tidak ditemukan pada source utama |
-| Frontend lint/build | Lulus | `npm.cmd run lint` dan `npm.cmd run build` lulus |
-| Backend build | Lulus | `npm.cmd run build` lulus |
-| Ownership test | Lulus | `npm.cmd run test:ownership` lulus, 7/7 |
-| REST API | Sesuai pada jalur utama | Legacy alias masih aktif untuk backward compatibility |
-| Browser storage | Aman | Auth token tidak disimpan di localStorage |
-| UAT browser lanjutan | Perlu perbaikan terencana | Temuan 07 Juni 2026 dicatat di `docs/plans/RENCANA_PERBAIKAN_UAT_BROWSER_2026_06_07.md` |
+| Area                           | Status                  | Catatan                                                                                                                  |
+| ------------------------------ | ----------------------- | ------------------------------------------------------------------------------------------------------------------------ |
+| Fitur utama                    | Selesai                 | User, tenant, booking, payment, review, report, dan ownership tersedia                                                   |
+| Frontend Architecture & UI/UX  | Selesai                 | Logika tersentralisasi di hooks, otorisasi UI tenant ketat (view-only mode), dan komponen premium (Love Badge konsisten) |
+| Fitur 1                        | Selesai                 | Homepage, auth/profile, katalog properti, detail properti, tenant CRUD property/room/category, availability, peak season |
+| Fitur 2                        | Selesai                 | Booking, manual payment, Midtrans, tenant order management, review, laporan pendapatan/properti/okupasi                  |
+| File source >200 baris         | Sesuai                  | Tidak ditemukan pada `backend/src`, `backend/tests`, `frontend/src`                                                      |
+| Function maksimal 15 baris     | Dipantau                | `npm run audit:functions` tersedia sebagai advisory tool; hasil terbaru 87 kandidat manual review                        |
+| `any`, `debugger`, `console.*` | Sesuai                  | Tidak ditemukan pada source utama                                                                                        |
+| Frontend lint/build            | Lulus                   | `npm.cmd run lint` dan `npm.cmd run build` lulus                                                                         |
+| Backend build                  | Lulus                   | `npm.cmd run build` lulus                                                                                                |
+| Ownership test                 | Lulus                   | `npm.cmd run test:ownership` lulus, 7/7                                                                                  |
+| REST API                       | Sesuai pada jalur utama | Legacy alias masih aktif untuk backward compatibility                                                                    |
+| Browser storage                | Aman                    | Auth token tidak disimpan di localStorage                                                                                |
+| UAT browser lanjutan           | Selesai                 | Temuan UAT browser 07 Juni 2026 telah dieksekusi sepenuhnya                                                              |
 
 Laporan lengkap tersedia di:
 
@@ -33,7 +33,6 @@ Laporan lengkap tersedia di:
 - [`docs/audits/AUDIT_CLEAN_CODE_REST_API_GUIDELINES.md`](./docs/audits/AUDIT_CLEAN_CODE_REST_API_GUIDELINES.md)
 - [`docs/audits/AUDIT_OWNERSHIP_SECURITY.md`](./docs/audits/AUDIT_OWNERSHIP_SECURITY.md)
 - [`docs/plans/RENCANA_PERBAIKAN_DETAIL.md`](./docs/plans/RENCANA_PERBAIKAN_DETAIL.md)
-- [`docs/plans/RENCANA_PERBAIKAN_UAT_BROWSER_2026_06_07.md`](./docs/plans/RENCANA_PERBAIKAN_UAT_BROWSER_2026_06_07.md)
 
 ## Kebijakan Dokumentasi
 
@@ -55,34 +54,34 @@ README di folder `frontend` dan `backend` sudah dihapus dan tidak dibuat ulang. 
 
 ## Fitur 1 - Property Renting Core
 
-| Requirement | Status | Folder/file terkait |
-| --- | --- | --- |
-| Homepage/Landing page | Selesai | `frontend/src/pages/user/HomePage.tsx`, `frontend/src/components/user/HeroSection.tsx`, `frontend/src/components/user/SearchForm.tsx` |
+| Requirement                                       | Status  | Folder/file terkait                                                                                                                                                        |
+| ------------------------------------------------- | ------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Homepage/Landing page                             | Selesai | `frontend/src/pages/user/HomePage.tsx`, `frontend/src/components/user/HeroSection.tsx`, `frontend/src/components/user/SearchForm.tsx`                                      |
 | Search destination, date, guest, price, amenities | Selesai | `frontend/src/components/user/search/`, `frontend/src/components/user/propertyFilterDropdown/`, `frontend/src/stores/filterStore.ts`, `backend/src/services/propertyList/` |
-| Explore property list | Selesai | `frontend/src/pages/user/ExplorePage.tsx`; desktop memakai sidebar search/filter/sort, mobile memakai panel filter |
-| Sort dan pagination properti | Selesai | `backend/src/services/propertyService.ts`, `backend/src/services/propertyPriceSortService.ts`, `frontend/src/pages/user/home/` |
-| Auth/register/verify/login/logout | Selesai | `frontend/src/pages/auth/`, `frontend/src/hooks/auth/`, `backend/src/routes/authRoutes.ts`, `backend/src/services/authService.ts` |
-| Profile USER/TENANT | Selesai | `frontend/src/pages/user/ProfilePage.tsx`, `frontend/src/components/user/profile/`, `backend/src/routes/userRoutes.ts`, `backend/src/services/userService.ts` |
-| Property detail, gallery, map, facilities, review | Selesai | `frontend/src/pages/user/PropertyDetailPage.tsx`, `frontend/src/components/property/`, `backend/src/services/propertyDetailService.ts` |
-| Public calendar dan availability | Selesai | `frontend/src/components/property/`, `frontend/src/services/availabilityService.ts`, `backend/src/services/publicAvailabilityService.ts` |
-| Tenant property CRUD | Selesai | `frontend/src/pages/tenant/PropertiesListPage.tsx`, `frontend/src/pages/tenant/PropertyFormPage.tsx`, `backend/src/services/tenantPropertyService.ts` |
-| Tenant room CRUD dan room images | Selesai | `frontend/src/pages/tenant/RoomsPage.tsx`, `frontend/src/components/tenant/room-form/`, `backend/src/services/tenantRoomService.ts` |
-| Tenant category management | Selesai | `frontend/src/pages/tenant/CategoriesPage.tsx`, `backend/src/services/categoryService.ts` |
-| Peak season management | Selesai | `frontend/src/pages/tenant/PeakSeasonPage.tsx`, `backend/src/services/pricing/`, `backend/src/services/tenantRoom/` |
+| Explore property list                             | Selesai | `frontend/src/pages/user/ExplorePage.tsx`; desktop memakai sidebar search/filter/sort, mobile memakai panel filter                                                         |
+| Sort dan pagination properti                      | Selesai | `backend/src/services/propertyService.ts`, `backend/src/services/propertyPriceSortService.ts`, `frontend/src/pages/user/home/`                                             |
+| Auth/register/verify/login/logout                 | Selesai | `frontend/src/pages/auth/`, `frontend/src/hooks/auth/`, `backend/src/routes/authRoutes.ts`, `backend/src/services/authService.ts`                                          |
+| Profile USER/TENANT                               | Selesai | `frontend/src/pages/user/ProfilePage.tsx`, `frontend/src/components/user/profile/`, `backend/src/routes/userRoutes.ts`, `backend/src/services/userService.ts`              |
+| Property detail, gallery, map, facilities, review | Selesai | `frontend/src/pages/user/PropertyDetailPage.tsx`, `frontend/src/components/property/`, `backend/src/services/propertyDetailService.ts`                                     |
+| Public calendar dan availability                  | Selesai | `frontend/src/components/property/`, `frontend/src/services/availabilityService.ts`, `backend/src/services/publicAvailabilityService.ts`                                   |
+| Tenant property CRUD                              | Selesai | `frontend/src/pages/tenant/PropertiesListPage.tsx`, `frontend/src/pages/tenant/PropertyFormPage.tsx`, `backend/src/services/tenantPropertyService.ts`                      |
+| Tenant room CRUD dan room images                  | Selesai | `frontend/src/pages/tenant/RoomsPage.tsx`, `frontend/src/components/tenant/room-form/`, `backend/src/services/tenantRoomService.ts`                                        |
+| Tenant category management                        | Selesai | `frontend/src/pages/tenant/CategoriesPage.tsx`, `backend/src/services/categoryService.ts`                                                                                  |
+| Peak season management                            | Selesai | `frontend/src/pages/tenant/PeakSeasonPage.tsx`, `backend/src/services/pricing/`, `backend/src/services/tenantRoom/`                                                        |
 
 ## Fitur 2 - Transaction, Review, Report
 
-| Requirement | Status | Folder/file terkait |
-| --- | --- | --- |
-| User booking flow | Selesai | `frontend/src/pages/user/BookingPage.tsx`, `backend/src/routes/orderRoutes.ts`, `backend/src/services/orderService.ts` |
-| Payment manual dan Midtrans | Selesai | `frontend/src/components/user/PaymentMethodSelector.tsx`, `frontend/src/lib/midtransSnap.ts`, `backend/src/services/midtransService.ts` |
-| Payment proof 1 jam | Selesai | `backend/src/constants/orderConstants.ts`, `backend/src/cron/` |
-| Tenant transaction management | Selesai | `frontend/src/pages/tenant/OrdersPage.tsx`, `backend/src/services/orderService.ts` |
-| Auto-cancel unpaid reservations | Selesai | `backend/src/cron/cronScheduler.ts`, `backend/src/cron/cronTasks.ts`, `ENABLE_CRON=true` |
-| Review setelah menginap | Selesai | `frontend/src/pages/user/UserReviewsPage.tsx`, `backend/src/services/reviewService.ts` |
-| Tenant reply/delete review dan rating summary | Selesai | `frontend/src/pages/tenant/ReviewsPage.tsx`, `frontend/src/pages/tenant/reviews/`, `backend/src/services/tenantReviewService.ts` |
-| Laporan pendapatan | Selesai | `frontend/src/pages/tenant/ReportsPage.tsx`, `backend/src/services/tenantReport/` |
-| Laporan properti dan okupasi kamar | Selesai | `frontend/src/pages/tenant/PropertyReportPage.tsx`, `frontend/src/pages/tenant/OccupancyPage.tsx` |
+| Requirement                                   | Status  | Folder/file terkait                                                                                                                     |
+| --------------------------------------------- | ------- | --------------------------------------------------------------------------------------------------------------------------------------- |
+| User booking flow                             | Selesai | `frontend/src/pages/user/BookingPage.tsx`, `backend/src/routes/orderRoutes.ts`, `backend/src/services/orderService.ts`                  |
+| Payment manual dan Midtrans                   | Selesai | `frontend/src/components/user/PaymentMethodSelector.tsx`, `frontend/src/lib/midtransSnap.ts`, `backend/src/services/midtransService.ts` |
+| Payment proof 1 jam                           | Selesai | `backend/src/constants/orderConstants.ts`, `backend/src/cron/`                                                                          |
+| Tenant transaction management                 | Selesai | `frontend/src/pages/tenant/OrdersPage.tsx`, `backend/src/services/orderService.ts`                                                      |
+| Auto-cancel unpaid reservations               | Selesai | `backend/src/cron/cronScheduler.ts`, `backend/src/cron/cronTasks.ts`, `ENABLE_CRON=true`                                                |
+| Review setelah menginap                       | Selesai | `frontend/src/pages/user/UserReviewsPage.tsx`, `backend/src/services/reviewService.ts`                                                  |
+| Tenant reply/delete review dan rating summary | Selesai | `frontend/src/pages/tenant/ReviewsPage.tsx`, `frontend/src/pages/tenant/reviews/`, `backend/src/services/tenantReviewService.ts`        |
+| Laporan pendapatan                            | Selesai | `frontend/src/pages/tenant/ReportsPage.tsx`, `backend/src/services/tenantReport/`                                                       |
+| Laporan properti dan okupasi kamar            | Selesai | `frontend/src/pages/tenant/PropertyReportPage.tsx`, `frontend/src/pages/tenant/OccupancyPage.tsx`                                       |
 
 ## Struktur Project
 
@@ -261,4 +260,4 @@ Frontend dapat dideploy sebagai static Vite app. Backend harus memiliki environm
 
 ## Catatan Final
 
-Project memiliki fondasi fitur utama yang lengkap dan verifikasi teknis terakhir lulus. Namun, hasil UAT browser terbaru pada 07 Juni 2026 menambahkan rencana perbaikan aktif yang perlu dieksekusi sebelum klaim final benar-benar ditutup. Rencana aktif tersedia di [`docs/plans/RENCANA_PERBAIKAN_UAT_BROWSER_2026_06_07.md`](./docs/plans/RENCANA_PERBAIKAN_UAT_BROWSER_2026_06_07.md). Sisa rencana opsional jangka panjang tetap tersedia di [`docs/plans/RENCANA_PERBAIKAN_DETAIL.md`](./docs/plans/RENCANA_PERBAIKAN_DETAIL.md).
+Project memiliki fondasi fitur utama yang lengkap dan verifikasi teknis terakhir lulus. Seluruh rencana aktif berdasarkan UAT browser terbaru pada 07 Juni 2026 telah selesai dieksekusi, termasuk penyempurnaan UI/UX voucher, pembatasan diskon, mode sewa properti, validasi tamu, serta notifikasi penolakan pembayaran. Proyek ini sekarang dapat diklaim final. Sisa rencana opsional jangka panjang tetap tersedia di [`docs/plans/RENCANA_PERBAIKAN_DETAIL.md`](./docs/plans/RENCANA_PERBAIKAN_DETAIL.md).

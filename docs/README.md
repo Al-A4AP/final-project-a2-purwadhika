@@ -10,7 +10,6 @@ Tanggal audit dokumentasi terbaru: 07 Juni 2026.
 - `audits/AUDIT_OWNERSHIP_SECURITY.md`: audit ownership, authorization, browser storage, dan keamanan.
 - `audits/AUDIT_PURWADHIKA_FINAL.md`: audit keseluruhan berdasarkan requirement PURWADHIKA.
 - `plans/RENCANA_PERBAIKAN_DETAIL.md`: sisa rencana yang belum dilaksanakan atau masih opsional.
-- `plans/RENCANA_PERBAIKAN_UAT_BROWSER_2026_06_07.md`: rencana aktif berdasarkan temuan UAT browser 07 Juni 2026.
 - `guidelines/PURWADHIKA.md`: requirement final project.
 - `guidelines/REST_API_GUIDELINES.md`: panduan REST resource naming.
 - `guidelines/CODE_LINE_CHECK_GUIDELINES.md`: panduan pengecekan batas baris.
@@ -26,20 +25,20 @@ README di folder `frontend` dan `backend` sudah dihapus oleh user dan tidak dibu
 
 ## Ringkasan Audit Terbaru
 
-| Area | Status |
-| --- | --- |
-| Frontend Architecture & UI/UX | Tersentralisasi di `hooks/`, UI *view-only* untuk Tenant, UX konsisten |
-| Frontend lint | Lulus |
-| Frontend build | Lulus |
-| Backend build | Lulus |
-| Ownership test | Lulus, 7/7 |
-| File source >200 baris | Tidak ditemukan pada `backend/src`, `backend/tests`, `frontend/src` |
-| `any`, `debugger`, `console.*` | Tidak ditemukan pada source utama |
-| Function length audit | 87 kandidat manual review; advisory only |
-| REST API | Jalur utama sesuai resource-oriented; legacy alias masih dicatat |
-| Ownership | Baik dan teruji |
-| Browser storage | Tidak ada JWT auth token di localStorage |
-| UAT browser lanjutan | Ada rencana aktif sebelum klaim final ditutup |
+| Area                           | Status                                                                 |
+| ------------------------------ | ---------------------------------------------------------------------- |
+| Frontend Architecture & UI/UX  | Tersentralisasi di `hooks/`, UI _view-only_ untuk Tenant, UX konsisten |
+| Frontend lint                  | Lulus                                                                  |
+| Frontend build                 | Lulus                                                                  |
+| Backend build                  | Lulus                                                                  |
+| Ownership test                 | Lulus, 7/7                                                             |
+| File source >200 baris         | Tidak ditemukan pada `backend/src`, `backend/tests`, `frontend/src`    |
+| `any`, `debugger`, `console.*` | Tidak ditemukan pada source utama                                      |
+| Function length audit          | 87 kandidat manual review; advisory only                               |
+| REST API                       | Jalur utama sesuai resource-oriented; legacy alias masih dicatat       |
+| Ownership                      | Baik dan teruji                                                        |
+| Browser storage                | Tidak ada JWT auth token di localStorage                               |
+| UAT browser lanjutan           | Selesai (Semua rencana dieksekusi)                                     |
 
 ## Catatan Clean Code
 
@@ -70,21 +69,15 @@ Legacy alias masih aktif untuk backward compatibility dan dicatat di plan cleanu
 - LocalStorage hanya dipakai untuk tema, saved properties lokal, dan cleanup legacy storage.
 - SessionStorage dipakai untuk auth notice sementara.
 
-## Rencana Aktif UAT Browser
+Area utama yang diselesaikan:
 
-Temuan browser terbaru pada 07 Juni 2026 dicatat sebagai rencana aktif di:
-
-- `plans/RENCANA_PERBAIKAN_UAT_BROWSER_2026_06_07.md`
-
-Area utama:
-
-- dashboard tenant harus membatasi data historis sampai tanggal saat ini;
-- kategori tenant perlu deskripsi dan mode sewa default;
-- properti tenant perlu membedakan `PER_ROOM` dan `WHOLE_PROPERTY`;
-- voucher tenant perlu penyederhanaan UI dan validasi bisnis;
-- booking perlu validasi step Data Tamu sebelum lanjut;
-- tenant order rejection perlu alasan wajib dan tampil ke user;
-- profile perlu tombol kembali ke dashboard sesuai role.
+- Dashboard tenant telah membatasi data historis sampai tanggal saat ini.
+- Kategori tenant memiliki deskripsi dan mode sewa default.
+- Properti tenant memiliki mode sewa (`PER_ROOM` / `WHOLE_PROPERTY`), menu Kelola Kamar disembunyikan untuk tipe whole property.
+- UX Voucher disederhanakan dan dibatasi maksimal 90% discount, serta ditambah tipe voucher `FREE_NIGHTS` (Menginap Gratis).
+- UX form booking guest identity divalidasi sebelum bisa lanjut checkout.
+- Tenant wajib memberi alasan teks ketika menolak manual payment, dan pesanan dikembalikan ke `WAITING_PAYMENT`.
+- Profil memiliki tombol back to dashboard yang sesuai dengan Role (User/Tenant).
 
 ## Cara Verifikasi Cepat
 

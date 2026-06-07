@@ -2,6 +2,9 @@ import { api } from './api';
 import type { ApiResponse, UserVoucherSummary, Voucher, VoucherFormInput, VoucherPreview } from '@/types';
 
 export const voucherService = {
+  async assignVoucher(id: string, email: string): Promise<void> {
+    await api.post(`/tenants/me/vouchers/${id}/assign`, { email });
+  },
   async createTenantVoucher(data: VoucherFormInput): Promise<Voucher> {
     const res = await api.post<ApiResponse<Voucher>>('/tenants/me/vouchers', data);
     return res.data.data;
@@ -9,8 +12,8 @@ export const voucherService = {
   async deleteTenantVoucher(id: string): Promise<void> {
     await api.delete(`/tenants/me/vouchers/${id}`);
   },
-  async getTenantVouchers(): Promise<Voucher[]> {
-    const res = await api.get<ApiResponse<Voucher[]>>('/tenants/me/vouchers');
+  async getTenantVouchers(page = 1, limit = 10): Promise<{ data: Voucher[]; meta: { page: number; limit: number; total: number; totalPages: number; } }> {
+    const res = await api.get<ApiResponse<{ data: Voucher[]; meta: { page: number; limit: number; total: number; totalPages: number; } }>>(`/tenants/me/vouchers?page=${page}&limit=${limit}`);
     return res.data.data;
   },
   async getUserVouchers(): Promise<UserVoucherSummary> {

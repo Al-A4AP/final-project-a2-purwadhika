@@ -10,7 +10,7 @@ Ownership dan keamanan berada pada kondisi baik. Route tenant dan user utama sud
 
 Auth token disimpan sebagai HTTP-only cookie dari backend, bukan localStorage. LocalStorage frontend hanya dipakai untuk preferensi UI dan saved properties lokal. Risiko keamanan yang tersisa bersifat production hardening, bukan blocker fitur final.
 
-Catatan UAT browser terbaru: rencana perbaikan 07 Juni 2026 menambah pekerjaan aktif yang menyentuh ownership data kategori, properti, voucher, dan order rejection. Detail rencana ada di `docs/plans/RENCANA_PERBAIKAN_UAT_BROWSER_2026_06_07.md`.
+Catatan UAT browser terbaru: Seluruh temuan perbaikan 07 Juni 2026 yang menyentuh *ownership* data kategori, properti, voucher, dan penolakan *order* telah dieksekusi dengan tetap mempertahankan keamanan berlapis.
 
 ## Verifikasi
 

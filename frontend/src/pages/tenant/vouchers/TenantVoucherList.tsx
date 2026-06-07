@@ -1,11 +1,13 @@
 import type { FC } from "react";
 import { useState } from "react";
-import { Pencil, Trash2 } from "lucide-react";
+import { Pencil, Send, Trash2 } from "lucide-react";
 import { EmptyState } from "@/components/common/EmptyState";
 import { formatPrice } from "@/lib/formatters";
 import type { Voucher } from "@/types";
 import type { useTenantVouchersPage } from "@/hooks/tenant/vouchers/useTenantVouchersPage";
 import { ConfirmModal } from "@/components/common/ConfirmModal";
+import { AssignVoucherModal } from "./AssignVoucherModal";
+import { Pagination } from "@/components/common/Pagination";
 
 type State = ReturnType<typeof useTenantVouchersPage>;
 
@@ -21,6 +23,7 @@ export const TenantVoucherList: FC<{ state: State }> = ({ state }) => {
           voucher={voucher} 
           onDelete={() => setDeletingVoucher(voucher)} 
           onEdit={state.setEditing} 
+          onAssign={state.setAssigning}
           isActive={state.editing?.id === voucher.id}
         />
       ))}
@@ -36,6 +39,23 @@ export const TenantVoucherList: FC<{ state: State }> = ({ state }) => {
           }
         }}
       />
+      <AssignVoucherModal
+        voucher={state.assigning}
+        saving={state.saving}
+        onClose={() => state.setAssigning(null)}
+        onSubmit={async (email) => {
+          if (state.assigning) {
+            await state.assignVoucher(state.assigning, email);
+          }
+        }}
+      />
+      {state.totalPages > 1 && (
+        <Pagination
+          currentPage={state.page}
+          totalPages={state.totalPages}
+          onPageChange={state.setPage}
+        />
+      )}
     </div>
   );
 };
@@ -46,11 +66,11 @@ const EmptyVoucherList: FC = () => (
   </div>
 );
 
-const VoucherCard: FC<{ onDelete: () => void; onEdit: (voucher: Voucher) => void; voucher: Voucher; isActive?: boolean }> = ({ onDelete, onEdit, voucher, isActive }) => (
+const VoucherCard: FC<{ onDelete: () => void; onEdit: (voucher: Voucher) => void; onAssign: (voucher: Voucher) => void; voucher: Voucher; isActive?: boolean }> = ({ onDelete, onEdit, onAssign, voucher, isActive }) => (
   <div className={`rounded-2xl border p-5 shadow-sm transition-colors ${isActive ? 'border-amber-400 bg-amber-50/20 dark:border-amber-500/50 dark:bg-slate-800' : 'border-slate-100 bg-white dark:border-slate-800 dark:bg-slate-900'}`}>
     <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
       <VoucherInfo voucher={voucher} />
-      <VoucherActions voucher={voucher} onDelete={onDelete} onEdit={onEdit} />
+      <VoucherActions voucher={voucher} onDelete={onDelete} onEdit={onEdit} onAssign={onAssign} />
     </div>
     <VoucherMeta voucher={voucher} />
   </div>
@@ -75,8 +95,9 @@ const VoucherMeta: FC<{ voucher: Voucher }> = ({ voucher }) => (
   </div>
 );
 
-const VoucherActions: FC<{ onDelete: () => void; onEdit: (voucher: Voucher) => void; voucher: Voucher }> = ({ onDelete, onEdit, voucher }) => (
+const VoucherActions: FC<{ onDelete: () => void; onEdit: (voucher: Voucher) => void; onAssign: (voucher: Voucher) => void; voucher: Voucher }> = ({ onDelete, onEdit, onAssign, voucher }) => (
   <div className="flex gap-2">
+    <button type="button" onClick={() => onAssign(voucher)} className={actionButtonClass} title="Kirim ke pelanggan" aria-label="Kirim ke pelanggan"><Send size={16} /></button>
     <button type="button" onClick={() => onEdit(voucher)} className={actionButtonClass} title="Edit voucher" aria-label="Edit voucher"><Pencil size={16} /></button>
     <button type="button" onClick={onDelete} className={dangerButtonClass} title="Hapus voucher" aria-label="Hapus voucher"><Trash2 size={16} /></button>
   </div>

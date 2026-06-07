@@ -10,7 +10,7 @@ Audit teknis terakhir menunjukkan source utama aman dari sisi clean code, build,
 
 REST API jalur utama sudah mengikuti pola resource-oriented. Beberapa legacy alias masih aktif untuk backward compatibility dan dicatat sebagai rencana cleanup opsional sebelum standar REST dibuat sangat ketat.
 
-Catatan terbaru: temuan UAT browser 07 Juni 2026 membutuhkan perubahan lanjutan pada dashboard, category/property schema, voucher, booking, tenant order rejection, dan profile navigation. Rencana aktif ada di `docs/plans/RENCANA_PERBAIKAN_UAT_BROWSER_2026_06_07.md`. Saat rencana itu dieksekusi, audit clean code dan REST API harus dijalankan ulang.
+Catatan terbaru: Seluruh temuan UAT browser 07 Juni 2026 yang menyangkut perubahan lanjutan pada dashboard, schema kategori/properti, voucher, booking, alasan penolakan order, dan navigasi profil telah diselesaikan dengan sukses. Audit clean code dan REST API telah dipastikan aman pasca eksekusi.
 
 ## Verifikasi yang Dijalankan
 

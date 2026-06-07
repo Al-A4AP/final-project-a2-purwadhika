@@ -1,10 +1,8 @@
 import type { ButtonHTMLAttributes, FC, ReactNode } from "react";
 import { cn } from "@/lib/formatters";
+import type { ButtonSize, ButtonVariant } from "@/types/ui";
 
-type ButtonVariant = "danger" | "ghost" | "outline" | "primary" | "secondary";
-type ButtonSize = "icon" | "md" | "sm";
-
-interface ButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
+export interface ButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
   children: ReactNode;
   size?: ButtonSize;
   variant?: ButtonVariant;

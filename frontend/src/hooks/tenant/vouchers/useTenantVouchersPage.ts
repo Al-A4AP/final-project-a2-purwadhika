@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback } from "react";
 import toast from "react-hot-toast";
 import { getApiErrorMessage } from "@/lib/errorMessage";
 import { voucherService } from "@/services/voucherService";
@@ -6,19 +6,37 @@ import type { Voucher, VoucherFormInput } from "@/types";
 
 export const useTenantVouchersPage = () => {
   const [editing, setEditing] = useState<Voucher | null>(null);
+  const [assigning, setAssigning] = useState<Voucher | null>(null);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [vouchers, setVouchers] = useState<Voucher[]>([]);
-  const load = () => loadVouchers(setLoading, setVouchers);
-  useEffect(() => { Promise.resolve().then(load); }, []);
+  const [page, setPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(1);
+  const limit = 10;
+  
+  const load = useCallback(() => loadVouchers(page, limit, setLoading, setVouchers, setTotalPages), [page]);
+  useEffect(() => { Promise.resolve().then(load); }, [load]);
   const saveVoucher = (data: VoucherFormInput) => saveVoucherData(data, editing, setSaving, setEditing, load);
   const deleteVoucher = (voucher: Voucher) => deleteVoucherData(voucher, load);
-  return { deleteVoucher, editing, load, loading, saveVoucher, saving, setEditing, vouchers };
+  const assignVoucher = async (voucher: Voucher, email: string) => {
+    setSaving(true);
+    try {
+      await voucherService.assignVoucher(voucher.id, email);
+      toast.success("Voucher berhasil dikirim ke " + email);
+      setAssigning(null);
+    } catch (err) { toast.error(getApiErrorMessage(err, "Gagal mengirim voucher.")); }
+    finally { setSaving(false); }
+  };
+  return { assignVoucher, assigning, setAssigning, deleteVoucher, editing, load, loading, saveVoucher, saving, setEditing, vouchers, page, setPage, totalPages };
 };
 
-const loadVouchers = async (setLoading: SetBoolean, setVouchers: SetVouchers) => {
+const loadVouchers = async (page: number, limit: number, setLoading: SetBoolean, setVouchers: SetVouchers, setTotalPages: (n: number) => void) => {
   setLoading(true);
-  try { setVouchers(await voucherService.getTenantVouchers()); }
+  try { 
+    const res = await voucherService.getTenantVouchers(page, limit);
+    setVouchers(res.data);
+    setTotalPages(res.meta.totalPages);
+  }
   catch (err) { toast.error(getApiErrorMessage(err, "Voucher belum bisa dimuat.")); }
   finally { setLoading(false); }
 };

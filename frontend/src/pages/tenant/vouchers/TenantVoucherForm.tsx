@@ -25,7 +25,7 @@ const TenantVoucherFormFields: FC<{ initialForm: VoucherFormInput; state: State 
 
 const VoucherFormBody: FC<FormPartProps> = ({ form, setForm }) => (
   <>
-    <VoucherTextField label="Kode" value={form.code} onChange={(value) => setForm({ ...form, code: value.toUpperCase().replace(/[^A-Z0-9]/g, '').slice(0, 8) })} />
+    <VoucherTextField label="Kode" value={form.code} onChange={(value) => setForm({ ...form, code: value.toUpperCase().replace(/[^A-Z0-9]/g, '').slice(0, 15) })} />
     <VoucherTextField label="Deskripsi" value={form.description || ""} onChange={(value) => setForm({ ...form, description: value })} />
     <VoucherDiscountFields form={form} setForm={setForm} />
     <VoucherDateFields form={form} setForm={setForm} />
@@ -36,7 +36,7 @@ const VoucherFormBody: FC<FormPartProps> = ({ form, setForm }) => (
 const VoucherTextField: FC<{ label: string; onChange: (value: string) => void; value: string }> = ({ label, onChange, value }) => (
   <label className="block space-y-1.5">
     <span className={labelClass}>{label}</span>
-    <input value={value} onChange={(event) => onChange(event.target.value)} required={label !== "Deskripsi"} className={inputClass} placeholder={label === "Kode" ? "Maks. 8 huruf/angka" : ""} />
+    <input value={value} onChange={(event) => onChange(event.target.value)} required={label !== "Deskripsi"} className={inputClass} placeholder={label === "Kode" ? "Maks. 15 huruf/angka" : ""} />
   </label>
 );
 

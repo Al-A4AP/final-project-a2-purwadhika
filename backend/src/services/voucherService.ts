@@ -5,8 +5,18 @@ import type { VoucherInput, VoucherPreviewInput } from '../validations/voucherVa
 
 type DbClient = typeof prisma | Prisma.TransactionClient;
 
-export const listTenantVouchers = (tenantId: string) =>
-  prisma.voucher.findMany({ where: { tenantId, deleted_at: null, userVouchers: { none: {} } }, orderBy: { created_at: 'desc' } });
+export const listTenantVouchers = async (tenantId: string, page = 1, limit = 10) => {
+  const skip = (page - 1) * limit;
+  const where = { tenantId, deleted_at: null, userVouchers: { none: {} } };
+  const [data, total] = await Promise.all([
+    prisma.voucher.findMany({ where, orderBy: { created_at: 'desc' }, skip, take: limit }),
+    prisma.voucher.count({ where })
+  ]);
+  return {
+    data,
+    meta: { page, limit, total, totalPages: Math.ceil(total / limit) }
+  };
+};
 
 export const createTenantVoucher = async (tenantId: string, data: VoucherInput) => {
   await assertVoucherCodeAvailable(data.code);
@@ -24,6 +34,25 @@ export const deleteTenantVoucher = async (id: string, tenantId: string) => {
   return prisma.voucher.update({ where: { id }, data: { deleted_at: new Date(), is_active: false } });
 };
 
+export const assignVoucherToUser = async (tenantId: string, voucherId: string, userEmail: string) => {
+  const voucher = await findTenantVoucherOrThrow(voucherId, tenantId);
+  const targetUser = await prisma.user.findUnique({ where: { email: userEmail, deleted_at: null } });
+  if (!targetUser) throw new AppError('Pengguna dengan email tersebut tidak ditemukan', 404);
+  
+  const existingAssignment = await prisma.userVoucher.findUnique({
+    where: { userId_voucherId: { userId: targetUser.id, voucherId: voucher.id } }
+  });
+  if (existingAssignment) throw new AppError('Voucher sudah diberikan kepada pengguna ini', 400);
+
+  return prisma.userVoucher.create({
+    data: {
+      userId: targetUser.id,
+      voucherId: voucher.id,
+      expires_at: voucher.expires_at,
+    }
+  });
+};
+
 export const previewUserVoucher = async (userId: string, input: VoucherPreviewInput) => {
   await ensureUserReferralCode(userId);
   const voucher = await findActiveVoucherForProperty(prisma, input.propertyId, input.voucher_code);
@@ -35,8 +64,8 @@ export const previewUserVoucher = async (userId: string, input: VoucherPreviewIn
 
 export const getUserVoucherSummary = async (userId: string) => {
   const user = await ensureUserReferralCode(userId);
-  const vouchers = mergeVouchers(await findAssignedActiveVouchers(userId), await findPublicActiveVouchers());
-  return { referralCode: user.referral_code, vouchers: vouchers.map(serializeVoucher) };
+  const assignedVouchers = await findAssignedActiveVouchers(userId);
+  return { referralCode: user.referral_code, vouchers: assignedVouchers.map(serializeVoucher) };
 };
 
 export const applyVoucherToOrder = async (tx: Prisma.TransactionClient, propertyId: string, code: string | undefined, subtotal: number, userId: string, total_nights = 1) => {

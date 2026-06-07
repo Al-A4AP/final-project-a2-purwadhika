@@ -1,8 +1,8 @@
-import type { FC, FormEvent } from "react";
-import { useState, useEffect } from "react";
+import type { FC } from "react";
 import { Loader2, Tags } from "lucide-react";
 import { Modal } from "@/components/common/Modal";
 import type { PropertyCategory } from "@/types";
+import { useCategoryForm } from "@/hooks/tenant/categories/useCategoryForm";
 
 interface CategoryFormModalProps {
   isOpen: boolean;
@@ -13,24 +13,9 @@ interface CategoryFormModalProps {
 }
 
 export const CategoryFormModal: FC<CategoryFormModalProps> = ({ isOpen, editing, saving, onClose, onSubmit }) => {
-  const [name, setName] = useState("");
-  const [description, setDescription] = useState("");
-  const [rentalType, setRentalType] = useState<"PER_ROOM" | "WHOLE_PROPERTY">("PER_ROOM");
-
-  useEffect(() => {
-    if (isOpen) {
-      Promise.resolve().then(() => {
-        setName(editing?.name || "");
-        setDescription(editing?.description || "");
-        setRentalType(editing?.default_rental_type || "PER_ROOM");
-      });
-    }
-  }, [isOpen, editing]);
-
-  const handleSubmit = async (event: FormEvent) => {
-    event.preventDefault();
-    await onSubmit({ name, description, default_rental_type: rentalType });
-  };
+  const {
+    name, setName, description, setDescription, rentalType, setRentalType, handleSubmit
+  } = useCategoryForm({ isOpen, editing, onSubmit });
 
   return (
     <Modal

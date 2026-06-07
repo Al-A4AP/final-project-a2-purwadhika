@@ -34,9 +34,15 @@ export const peakRateSchema = z.object({
   rate_type: z.enum(['PERCENTAGE', 'NOMINAL']),
   rate_value: z.string().regex(/^\d+$/, 'Nilai rate harus berupa angka'),
   description: z.string().optional(),
-}).refine((data) => new Date(data.end_date) > new Date(data.start_date), {
-  message: "Tanggal selesai harus setelah tanggal mulai",
-  path: ["end_date"]
+}).superRefine((data, ctx) => {
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+  if (new Date(data.start_date) < today) {
+    ctx.addIssue({ code: 'custom', message: 'Tanggal mulai tidak boleh di masa lalu', path: ['start_date'] });
+  }
+  if (new Date(data.end_date) <= new Date(data.start_date)) {
+    ctx.addIssue({ code: 'custom', message: 'Tanggal selesai harus setelah tanggal mulai', path: ['end_date'] });
+  }
 });
 
 export const availabilityRangeSchema = z.object({
