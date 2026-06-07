@@ -21,12 +21,62 @@ const PUBLIC_ERROR = <RouteErrorPage variant="public" />;
 const AUTH_ERROR = <RouteErrorPage variant="auth" />;
 const TENANT_ERROR = <RouteErrorPage variant="tenant" />;
 
-const publicRoute = (path: string, element: ReactNode) => ({ path, element, errorElement: PUBLIC_ERROR });
+const publicUserRoute = (path: string, element: ReactNode) => ({ path, element, errorElement: PUBLIC_ERROR });
 const authRoute = (path: string, element: ReactNode) => ({ path, element, errorElement: AUTH_ERROR });
 const tenantRoute = (path: string, element: ReactNode) => ({ path, element, errorElement: TENANT_ERROR });
 
-const protected_ = (component: ReactNode, role: "USER" | "TENANT") =>
+const protectedElement = (component: ReactNode, role: "USER" | "TENANT") =>
   <ProtectedRoute component={component} role={role} />;
+
+const protectedUserRoute = (path: string, element: ReactNode) =>
+  publicUserRoute(path, protectedElement(element, "USER"));
+
+const publicUserRoutes = [
+  publicUserRoute("", <HomePage />),
+  publicUserRoute("explore", <ExplorePage />),
+  publicUserRoute("properties/:id", <PropertyDetailPage />),
+  publicUserRoute("about", <AboutPage />),
+  publicUserRoute("contact", <ContactPage />),
+  publicUserRoute("legal", <LegalPage />),
+];
+
+const protectedUserRoutes = [
+  protectedUserRoute("dashboard", <UserDashboardPage />),
+  protectedUserRoute("profile", <ProfilePage />),
+  protectedUserRoute("booking", <BookingPage />),
+  protectedUserRoute("orders", <OrdersPage />),
+  protectedUserRoute("orders/:id", <BookingDetailPage />),
+  protectedUserRoute("saved-properties", <SavedPropertiesPage />),
+  protectedUserRoute("reviews", <UserReviewsPage />),
+  protectedUserRoute("payment/success", <PaymentSuccessPage />),
+];
+
+const authRoutes = [
+  authRoute("login", <LoginPage />),
+  authRoute("register", <RegisterPage />),
+  authRoute("register/user", <UserRegisterPage />),
+  authRoute("register/tenant", <TenantRegisterPage />),
+  authRoute("verify-email/:token", <VerifyEmailPage />),
+  authRoute("verify-email-change/:token", <VerifyEmailChangePage />),
+  authRoute("forgot-password", <ForgotPasswordPage />),
+  authRoute("reset-password", <ResetPasswordPage />),
+];
+
+const tenantRoutes = [
+  tenantRoute("dashboard", <DashboardPage />),
+  tenantRoute("properties", <PropertiesListPage />),
+  tenantRoute("properties/new", <PropertyFormPage />),
+  tenantRoute("properties/:id/edit", <PropertyFormPage />),
+  tenantRoute("properties/:id/rooms", <RoomsPage />),
+  tenantRoute("categories", <CategoriesPage />),
+  tenantRoute("orders", <TenantOrdersPage />),
+  tenantRoute("reviews", <TenantReviewsPage />),
+  tenantRoute("profile", <ProfilePage />),
+  tenantRoute("reports", <ReportsPage />),
+  tenantRoute("property-report", <PropertyReportPage />),
+  tenantRoute("occupancy", <OccupancyPage />),
+  tenantRoute("peak-season", <PeakSeasonPage />),
+];
 
 export const router = createBrowserRouter([
   {
@@ -34,56 +84,21 @@ export const router = createBrowserRouter([
     element: <UserLayout />,
     errorElement: PUBLIC_ERROR,
     children: [
-      publicRoute("", <HomePage />),
-      publicRoute("explore", <ExplorePage />),
-      publicRoute("properties/:id", <PropertyDetailPage />),
-      publicRoute("about", <AboutPage />),
-      publicRoute("contact", <ContactPage />),
-      publicRoute("legal", <LegalPage />),
-      publicRoute("dashboard", protected_(<UserDashboardPage />, "USER")),
-      publicRoute("profile", protected_(<ProfilePage />, "USER")),
-      publicRoute("booking", protected_(<BookingPage />, "USER")),
-      publicRoute("orders", protected_(<OrdersPage />, "USER")),
-      publicRoute("orders/:id", protected_(<BookingDetailPage />, "USER")),
-      publicRoute("saved-properties", protected_(<SavedPropertiesPage />, "USER")),
-      publicRoute("reviews", protected_(<UserReviewsPage />, "USER")),
-      publicRoute("payment/success", protected_(<PaymentSuccessPage />, "USER")),
-      publicRoute("*", <NotFoundPage />),
+      ...publicUserRoutes,
+      ...protectedUserRoutes,
+      publicUserRoute("*", <NotFoundPage />),
     ],
   },
   {
     path: "/auth",
     element: <AuthLayout />,
     errorElement: AUTH_ERROR,
-    children: [
-      authRoute("login", <LoginPage />),
-      authRoute("register", <RegisterPage />),
-      authRoute("register/user", <UserRegisterPage />),
-      authRoute("register/tenant", <TenantRegisterPage />),
-      authRoute("verify-email/:token", <VerifyEmailPage />),
-      authRoute("verify-email-change/:token", <VerifyEmailChangePage />),
-      authRoute("forgot-password", <ForgotPasswordPage />),
-      authRoute("reset-password", <ResetPasswordPage />),
-    ],
+    children: authRoutes,
   },
   {
     path: "/tenant",
-    element: protected_(<TenantLayout />, "TENANT"),
+    element: protectedElement(<TenantLayout />, "TENANT"),
     errorElement: TENANT_ERROR,
-    children: [
-      tenantRoute("dashboard", <DashboardPage />),
-      tenantRoute("properties", <PropertiesListPage />),
-      tenantRoute("properties/new", <PropertyFormPage />),
-      tenantRoute("properties/:id/edit", <PropertyFormPage />),
-      tenantRoute("properties/:id/rooms", <RoomsPage />),
-      tenantRoute("categories", <CategoriesPage />),
-      tenantRoute("orders", <TenantOrdersPage />),
-      tenantRoute("reviews", <TenantReviewsPage />),
-      tenantRoute("profile", <ProfilePage />),
-      tenantRoute("reports", <ReportsPage />),
-      tenantRoute("property-report", <PropertyReportPage />),
-      tenantRoute("occupancy", <OccupancyPage />),
-      tenantRoute("peak-season", <PeakSeasonPage />),
-    ],
+    children: tenantRoutes,
   },
 ]);
