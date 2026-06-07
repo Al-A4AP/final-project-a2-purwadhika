@@ -3,11 +3,12 @@ import { ProfileInfoFields } from './ProfileInfoFields';
 import { ProfileSection } from './ProfileSection';
 import { ProfileSubmitButton } from './ProfileSubmitButton';
 import { useProfileInfoForm } from './useProfileInfoForm';
+import type { ProfileInput } from '@/validations/profile';
 
 interface Props {
   user: User | null;
   inputClass: string;
-  onSave: (data: { name?: string; phone?: string }) => Promise<void>;
+  onSave: (data: ProfileInput) => Promise<void>;
 }
 
 export const ProfileInfoForm = ({ user, inputClass, onSave }: Props) => {

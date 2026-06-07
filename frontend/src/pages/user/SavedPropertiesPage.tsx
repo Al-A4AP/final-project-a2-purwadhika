@@ -5,6 +5,7 @@ import { Search } from "lucide-react";
 import { useSavedProperties } from "@/hooks/useSavedProperties";
 import { SavedPropertyCard } from "./saved-properties/SavedPropertyCard";
 import { useState, useMemo } from "react";
+import { UserDashboardBackLink } from "@/components/user/UserDashboardBackLink";
 
 const SavedPropertiesPage: FC = () => {
   const { savedProperties, removeProperty } = useSavedProperties();
@@ -23,6 +24,9 @@ const SavedPropertiesPage: FC = () => {
       <div className="mx-auto max-w-7xl space-y-8">
         <div className="flex flex-col md:flex-row md:items-end justify-between gap-4">
           <div>
+            <div className="mb-4">
+              <UserDashboardBackLink />
+            </div>
             <h1 className="text-3xl font-bold text-slate-900 dark:text-white">Properti Tersimpan</h1>
             <p className="mt-2 text-sm text-slate-600 dark:text-slate-400">Daftar properti yang telah Anda simpan ke wishlist untuk dibandingkan nanti.</p>
           </div>

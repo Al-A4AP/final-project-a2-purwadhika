@@ -7,6 +7,7 @@ import { CategoriesHeader } from './categories/CategoriesHeader';
 import { CategoriesSummary } from './categories/CategoriesSummary';
 import { CategoryListView } from './categories/CategoryListView';
 import { CategoryFormModal } from './categories/CategoryFormModal';
+import { CategorySortPanel } from './categories/CategorySortPanel';
 
 const CategoriesPage: FC = () => {
   const view = useCategoryViewState();
@@ -18,6 +19,7 @@ const CategoryPageView: FC<{ view: CategoryViewState }> = ({ view }) => (
     <div className="mx-auto max-w-7xl">
       <CategoriesHeader onAdd={view.openAddModal} />
       <CategoriesSummary total={view.data.pagination.total || 0} />
+      <CategorySortPanel view={view} />
       
       <div className="mt-6">
         <CategoryResults view={view} />

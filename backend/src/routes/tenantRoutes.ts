@@ -26,6 +26,8 @@ import { getDashboardAnalyticsCtrl, getOccupancyCalendarCtrl } from '../controll
 import { getTenantReviewsCtrl } from '../controllers/tenantReviewController';
 import { createCategoryCtrl, deleteCategoryCtrl, getCategoriesCtrl, updateCategoryCtrl } from '../controllers/categoryController';
 import { getTenantOrdersCtrl } from '../controllers/orderController';
+import { createTenantVoucherCtrl, deleteTenantVoucherCtrl, getTenantVouchersCtrl, updateTenantVoucherCtrl } from '../controllers/voucherController';
+import { voucherSchema } from '../validations/voucherValidation';
 
 const router = Router();
 const isTenant = [requireAuth, requireRole(['TENANT'])];
@@ -79,5 +81,11 @@ router.get('/categories', ...isTenant, getCategoriesCtrl);
 router.post('/categories', ...isTenant, createCategoryCtrl);
 router.patch('/categories/:id', ...isTenant, updateCategoryCtrl);
 router.delete('/categories/:id', ...isTenant, deleteCategoryCtrl);
+
+// Vouchers
+router.get('/vouchers', ...isTenant, getTenantVouchersCtrl);
+router.post('/vouchers', ...isTenant, validate(voucherSchema), createTenantVoucherCtrl);
+router.patch('/vouchers/:id', ...isTenant, validate(voucherSchema), updateTenantVoucherCtrl);
+router.delete('/vouchers/:id', ...isTenant, deleteTenantVoucherCtrl);
 
 export default router;

@@ -14,7 +14,7 @@ import {
   PropertyReportPage, RegisterPage, ReportsPage, RoomsPage, SavedPropertiesPage,
   TenantOrdersPage, TenantRegisterPage, TenantReviewsPage, UserDashboardPage,
   UserRegisterPage, UserReviewsPage, VerifyEmailChangePage, VerifyEmailPage,
-  ResetPasswordPage,
+  ResetPasswordPage, VouchersPage,
 } from "./routePages";
 
 const PUBLIC_ERROR = <RouteErrorPage variant="public" />;
@@ -76,6 +76,7 @@ const tenantRoutes = [
   tenantRoute("property-report", <PropertyReportPage />),
   tenantRoute("occupancy", <OccupancyPage />),
   tenantRoute("peak-season", <PeakSeasonPage />),
+  tenantRoute("vouchers", <VouchersPage />),
 ];
 
 export const router = createBrowserRouter([

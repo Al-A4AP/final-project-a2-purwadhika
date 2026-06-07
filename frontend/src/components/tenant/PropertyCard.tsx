@@ -2,6 +2,7 @@ import type { FC } from 'react';
 import { Link } from 'react-router-dom';
 import { Pencil, Trash2, BedDouble, Star } from 'lucide-react';
 import { formatPrice } from '@/lib/formatters';
+import { isWholeUnitCategory } from '@/lib/categoryRental';
 import type { TenantProperty } from '@/types';
 
 interface PropertyCardProps {
@@ -68,7 +69,7 @@ const DeleteButton: FC<PropertyActionsProps> = ({ property, deletingId, onDelete
 
 const PropertyActions: FC<PropertyActionsProps> = (props) => (
   <div className="grid grid-cols-[1fr_44px_44px] items-center gap-2 sm:flex sm:shrink-0">
-    <RoomLink property={props.property} />
+    {!isWholeUnitCategory(props.property.category?.name) && <RoomLink property={props.property} />}
     <EditLink property={props.property} />
     <DeleteButton {...props} />
   </div>

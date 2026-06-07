@@ -2,10 +2,11 @@ import { toast } from "react-hot-toast";
 import { getApiErrorMessage } from "@/lib/errorMessage";
 import { userService } from "@/services/userService";
 import type { User } from "@/types";
+import type { ProfileInput } from "@/validations/profile";
 
 type SetUser = (user: User | null) => void;
 
-export const saveProfileAction = async (data: { name?: string; phone?: string }, setUser: SetUser) => {
+export const saveProfileAction = async (data: ProfileInput, setUser: SetUser) => {
   try {
     setUser(await userService.updateProfile(data));
     toast.success("Profil berhasil disimpan!");

@@ -1,5 +1,6 @@
 import type { FC, KeyboardEvent } from "react";
 import type { usePropertiesFilters } from "@/hooks/tenant/properties-list/usePropertiesFilters";
+import type { PropertyCategory } from "@/types";
 
 type PropertiesFilters = ReturnType<typeof usePropertiesFilters>;
 type SortValue = "name-asc" | "name-desc" | "created_at-desc" | "created_at-asc";
@@ -11,10 +12,11 @@ const sortOptions: { label: string; value: SortValue }[] = [
   { label: "Terlama", value: "created_at-asc" },
 ];
 
-export const PropertiesFilterPanel: FC<{ filters: PropertiesFilters; total: number }> = ({ filters, total }) => (
+export const PropertiesFilterPanel: FC<{ categories: PropertyCategory[]; filters: PropertiesFilters; total: number }> = ({ categories, filters, total }) => (
   <div className="mb-6 rounded-2xl border border-slate-100 bg-white p-5 shadow-sm dark:border-slate-800 dark:bg-slate-900">
-    <div className="grid gap-4 lg:grid-cols-[1.2fr_0.8fr]">
+    <div className="grid gap-4 lg:grid-cols-[1.2fr_0.8fr_0.8fr]">
       <SearchField filters={filters} />
+      <CategoryField categories={categories} filters={filters} />
       <SortField filters={filters} />
     </div>
     <div className="mt-5 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
@@ -36,6 +38,16 @@ const SortField: FC<{ filters: PropertiesFilters }> = ({ filters }) => (
     <span className={labelClass}>Urutkan</span>
     <select value={`${filters.sortKey}-${filters.sortOrder}`} onChange={(event) => applySortValue(event.target.value as SortValue, filters)} className={inputClass}>
       {sortOptions.map((option) => <option key={option.value} value={option.value}>{option.label}</option>)}
+    </select>
+  </label>
+);
+
+const CategoryField: FC<{ categories: PropertyCategory[]; filters: PropertiesFilters }> = ({ categories, filters }) => (
+  <label className={fieldClass}>
+    <span className={labelClass}>Kategori Properti</span>
+    <select value={filters.categoryId} onChange={(event) => filters.setCategoryId(event.target.value)} className={inputClass}>
+      <option value="">Semua kategori</option>
+      {categories.map((category) => <option key={category.id} value={category.id}>{category.name}</option>)}
     </select>
   </label>
 );

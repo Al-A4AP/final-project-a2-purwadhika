@@ -1,16 +1,15 @@
 import { useState } from "react";
 
 export const useOccupancyMonth = () => {
-  const today = new Date();
-  const [currentMonth, setCurrentMonth] = useState(today.getMonth());
-  const [currentYear, setCurrentYear] = useState(today.getFullYear());
-  const goPrevMonth = () => {
-    if (currentMonth === 0) { setCurrentMonth(11); setCurrentYear((year) => year - 1); }
-    else setCurrentMonth((month) => month - 1);
-  };
-  const goNextMonth = () => {
-    if (currentMonth === 11) { setCurrentMonth(0); setCurrentYear((year) => year + 1); }
-    else setCurrentMonth((month) => month + 1);
-  };
-  return { currentMonth, currentYear, goNextMonth, goPrevMonth };
+  const [visibleDate, setVisibleDate] = useState(() => startOfMonth(new Date()));
+  const canGoPrev = visibleDate > startOfMonth(new Date());
+  const goPrevMonth = () => canGoPrev && setVisibleDate(addMonths(visibleDate, -1));
+  const goNextMonth = () => setVisibleDate(addMonths(visibleDate, 1));
+  return { canGoPrev, currentMonth: visibleDate.getMonth(), currentYear: visibleDate.getFullYear(), goNextMonth, goPrevMonth };
 };
+
+const startOfMonth = (date: Date) =>
+  new Date(date.getFullYear(), date.getMonth(), 1);
+
+const addMonths = (date: Date, amount: number) =>
+  new Date(date.getFullYear(), date.getMonth() + amount, 1);

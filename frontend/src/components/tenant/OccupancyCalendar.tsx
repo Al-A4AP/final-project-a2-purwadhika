@@ -16,7 +16,7 @@ export const OccupancyCalendar: FC<Props> = ({ data }) => {
   return (
     <div className="space-y-6 rounded-2xl border border-slate-100 bg-white p-6 shadow-sm dark:border-slate-800 dark:bg-slate-900">
       <div className="flex flex-col gap-6 md:flex-row md:items-center md:justify-between">
-        <OccupancyHeader month={monthState.currentMonth} year={monthState.currentYear} onPrev={monthState.goPrevMonth} onNext={monthState.goNextMonth} />
+        <OccupancyHeader canGoPrev={monthState.canGoPrev} month={monthState.currentMonth} year={monthState.currentYear} onPrev={monthState.goPrevMonth} onNext={monthState.goNextMonth} />
         <OccupancyLegend />
       </div>
       <OccupancyTable data={data} dayNumbers={dayNumbers} year={monthState.currentYear} month={monthState.currentMonth} />

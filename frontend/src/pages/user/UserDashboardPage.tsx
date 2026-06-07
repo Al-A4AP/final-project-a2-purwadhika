@@ -7,6 +7,7 @@ import { DashboardActiveSummary } from "./dashboard/DashboardActiveSummary";
 import { DashboardQuickActions } from "./dashboard/DashboardQuickActions";
 import { DashboardRecent } from "./dashboard/DashboardRecent";
 import { DashboardReviewReminders } from "./dashboard/DashboardReviewReminders";
+import { DashboardVoucherReferral } from "./dashboard/DashboardVoucherReferral";
 
 const UserDashboardPage: FC = () => {
   const { user, loading, error, stats, upcomingStay, reviewReminders, recentOrders } = useUserDashboardState();
@@ -32,6 +33,7 @@ const UserDashboardPage: FC = () => {
               </div>
               <div className="lg:col-span-1">
                 <DashboardActiveSummary stats={stats} />
+                <DashboardVoucherReferral />
                 <DashboardQuickActions />
               </div>
             </div>

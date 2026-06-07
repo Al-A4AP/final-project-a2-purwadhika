@@ -1,8 +1,9 @@
 import { api } from './api';
 import type { ApiResponse, User } from '@/types';
+import type { ProfileInput } from '@/validations/profile';
 
 export const userService = {
-  async updateProfile(data: { name?: string; phone?: string }) {
+  async updateProfile(data: ProfileInput) {
     const res = await api.patch<ApiResponse<User>>('/users/me', data);
     return res.data.data;
   },

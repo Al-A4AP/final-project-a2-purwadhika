@@ -2,12 +2,14 @@ import { OrderStatus, type Prisma } from '@prisma/client';
 import prisma from '../../config/prisma';
 import { createPaymentDeadline } from '../../constants/orderConstants';
 import { AppError } from '../../middlewares/errorHandler';
+import { issueReferralRewardForProcessedOrder } from '../referralRewardService';
 import { sendPaymentConfirmationEmail, sendPaymentRejectionEmail } from '../../utils/emailService';
 
 export const updateTenantOrderStatus = async (orderId: string, tenantId: string, status: string) => {
   const order = await findTenantOrderForStatus(orderId, tenantId);
   const transition = buildTenantStatusUpdate(order.status, status);
   const updatedOrder = await prisma.order.update({ where: { id: orderId }, data: transition.updateData });
+  await issueRewardIfProcessed(updatedOrder.id, transition.finalStatus);
   await handleOrderStatusEmail(order, transition.finalStatus, status);
   return updatedOrder;
 };
@@ -28,6 +30,11 @@ const buildTenantStatusUpdate = (currentStatus: OrderStatus, requestedStatus: st
 const handleOrderStatusEmail = async (order: TenantStatusOrder, finalStatus: OrderStatus, requestedStatus: string) => {
   if (finalStatus === OrderStatus.PROCESSED) await sendPaymentConfirmationEmail(order.user.email, order.order_number).catch(() => {});
   if (shouldSendRejectionEmail(order.status, requestedStatus)) await sendPaymentRejectionEmail(order.user.email, order.order_number).catch(() => {});
+};
+
+const issueRewardIfProcessed = (orderId: string, finalStatus: OrderStatus) => {
+  if (finalStatus !== OrderStatus.PROCESSED) return Promise.resolve();
+  return issueReferralRewardForProcessedOrder(orderId).then(() => undefined).catch(() => undefined);
 };
 
 const processedTransition = (): TenantStatusTransition =>

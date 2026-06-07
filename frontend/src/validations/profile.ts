@@ -1,6 +1,9 @@
 import { z } from 'zod';
 
 export const profileSchema = z.object({
+  domicile_address: z.string().max(255, 'Alamat domisili maksimal 255 karakter').optional().or(z.literal('')),
+  ktp_address: z.string().max(255, 'Alamat sesuai KTP maksimal 255 karakter').optional().or(z.literal('')),
+  legal_name: z.string().min(3, 'Nama sesuai KTP minimal 3 karakter').max(100, 'Nama sesuai KTP maksimal 100 karakter').optional().or(z.literal('')),
   name: z.string().min(3, 'Nama minimal 3 karakter').optional().or(z.literal('')),
   phone: z.string().optional(),
 });

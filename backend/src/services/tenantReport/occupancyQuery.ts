@@ -16,8 +16,13 @@ export const findOccupancyCalendar = (tenantId: string) => (
 
 const buildRoomOccupancySelect = () => ({
   id: true,
-  orders: { where: { status: { in: ACTIVE_OCCUPANCY_STATUSES } }, select: buildOrderOccupancySelect() },
+  orders: { where: buildActiveOrderWhere(), select: buildOrderOccupancySelect() },
   room_type: true,
+});
+
+const buildActiveOrderWhere = () => ({
+  check_out_date: { gte: startOfToday() },
+  status: { in: ACTIVE_OCCUPANCY_STATUSES },
 });
 
 const buildOrderOccupancySelect = () => ({
@@ -27,3 +32,9 @@ const buildOrderOccupancySelect = () => ({
   order_number: true,
   user: { select: { name: true } },
 });
+
+const startOfToday = () => {
+  const value = new Date();
+  value.setHours(0, 0, 0, 0);
+  return value;
+};

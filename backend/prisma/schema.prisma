@@ -15,7 +15,11 @@ model User {
   password_set_at           DateTime?
   role                      Role                @default(USER)
   name                      String
+  legal_name                String?
   phone                     String?
+  ktp_address               String?
+  domicile_address          String?
+  referral_code             String?             @unique
   avatar_url                String?
   verified_at               DateTime?
   email_change_requested_at DateTime?
@@ -29,6 +33,10 @@ model User {
   reviewReplies             ReviewReply[]
   reviews                   Review[]
   propertyCategories        PropertyCategory[]  @relation("TenantCategories")
+  tenantVouchers            Voucher[]           @relation("TenantVouchers")
+  userVouchers              UserVoucher[]
+  referralRewardsEarned     ReferralReward[]    @relation("ReferralRewardsEarned")
+  referralRewardsTriggered  ReferralReward[]    @relation("ReferralRewardsTriggered")
 
   @@map("users")
 }
@@ -195,7 +203,18 @@ model Order {
   propertyId              String
   check_in_date           DateTime
   check_out_date          DateTime
+  subtotal_price          Int?
   total_price             Int
+  discount_amount         Int           @default(0)
+  booking_for_self        Boolean       @default(true)
+  guest_name              String?
+  guest_legal_name        String?
+  guest_phone             String?
+  guest_email             String?
+  guest_ktp_address       String?
+  guest_domicile_address  String?
+  voucherId               String?
+  referral_code           String?
   status                  OrderStatus   @default(WAITING_PAYMENT)
   payment_method          PaymentMethod @default(MANUAL)
   payment_proof_url       String?
@@ -211,14 +230,82 @@ model Order {
   property                Property      @relation(fields: [propertyId], references: [id])
   room                    Room          @relation(fields: [roomId], references: [id])
   user                    User          @relation(fields: [userId], references: [id])
+  voucher                 Voucher?      @relation(fields: [voucherId], references: [id])
   review                  Review?
+  referralReward          ReferralReward?
 
   @@index([userId])
   @@index([roomId])
   @@index([propertyId])
   @@index([status])
+  @@index([voucherId])
+  @@index([referral_code])
   @@index([check_in_date, check_out_date])
   @@map("orders")
+}
+
+model Voucher {
+  id             String              @id @default(cuid())
+  tenantId       String
+  code           String              @unique
+  name           String
+  description    String?
+  discount_type  VoucherDiscountType @default(PERCENTAGE)
+  discount_value Int
+  max_discount   Int?
+  quota          Int?
+  used_count     Int                 @default(0)
+  starts_at      DateTime
+  expires_at     DateTime
+  is_active      Boolean             @default(true)
+  new_user_only  Boolean             @default(false)
+  deleted_at     DateTime?
+  created_at     DateTime            @default(now())
+  updated_at     DateTime            @default(now()) @updatedAt
+  tenant         User                @relation("TenantVouchers", fields: [tenantId], references: [id])
+  orders         Order[]
+  referralRewards ReferralReward[]
+  userVouchers   UserVoucher[]
+
+  @@index([tenantId])
+  @@index([code])
+  @@index([is_active, starts_at, expires_at])
+  @@map("vouchers")
+}
+
+model UserVoucher {
+  id         String    @id @default(cuid())
+  userId     String
+  voucherId  String
+  expires_at DateTime?
+  used_at    DateTime?
+  created_at DateTime  @default(now())
+  user       User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  voucher    Voucher   @relation(fields: [voucherId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, voucherId])
+  @@index([userId])
+  @@index([voucherId])
+  @@map("user_vouchers")
+}
+
+model ReferralReward {
+  id             String   @id @default(cuid())
+  referrerId     String
+  referredUserId String
+  orderId        String   @unique
+  voucherId      String?
+  reward_code    String
+  created_at     DateTime @default(now())
+  order          Order    @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  referredUser   User     @relation("ReferralRewardsTriggered", fields: [referredUserId], references: [id])
+  referrer       User     @relation("ReferralRewardsEarned", fields: [referrerId], references: [id])
+  voucher        Voucher? @relation(fields: [voucherId], references: [id])
+
+  @@index([referrerId])
+  @@index([referredUserId])
+  @@index([voucherId])
+  @@map("referral_rewards")
 }
 
 model Review {
@@ -289,6 +376,11 @@ enum PaymentMethod {
 }
 
 enum RateType {
+  PERCENTAGE
+  NOMINAL
+}
+
+enum VoucherDiscountType {
   PERCENTAGE
   NOMINAL
 }

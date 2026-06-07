@@ -8,6 +8,7 @@ import { ReviewSummaryCards } from "./reviews/ReviewSummaryCards";
 import { EligibleReviewCard } from "./reviews/EligibleReviewCard";
 import { SubmittedReviewCard } from "./reviews/SubmittedReviewCard";
 import { OrderReviewForm } from "@/components/user/order-card/OrderReviewForm";
+import { UserDashboardBackLink } from "@/components/user/UserDashboardBackLink";
 
 const UserReviewsPage: FC = () => {
   const state = useUserReviewsState();
@@ -41,6 +42,9 @@ const UserReviewsPage: FC = () => {
     <div className="min-h-screen bg-gray-50 px-4 py-8 md:p-12 dark:bg-slate-900 pb-24">
       <div className="mx-auto max-w-5xl space-y-8">
         <div>
+          <div className="mb-4">
+            <UserDashboardBackLink />
+          </div>
           <h1 className="text-3xl font-bold text-slate-900 dark:text-white">Ulasan Saya</h1>
           <p className="mt-2 text-sm text-slate-600 dark:text-slate-400">Kelola dan lihat ulasan yang telah Anda berikan untuk properti yang pernah Anda kunjungi.</p>
         </div>

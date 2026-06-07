@@ -7,11 +7,12 @@ import { orderService } from "@/services/orderService";
 import type { PropertyDetail, Room } from "@/types";
 import { createCheckoutPayload } from "./checkoutPayload";
 import { validateCheckout } from "./checkoutValidation";
-import type { BookingGuests, BookingQuery, PaymentMethod } from "./bookingTypes";
+import type { BookingGuestIdentity, BookingGuests, BookingQuery, PaymentMethod } from "./bookingTypes";
 
 export const useBookingCheckout = (params: {
-  query: BookingQuery; property: PropertyDetail | null; room: Room | null;
-  guests: BookingGuests; paymentMethod: PaymentMethod; navigate: NavigateFunction;
+  agreementAccepted: boolean; query: BookingQuery; property: PropertyDetail | null; room: Room | null;
+  guestIdentity: BookingGuestIdentity; guests: BookingGuests; paymentMethod: PaymentMethod; navigate: NavigateFunction;
+  referralCode: string; voucherCode: string;
 }) => {
   const [processing, setProcessing] = useState(false);
   const handleCheckout = async (paymentProofFile?: File | null) => { await checkout(params, setProcessing, paymentProofFile); };
@@ -20,7 +21,7 @@ export const useBookingCheckout = (params: {
 
 const checkout = async (params: Parameters<typeof useBookingCheckout>[0], setProcessing: (processing: boolean) => void, paymentProofFile?: File | null) => {
   if (!params.property || !params.room) return;
-  if (!validateCheckout(params.query, params.room, params.guests)) return;
+  if (!validateCheckout(params)) return;
   setProcessing(true);
   try { await submitCheckout(params, paymentProofFile); }
   catch (err) { toast.error(getApiErrorMessage(err, "Checkout gagal. Periksa tanggal, jumlah tamu, dan metode pembayaran lalu coba lagi.")); }
@@ -28,7 +29,7 @@ const checkout = async (params: Parameters<typeof useBookingCheckout>[0], setPro
 };
 
 const submitCheckout = async (params: Parameters<typeof useBookingCheckout>[0], paymentProofFile?: File | null) => {
-  const payload = createCheckoutPayload(params.property!, params.room!, params.query, params.paymentMethod, params.guests);
+  const payload = createCheckoutPayload(params.property!, params.room!, params.query, params.paymentMethod, params.guests, params.guestIdentity, params.voucherCode, params.referralCode);
   const result = await orderService.createOrder(payload);
   if (openMidtransIfNeeded(params, result.snapToken)) return;
   await uploadManualProofIfNeeded(result.order?.id, params.paymentMethod, paymentProofFile);

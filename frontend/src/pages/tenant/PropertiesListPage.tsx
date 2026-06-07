@@ -6,12 +6,14 @@ import { PropertiesListContent } from "./properties-list/PropertiesListContent";
 import { PropertiesPagination } from "./properties-list/PropertiesPagination";
 import { PropertiesFilterPanel } from "./properties-list/PropertiesFilterPanel";
 import { usePropertiesFilters } from "@/hooks/tenant/properties-list/usePropertiesFilters";
+import { usePropertyCategoryOptions } from "@/hooks/tenant/properties-list/usePropertyCategoryOptions";
 import { usePropertyDeleteConfirm } from "@/hooks/tenant/properties-list/usePropertyDeleteConfirm";
 import { useTenantPropertiesData } from "@/hooks/tenant/properties-list/useTenantPropertiesData";
 import { SectionLoading } from "@/components/common/SectionLoading";
 
 const PropertiesListPage: FC = () => {
   const filters = usePropertiesFilters();
+  const categories = usePropertyCategoryOptions();
   const data = useTenantPropertiesData(filters);
   const deleteState = usePropertyDeleteConfirm(data.properties, data.setProperties);
 
@@ -29,7 +31,7 @@ const PropertiesListPage: FC = () => {
         <PropertiesHeader />
         <PropertiesSummary total={data.pagination.total} />
 
-        <PropertiesFilterPanel filters={filters} total={data.pagination.total} />
+        <PropertiesFilterPanel categories={categories} filters={filters} total={data.pagination.total} />
 
         <div className="mt-6">
           <PropertiesListContent 

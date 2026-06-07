@@ -21,20 +21,18 @@ const getMonthSpan = (period: DashboardRevenuePeriod) => {
 
 const buildMonthSpanRange = (now: Date, months: number) => ({
   start: new Date(now.getFullYear(), now.getMonth() - months + 1, 1),
-  end: new Date(now.getFullYear(), now.getMonth() + 1, 1),
+  end: now,
 });
 
 const buildYearRange = (now: Date) => ({
   start: new Date(now.getFullYear(), 0, 1),
-  end: new Date(now.getFullYear() + 1, 0, 1),
+  end: now,
 });
 
 const buildWeeklyRange = (now: Date) => {
   const start = startOfDay(now);
   start.setDate(start.getDate() + getMondayOffset(start.getDay()));
-  const end = new Date(start);
-  end.setDate(end.getDate() + 7);
-  return { start, end };
+  return { start, end: now };
 };
 
 const startOfDay = (date: Date) => {

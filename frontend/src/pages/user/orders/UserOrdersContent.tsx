@@ -6,6 +6,7 @@ import { UserCancelOrderModal } from "./UserCancelOrderModal";
 import { UserOrdersFilter } from "./UserOrdersFilter";
 import { UserOrdersList } from "./UserOrdersList";
 import { BedDouble } from "lucide-react";
+import { UserDashboardBackLink } from "@/components/user/UserDashboardBackLink";
 
 interface UserOrdersContentProps {
   fileInputRef: RefObject<HTMLInputElement | null>;
@@ -23,6 +24,9 @@ export const UserOrdersContent: FC<UserOrdersContentProps> = ({ fileInputRef, st
     <div className="min-h-screen bg-slate-50 dark:bg-slate-900 pb-24 pt-8 md:pt-12">
       <div className="mx-auto max-w-5xl px-4 space-y-8">
         <div className="rounded-3xl border border-slate-100 bg-white p-6 md:p-10 shadow-sm dark:border-slate-800 dark:bg-slate-900">
+          <div className="mb-6">
+            <UserDashboardBackLink />
+          </div>
           <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 mb-8">
             <div>
               <h1 className="text-3xl font-bold text-slate-900 dark:text-white mb-2">Riwayat Reservasi</h1>

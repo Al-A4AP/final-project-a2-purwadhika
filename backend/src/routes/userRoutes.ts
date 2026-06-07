@@ -10,10 +10,14 @@ import {
   updateAvatarCtrl,
   updateProfileCtrl,
 } from '../controllers/userController';
+import { getUserVouchersCtrl, previewUserVoucherCtrl } from '../controllers/voucherController';
+import { voucherPreviewSchema } from '../validations/voucherValidation';
 
 const router = Router();
 
 router.get('/me/orders', requireAuth, requireRole(['USER']), getUserOrdersCtrl);
+router.get('/me/vouchers', requireAuth, requireRole(['USER']), getUserVouchersCtrl);
+router.post('/me/voucher-previews', requireAuth, requireRole(['USER']), validate(voucherPreviewSchema), previewUserVoucherCtrl);
 router.patch('/me', requireAuth, validate(updateProfileSchema), updateProfileCtrl);
 router.patch('/me/avatar', requireAuth, upload.single('avatar'), updateAvatarCtrl);
 router.patch('/me/password', requireAuth, validate(changePasswordSchema), changePasswordCtrl);

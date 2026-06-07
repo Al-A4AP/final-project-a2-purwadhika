@@ -6,7 +6,11 @@ export interface User {
   email: string;
   pending_email?: string | null;
   name: string;
+  legal_name?: string | null;
   phone?: string;
+  ktp_address?: string | null;
+  domicile_address?: string | null;
+  referral_code?: string | null;
   avatar_url?: string;
   auth_provider?: AuthProvider;
   password_set_at?: string | null;

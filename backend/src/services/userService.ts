@@ -8,7 +8,7 @@ export const updateProfile = async (userId: string, data: ProfileUpdateData) => 
   const user = await findUserOrThrow(userId);
   const updated = await prisma.user.update({
     where: { id: userId },
-    data: { name: data.name ?? user.name, phone: data.phone ?? user.phone },
+    data: buildProfileUpdateData(user, data),
   });
   return sanitizeUser(updated);
 };
@@ -54,12 +54,23 @@ const updateUserPassword = async (userId: string, newPassword: string) =>
     data: { password_hash: await bcrypt.hash(newPassword, 10), password_set_at: new Date() },
   });
 
+const buildProfileUpdateData = (user: User, data: ProfileUpdateData) => ({
+  domicile_address: data.domicile_address ?? user.domicile_address,
+  ktp_address: data.ktp_address ?? user.ktp_address,
+  legal_name: data.legal_name ?? user.legal_name,
+  name: data.name ?? user.name,
+  phone: data.phone ?? user.phone,
+});
+
 const sanitizeUser = (user: User): SafeUser => {
   const { password_hash, ...safe } = user;
   return safe;
 };
 
 interface ProfileUpdateData {
+  domicile_address?: string;
+  ktp_address?: string;
+  legal_name?: string;
   name?: string;
   phone?: string;
 }

@@ -1,4 +1,5 @@
 import type { PropertyDetail, Room } from "@/types";
+import type { VoucherPreview } from "@/types";
 import type { BookingDateFormState } from "./date-fields/bookingDateFieldTypes";
 
 export type PaymentMethod = "MANUAL" | "MIDTRANS";
@@ -8,6 +9,16 @@ export type BookingGuests = {
   adults: number;
   children: number;
   babies: number;
+};
+
+export type BookingGuestIdentity = {
+  bookingForSelf: boolean;
+  domicileAddress: string;
+  email: string;
+  ktpAddress: string;
+  legalName: string;
+  name: string;
+  phone: string;
 };
 
 export type BookingQuery = {
@@ -31,7 +42,20 @@ export type BookingPageState = {
   loading: boolean;
   dateForm: BookingDateFormState;
   guests: BookingGuests;
+  guestIdentity: BookingGuestIdentity;
+  voucherCode: string;
+  voucherPreview: VoucherPreview | null;
+  voucherLoading: boolean;
+  applyVoucher: () => Promise<void>;
+  clearVoucher: () => void;
+  clearReferralCode: () => void;
+  referralCode: string;
+  setReferralCode: (code: string) => void;
+  setVoucherCode: (code: string) => void;
+  setGuestIdentityField: (field: keyof BookingGuestIdentity, value: boolean | string) => void;
   updateGuest: (type: GuestType, delta: number) => void;
+  agreementAccepted: boolean;
+  setAgreementAccepted: (accepted: boolean) => void;
   paymentMethod: PaymentMethod;
   setPaymentMethod: (method: PaymentMethod) => void;
   processing: boolean;

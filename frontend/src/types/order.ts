@@ -17,7 +17,18 @@ export interface Order {
   roomId: string;
   check_in_date: string;
   check_out_date: string;
+  subtotal_price?: number | null;
   total_price: number;
+  booking_for_self?: boolean;
+  guest_name?: string | null;
+  guest_legal_name?: string | null;
+  guest_phone?: string | null;
+  guest_email?: string | null;
+  guest_ktp_address?: string | null;
+  guest_domicile_address?: string | null;
+  discount_amount?: number;
+  referral_code?: string | null;
+  voucherId?: string | null;
   status: OrderStatus;
   payment_method: PaymentMethod;
   payment_proof_url?: string;

@@ -15,9 +15,9 @@ export const ReservationStepper: FC<ReservationStepperProps> = ({ state }) => {
   const [proofFile, setProofFile] = useState<File | null>(null);
 
   const isManual = state.paymentMethod === "MANUAL";
-  const totalSteps = isManual ? 5 : 4;
+  const totalSteps = isManual ? 6 : 5;
   const steps = buildReservationSteps(isManual);
-  const canContinue = !(currentStep === 4 && isManual && !proofFile);
+  const canContinue = canContinueStep(currentStep, isManual, proofFile, state);
   const handleNext = () => setCurrentStep((p) => Math.min(p + 1, totalSteps));
   const handlePrev = () => setCurrentStep((p) => Math.max(p - 1, 1));
 
@@ -44,4 +44,10 @@ export const ReservationStepper: FC<ReservationStepperProps> = ({ state }) => {
       </div>
     </div>
   );
+};
+
+const canContinueStep = (step: number, isManual: boolean, proofFile: File | null, state: BookingPageState) => {
+  if (step === 3) return state.agreementAccepted;
+  if (step === 5 && isManual) return Boolean(proofFile);
+  return true;
 };

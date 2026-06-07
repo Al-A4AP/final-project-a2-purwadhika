@@ -1,4 +1,4 @@
-import type { FC } from "react";
+import type { FC, ReactNode } from "react";
 import { Pencil, Trash2, Tag, CalendarClock } from "lucide-react";
 import { isDefaultCategoryName } from "@/lib/defaultCategories";
 import type { PropertyCategory } from "@/types";
@@ -19,6 +19,33 @@ const DefaultBadge: FC<{ name: string }> = ({ name }) => (
       Default
     </span>
   ) : null
+);
+
+const CategoryActions: FC<{
+  category: PropertyCategory;
+  deletingId?: string | null;
+  onDelete: (category: PropertyCategory) => void;
+  onEdit: (category: PropertyCategory) => void;
+}> = ({ category, deletingId, onDelete, onEdit }) => {
+  if (isDefaultCategoryName(category.name)) return <span className="text-xs font-semibold text-slate-400">Default sistem</span>;
+  return (
+    <div className="flex items-center justify-end gap-2">
+      <CategoryActionButton label="Edit kategori" onClick={() => onEdit(category)}><Pencil size={16} /></CategoryActionButton>
+      <CategoryActionButton danger disabled={deletingId === category.id} label="Hapus kategori" onClick={() => onDelete(category)}><Trash2 size={16} /></CategoryActionButton>
+    </div>
+  );
+};
+
+const CategoryActionButton: FC<{ children: ReactNode; danger?: boolean; disabled?: boolean; label: string; onClick: () => void }> = ({ children, danger, disabled, label, onClick }) => (
+  <button
+    onClick={onClick}
+    disabled={disabled}
+    className={danger ? deleteButtonClass : editButtonClass}
+    title={label}
+    aria-label={label}
+  >
+    {children}
+  </button>
 );
 
 export const CategoryListView: FC<CategoryListViewProps> = ({ categories, loading, deletingId, onEdit, onDelete }) => {
@@ -76,23 +103,7 @@ export const CategoryListView: FC<CategoryListViewProps> = ({ categories, loadin
                   )}
                 </td>
                 <td className="px-6 py-4 text-right">
-                  <div className="flex items-center justify-end gap-2">
-                    <button
-                      onClick={() => onEdit(category)}
-                      className="flex h-9 w-9 items-center justify-center rounded-lg border border-slate-200 text-slate-500 transition hover:bg-blue-50 hover:text-blue-600 dark:border-slate-700 dark:text-slate-400 dark:hover:border-blue-900/50 dark:hover:bg-blue-900/20 dark:hover:text-blue-400"
-                      title="Edit kategori"
-                    >
-                      <Pencil size={16} />
-                    </button>
-                    <button
-                      onClick={() => onDelete(category)}
-                      disabled={deletingId === category.id}
-                      className="flex h-9 w-9 items-center justify-center rounded-lg border border-slate-200 text-slate-500 transition hover:bg-red-50 hover:text-red-600 disabled:opacity-50 dark:border-slate-700 dark:text-slate-400 dark:hover:border-red-900/50 dark:hover:bg-red-900/20 dark:hover:text-red-400"
-                      title="Hapus kategori"
-                    >
-                      <Trash2 size={16} />
-                    </button>
-                  </div>
+                  <CategoryActions category={category} deletingId={deletingId} onDelete={onDelete} onEdit={onEdit} />
                 </td>
               </tr>
             ))}
@@ -102,3 +113,6 @@ export const CategoryListView: FC<CategoryListViewProps> = ({ categories, loadin
     </div>
   );
 };
+
+const editButtonClass = "flex h-9 w-9 items-center justify-center rounded-lg border border-slate-200 text-slate-500 transition hover:bg-blue-50 hover:text-blue-600 dark:border-slate-700 dark:text-slate-400 dark:hover:border-blue-900/50 dark:hover:bg-blue-900/20 dark:hover:text-blue-400";
+const deleteButtonClass = "flex h-9 w-9 items-center justify-center rounded-lg border border-slate-200 text-slate-500 transition hover:bg-red-50 hover:text-red-600 disabled:opacity-50 dark:border-slate-700 dark:text-slate-400 dark:hover:border-red-900/50 dark:hover:bg-red-900/20 dark:hover:text-red-400";

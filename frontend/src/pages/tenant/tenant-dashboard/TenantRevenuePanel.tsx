@@ -38,6 +38,9 @@ export const TenantRevenuePanel: FC<TenantRevenuePanelProps> = ({ revenuePeriod,
       </div>
 
       <RevenueTrendChart data={revenueTrend || []} />
+      <p className="mt-4 text-xs text-slate-500 dark:text-slate-400">
+        Data pendapatan ditampilkan sampai hari ini. Jika periode belum lengkap, grafik memakai transaksi yang sudah tersedia.
+      </p>
     </div>
   );
 };
