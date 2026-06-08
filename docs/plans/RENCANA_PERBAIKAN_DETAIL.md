@@ -1,7 +1,7 @@
 # Rencana Perbaikan Sisa Setelah Audit Final
 
-Tanggal update: 07 Juni 2026  
-Acuan: audit clean code, REST API guidelines, ownership, security, dan PURWADHIKA
+Tanggal update: 08 Juni 2026  
+Acuan: audit clean code, REST API guidelines, ownership, security, PURWADHIKA, dan Vercel Serverless Architecture
 
 ## Ringkasan
 
@@ -9,24 +9,6 @@ Rencana besar sebelumnya sudah dilaksanakan: clean code residual, validasi query
 
 File ini menyimpan rencana aktif dan sisa rekomendasi yang belum dilaksanakan atau masih perlu keputusan final. Item yang sudah selesai tidak dicatat lagi sebagai rencana kerja aktif.
 
-## Rencana Aktif UAT Browser 07 Juni 2026 (SELESAI)
-
-Prioritas: P0-P2 (Telah Selesai)  
-Risiko: Rendah sampai menengah (Telah Selesai)
-
-
-
-Ringkasan tahap (Semuanya telah selesai):
-
-1. Schema dan backfill data dasar: category description, rental type, property rental type, dan order rejection reason.
-2. Tenant dashboard date logic: data historis sampai hari ini, periode minggu/bulan/tahun/seluruh data maksimal 3 tahun.
-3. Kategori dan mode sewa properti: deskripsi kategori, default rental type, pilihan sewa per kamar/seluruh properti, sembunyikan Kelola Kamar untuk whole property.
-4. Voucher UX dan validasi bisnis: kode 8 alfanumerik, date-only calendar, batasan maksimal 90% diskon, fitur *Free Nights*.
-5. Booking guest data dan step validation: validasi Data Tamu sebelum lanjut dan CTA self-booking lebih jelas.
-6. Tenant reject payment reason: alasan wajib, tersimpan, dikirim ke email/notifikasi user, dan tampil di Riwayat Pesanan.
-7. Profile back link berdasarkan role.
-
-Catatan: Karena seluruh rencana aktif di atas telah diselesaikan, rencana di bawah ini sekarang murni merupakan sisa rencana opsional.
 
 ## Sudah Dilaksanakan
 
@@ -44,7 +26,8 @@ Catatan: Karena seluruh rencana aktif di atas telah diselesaikan, rencana di baw
 | Browser storage cleanup | Selesai |
 | Struktur `docs/audits`, `docs/plans`, `docs/guidelines` | Selesai |
 | README hanya di root dan `docs` | Selesai secara dokumentasi |
-| Cron scheduler di `backend/src/cron/` | Selesai |
+| Vercel Serverless Proxy (atasi Cross-Origin Cookie & CSRF) | Selesai |
+| Webhook Cron Jobs (ganti `node-cron` persisten) | Selesai |
 | Function-length audit otomatis advisory | Selesai |
 | Explore desktop sidebar filter dan mobile auto-close filter | Selesai |
 | Tenant reports/reviews/property performance pagination | Selesai |
@@ -123,31 +106,8 @@ Tahapan aman:
 4. Refactor satu area per tahap.
 5. Jalankan lint/build sesuai area terdampak.
 
-### 3. CSRF Token untuk Cookie Auth Production
 
-Risiko: Menengah  
-Prioritas: Production hardening
-
-Masalah:
-
-Auth token sudah HTTP-only cookie dengan `sameSite: strict`. Jika production memakai cookie-auth cross-origin atau domain kompleks, CSRF token eksplisit akan lebih kuat.
-
-File yang kemungkinan terdampak:
-
-- `backend/src/middlewares/`
-- `backend/server.ts`
-- `backend/src/config/authCookie.ts`
-- `frontend/src/services/api/`
-
-Tahapan aman:
-
-1. Tentukan apakah production benar-benar membutuhkan CSRF token.
-2. Tambahkan endpoint/token bootstrap atau double-submit cookie.
-3. Tambahkan interceptor frontend untuk mengirim CSRF header.
-4. Terapkan middleware hanya pada state-changing request.
-5. Uji login, logout, profile update, booking, payment proof, tenant CRUD, dan review.
-
-### 4. Persistent Token Blacklist
+### 3. Persistent Token Blacklist
 
 Risiko: Menengah  
 Prioritas: Production hardening jika backend multi-instance
@@ -170,7 +130,7 @@ Tahapan aman:
 3. Update service blacklist untuk read/write persistent storage.
 4. Tambahkan test logout dan revoked token.
 
-### 5. Saved Properties Menjadi Data Akun
+### 4. Saved Properties Menjadi Data Akun
 
 Risiko: Menengah-tinggi  
 Prioritas: Product improvement, bukan blocker requirement
@@ -199,12 +159,10 @@ Tahapan aman:
 
 ## Rekomendasi Urutan
 
-1. Eksekusi `RENCANA_PERBAIKAN_UAT_BROWSER_2026_06_07.md`.
-2. Cleanup legacy REST alias jika ingin standar REST paling ketat.
-3. Review kandidat function-length advisory bila mentor meminta kepatuhan 15 baris lebih ketat.
-4. Tambahkan CSRF token jika deployment production membutuhkan.
-5. Pindahkan token blacklist ke storage persistent jika backend multi-instance.
-6. Pertimbangkan saved properties backend hanya jika fitur akun lintas device dibutuhkan.
+1. Cleanup legacy REST alias jika ingin standar REST paling ketat.
+2. Review kandidat function-length advisory bila mentor meminta kepatuhan 15 baris lebih ketat.
+3. Pindahkan token blacklist ke storage persistent jika backend multi-instance.
+4. Pertimbangkan saved properties backend hanya jika fitur akun lintas device dibutuhkan.
 
 ## Status Verifikasi Terakhir
 

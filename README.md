@@ -7,9 +7,16 @@ Final Project Purwadhika JCWDBGPM-11, Group 1:
 - Muhammad Ali Akbar - Fitur 1
 - Anggita Zahra Kamila - Fitur 2
 
+## Live Deployment
+
+Aplikasi ini telah dideploy dan dapat diakses secara publik pada tautan berikut:
+
+- **Frontend (Web Utama)**: [https://final-project-a2-purwadhika-fronten.vercel.app](https://final-project-a2-purwadhika-fronten.vercel.app)
+- **Backend (API)**: [https://final-project-a2-purwadhika-backend.vercel.app](https://final-project-a2-purwadhika-backend.vercel.app)
+
 ## Status Audit Terakhir
 
-Audit dokumentasi diperbarui pada 07 Juni 2026 dengan acuan `docs/guidelines/PURWADHIKA.md` dan `docs/guidelines/REST_API_GUIDELINES.md`.
+Audit dokumentasi diperbarui pada 08 Juni 2026 dengan acuan `docs/guidelines/PURWADHIKA.md` dan `docs/guidelines/REST_API_GUIDELINES.md`.
 
 | Area                           | Status                  | Catatan                                                                                                                  |
 | ------------------------------ | ----------------------- | ------------------------------------------------------------------------------------------------------------------------ |
@@ -25,7 +32,7 @@ Audit dokumentasi diperbarui pada 07 Juni 2026 dengan acuan `docs/guidelines/PUR
 | Ownership test                 | Lulus                   | `npm.cmd run test:ownership` lulus, 7/7                                                                                  |
 | REST API                       | Sesuai pada jalur utama | Legacy alias masih aktif untuk backward compatibility                                                                    |
 | Browser storage                | Aman                    | Auth token tidak disimpan di localStorage                                                                                |
-| UAT browser lanjutan           | Selesai                 | Temuan UAT browser 07 Juni 2026 telah dieksekusi sepenuhnya                                                              |
+|                                |
 
 Laporan lengkap tersedia di:
 
@@ -40,8 +47,6 @@ README hanya dipertahankan di:
 
 - `README.md` pada root project.
 - `docs/README.md` pada folder dokumentasi.
-
-README di folder `frontend` dan `backend` sudah dihapus dan tidak dibuat ulang. Detail frontend/backend dirangkum di README ini dan dokumen audit pada folder `docs`.
 
 ## Eksternal API yang Digunakan
 
@@ -152,7 +157,7 @@ Backend:
 - Cloudinary
 - Midtrans
 - Nodemailer
-- node-cron
+- Webhook Serverless Cron (pengganti node-cron)
 - Zod
 - express-rate-limit
 
@@ -198,7 +203,7 @@ Backend:
 - `MIDTRANS_SERVER_KEY`, `MIDTRANS_CLIENT_KEY`, `MIDTRANS_IS_PRODUCTION`
 - `PORT`
 - `NODE_ENV`
-- `ENABLE_CRON`
+- `CRON_SECRET`
 - `ALLOWED_ORIGINS`
 - `FRONTEND_URL`
 - `LOCATIONIQ_API_KEY`
@@ -245,19 +250,15 @@ npm run build
 npm run test:ownership
 ```
 
-## Deployment
+## Deployment (Vercel Serverless Architecture)
 
-Backend sebaiknya dideploy sebagai persistent Node.js process, bukan serverless, karena aplikasi membutuhkan:
+Aplikasi ini telah dioptimalkan sepenuhnya untuk berjalan di lingkungan **Serverless Vercel**:
 
-- Long-running Express API server.
-- Booking management.
-- Scheduled tasks untuk auto-cancel unpaid reservations.
-- Auto-complete order setelah checkout.
-- Authentication dan role management.
-- Upload file ke Cloudinary.
-
-Frontend dapat dideploy sebagai static Vite app. Backend harus memiliki environment production, CORS production, dan `ENABLE_CRON=true` pada platform yang mendukung persistent process seperti Render, Railway, VPS, atau layanan setara.
+- **Frontend**: Dideploy sebagai static Vite app di Vercel. Menggunakan `vercel.json` Rewrites untuk melakukan proxy request API ke backend, menghilangkan kendala _Cross-Origin Cookies (CORS)_.
+- **Backend**: Dideploy sebagai Vercel Serverless Functions.
+- **Cron Jobs**: Mekanisme pembatalan pesanan dan notifikasi (`node-cron` persisten) telah dimigrasikan menjadi rute **Serverless Webhook** (`/api/webhooks/cron`) yang diamankan menggunakan `CRON_SECRET`. Pemicu (trigger) dilakukan secara eksternal menggunakan layanan seperti `cron-job.org`.
+- **Authentication**: Kuki otentikasi diatur dengan `sameSite: 'lax'` dan di-proxy melalui frontend untuk stabilitas penuh saat menggunakan integrasi _OAuth_ (Google Login) maupun _Payment Gateway_ (Midtrans).
 
 ## Catatan Final
 
-Project memiliki fondasi fitur utama yang lengkap dan verifikasi teknis terakhir lulus. Seluruh rencana aktif berdasarkan UAT browser terbaru pada 07 Juni 2026 telah selesai dieksekusi, termasuk penyempurnaan UI/UX voucher, pembatasan diskon, mode sewa properti, validasi tamu, serta notifikasi penolakan pembayaran. Proyek ini sekarang dapat diklaim final. Sisa rencana opsional jangka panjang tetap tersedia di [`docs/plans/RENCANA_PERBAIKAN_DETAIL.md`](./docs/plans/RENCANA_PERBAIKAN_DETAIL.md).
+Project memiliki fondasi fitur utama yang lengkap dan verifikasi teknis terakhir lulus. Seluruh rencana arsitektur untuk penyesuaian produksi Vercel (08 Juni 2026) telah selesai dieksekusi secara sempurna. Proyek ini sekarang dapat berjalan dengan stabil di lingkungan _cloud production_. Sisa rencana opsional jangka panjang tetap tersedia di [`docs/plans/RENCANA_PERBAIKAN_DETAIL.md`](./docs/plans/RENCANA_PERBAIKAN_DETAIL.md).

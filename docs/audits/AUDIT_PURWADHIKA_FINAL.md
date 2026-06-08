@@ -1,6 +1,6 @@
 # Audit Keseluruhan PURWADHIKA
 
-Tanggal audit: 07 Juni 2026  
+Tanggal audit: 08 Juni 2026  
 Project: PURWALOKA - Property Renting Web App  
 Acuan: `docs/guidelines/PURWADHIKA.md`
 
@@ -8,7 +8,7 @@ Acuan: `docs/guidelines/PURWADHIKA.md`
 
 Project sudah memenuhi mayoritas requirement utama PURWADHIKA untuk Property Renting Web App. Fitur user, tenant, transaksi, review, report, mobile responsiveness, clean code, ownership, dan REST guideline jalur utama sudah tersedia dan terverifikasi.
 
-Status audit teknis terakhir: fitur utama tersedia dan verifikasi teknis lulus. Rencana aktif UAT browser 07 Juni 2026 telah dieksekusi secara keseluruhan. Proyek ini sudah siap untuk penilaian akhir.
+Status audit teknis terakhir: fitur utama tersedia dan verifikasi teknis lulus. Arsitektur telah sepenuhnya dioptimalkan untuk Vercel Serverless, termasuk sistem Proxy Frontend dan Webhook Cronjob. Proyek ini sudah siap untuk penilaian akhir.
 
 ## Catatan UAT Browser Terbaru (SELESAI)
 
@@ -17,6 +17,8 @@ Seluruh temuan browser terbaru pada 07 Juni 2026 telah dieksekusi dan diimplemen
 | Area | Status | Ringkasan Perbaikan |
 | --- | --- | --- |
 | Dashboard tenant date logic | Selesai | Data historis dibatasi sampai tanggal saat ini; tersedia opsi rentang minggu/bulan/tahun/seluruh data max 3 tahun |
+| Vercel Serverless Architecture | Selesai | Frontend memproxy backend lewat `vercel.json` (atasi masalah Cookie/CORS); Kuki auth diset `sameSite: lax` |
+| Webhook Cron Jobs | Selesai | Menggantikan `node-cron` persisten menjadi rute webhook API (`/api/webhooks/cron`) yang diamankan dengan `CRON_SECRET` |
 | Tenant category data | Selesai | Kategori dilengkapi deskripsi dan *default rental type* untuk mempermudah saat membuat properti |
 | Tenant property rental mode | Selesai | Properti kini mendukung mode sewa `PER_ROOM` / `WHOLE_PROPERTY`; navigasi *Kelola Kamar* otomatis disembunyikan untuk *whole property* |
 | Voucher tenant | Selesai | Form voucher lebih presisi (alfanumerik 8 huruf, date-only, batasan nilai maks 90%); dukungan baru untuk Voucher *Free Nights* (Menginap Gratis) |
@@ -156,11 +158,11 @@ File terkait:
 
 Status: terpenuhi.
 
-Tenant dapat melihat order, konfirmasi pembayaran manual, menolak/membatalkan sesuai rule, dan melihat status order. Auto-cancel unpaid order dan auto-complete processed order tersedia melalui cron saat `ENABLE_CRON=true`.
+Tenant dapat melihat order, konfirmasi pembayaran manual, menolak/membatalkan sesuai rule, dan melihat status order. Auto-cancel unpaid order dan auto-complete processed order tersedia melalui eksekusi Webhook Serverless `/api/webhooks/cron` menggunakan `CRON_SECRET`.
 
 File terkait:
 
-- `backend/src/cron/`
+- `backend/src/routes/webhookRoutes.ts`
 - `backend/src/services/orderService.ts`
 - `frontend/src/pages/tenant/OrdersPage.tsx`
 - `frontend/src/components/tenant/`
@@ -252,4 +254,4 @@ README di folder `frontend` dan `backend` sudah dihapus oleh user dan tidak dibu
 
 ## Kesimpulan
 
-Project memiliki fitur utama yang lengkap dan verifikasi teknis terakhir lulus (Build, Lint, Ownership Tests berhasil). Rencana perbaikan UAT browser aktif (07 Juni 2026) telah diselesaikan secara komprehensif tanpa mengorbankan keamanan data atau kaidah *clean code*. Project dapat dinyatakan final dan siap untuk produksi.
+Project memiliki fitur utama yang lengkap dan verifikasi teknis terakhir lulus (Build, Lint, Ownership Tests berhasil). Seluruh perombakan infrastruktur *cloud* dan pembaruan arsitektur (*Vercel Proxy*, *Webhook Cron*, *Cookie Lax*) telah diselesaikan secara komprehensif tanpa mengorbankan keamanan data atau kaidah *clean code*. Project dapat dinyatakan final dan siap untuk dipresentasikan dan diproduksi.

@@ -38,7 +38,7 @@ README di folder `frontend` dan `backend` sudah dihapus oleh user dan tidak dibu
 | REST API                       | Jalur utama sesuai resource-oriented; legacy alias masih dicatat       |
 | Ownership                      | Baik dan teruji                                                        |
 | Browser storage                | Tidak ada JWT auth token di localStorage                               |
-| UAT browser lanjutan           | Selesai (Semua rencana dieksekusi)                                     |
+|                                |
 
 ## Catatan Clean Code
 
@@ -68,16 +68,6 @@ Legacy alias masih aktif untuk backward compatibility dan dicatat di plan cleanu
 - Auth token memakai HTTP-only cookie backend.
 - LocalStorage hanya dipakai untuk tema, saved properties lokal, dan cleanup legacy storage.
 - SessionStorage dipakai untuk auth notice sementara.
-
-Area utama yang diselesaikan:
-
-- Dashboard tenant telah membatasi data historis sampai tanggal saat ini.
-- Kategori tenant memiliki deskripsi dan mode sewa default.
-- Properti tenant memiliki mode sewa (`PER_ROOM` / `WHOLE_PROPERTY`), menu Kelola Kamar disembunyikan untuk tipe whole property.
-- UX Voucher disederhanakan dan dibatasi maksimal 90% discount, serta ditambah tipe voucher `FREE_NIGHTS` (Menginap Gratis).
-- UX form booking guest identity divalidasi sebelum bisa lanjut checkout.
-- Tenant wajib memberi alasan teks ketika menolak manual payment, dan pesanan dikembalikan ke `WAITING_PAYMENT`.
-- Profil memiliki tombol back to dashboard yang sesuai dengan Role (User/Tenant).
 
 ## Cara Verifikasi Cepat
 
