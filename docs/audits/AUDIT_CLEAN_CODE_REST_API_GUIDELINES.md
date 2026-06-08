@@ -6,7 +6,7 @@ Acuan: `docs/guidelines/PURWADHIKA.md` bagian Clean Code dan `docs/guidelines/RE
 
 ## Ringkasan
 
-Audit teknis terakhir menunjukkan source utama aman dari sisi clean code, build, lint, dan type-safety. Tidak ada file `.ts`, `.tsx`, `.js`, atau `.jsx` di `backend/src`, `backend/tests`, dan `frontend/src` yang melebihi 200 baris. Tidak ditemukan `any`, `debugger`, atau `console.*` pada source utama. `console.*` hanya ditemukan di `tools/audit-function-length.js`, karena file tersebut memang script audit CLI.
+Audit teknis terakhir menunjukkan source utama aman dari sisi build, lint, dan type-safety. Tidak ada file `.ts`, `.tsx`, `.js`, atau `.jsx` di `backend/src`, `backend/tests`, dan `frontend/src` yang melebihi 200 baris. Terdapat sedikit residu *clean code*, yaitu penggunaan `as any` di `tenantPropertyFilters.ts` dan `console.error` di `webhookRoutes.ts`. Keduanya tidak memblokir build, tetapi dicatat untuk refactor.
 
 REST API jalur utama sudah mengikuti pola resource-oriented. Beberapa legacy alias masih aktif untuk backward compatibility dan dicatat sebagai rencana cleanup opsional sebelum standar REST dibuat sangat ketat.
 
@@ -21,9 +21,9 @@ Catatan terbaru: Seluruh temuan UAT browser 07 Juni 2026 yang menyangkut perubah
 | `backend npm.cmd run build` | Lulus |
 | `backend npm.cmd run test:ownership` | Lulus, 7/7 test pass |
 | Scan file source >200 baris | Tidak ditemukan di `backend/src`, `backend/tests`, `frontend/src` |
-| Scan `console.*` dan `debugger` | Tidak ditemukan di source utama; hanya ada di `tools/audit-function-length.js` |
-| Scan `any`, `as any`, `unknown as`, `as unknown` | Tidak ditemukan di area audit |
-| `npm run audit:functions` | Advisory only; 87 kandidat manual review, 84 frontend dan 3 backend |
+| Scan `console.*` dan `debugger` | Minor residue: `console.error` di `webhookRoutes.ts` |
+| Scan `any`, `as any`, `unknown as`, `as unknown` | Minor residue: `as any` di `tenantPropertyFilters.ts` |
+| `npm run audit:functions` | Advisory only; 103 kandidat manual review |
 
 ## Clean Code
 
@@ -59,129 +59,144 @@ npm run audit:functions
 
 Hasil terbaru:
 
-- 87 kandidat di atas 15 baris.
+- 103 kandidat di atas 15 baris.
 - 84 kandidat berada di `frontend/src`.
 - 3 kandidat berada di `backend/src`.
 - Script selalu exit `0` dan tidak menjadi hard rule.
 
 ### Snapshot Kandidat Function-Length Advisory
 
-Daftar ini adalah snapshot tracking, bukan hard rule dan bukan daftar final yang harus dipecah semuanya. Ringkasan terbaru per 07 Juni 2026 menunjukkan 87 kandidat. Untuk daftar lengkap aktual, jalankan `npm run audit:functions` karena hasil dapat berubah setiap kali ada refactor.
+Daftar ini adalah snapshot tracking, bukan hard rule dan bukan daftar final yang harus dipecah semuanya. Ringkasan terbaru per 09 Juni 2026 menunjukkan 103 kandidat. Untuk daftar lengkap aktual, jalankan `npm run audit:functions` karena hasil dapat berubah setiap kali ada refactor.
 
-Kandidat prioritas terbaru:
+Kandidat prioritas terbaru (Top 7):
 
 - `frontend/src/pages/tenant/rooms-page/RoomsListView.tsx`
 - `frontend/src/pages/tenant/properties-list/PropertiesListView.tsx`
 - `frontend/src/pages/tenant/property-form/PropertyImageField.tsx`
 - `frontend/src/hooks/tenant/room-form/useRoomImageField.ts`
 - `frontend/src/components/user/OrderCard.tsx`
+- `backend/src/services/tenantProperty/dashboardStats.ts`
 - `backend/src/services/categoryService.ts`
-- `backend/src/services/tenantPropertyService.ts`
 
 | No | File | Baris | Fungsi/Component | Kind | Jumlah Baris |
 | --- | --- | ---: | --- | --- | ---: |
-| 1 | `frontend/src/components/tenant/room-form/RoomImageField.tsx` | 20 | `RoomImageField` | ArrowFunction | 193 |
-| 2 | `frontend/src/pages/user/booking/ReservationStepper.tsx` | 14 | `ReservationStepper` | ArrowFunction | 145 |
-| 3 | `frontend/src/pages/tenant/rooms-page/RoomsListView.tsx` | 16 | `RoomsListView` | ArrowFunction | 128 |
-| 4 | `frontend/src/pages/tenant/properties-list/PropertiesListView.tsx` | 15 | `PropertiesListView` | ArrowFunction | 122 |
-| 5 | `frontend/src/pages/tenant/property-form/PropertyImageField.tsx` | 6 | `PropertyImageField` | ArrowFunction | 104 |
-| 6 | `frontend/src/components/user/OrderCard.tsx` | 9 | `OrderCard` | ArrowFunction | 96 |
-| 7 | `frontend/src/pages/user/UserReviewsPage.tsx` | 12 | `UserReviewsPage` | ArrowFunction | 90 |
+| 1 | `frontend/src/pages/tenant/rooms-page/RoomsListView.tsx` | 16 | `RoomsListView` | ArrowFunction | 128 |
+| 2 | `frontend/src/pages/tenant/properties-list/PropertiesListView.tsx` | 15 | `PropertiesListView` | ArrowFunction | 126 |
+| 3 | `frontend/src/pages/tenant/property-form/PropertyImageField.tsx` | 6 | `PropertyImageField` | ArrowFunction | 104 |
+| 4 | `frontend/src/hooks/tenant/room-form/useRoomImageField.ts` | 21 | `useRoomImageField` | ArrowFunction | 100 |
+| 5 | `frontend/src/components/user/OrderCard.tsx` | 9 | `OrderCard` | ArrowFunction | 96 |
+| 6 | `frontend/src/pages/user/UserReviewsPage.tsx` | 13 | `UserReviewsPage` | ArrowFunction | 93 |
+| 7 | `frontend/src/pages/tenant/categories/CategoryFormModal.tsx` | 15 | `CategoryFormModal` | ArrowFunction | 91 |
 | 8 | `frontend/src/pages/user/BookingDetailPage.tsx` | 12 | `BookingDetailPage` | ArrowFunction | 89 |
-| 9 | `frontend/src/components/common/ImageCropperModal.tsx` | 18 | `ImageCropperModal` | ArrowFunction | 88 |
-| 10 | `frontend/src/pages/tenant/categories/CategoryListView.tsx` | 24 | `CategoryListView` | ArrowFunction | 81 |
-| 11 | `frontend/src/pages/tenant/tenant-dashboard/HostRecentReservations.tsx` | 11 | `HostRecentReservations` | ArrowFunction | 75 |
-| 12 | `frontend/src/pages/user/SavedPropertiesPage.tsx` | 9 | `SavedPropertiesPage` | ArrowFunction | 75 |
-| 13 | `frontend/src/components/property/ReservationPanel.tsx` | 13 | `ReservationPanel` | ArrowFunction | 73 |
+| 9 | `frontend/src/components/common/ImageCropperModal.tsx` | 35 | `ImageCropperModal` | ArrowFunction | 88 |
+| 10 | `frontend/src/pages/user/SavedPropertiesPage.tsx` | 10 | `SavedPropertiesPage` | ArrowFunction | 78 |
+| 11 | `frontend/src/pages/tenant/tenant-dashboard/TenantRecentReservations.tsx` | 11 | `TenantRecentReservations` | ArrowFunction | 75 |
+| 12 | `frontend/src/components/property/ReservationPanel.tsx` | 13 | `ReservationPanel` | ArrowFunction | 73 |
+| 13 | `frontend/src/pages/tenant/vouchers/AssignVoucherModal.tsx` | 14 | `AssignVoucherModal` | ArrowFunction | 70 |
 | 14 | `frontend/src/pages/user/dashboard/DashboardUpcomingStay.tsx` | 11 | `DashboardUpcomingStay` | ArrowFunction | 70 |
 | 15 | `frontend/src/components/tenant/room-form/RoomFormFields.tsx` | 27 | `RoomFormFields` | ArrowFunction | 69 |
-| 16 | `frontend/src/pages/tenant/categories/CategoryFormModal.tsx` | 15 | `CategoryFormModal` | ArrowFunction | 69 |
-| 17 | `frontend/src/pages/user/saved-properties/SavedPropertyCard.tsx` | 14 | `SavedPropertyCard` | ArrowFunction | 60 |
-| 18 | `frontend/src/pages/user/orders/BookingPropertySummary.tsx` | 6 | `BookingPropertySummary` | ArrowFunction | 59 |
-| 19 | `frontend/src/pages/tenant/rooms-page/RoomsSummary.tsx` | 10 | `RoomsSummary` | ArrowFunction | 55 |
-| 20 | `frontend/src/pages/tenant/tenant-dashboard/HostKpiGrid.tsx` | 10 | `HostKpiGrid` | ArrowFunction | 55 |
-| 21 | `frontend/src/pages/user/orders/UserOrdersContent.tsx` | 15 | `UserOrdersContent` | ArrowFunction | 52 |
-| 22 | `frontend/src/pages/user/PaymentSuccessPage.tsx` | 6 | `PaymentSuccessPage` | ArrowFunction | 52 |
-| 23 | `frontend/src/pages/user/PropertyDetailPage.tsx` | 26 | `PropertyDetailView` | ArrowFunction | 52 |
-| 24 | `frontend/src/pages/user/orders/BookingStatusTimeline.tsx` | 5 | `BookingStatusTimeline` | ArrowFunction | 50 |
-| 25 | `frontend/src/components/property/PropertyGallery.tsx` | 11 | `PropertyGallery` | ArrowFunction | 47 |
-| 26 | `frontend/src/pages/tenant/occupancy/OccupancyContent.tsx` | 29 | `AvailabilitySummary` | ArrowFunction | 47 |
-| 27 | `frontend/src/pages/tenant/PropertiesListPage.tsx` | 13 | `PropertiesListPage` | ArrowFunction | 45 |
-| 28 | `frontend/src/pages/user/orders/BookingPaymentPanel.tsx` | 6 | `BookingPaymentPanel` | ArrowFunction | 44 |
-| 29 | `frontend/src/pages/tenant/property-form/PropertyLocationFields.tsx` | 6 | `PropertyLocationFields` | ArrowFunction | 43 |
-| 30 | `frontend/src/pages/user/reviews/EligibleReviewCard.tsx` | 10 | `EligibleReviewCard` | ArrowFunction | 42 |
-| 31 | `frontend/src/pages/user/reviews/ReviewSummaryCards.tsx` | 10 | `ReviewSummaryCards` | ArrowFunction | 41 |
-| 32 | `frontend/src/pages/tenant/CategoriesPage.tsx` | 37 | `useCategoryViewState` | ArrowFunction | 39 |
-| 33 | `frontend/src/pages/tenant/RoomsPage.tsx` | 38 | `RoomsPageLayout` | ArrowFunction | 39 |
-| 34 | `frontend/src/pages/tenant/property-form/PropertyBasicFields.tsx` | 7 | `PropertyBasicFields` | ArrowFunction | 37 |
-| 35 | `frontend/src/pages/user/reviews/SubmittedReviewCard.tsx` | 9 | `SubmittedReviewCard` | ArrowFunction | 37 |
-| 36 | `frontend/src/pages/tenant/tenant-dashboard/HostRevenuePanel.tsx` | 12 | `HostRevenuePanel` | ArrowFunction | 36 |
-| 37 | `frontend/src/components/tenant/room-form/RoomImageField.tsx` | 50 | `handleCropComplete` | ArrowFunction | 33 |
-| 38 | `frontend/src/pages/tenant/rooms-page/RoomsPageHeader.tsx` | 11 | `RoomsPageHeader` | ArrowFunction | 33 |
-| 39 | `frontend/src/pages/user/UserDashboardPage.tsx` | 11 | `UserDashboardPage` | ArrowFunction | 33 |
-| 40 | `frontend/src/pages/tenant/rooms-page/RoomsFormSection.tsx` | 18 | `RoomsFormSection` | ArrowFunction | 31 |
-| 41 | `frontend/src/pages/user/dashboard/DashboardRecent.tsx` | 11 | `DashboardRecent` | ArrowFunction | 31 |
-| 42 | `frontend/src/lib/cropImage.ts` | 17 | `getCroppedImg` | ArrowFunction | 29 |
-| 43 | `frontend/src/components/common/navbar/ProfileDropdown.tsx` | 20 | `ProfileDropdownLinks` | ArrowFunction | 28 |
-| 44 | `frontend/src/pages/user/dashboard/DashboardReviewReminders.tsx` | 10 | `DashboardReviewReminders` | ArrowFunction | 27 |
-| 45 | `frontend/src/pages/tenant/CategoriesPage.tsx` | 77 | `CategoryPageView` | ArrowFunction | 25 |
-| 46 | `backend/src/services/categoryService.ts` | 62 | `listCategories` | ArrowFunction | 24 |
-| 47 | `frontend/src/hooks/useSavedProperties.ts` | 21 | `useSavedPropertyActions` | ArrowFunction | 24 |
-| 48 | `frontend/src/pages/tenant/DashboardPage.tsx` | 10 | `DashboardPage` | ArrowFunction | 23 |
-| 49 | `frontend/src/components/property/InlineAvailabilitySection.tsx` | 21 | `InlineAvailabilitySection` | ArrowFunction | 22 |
-| 50 | `frontend/src/pages/tenant/categories/CategoriesHeader.tsx` | 8 | `CategoriesHeader` | ArrowFunction | 22 |
-| 51 | `frontend/src/pages/tenant/properties-list/PropertiesHeader.tsx` | 5 | `PropertiesHeader` | ArrowFunction | 22 |
-| 52 | `frontend/src/pages/tenant/reviews/ReviewsSkeleton.tsx` | 3 | `ReviewsSkeleton` | ArrowFunction | 22 |
-| 53 | `frontend/src/pages/tenant/reviews/TenantReviewsContent.tsx` | 11 | `TenantReviewsContent` | ArrowFunction | 22 |
-| 54 | `frontend/src/pages/tenant/tenant-dashboard/HostOperationsGrid.tsx` | 27 | `HostOperationsGrid` | ArrowFunction | 22 |
-| 55 | `frontend/src/pages/tenant/orders/TenantOrdersContent.tsx` | 13 | `TenantOrdersContent` | ArrowFunction | 21 |
-| 56 | `frontend/src/pages/tenant/reports/ReportsContent.tsx` | 6 | `ReportsContent` | ArrowFunction | 21 |
-| 57 | `frontend/src/pages/user/dashboard/DashboardWelcome.tsx` | 8 | `DashboardWelcome` | ArrowFunction | 21 |
-| 58 | `frontend/src/pages/user/orders/BookingDetailHeader.tsx` | 7 | `BookingDetailHeader` | ArrowFunction | 21 |
-| 59 | `frontend/src/hooks/auth/login/useLoginPageState.ts` | 109 | `handleGoogleSuccess` | ArrowFunction | 20 |
-| 60 | `frontend/src/pages/tenant/occupancy/OccupancyContent.tsx` | 8 | `OccupancyContent` | ArrowFunction | 20 |
-| 61 | `frontend/src/pages/tenant/property-form/PropertyBasicFields.tsx` | 45 | `CategoryField` | ArrowFunction | 20 |
-| 62 | `frontend/src/pages/tenant/reports/ReportOrderItem.tsx` | 6 | `ReportOrderItem` | ArrowFunction | 20 |
-| 63 | `frontend/src/pages/tenant/rooms-page/RoomsListSection.tsx` | 16 | `RoomsListSection` | ArrowFunction | 20 |
-| 64 | `frontend/src/pages/tenant/property-form/PropertyFormHeader.tsx` | 5 | `PropertyFormHeader` | ArrowFunction | 19 |
-| 65 | `frontend/src/pages/tenant/reports/KPICard.tsx` | 10 | `KPICard` | ArrowFunction | 19 |
-| 66 | `frontend/src/pages/tenant/reports/ReportOrdersCard.tsx` | 7 | `ReportOrdersCard` | ArrowFunction | 19 |
-| 67 | `frontend/src/hooks/tenant/properties-list/usePropertiesFilters.ts` | 3 | `usePropertiesFilters` | ArrowFunction | 18 |
-| 68 | `frontend/src/pages/tenant/reports/ReportsFilterPanel.tsx` | 23 | `ReportsFilterPanel` | ArrowFunction | 18 |
-| 69 | `frontend/src/pages/tenant/reviews/TenantReviewCard.tsx` | 10 | `TenantReviewCard` | ArrowFunction | 18 |
-| 70 | `backend/src/services/tenantPropertyService.ts` | 82 | `updateProperty` | ArrowFunction | 17 |
-| 71 | `frontend/src/pages/tenant/property-form/PropertySubmitButton.tsx` | 4 | `PropertySubmitButton` | ArrowFunction | 17 |
-| 72 | `frontend/src/pages/user/profile/AvatarUploadSection.tsx` | 8 | `AvatarUploadSection` | ArrowFunction | 17 |
-| 73 | `frontend/src/pages/user/profile/useAvatarUpload.ts` | 23 | `useAvatarCropActions` | ArrowFunction | 17 |
-| 74 | `frontend/src/components/property/InlineDatePicker.tsx` | 17 | `InlineDatePicker` | ArrowFunction | 16 |
-| 75 | `frontend/src/pages/tenant/occupancy/OccupancyContent.tsx` | 77 | `renderContent` | ArrowFunction | 16 |
-| 76 | `frontend/src/pages/tenant/reports/ReportOrdersCard.tsx` | 27 | `ReportOrdersList` | ArrowFunction | 16 |
-| 77 | `frontend/src/pages/tenant/reviews/ReviewsHeader.tsx` | 4 | `ReviewsHeader` | ArrowFunction | 16 |
-| 78 | `frontend/src/pages/tenant/tenant-dashboard/HostDashboardHeader.tsx` | 4 | `HostDashboardHeader` | ArrowFunction | 16 |
-
-Kandidat prioritas jika ingin refactor lanjutan:
-
-- `frontend/src/components/tenant/room-form/RoomImageField.tsx`
-- `frontend/src/pages/user/booking/ReservationStepper.tsx`
-- `frontend/src/pages/tenant/rooms-page/RoomsListView.tsx`
-- `frontend/src/pages/tenant/properties-list/PropertiesListView.tsx`
-- `frontend/src/pages/tenant/property-form/PropertyImageField.tsx`
-- `backend/src/services/categoryService.ts`
-- `backend/src/services/tenantPropertyService.ts`
+| 16 | `frontend/src/pages/tenant/tenant-dashboard/RevenueTrendChart.tsx` | 9 | `RevenueTrendChart` | ArrowFunction | 67 |
+| 17 | `frontend/src/pages/tenant/categories/CategoryListView.tsx` | 51 | `CategoryListView` | ArrowFunction | 65 |
+| 18 | `frontend/src/pages/user/PropertyDetailPage.tsx` | 26 | `PropertyDetailView` | ArrowFunction | 60 |
+| 19 | `frontend/src/pages/user/saved-properties/SavedPropertyCard.tsx` | 14 | `SavedPropertyCard` | ArrowFunction | 60 |
+| 20 | `frontend/src/pages/user/orders/BookingPropertySummary.tsx` | 6 | `BookingPropertySummary` | ArrowFunction | 59 |
+| 21 | `frontend/src/pages/tenant/rooms-page/RoomsSummary.tsx` | 10 | `RoomsSummary` | ArrowFunction | 55 |
+| 22 | `frontend/src/pages/tenant/tenant-dashboard/TenantKpiGrid.tsx` | 10 | `TenantKpiGrid` | ArrowFunction | 55 |
+| 23 | `frontend/src/pages/user/orders/UserOrdersContent.tsx` | 16 | `UserOrdersContent` | ArrowFunction | 55 |
+| 24 | `frontend/src/pages/user/PaymentSuccessPage.tsx` | 6 | `PaymentSuccessPage` | ArrowFunction | 52 |
+| 25 | `frontend/src/pages/user/orders/BookingStatusTimeline.tsx` | 5 | `BookingStatusTimeline` | ArrowFunction | 50 |
+| 26 | `frontend/src/pages/tenant/vouchers/TenantVoucherList.tsx` | 14 | `TenantVoucherList` | ArrowFunction | 48 |
+| 27 | `frontend/src/components/property/PropertyGallery.tsx` | 11 | `PropertyGallery` | ArrowFunction | 47 |
+| 28 | `frontend/src/pages/tenant/occupancy/OccupancyContent.tsx` | 29 | `AvailabilitySummary` | ArrowFunction | 47 |
+| 29 | `frontend/src/components/tenant/room-form/RoomImageField.tsx` | 19 | `RoomImageField` | ArrowFunction | 46 |
+| 30 | `frontend/src/pages/tenant/PropertiesListPage.tsx` | 14 | `PropertiesListPage` | ArrowFunction | 46 |
+| 31 | `frontend/src/pages/user/orders/BookingPaymentPanel.tsx` | 6 | `BookingPaymentPanel` | ArrowFunction | 46 |
+| 32 | `backend/src/scripts/backfill.ts` | 3 | `backfill` | ArrowFunction | 44 |
+| 33 | `frontend/src/pages/tenant/property-form/PropertyLocationFields.tsx` | 6 | `PropertyLocationFields` | ArrowFunction | 43 |
+| 34 | `frontend/src/pages/user/reviews/EligibleReviewCard.tsx` | 10 | `EligibleReviewCard` | ArrowFunction | 42 |
+| 35 | `frontend/src/pages/user/reviews/ReviewSummaryCards.tsx` | 10 | `ReviewSummaryCards` | ArrowFunction | 41 |
+| 36 | `frontend/src/pages/tenant/RoomsPage.tsx` | 14 | `RoomsPageLayout` | ArrowFunction | 39 |
+| 37 | `frontend/src/pages/tenant/property-form/PropertyBasicFields.tsx` | 7 | `PropertyBasicFields` | ArrowFunction | 38 |
+| 38 | `frontend/src/pages/user/reviews/SubmittedReviewCard.tsx` | 9 | `SubmittedReviewCard` | ArrowFunction | 37 |
+| 39 | `backend/src/services/tenantProperty/dashboardStats.ts` | 35 | `buildRevenueTrend` | ArrowFunction | 35 |
+| 40 | `frontend/src/pages/user/booking/ReservationStepper.tsx` | 13 | `ReservationStepper` | ArrowFunction | 35 |
+| 41 | `frontend/src/pages/user/UserDashboardPage.tsx` | 12 | `UserDashboardPage` | ArrowFunction | 34 |
+| 42 | `frontend/src/pages/tenant/rooms-page/RoomsPageHeader.tsx` | 11 | `RoomsPageHeader` | ArrowFunction | 33 |
+| 43 | `frontend/src/pages/tenant/tenant-dashboard/TenantRevenuePanel.tsx` | 14 | `TenantRevenuePanel` | ArrowFunction | 33 |
+| 44 | `frontend/src/pages/tenant/property-form/PropertyBasicFields.tsx` | 67 | `RentalTypeField` | ArrowFunction | 31 |
+| 45 | `frontend/src/pages/tenant/rooms-page/RoomsFormSection.tsx` | 18 | `RoomsFormSection` | ArrowFunction | 31 |
+| 46 | `frontend/src/pages/user/dashboard/DashboardRecent.tsx` | 11 | `DashboardRecent` | ArrowFunction | 31 |
+| 47 | `frontend/src/pages/user/HomePage.tsx` | 149 | `PromosCta` | ArrowFunction | 31 |
+| 48 | `frontend/src/hooks/tenant/categories/useCategoryForm.ts` | 10 | `useCategoryForm` | ArrowFunction | 30 |
+| 49 | `frontend/src/lib/cropImage.ts` | 17 | `getCroppedImg` | ArrowFunction | 29 |
+| 50 | `frontend/src/components/common/navbar/ProfileDropdown.tsx` | 20 | `ProfileDropdownLinks` | ArrowFunction | 28 |
+| 51 | `frontend/src/pages/user/dashboard/DashboardReviewReminders.tsx` | 10 | `DashboardReviewReminders` | ArrowFunction | 27 |
+| 52 | `frontend/src/pages/tenant/CategoriesPage.tsx` | 17 | `CategoryPageView` | ArrowFunction | 26 |
+| 53 | `frontend/src/hooks/tenant/vouchers/useTenantVouchersPage.ts` | 7 | `useTenantVouchersPage` | ArrowFunction | 25 |
+| 54 | `backend/src/services/categoryService.ts` | 62 | `listCategories` | ArrowFunction | 24 |
+| 55 | `backend/src/services/tenantProperty/tenantPropertyFilters.ts` | 22 | `buildPropertyCreateData` | ArrowFunction | 24 |
+| 56 | `frontend/src/hooks/useSavedProperties.ts` | 21 | `useSavedPropertyActions` | ArrowFunction | 24 |
+| 57 | `backend/src/validations/voucherValidation.ts` | 24 | `validateVoucherRules` | FunctionDeclaration | 23 |
+| 58 | `frontend/src/components/user/search/CityField.tsx` | 15 | `CityField` | ArrowFunction | 23 |
+| 59 | `frontend/src/pages/tenant/DashboardPage.tsx` | 10 | `DashboardPage` | ArrowFunction | 23 |
+| 60 | `frontend/src/components/property/InlineAvailabilitySection.tsx` | 21 | `InlineAvailabilitySection` | ArrowFunction | 22 |
+| 61 | `frontend/src/pages/tenant/categories/CategoriesHeader.tsx` | 8 | `CategoriesHeader` | ArrowFunction | 22 |
+| 62 | `frontend/src/pages/tenant/properties-list/PropertiesHeader.tsx` | 5 | `PropertiesHeader` | ArrowFunction | 22 |
+| 63 | `frontend/src/pages/tenant/reviews/ReviewsSkeleton.tsx` | 3 | `ReviewsSkeleton` | ArrowFunction | 22 |
+| 64 | `frontend/src/pages/tenant/reviews/TenantReviewsContent.tsx` | 11 | `TenantReviewsContent` | ArrowFunction | 22 |
+| 65 | `frontend/src/pages/tenant/tenant-dashboard/TenantOperationsGrid.tsx` | 24 | `TenantOperationsGrid` | ArrowFunction | 22 |
+| 66 | `frontend/src/pages/user/booking/ManualProofUpload.tsx` | 11 | `ManualProofUpload` | ArrowFunction | 22 |
+| 67 | `frontend/src/pages/user/profile/ProfileContent.tsx` | 12 | `ProfileContent` | ArrowFunction | 22 |
+| 68 | `frontend/src/hooks/tenant/property-form/usePropertyFormState.ts` | 67 | `usePropertyFormLoader` | ArrowFunction | 21 |
+| 69 | `frontend/src/pages/tenant/orders/TenantOrdersContent.tsx` | 13 | `TenantOrdersContent` | ArrowFunction | 21 |
+| 70 | `frontend/src/pages/tenant/reports/ReportsContent.tsx` | 6 | `ReportsContent` | ArrowFunction | 21 |
+| 71 | `frontend/src/pages/tenant/vouchers/TenantVoucherForm.tsx` | 43 | `VoucherDiscountFields` | ArrowFunction | 21 |
+| 72 | `frontend/src/pages/user/dashboard/DashboardWelcome.tsx` | 8 | `DashboardWelcome` | ArrowFunction | 21 |
+| 73 | `frontend/src/pages/user/orders/BookingDetailHeader.tsx` | 7 | `BookingDetailHeader` | ArrowFunction | 21 |
+| 74 | `frontend/src/hooks/auth/login/useLoginPageState.ts` | 109 | `handleGoogleSuccess` | ArrowFunction | 20 |
+| 75 | `frontend/src/pages/tenant/occupancy/OccupancyContent.tsx` | 8 | `OccupancyContent` | ArrowFunction | 20 |
+| 76 | `frontend/src/pages/tenant/property-form/PropertyBasicFields.tsx` | 46 | `CategoryField` | ArrowFunction | 20 |
+| 77 | `frontend/src/pages/tenant/reports/ReportOrderItem.tsx` | 6 | `ReportOrderItem` | ArrowFunction | 20 |
+| 78 | `frontend/src/pages/tenant/rooms-page/RoomsListSection.tsx` | 16 | `RoomsListSection` | ArrowFunction | 20 |
+| 79 | `backend/src/services/voucherService.ts` | 193 | `buildVoucherUpdateData` | ArrowFunction | 19 |
+| 80 | `frontend/src/components/user/order-card/OrderPaymentInfo.tsx` | 7 | `OrderPaymentInfo` | ArrowFunction | 19 |
+| 81 | `frontend/src/pages/tenant/property-form/PropertyFormHeader.tsx` | 5 | `PropertyFormHeader` | ArrowFunction | 19 |
+| 82 | `frontend/src/pages/tenant/reports/KPICard.tsx` | 10 | `KPICard` | ArrowFunction | 19 |
+| 83 | `frontend/src/pages/tenant/reports/ReportOrdersCard.tsx` | 7 | `ReportOrdersCard` | ArrowFunction | 19 |
+| 84 | `backend/src/services/voucherService.ts` | 37 | `assignVoucherToUser` | ArrowFunction | 18 |
+| 85 | `frontend/src/pages/tenant/reports/ReportsFilterPanel.tsx` | 23 | `ReportsFilterPanel` | ArrowFunction | 18 |
+| 86 | `frontend/src/pages/tenant/reviews/TenantReviewCard.tsx` | 10 | `TenantReviewCard` | ArrowFunction | 18 |
+| 87 | `backend/src/services/categoryService.ts` | 99 | `updateCategory` | ArrowFunction | 17 |
+| 88 | `backend/src/services/tenantPropertyService.ts` | 82 | `updateProperty` | ArrowFunction | 17 |
+| 89 | `frontend/src/components/common/ConfirmModal.tsx` | 33 | `ConfirmModalBody` | ArrowFunction | 17 |
+| 90 | `frontend/src/components/tenant/room-form/RoomImageDropzone.tsx` | 10 | `RoomImageDropzone` | ArrowFunction | 17 |
+| 91 | `frontend/src/hooks/user/profile/useAvatarUpload.ts` | 23 | `useAvatarCropActions` | ArrowFunction | 17 |
+| 92 | `frontend/src/pages/tenant/property-form/PropertySubmitButton.tsx` | 4 | `PropertySubmitButton` | ArrowFunction | 17 |
+| 93 | `frontend/src/pages/user/profile/AvatarUploadSection.tsx` | 8 | `AvatarUploadSection` | ArrowFunction | 17 |
+| 94 | `frontend/src/components/property/InlineDatePicker.tsx` | 17 | `InlineDatePicker` | ArrowFunction | 16 |
+| 95 | `frontend/src/components/tenant/room-form/RoomGalleryGrid.tsx` | 14 | `RoomGalleryGrid` | ArrowFunction | 16 |
+| 96 | `frontend/src/components/tenant/room-form/RoomGalleryGrid.tsx` | 74 | `GalleryIconButton` | ArrowFunction | 16 |
+| 97 | `frontend/src/components/ui/Button.tsx` | 28 | `Button` | ArrowFunction | 16 |
+| 98 | `frontend/src/hooks/auth/reset-password/resetPasswordActions.ts` | 14 | `resetPasswordAction` | ArrowFunction | 16 |
+| 99 | `frontend/src/hooks/user/booking/useBookingPageState.ts` | 14 | `useBookingPageState` | ArrowFunction | 16 |
+| 100 | `frontend/src/pages/tenant/occupancy/OccupancyContent.tsx` | 77 | `renderContent` | ArrowFunction | 16 |
+| 101 | `frontend/src/pages/tenant/reports/ReportOrdersCard.tsx` | 27 | `ReportOrdersList` | ArrowFunction | 16 |
+| 102 | `frontend/src/pages/tenant/reviews/ReviewsHeader.tsx` | 4 | `ReviewsHeader` | ArrowFunction | 16 |
+| 103 | `frontend/src/pages/tenant/tenant-dashboard/TenantDashboardHeader.tsx` | 4 | `TenantDashboardHeader` | ArrowFunction | 16 |
 
 Rekomendasi: refactor hanya dilakukan jika pemecahan function/component membuat kode lebih jelas. Banyak kandidat frontend berupa JSX presentasional panjang, sehingga tetap perlu penilaian manual.
 
 ### Log Production dan Debugger
 
-Status: sesuai.
+Status: terdapat minor residue.
 
-Tidak ditemukan `console.*` atau `debugger` aktif pada source utama. `console.log` dan `console.table` pada `tools/audit-function-length.js` diterima karena script tersebut adalah CLI reporting tool.
+Ditemukan `console.error` aktif pada `webhookRoutes.ts`. Disarankan diganti dengan *logger* standar untuk *production*.
 
 ### Type Safety
 
-Status: sesuai.
+Status: terdapat minor residue.
 
-Tidak ditemukan `any`, `as any`, `unknown as`, atau `as unknown` pada area audit. Type assertion yang tersisa tidak memakai `any` dan masih dalam batas wajar TypeScript.
+Ditemukan `as any` pada `tenantPropertyFilters.ts` saat menangani kueri dinamis Prisma. Sisa source lainnya bersih dari *type assertion* yang memaksa.
 
 ## REST API Guidelines
 

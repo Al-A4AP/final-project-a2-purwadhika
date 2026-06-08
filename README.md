@@ -25,8 +25,8 @@ Audit dokumentasi diperbarui pada 08 Juni 2026 dengan acuan `docs/guidelines/PUR
 | Fitur 1                        | Selesai                 | Homepage, auth/profile, katalog properti, detail properti, tenant CRUD property/room/category, availability, peak season |
 | Fitur 2                        | Selesai                 | Booking, manual payment, Midtrans, tenant order management, review, laporan pendapatan/properti/okupasi                  |
 | File source >200 baris         | Sesuai                  | Tidak ditemukan pada `backend/src`, `backend/tests`, `frontend/src`                                                      |
-| Function maksimal 15 baris     | Dipantau                | `npm run audit:functions` tersedia sebagai advisory tool; hasil terbaru 87 kandidat manual review                        |
-| `any`, `debugger`, `console.*` | Sesuai                  | Tidak ditemukan pada source utama                                                                                        |
+| Function maksimal 15 baris     | Dipantau                | `npm run audit:functions` tersedia sebagai advisory tool; hasil terbaru 103 kandidat manual review                        |
+| `any`, `debugger`, `console.*` | Minor Residue           | Ditemukan `as any` di `tenantPropertyFilters.ts` dan `console.error` di `webhookRoutes.ts`                                |
 | Frontend lint/build            | Lulus                   | `npm.cmd run lint` dan `npm.cmd run build` lulus                                                                         |
 | Backend build                  | Lulus                   | `npm.cmd run build` lulus                                                                                                |
 | Ownership test                 | Lulus                   | `npm.cmd run test:ownership` lulus, 7/7                                                                                  |
@@ -206,7 +206,7 @@ Backend:
 - `CRON_SECRET`
 - `ALLOWED_ORIGINS`
 - `FRONTEND_URL`
-- `LOCATIONIQ_API_KEY`
+- `LOCATIONIQ_TOKEN`
 
 Frontend:
 

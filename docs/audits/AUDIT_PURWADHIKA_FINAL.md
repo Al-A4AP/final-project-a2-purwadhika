@@ -37,8 +37,8 @@ Seluruh temuan browser terbaru pada 07 Juni 2026 telah dieksekusi dan diimplemen
 | Backend build | Lulus |
 | Backend ownership test | Lulus, 7/7 |
 | File source >200 baris | Tidak ditemukan pada `backend/src`, `backend/tests`, `frontend/src` |
-| `any`, `debugger`, `console.*` | Tidak ditemukan pada source utama |
-| Function length audit advisory | 87 kandidat manual review; bukan build blocker |
+| `any`, `debugger`, `console.*` | Terdapat minor residue (`as any`, `console.error`) |
+| Function length audit advisory | 103 kandidat manual review; bukan build blocker |
 | Pemisahan Hak Akses UI (Role UI) | Lulus (Akses reservasi Tenant 100% terkunci) |
 | Konsistensi Desain (UX) | Lulus (Komponen global rapi & arsitektur *frontend* solid) |
 
@@ -228,7 +228,7 @@ Backend terstruktur menjadi `routes`, `controllers`, `services`, `middlewares`, 
 
 Status: terpenuhi dengan catatan advisory.
 
-Tidak ada file source utama >200 baris, tidak ada `any`, tidak ada `debugger`, dan tidak ada `console.*` pada source utama. Function-length audit menemukan 87 kandidat manual review. Hasil ini tidak menjadi hard rule karena banyak kandidat berupa JSX presentasional panjang yang perlu dinilai manual.
+Clean code umumnya terjaga, namun terdapat residu: `as any` di `tenantPropertyFilters.ts` dan `console.error` di `webhookRoutes.ts`. Function-length audit menemukan 103 kandidat manual review. Hasil ini tidak menjadi hard rule karena banyak kandidat berupa JSX presentasional panjang yang perlu dinilai manual.
 
 ## Struktur Dokumentasi
 

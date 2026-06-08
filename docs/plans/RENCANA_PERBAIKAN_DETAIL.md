@@ -15,7 +15,7 @@ File ini menyimpan rencana aktif dan sisa rekomendasi yang belum dilaksanakan at
 | Item | Status |
 | --- | --- |
 | File source utama <200 baris | Selesai |
-| Hapus `any`, `debugger`, dan `console.*` dari source utama | Selesai |
+| Hapus `any`, `debugger`, dan `console.*` dari source utama | Sebagian (sisa `tenantPropertyFilters.ts` dan `webhookRoutes.ts`) |
 | Validasi query backend | Selesai |
 | Endpoint resource-oriented utama | Selesai |
 | Update frontend ke endpoint utama | Selesai |
@@ -28,7 +28,7 @@ File ini menyimpan rencana aktif dan sisa rekomendasi yang belum dilaksanakan at
 | README hanya di root dan `docs` | Selesai secara dokumentasi |
 | Vercel Serverless Proxy (atasi Cross-Origin Cookie & CSRF) | Selesai |
 | Webhook Cron Jobs (ganti `node-cron` persisten) | Selesai |
-| Function-length audit otomatis advisory | Selesai |
+| Function-length audit otomatis advisory | Selesai (103 kandidat terpantau) |
 | Explore desktop sidebar filter dan mobile auto-close filter | Selesai |
 | Tenant reports/reviews/property performance pagination | Selesai |
 
@@ -79,7 +79,7 @@ Prioritas: Opsional clean code jika mentor menilai aturan 15 baris sangat ketat
 
 Masalah:
 
-Script `npm run audit:functions` menemukan 87 kandidat manual review: 84 di `frontend/src` dan 3 di `backend/src`. Mayoritas kandidat frontend adalah JSX presentasional panjang, sehingga perlu review manual sebelum dipecah.
+Script `npm run audit:functions` menemukan 103 kandidat manual review. Mayoritas kandidat frontend adalah JSX presentasional panjang, sehingga perlu review manual sebelum dipecah.
 
 Prioritas kandidat awal:
 
@@ -157,12 +157,33 @@ Tahapan aman:
 4. Migrasikan frontend dari localStorage ke API dengan fallback local cache.
 5. Uji login/logout, saved/unsaved, refresh page, dan multi-device.
 
+### 5. Prioritas Tindakan Lanjutan (Audit 09 Juni 2026)
+
+Berdasarkan audit otomatis terbaru, beberapa rencana perbaikan baru harus ditambahkan:
+
+**Prioritas P0 (Blocker Production):**
+1. Sinkronkan nilai `all_time` di `queryValidation.ts` agar laporan Dasbor Tenant dapat diakses penuh.
+2. Hilangkan `as any` di `tenantPropertyFilters.ts` dan `console.error` di `webhookRoutes.ts`.
+3. Pastikan deployment Backend (Vercel Serverless) aman dari panggilan paksa `app.listen` di `server.ts`.
+
+**Prioritas P1 (UX & Ops):**
+1. Sinkronkan dokumen *environment variables* (`LOCATIONIQ_TOKEN`, `VITE_MIDTRANS_CLIENT_KEY`).
+2. Rapikan UX form pemesanan mandiri jika profil user kosong.
+3. Update validasi Voucher (maks 8 karakter, max persen, dll) sesuai *requirements*.
+4. Tambah *tests* yang spesifik untuk validasi di atas.
+
+**Prioritas P2 (Refactor & Enhancement):**
+1. Refactor manual 103 kandidat function >15 baris.
+2. Jadikan kategori Explore dinamis.
+3. Lakukan Browser QA final.
+
 ## Rekomendasi Urutan
 
-1. Cleanup legacy REST alias jika ingin standar REST paling ketat.
-2. Review kandidat function-length advisory bila mentor meminta kepatuhan 15 baris lebih ketat.
-3. Pindahkan token blacklist ke storage persistent jika backend multi-instance.
-4. Pertimbangkan saved properties backend hanya jika fitur akun lintas device dibutuhkan.
+1. Selesaikan P0 (Query Validation `all_time`, Clean Code residue, Serverless `app.listen`).
+2. Selesaikan P1 (Env docs, UX Booking, Voucher Validation).
+3. Cleanup legacy REST alias jika ingin standar REST paling ketat.
+4. Pindahkan token blacklist ke storage persistent jika backend multi-instance.
+5. Pertimbangkan saved properties backend hanya jika fitur akun lintas device dibutuhkan.
 
 ## Status Verifikasi Terakhir
 
@@ -170,5 +191,5 @@ Tahapan aman:
 - Frontend build: lulus.
 - Backend build: lulus.
 - Ownership test: lulus, 7/7.
-- Function-length audit advisory: 87 kandidat manual review.
-- Scan clean code utama: tidak ada `any`, `debugger`, `console.*`, dan tidak ada file source utama >200 baris.
+- Function-length audit advisory: 103 kandidat manual review.
+- Scan clean code utama: tidak ada file source utama >200 baris, minor residue `any` & `console.error` dicatat di `RENCANA_PERBAIKAN_DETAIL`.
