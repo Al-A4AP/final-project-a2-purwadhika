@@ -3,6 +3,7 @@ import type { FC } from 'react';
 interface GoogleAuthButtonProps {
   label: string;
   onClick: () => void;
+  disabled?: boolean;
 }
 
 const GoogleIcon = () => (
@@ -14,8 +15,8 @@ const GoogleIcon = () => (
   </svg>
 );
 
-export const GoogleAuthButton: FC<GoogleAuthButtonProps> = ({ label, onClick }) => (
-  <button type="button" onClick={onClick} className="flex w-full cursor-pointer items-center justify-center gap-2 rounded-lg border border-gray-300 bg-white py-2.5 font-semibold text-gray-700 transition hover:bg-gray-50 dark:border-slate-600 dark:bg-slate-800 dark:text-gray-200 dark:hover:bg-slate-700">
+export const GoogleAuthButton: FC<GoogleAuthButtonProps> = ({ label, onClick, disabled = false, }) => (
+  <button type="button" onClick={onClick} disabled={disabled} className="flex w-full cursor-pointer items-center justify-center gap-2 rounded-lg border border-gray-300 bg-white py-2.5 font-semibold text-gray-700 transition hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-50 disabled:hover:bg-white dark:border-slate-600 dark:bg-slate-800 dark:text-gray-200 dark:hover:bg-slate-700 dark:disabled:hover:bg-slate-800">
     <GoogleIcon />
     {label}
   </button>
