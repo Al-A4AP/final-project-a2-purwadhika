@@ -1,4 +1,4 @@
-import type { Prisma, Property } from '@prisma/client';
+import type { Prisma, Property, RentalType } from '@prisma/client';
 import type { GetTenantPropertiesOptions, NormalizedTenantPropertyOptions, PropertyFormData } from './tenantPropertyTypes';
 
 const sortableColumns = new Set(['created_at', 'name', 'city', 'updated_at', 'min_price']);
@@ -22,7 +22,7 @@ export const buildTenantPropertyWhere = (tenantId: string, options: NormalizedTe
 export const buildPropertyCreateData = (tenantId: string, data: PropertyFormData, featuredImageUrl?: string): Prisma.PropertyCreateInput => ({
   tenant: { connect: { id: tenantId } },
   category: { connect: { id: data.categoryId } },
-  rental_type: (data.rental_type as any) || 'PER_ROOM',
+  rental_type: (data.rental_type as RentalType) || 'PER_ROOM',
   name: data.name!,
   description: data.description!,
   address: data.address!,
@@ -46,7 +46,7 @@ export const buildPropertyCreateData = (tenantId: string, data: PropertyFormData
 
 export const buildPropertyUpdateData = (data: PropertyFormData, existing: Property, featuredImageUrl?: string) => ({
   ...buildPropertyTextUpdate(data, existing),
-  rental_type: (data.rental_type as any) || existing.rental_type,
+  rental_type: (data.rental_type as RentalType) || existing.rental_type,
   amenities: data.amenities !== undefined ? parseAmenities(data.amenities) : existing.amenities,
   ...buildCoordinateUpdate(data, existing),
   featured_image_url: featuredImageUrl,

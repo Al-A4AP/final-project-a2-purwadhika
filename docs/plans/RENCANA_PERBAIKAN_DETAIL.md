@@ -159,18 +159,7 @@ Tahapan aman:
 
 ### 5. Prioritas Tindakan Lanjutan (Audit 09 Juni 2026)
 
-Berdasarkan audit otomatis terbaru, beberapa rencana perbaikan baru harus ditambahkan:
-
-**Prioritas P0 (Blocker Production):**
-1. Sinkronkan nilai `all_time` di `queryValidation.ts` agar laporan Dasbor Tenant dapat diakses penuh.
-2. Hilangkan `as any` di `tenantPropertyFilters.ts` dan `console.error` di `webhookRoutes.ts`.
-3. Pastikan deployment Backend (Vercel Serverless) aman dari panggilan paksa `app.listen` di `server.ts`.
-
-**Prioritas P1 (UX & Ops):**
-1. Sinkronkan dokumen *environment variables* (`LOCATIONIQ_TOKEN`, `VITE_MIDTRANS_CLIENT_KEY`).
-2. Rapikan UX form pemesanan mandiri jika profil user kosong.
-3. Update validasi Voucher (maks 8 karakter, max persen, dll) sesuai *requirements*.
-4. Tambah *tests* yang spesifik untuk validasi di atas.
+Berdasarkan audit otomatis terbaru, seluruh perbaikan prioritas produksi (P0 & P1) telah selesai dan diverifikasi. Sisa tindakan merupakan pengembangan lanjutan dan perapian:
 
 **Prioritas P2 (Refactor & Enhancement):**
 1. Refactor manual 103 kandidat function >15 baris.

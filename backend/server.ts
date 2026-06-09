@@ -52,7 +52,7 @@ app.use((_req, res) => {
 app.use(errorHandler);
 
 // Server listen — hanya di local/development, tidak di Vercel Serverless
-if (env.NODE_ENV !== 'test') {
+if (env.NODE_ENV !== 'test' && !process.env.VERCEL) {
   app.listen(PORT);
 }
 

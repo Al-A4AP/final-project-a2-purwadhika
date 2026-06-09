@@ -1,7 +1,7 @@
 import { OrderStatus } from '@prisma/client';
 import { z } from 'zod';
 
-const revenuePeriods = ['weekly', 'monthly', 'quarterly', 'six_months', 'yearly'] as const;
+const revenuePeriods = ['weekly', 'monthly', 'quarterly', 'six_months', 'yearly', 'all_time'] as const;
 const orderDirections = ['asc', 'desc'] as const;
 const orderSortFields = ['created_at', 'check_in_date', 'check_out_date', 'total_price', 'order_number'] as const;
 

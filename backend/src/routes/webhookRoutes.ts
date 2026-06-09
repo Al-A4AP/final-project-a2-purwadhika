@@ -29,7 +29,6 @@ router.post('/cron', async (req, res) => {
 
     res.json({ success: true, message: 'Semua tugas cron berhasil dijalankan' });
   } catch (error) {
-    console.error('Error executing cron jobs via webhook:', error);
     res.status(500).json({ success: false, message: 'Gagal menjalankan tugas cron' });
   }
 });
