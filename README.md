@@ -146,6 +146,11 @@ Frontend:
 - Lucide React
 - Leaflet/React Leaflet
 - Google OAuth client
+- Axios
+- Motion (Framer Motion)
+- React Hot Toast
+- React Easy Crop
+- jwt-decode
 
 Backend:
 
@@ -160,6 +165,10 @@ Backend:
 - Webhook Serverless Cron (pengganti node-cron)
 - Zod
 - express-rate-limit
+- Bcrypt.js (Password Hashing)
+- JSONWebToken (JWT Auth)
+- Multer (File Upload Handling)
+- Cookie Parser & CORS
 
 ## Setup Local
 
