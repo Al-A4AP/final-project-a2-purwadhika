@@ -6,7 +6,13 @@ export const loginSchema = z.object({
 });
 
 export const registerSchema = z.object({
-  name: z.string().min(3, 'Nama minimal 3 karakter'),
+  name: z.string()
+    .trim()
+    .min(1, 'Nama wajib diisi')
+    .max(100, 'Nama maksimal 100 karakter')
+    .regex(/^[a-zA-Z\s]+$/, 'Nama hanya boleh berisi huruf dan spasi')
+    .transform((val) => val.replace(/\s+/g, ' '))
+    .refine((val) => val.length >= 3, 'Nama minimal 3 karakter'),
   email: z.string().email('Email tidak valid'),
   role: z.enum(['USER', 'TENANT']).default('USER'),
 });
