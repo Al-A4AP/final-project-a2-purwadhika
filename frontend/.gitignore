@@ -23,6 +23,8 @@ dist-ssr
 *.sln
 *.sw?
 .agents/
+test-lifecycle.ts
+test-super-refine.ts
 
 .env
 *.local.md

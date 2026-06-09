@@ -32,13 +32,14 @@ Audit dokumentasi diperbarui pada 09 Juni 2026 dengan acuan `docs/guidelines/PUR
 | Ownership test                 | Lulus                   | `npm.cmd run test:ownership` lulus, 7/7                                                                                  |
 | REST API                       | Sesuai pada jalur utama | Legacy alias masih aktif untuk backward compatibility                                                                    |
 | Browser storage                | Aman                    | Auth token tidak disimpan di localStorage                                                                                |
-|                                |
+| Zod Form Validation            | Selesai                 | Bug resolver ditangani dengan Pure Custom Resolver tanpa menyentuh dependency eksternal                                  |
 
 Laporan lengkap tersedia di:
 
 - [`docs/audits/AUDIT_PURWADHIKA_FINAL.md`](./docs/audits/AUDIT_PURWADHIKA_FINAL.md)
 - [`docs/audits/AUDIT_CLEAN_CODE_REST_API_GUIDELINES.md`](./docs/audits/AUDIT_CLEAN_CODE_REST_API_GUIDELINES.md)
 - [`docs/audits/AUDIT_OWNERSHIP_SECURITY.md`](./docs/audits/AUDIT_OWNERSHIP_SECURITY.md)
+- [`docs/audits/AUDIT_ZOD_RESOLVER_BUG.md`](./docs/audits/AUDIT_ZOD_RESOLVER_BUG.md)
 - [`docs/plans/RENCANA_PERBAIKAN_DETAIL.md`](./docs/plans/RENCANA_PERBAIKAN_DETAIL.md)
 
 ## Kebijakan Dokumentasi

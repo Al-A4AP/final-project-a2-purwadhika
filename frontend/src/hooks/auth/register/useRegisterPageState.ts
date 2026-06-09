@@ -1,10 +1,10 @@
 import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { useLocation, useNavigate } from "react-router-dom";
-import { zodResolver } from "@hookform/resolvers/zod";
 import { useAuthStore } from "@/stores/authStore";
 import { getAuthRoleFromPath, type TargetAuthRole } from "@/lib/authRole";
-import { registerSchema, type RegisterInput } from "@/validations/auth";
+import { type RegisterInput } from "@/validations/auth";
+import { registerFormResolver } from "./registerFormResolver";
 import type { Role, User } from "@/types";
 import type { RegisterPageState } from "./registerTypes";
 import { useRegisterGoogle } from "./useRegisterGoogle";
@@ -15,7 +15,7 @@ const selectSetUser = (state: { setUser: (user: User | null) => void }) => state
 export const useRegisterPageState = (targetRole?: TargetAuthRole): RegisterPageState => {
   const role = useRegisterRole(targetRole);
   const defaultRole: Role = role || "USER";
-  const form = useForm<RegisterInput>({ resolver: zodResolver(registerSchema), defaultValues: { role: defaultRole } });
+  const form = useForm<RegisterInput>({ resolver: registerFormResolver, defaultValues: { role: defaultRole } });
   const [registeredEmail, setRegisteredEmail] = useState<string | null>(null);
   const navigate = useNavigate();
   const setUser = useAuthStore(selectSetUser);

@@ -38,7 +38,7 @@ README di folder `frontend` dan `backend` sudah dihapus oleh user dan tidak dibu
 | REST API                       | Jalur utama sesuai resource-oriented; legacy alias masih dicatat       |
 | Ownership                      | Baik dan teruji                                                        |
 | Browser storage                | Tidak ada JWT auth token di localStorage                               |
-|                                |
+| Zod Form Validation            | Diselesaikan via Pure Custom Resolver tanpa menyentuh dependency luar  |
 
 ## Catatan Clean Code
 
