@@ -53,10 +53,23 @@ export const uploadPaymentProof = async (orderId: string, userId: string, imageU
 
 const buildOrderContext = async (data: CreateOrderData) => {
   await validateUser(data.userId);
+  await validateActiveWaitingPaymentOrders(data.userId);
   const dates = parseStayDates(data.check_in_date, data.check_out_date);
   validateDates(dates.checkIn, dates.checkOut);
   return { ...data, ...dates, guests: pickGuestCounts(data), nights: getNights(dates.checkIn, dates.checkOut) };
 };
+
+const MAX_ACTIVE_WAITING_PAYMENT_ORDERS = 3;
+
+const validateActiveWaitingPaymentOrders = async (userId: string) => {
+  const count = await prisma.order.count({
+    where: { userId, status: OrderStatus.WAITING_PAYMENT },
+  });
+  if (count >= MAX_ACTIVE_WAITING_PAYMENT_ORDERS) {
+    throw new AppError('Anda masih memiliki 3 pesanan yang menunggu pembayaran. Selesaikan atau batalkan salah satu pesanan terlebih dahulu.', 400);
+  }
+};
+
 
 const executeOrderTransaction = (context: OrderContext) =>
   prisma.$transaction(async (tx) => {

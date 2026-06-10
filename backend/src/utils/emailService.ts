@@ -2,6 +2,16 @@ import nodemailer from "nodemailer";
 import { env } from "../config/env";
 import { getEmailWrapper } from "./emailTemplate";
 
+const escapeHtml = (unsafe: unknown): string => {
+  if (typeof unsafe !== "string") return String(unsafe);
+  return unsafe
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#39;");
+};
+
 const transporter = nodemailer.createTransport({
   host: env.EMAIL_HOST,
   port: env.EMAIL_PORT,
@@ -109,9 +119,9 @@ const buildOrderDetailTable = (data: OrderConfirmationData) => `
 
 const orderDetailRows = (data: OrderConfirmationData) =>
   [
-    ["Nomor Order:", `#${data.orderNumber}`, false],
-    ["Akomodasi:", data.propertyName, false],
-    ["Tipe Kamar:", data.roomType, false],
+    ["Nomor Order:", `#${escapeHtml(data.orderNumber)}`, false],
+    ["Akomodasi:", escapeHtml(data.propertyName), false],
+    ["Tipe Kamar:", escapeHtml(data.roomType), false],
     ["Check-in:", formatEmailDate(data.checkIn), false],
     ["Check-out:", formatEmailDate(data.checkOut), false],
     ["Total Biaya:", formatEmailPrice(data.totalPrice), true],
@@ -149,7 +159,7 @@ export const sendPaymentConfirmationEmail = async (
     `
     <h2>Pembayaran Diterima & Dikonfirmasi</h2>
     <p>Halo,</p>
-    <p>Pembayaran Anda untuk order <strong>#${orderNumber}</strong> telah berhasil dikonfirmasi oleh pemilik akomodasi (tenant).</p>
+    <p>Pembayaran Anda untuk order <strong>#${escapeHtml(orderNumber)}</strong> telah berhasil dikonfirmasi oleh pemilik akomodasi (tenant).</p>
     <p>Status pemesanan Anda kini telah berubah menjadi <strong>Dikonfirmasi (Processed)</strong>. Silakan periksa kembali rincian pemesanan Anda pada halaman dashboard pengguna.</p>
     <p>Terima kasih telah mempercayai PURWALOKA!</p>
   `,
@@ -171,7 +181,7 @@ export const sendBookingReminderEmail = async (
     `
     <h2>Pengingat Jadwal Check-in Besok</h2>
     <p>Halo,</p>
-    <p>Ini adalah pengingat bahwa jadwal menginap Anda untuk properti <strong>${propertyName}</strong> (Order <strong>#${orderNumber}</strong>) adalah besok.</p>
+    <p>Ini adalah pengingat bahwa jadwal menginap Anda untuk properti <strong>${escapeHtml(propertyName)}</strong> (Order <strong>#${escapeHtml(orderNumber)}</strong>) adalah besok.</p>
     <p>Harap persiapkan dokumen penting Anda dan hubungi kontak properti jika membutuhkan bantuan panduan arah atau proses check-in.</p>
     <p>Semoga perjalanan dan masa menginap Anda menyenangkan!</p>
   `,
@@ -200,10 +210,10 @@ export const sendCancellationEmail = async (
     `
     <h2>Pembatalan Transaksi Pemesanan</h2>
     <p>Halo,</p>
-    <p>Kami ingin menginformasikan bahwa pesanan Anda dengan nomor <strong>#${orderNumber}</strong> telah dibatalkan.</p>
+    <p>Kami ingin menginformasikan bahwa pesanan Anda dengan nomor <strong>#${escapeHtml(orderNumber)}</strong> telah dibatalkan.</p>
     <div style="background-color: #f8fafc; border-left: 4px solid #2980B9; padding: 15px; margin: 20px 0; border-radius: 4px;">
       <p style="margin: 0; font-weight: bold; color: #2980B9;">Alasan Pembatalan:</p>
-      <p style="margin: 5px 0 0 0; color: #475569;">${reason}</p>
+      <p style="margin: 5px 0 0 0; color: #475569;">${escapeHtml(reason)}</p>
     </div>
     ${refundInfo}
     <p>Jika pembatalan disebabkan oleh habisnya batas waktu pembayaran, Anda masih dapat mencari akomodasi lain yang tersedia dan melakukan pemesanan ulang.</p>
@@ -227,9 +237,9 @@ export const sendManualRefundTenantEmail = async (
     <p>Tamu telah membatalkan pesanan yang sebelumnya telah memiliki bukti pembayaran.</p>
     <p>Mohon melakukan pengembalian dana (refund) kepada tamu sesuai dengan kebijakan properti Anda, karena transaksi ini dilakukan secara manual di luar sistem pembayaran otomatis.</p>
     <table style="width: 100%; border-collapse: collapse; margin: 20px 0;">
-      <tr><td style="padding: 8px 0; color: #64748b; width: 150px;">Nomor Order:</td><td style="padding: 8px 0; font-weight: bold;">#${orderNumber}</td></tr>
-      <tr><td style="padding: 8px 0; color: #64748b;">Akomodasi:</td><td style="padding: 8px 0; font-weight: bold;">${propertyName}</td></tr>
-      <tr><td style="padding: 8px 0; color: #64748b;">Nama Tamu:</td><td style="padding: 8px 0; font-weight: bold;">${guestName}</td></tr>
+      <tr><td style="padding: 8px 0; color: #64748b; width: 150px;">Nomor Order:</td><td style="padding: 8px 0; font-weight: bold;">#${escapeHtml(orderNumber)}</td></tr>
+      <tr><td style="padding: 8px 0; color: #64748b;">Akomodasi:</td><td style="padding: 8px 0; font-weight: bold;">${escapeHtml(propertyName)}</td></tr>
+      <tr><td style="padding: 8px 0; color: #64748b;">Nama Tamu:</td><td style="padding: 8px 0; font-weight: bold;">${escapeHtml(guestName)}</td></tr>
       <tr><td style="padding: 8px 0; color: #64748b;">Check-in:</td><td style="padding: 8px 0; font-weight: bold;">${new Date(checkInDate).toLocaleDateString("id-ID", { day: "numeric", month: "long", year: "numeric" })}</td></tr>
     </table>
     <p>Anda dapat berkomunikasi dengan tamu untuk detail pengembalian dana.</p>
@@ -248,10 +258,10 @@ export const sendPaymentRejectionEmail = async (
     `
     <h2>Bukti Pembayaran Ditolak</h2>
     <p>Halo,</p>
-    <p>Bukti pembayaran yang Anda unggah untuk nomor pesanan <strong>#${orderNumber}</strong> ditolak karena alasan berikut:</p>
+    <p>Bukti pembayaran yang Anda unggah untuk nomor pesanan <strong>#${escapeHtml(orderNumber)}</strong> ditolak karena alasan berikut:</p>
     <div style="background-color: #f8fafc; border-left: 4px solid #D4AC0D; padding: 15px; margin: 20px 0; border-radius: 4px;">
       <p style="margin: 0; font-weight: bold; color: #D4AC0D;">Alasan Penolakan:</p>
-      <p style="margin: 5px 0 0 0; color: #475569;">${reason}</p>
+      <p style="margin: 5px 0 0 0; color: #475569;">${escapeHtml(reason)}</p>
     </div>
     <p><strong>Penting:</strong> Status pesanan Anda telah dikembalikan menjadi <strong>Menunggu Pembayaran</strong>.</p>
     <p>Silakan masuk ke dashboard akun Anda untuk mengunggah ulang bukti pembayaran yang valid sebelum batas waktu pembayaran Anda berakhir untuk mencegah pembatalan otomatis.</p>
