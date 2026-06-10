@@ -19,9 +19,9 @@ export const createCheckoutPayload = (property: PropertyDetail, room: Room, quer
 
 const buildGuestPayload = (identity: BookingGuestIdentity) => ({
   booking_for_self: identity.bookingForSelf,
-  guest_domicile_address: identity.domicileAddress || undefined,
   guest_email: identity.email || undefined,
   guest_ktp_address: identity.ktpAddress,
+  guest_ktp_number: identity.ktpNumber,
   guest_legal_name: identity.legalName,
   guest_name: identity.name || undefined,
   guest_phone: identity.phone,

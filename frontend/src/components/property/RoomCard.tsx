@@ -2,6 +2,7 @@ import type { FC, KeyboardEvent, ReactNode } from 'react';
 import type { Room } from '@/types';
 import { AlertTriangle, BedDouble } from 'lucide-react';
 import { formatPrice } from '@/lib/formatters';
+import { getBlockedReasonLabel } from '@/hooks/user/property-detail/propertyDetailAccess';
 import { AmenitiesList } from './AmenitiesList';
 
 type PriceDay = { date: string; price: number; isPeak: boolean; rateName?: string };
@@ -145,8 +146,7 @@ const enabledCardClass = 'cursor-pointer hover:border-slate-300 hover:shadow-md 
 
 const getBookingLabel = (room: Room, reason?: string) => {
   if (room.is_available === false) return getUnavailableLabel(room);
-  if (reason) return reason.includes('verifikasi') ? 'Verifikasi Email' : 'Login';
-  return 'Pesan';
+  return getBlockedReasonLabel(reason, 'Pesan');
 };
 
 const getUnavailableLabel = (room: Room) =>

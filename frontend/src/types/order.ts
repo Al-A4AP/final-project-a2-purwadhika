@@ -25,6 +25,7 @@ export interface Order {
   guest_phone?: string | null;
   guest_email?: string | null;
   guest_ktp_address?: string | null;
+  guest_ktp_number?: string | null;
   guest_domicile_address?: string | null;
   discount_amount?: number;
   referral_code?: string | null;

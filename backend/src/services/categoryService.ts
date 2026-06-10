@@ -25,32 +25,26 @@ const buildOrderBy = (
     sortOrder === "desc" ? "desc" : "asc",
 });
 
-const buildNameWhere = (
-  name: string,
-  tenantId: string,
-  exceptId?: string,
-): Prisma.PropertyCategoryWhereInput => ({
-  name,
-  OR: [{ tenantId: null }, { tenantId }],
-  ...(exceptId ? { id: { not: exceptId } } : {}),
-});
-
 const ensureNameAvailable = async (
   name: string,
-  tenantId: string,
+  tenantId: string, // Kept for signature compatibility
   exceptId?: string,
 ) => {
   const existing = await prisma.propertyCategory.findFirst({
-    where: buildNameWhere(name, tenantId, exceptId),
+    where: {
+      name: { equals: name.trim(), mode: "insensitive" as const },
+      ...(exceptId ? { id: { not: exceptId } } : {}),
+    },
   });
-  if (existing) throw new AppError("Nama kategori sudah digunakan", 400);
+  if (existing) throw new AppError("Kategori dengan nama serupa telah tersedia di sistem, silakan gunakan dari daftar yang ada.", 409);
 };
 
 const findTenantCategory = async (id: string, tenantId: string) => {
-  const category = await prisma.propertyCategory.findFirst({
-    where: { id, tenantId },
+  const category = await prisma.propertyCategory.findUnique({
+    where: { id },
   });
   if (!category) throw new AppError("Kategori tidak ditemukan", 404);
+  if (category.tenantId !== tenantId) throw new AppError("Anda tidak memiliki akses untuk mengubah kategori ini.", 403);
   return category;
 };
 
@@ -59,15 +53,20 @@ const ensureCustomCategory = (name: string, action: "diubah" | "dihapus") => {
     throw new AppError(`Kategori default sistem tidak bisa ${action}`, 400);
 };
 
+const ensureNotUsed = async (categoryId: string) => {
+  const used = await prisma.property.count({
+    where: { categoryId, deleted_at: null },
+  });
+  if (used > 0)
+    throw new AppError("Kategori tidak dapat diubah atau dihapus karena sudah digunakan oleh properti.", 409);
+};
+
 export const listCategories = async (
   tenantId: string,
   query: CategoryQuery,
 ) => {
   const { page, limit } = normalizePagination(query.page, query.limit);
-  const where = {
-    ...buildSearchWhere(query.search),
-    OR: [{ tenantId: null }, { tenantId }],
-  };
+  const where = buildSearchWhere(query.search);
   const orderBy = buildOrderBy(query.sortBy, query.sortOrder);
   const [categories, total] = await Promise.all([
     prisma.propertyCategory.findMany({
@@ -88,7 +87,7 @@ export const createCategory = async (tenantId: string, data: CategoryInput) => {
   await ensureNameAvailable(data.name, tenantId);
   return prisma.propertyCategory.create({
     data: { 
-      name: data.name, 
+      name: data.name.trim(), 
       description: data.description,
       default_rental_type: data.default_rental_type,
       tenantId 
@@ -103,11 +102,12 @@ export const updateCategory = async (
 ) => {
   const category = await findTenantCategory(id, tenantId);
   ensureCustomCategory(category.name, "diubah");
+  await ensureNotUsed(id);
   await ensureNameAvailable(data.name, tenantId, id);
   return prisma.propertyCategory.update({
     where: { id },
     data: { 
-      name: data.name,
+      name: data.name.trim(),
       description: data.description,
       default_rental_type: data.default_rental_type
     },
@@ -117,10 +117,6 @@ export const updateCategory = async (
 export const deleteCategory = async (id: string, tenantId: string) => {
   const category = await findTenantCategory(id, tenantId);
   ensureCustomCategory(category.name, "dihapus");
-  const used = await prisma.property.count({
-    where: { categoryId: id, deleted_at: null },
-  });
-  if (used > 0)
-    throw new AppError("Kategori sedang digunakan oleh properti", 400);
+  await ensureNotUsed(id);
   await prisma.propertyCategory.delete({ where: { id } });
 };

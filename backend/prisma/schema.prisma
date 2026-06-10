@@ -215,6 +215,7 @@ model Order {
   guest_phone              String?
   guest_email              String?
   guest_ktp_address        String?
+  guest_ktp_number         String?
   guest_domicile_address   String?
   voucherId                String?
   referral_code            String?

@@ -23,6 +23,7 @@ interface CreateOrderData {
   guest_phone?: string;
   guest_email?: string;
   guest_ktp_address?: string;
+  guest_ktp_number?: string;
   guest_domicile_address?: string;
   referral_code?: string;
   voucher_code?: string;
@@ -143,6 +144,7 @@ const buildGuestCreateData = (context: OrderContext) => ({
   guest_domicile_address: context.guest_domicile_address || null,
   guest_email: context.guest_email || null,
   guest_ktp_address: context.guest_ktp_address || null,
+  guest_ktp_number: context.guest_ktp_number || null,
   guest_legal_name: context.guest_legal_name || null,
   guest_name: context.guest_name || null,
   guest_phone: context.guest_phone || null,

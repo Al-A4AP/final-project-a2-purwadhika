@@ -5,6 +5,7 @@ export interface PropertyCategory {
   name: string;
   description?: string;
   default_rental_type?: 'PER_ROOM' | 'WHOLE_PROPERTY';
+  tenantId?: string | null;
   updated_at?: string;
 }
 

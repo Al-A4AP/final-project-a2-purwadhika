@@ -1,9 +1,9 @@
 import type { FC, ReactNode } from "react";
 import { Pencil, Trash2, Tag, CalendarClock } from "lucide-react";
-import { isDefaultCategoryName } from "@/lib/defaultCategories";
 import type { PropertyCategory } from "@/types";
 import { EmptyState } from "@/components/common/EmptyState";
 import { SectionLoading } from "@/components/common/SectionLoading";
+import { useAuthStore } from "@/stores/authStore";
 
 interface CategoryListViewProps {
   categories: PropertyCategory[];
@@ -13,13 +13,24 @@ interface CategoryListViewProps {
   onDelete: (category: PropertyCategory) => void;
 }
 
-const DefaultBadge: FC<{ name: string }> = ({ name }) => (
-  isDefaultCategoryName(name) ? (
-    <span className="rounded-full bg-slate-100 px-2.5 py-0.5 text-xs font-semibold text-slate-600 dark:bg-slate-700 dark:text-slate-300">
-      Default
-    </span>
-  ) : null
-);
+const DefaultBadge: FC<{ category: PropertyCategory }> = ({ category }) => {
+  const user = useAuthStore(s => s.user);
+  if (category.tenantId === null) {
+    return (
+      <span className="rounded-full bg-slate-100 px-2.5 py-0.5 text-xs font-semibold text-slate-600 dark:bg-slate-700 dark:text-slate-300">
+        Default Sistem
+      </span>
+    );
+  }
+  if (user && category.tenantId !== user.id) {
+    return (
+      <span className="rounded-full bg-blue-50 px-2.5 py-0.5 text-xs font-semibold text-blue-600 dark:bg-blue-900/30 dark:text-blue-400">
+        Dipakai Bersama
+      </span>
+    );
+  }
+  return null;
+};
 
 const CategoryActions: FC<{
   category: PropertyCategory;
@@ -27,7 +38,10 @@ const CategoryActions: FC<{
   onDelete: (category: PropertyCategory) => void;
   onEdit: (category: PropertyCategory) => void;
 }> = ({ category, deletingId, onDelete, onEdit }) => {
-  if (isDefaultCategoryName(category.name)) return <span className="text-xs font-semibold text-slate-400">Default sistem</span>;
+  const user = useAuthStore(s => s.user);
+  
+  if (category.tenantId === null) return <span className="text-xs font-semibold text-slate-400">Default sistem</span>;
+  if (user && category.tenantId !== user.id) return <span className="text-xs font-semibold text-slate-400">Hanya-Baca</span>;
   return (
     <div className="flex items-center justify-end gap-2">
       <CategoryActionButton label="Edit kategori" onClick={() => onEdit(category)}><Pencil size={16} /></CategoryActionButton>
@@ -86,7 +100,7 @@ export const CategoryListView: FC<CategoryListViewProps> = ({ categories, loadin
                     <div>
                       <div className="flex items-center gap-2">
                         <span className="font-semibold text-slate-900 dark:text-white">{category.name}</span>
-                        <DefaultBadge name={category.name} />
+                        <DefaultBadge category={category} />
                       </div>
                       <span className="text-xs text-slate-500">ID: {category.id.substring(0, 8)}</span>
                     </div>

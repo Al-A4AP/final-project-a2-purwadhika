@@ -12,6 +12,7 @@ export const createOrderSchema = z.object({
   guest_phone: optionalText(),
   guest_email: z.string().email('Email tamu tidak valid').optional().or(z.literal('')),
   guest_ktp_address: optionalText(),
+  guest_ktp_number: z.string().trim().regex(/^\d{16}$/, 'Nomor KTP harus terdiri dari 16 digit angka').optional().or(z.literal('')),
   guest_domicile_address: optionalText(),
   referral_code: z.string().trim().min(3, 'Kode referral minimal 3 karakter').max(15, 'Kode referral maksimal 15 karakter').optional().or(z.literal('')),
   voucher_code: z.string().trim().min(3, 'Kode voucher minimal 3 karakter').optional().or(z.literal('')),
@@ -27,6 +28,7 @@ function optionalText() {
 function requireGuestIdentity(data: z.infer<typeof createOrderSchema>, ctx: z.RefinementCtx) {
   requireField(data.guest_legal_name, 'guest_legal_name', 'Nama sesuai KTP wajib diisi', ctx);
   requireField(data.guest_phone, 'guest_phone', 'Nomor telepon tamu wajib diisi', ctx);
+  requireField(data.guest_ktp_number, 'guest_ktp_number', 'Nomor KTP tamu wajib diisi', ctx);
   requireField(data.guest_ktp_address, 'guest_ktp_address', 'Alamat sesuai KTP wajib diisi', ctx);
 }
 

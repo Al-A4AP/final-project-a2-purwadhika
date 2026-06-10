@@ -39,7 +39,7 @@ const TravelStep: FC<{ state: BookingPageState }> = ({ state }) => (
 
 const GuestStep: FC<{ state: BookingPageState }> = ({ state }) => (
   <div className="space-y-6 animate-in fade-in slide-in-from-right-4 duration-300">
-    <StepIntro title="Data Tamu" description="Lengkapi identitas tamu dan jumlah penghuni kamar." />
+    <StepIntro title="Data Tamu" description="Lengkapi data sesuai identitas resmi untuk kelancaran proses check-in." />
     <GuestIdentityForm state={state} />
     <GuestCounter guests={state.guests} roomCapacity={state.room!.capacity} onUpdate={state.updateGuest} />
   </div>

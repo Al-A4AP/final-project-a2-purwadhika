@@ -8,6 +8,7 @@ export const validateCheckout = ({ agreementAccepted, guestIdentity, guests, que
   if (!room) return false;
   if (query.checkIn && toUtcBookingDate(query.checkIn) < getTodayUtc()) return showError("Tanggal check-in tidak boleh di masa lalu.");
   if (!guestIdentity.legalName.trim()) return showError("Nama sesuai KTP wajib diisi.");
+  if (!guestIdentity.ktpNumber.trim() || !/^\d{16}$/.test(guestIdentity.ktpNumber.trim())) return showError("Nomor KTP harus terdiri dari 16 digit angka.");
   if (!guestIdentity.phone.trim()) return showError("Nomor telepon tamu wajib diisi.");
   if (!guestIdentity.ktpAddress.trim()) return showError("Alamat sesuai KTP wajib diisi.");
   if (!agreementAccepted) return showError("Checklist persetujuan reservasi wajib dicentang.");

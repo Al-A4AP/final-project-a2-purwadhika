@@ -21,9 +21,9 @@ export const useBookingGuestIdentity = () => {
 
 const buildUserIdentity = (user: User | null): BookingGuestIdentity => ({
   bookingForSelf: true,
-  domicileAddress: user?.domicile_address || "",
   email: user?.email || "",
   ktpAddress: user?.ktp_address || "",
+  ktpNumber: "",
   legalName: user?.legal_name || user?.name || "",
   name: user?.name || "",
   phone: user?.phone || "",

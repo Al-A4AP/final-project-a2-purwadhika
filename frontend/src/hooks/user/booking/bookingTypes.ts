@@ -13,9 +13,9 @@ export type BookingGuests = {
 
 export type BookingGuestIdentity = {
   bookingForSelf: boolean;
-  domicileAddress: string;
   email: string;
   ktpAddress: string;
+  ktpNumber: string;
   legalName: string;
   name: string;
   phone: string;

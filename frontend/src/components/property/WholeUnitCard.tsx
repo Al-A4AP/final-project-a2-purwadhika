@@ -2,6 +2,7 @@ import type { FC } from 'react';
 import type { Room } from '@/types';
 import { AlertTriangle, BedDouble } from 'lucide-react';
 import { formatPrice } from '@/lib/formatters';
+import { getBlockedReasonLabel } from '@/hooks/user/property-detail/propertyDetailAccess';
 import { AmenitiesList } from './AmenitiesList';
 
 interface WholeUnitCardProps {
@@ -81,8 +82,7 @@ const getRoomPrice = (room: Room) =>
 
 const statusLabel = (room: Room, reason?: string) => {
   if (room.is_available === false) return unavailableLabel(room, reason);
-  if (reason) return reason.includes('verifikasi') ? 'Verifikasi Email' : 'Login Diperlukan';
-  return 'Pesan Sekarang';
+  return getBlockedReasonLabel(reason, 'Pesan Sekarang');
 };
 
 const unavailableLabel = (room: Room, reason?: string) =>

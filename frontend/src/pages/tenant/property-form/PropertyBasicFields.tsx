@@ -3,6 +3,7 @@ import type { PropertyCategory } from "@/types";
 import type { PropertyFormState } from "@/hooks/tenant/property-form/propertyFormTypes";
 import { FieldErrorText, FieldLabel, PROPERTY_INPUT_CLASS, TextAreaField, TextField } from "./FormFields";
 import { Building2 } from "lucide-react";
+import { useAuthStore } from "@/stores/authStore";
 
 export const PropertyBasicFields: FC<{ state: PropertyFormState }> = ({ state }) => {
   const { errors } = state.form.formState;
@@ -45,6 +46,11 @@ export const PropertyBasicFields: FC<{ state: PropertyFormState }> = ({ state })
 
 const CategoryField: FC<{ categories: PropertyCategory[]; state: PropertyFormState }> = ({ categories, state }) => {
   const error = state.form.formState.errors.categoryId;
+  const user = useAuthStore(s => s.user);
+  
+  const systemCategories = categories.filter(c => c.tenantId === null);
+  const ownCategories = categories.filter(c => c.tenantId === user?.id);
+  const sharedCategories = categories.filter(c => c.tenantId !== null && c.tenantId !== user?.id);
   
   return (
     <div>
@@ -54,9 +60,21 @@ const CategoryField: FC<{ categories: PropertyCategory[]; state: PropertyFormSta
         className={`${PROPERTY_INPUT_CLASS} ${error ? 'border-red-500 focus:border-red-500 focus:ring-red-500' : ''}`}
       >
         <option value="">Pilih kategori...</option>
-        {categories.map((category) => (
-          <option key={category.id} value={category.id}>{category.name}</option>
-        ))}
+        {systemCategories.length > 0 && (
+          <optgroup label="Default Sistem">
+            {systemCategories.map((c) => <option key={c.id} value={c.id}>{c.name}</option>)}
+          </optgroup>
+        )}
+        {ownCategories.length > 0 && (
+          <optgroup label="Kategori Anda">
+            {ownCategories.map((c) => <option key={c.id} value={c.id}>{c.name}</option>)}
+          </optgroup>
+        )}
+        {sharedCategories.length > 0 && (
+          <optgroup label="Dipakai Bersama">
+            {sharedCategories.map((c) => <option key={c.id} value={c.id}>{c.name}</option>)}
+          </optgroup>
+        )}
       </select>
       <p className="mt-1.5 text-xs text-slate-500 dark:text-slate-400">Kategori menentukan filter pencarian.</p>
       {error && <FieldErrorText message={error.message} />}
