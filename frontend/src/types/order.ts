@@ -37,6 +37,8 @@ export interface Order {
   payment_verified_at?: string;
   expires_at?: string;
   completed_at?: string;
+  refund_completed_at?: string | null;
+  refund_completed_by?: string | null;
   created_at: string;
   
   // Relations

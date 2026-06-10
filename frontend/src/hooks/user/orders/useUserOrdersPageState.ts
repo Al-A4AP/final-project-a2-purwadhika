@@ -1,5 +1,5 @@
 import { useCallback } from "react";
-import { useCancelManualOrder } from "./useCancelManualOrder";
+import { useCancelOrder } from "./useCancelOrder";
 import { useMidtransOrderActions } from "./useMidtransOrderActions";
 import { usePaymentProofUpload } from "./usePaymentProofUpload";
 import { useReviewSubmission } from "./useReviewSubmission";
@@ -9,7 +9,7 @@ export const useUserOrdersPageState = () => {
   const ordersState = useUserOrders();
   const { fetchOrders, orders } = ordersState;
   const refetch = useCallback(() => fetchOrders(), [fetchOrders]);
-  const cancel = useCancelManualOrder(orders, refetch);
+  const cancel = useCancelOrder(orders, refetch);
   const midtrans = useMidtransOrderActions(refetch);
   const upload = usePaymentProofUpload(orders, refetch);
   const review = useReviewSubmission(orders, refetch);

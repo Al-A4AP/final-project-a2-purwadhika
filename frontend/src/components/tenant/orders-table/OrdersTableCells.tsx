@@ -33,11 +33,26 @@ export const OrderPaymentCell: FC<{ order: Order }> = ({ order }) => (
   </td>
 );
 
-export const OrderStatusCell: FC<{ order: Order }> = ({ order }) => (
-  <td className="px-6 py-4">
-    <div className="flex flex-col items-start gap-2">
-      <OrderStatusBadge status={order.status} />
-      {order.payment_proof_url && <PaymentProofLink orderNumber={order.order_number} url={order.payment_proof_url} />}
-    </div>
-  </td>
-);
+export const OrderStatusCell: FC<{ order: Order }> = ({ order }) => {
+  const needsRefund = order.status === "CANCELLED" && order.payment_method === "MANUAL" && order.payment_proof_url && !order.refund_completed_at;
+  const refundCompleted = order.status === "CANCELLED" && order.payment_method === "MANUAL" && order.payment_proof_url && order.refund_completed_at;
+
+  return (
+    <td className="px-6 py-4">
+      <div className="flex flex-col items-start gap-2">
+        <OrderStatusBadge status={order.status} />
+        {needsRefund && (
+          <span className="inline-flex items-center justify-center rounded-md px-2 py-1 text-center text-xs font-medium bg-orange-100 text-orange-800">
+            Refund Diperlukan
+          </span>
+        )}
+        {refundCompleted && (
+          <span className="inline-flex items-center justify-center rounded-md px-2 py-1 text-center text-xs font-medium bg-emerald-100 text-emerald-800">
+            Refund Selesai
+          </span>
+        )}
+        {order.payment_proof_url && <PaymentProofLink orderNumber={order.order_number} url={order.payment_proof_url} />}
+      </div>
+    </td>
+  );
+};

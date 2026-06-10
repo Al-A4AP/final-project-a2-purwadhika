@@ -186,7 +186,15 @@ export const sendCancellationEmail = async (
   email: string,
   orderNumber: string,
   reason: string,
+  requiresManualRefund = false,
 ) => {
+  const refundInfo = requiresManualRefund
+    ? `<div style="background-color: #fffbeb; border-left: 4px solid #f59e0b; padding: 15px; margin: 20px 0; border-radius: 4px;">
+         <p style="margin: 0; font-weight: bold; color: #d97706;">Informasi Pengembalian Dana:</p>
+         <p style="margin: 5px 0 0 0; color: #475569;">Pengembalian dana dilakukan langsung oleh pengelola properti dan berada di luar sistem Purwaloka.</p>
+       </div>`
+    : "";
+
   const html = getEmailWrapper(
     "Pemesanan Dibatalkan - PURWALOKA",
     `
@@ -197,10 +205,37 @@ export const sendCancellationEmail = async (
       <p style="margin: 0; font-weight: bold; color: #2980B9;">Alasan Pembatalan:</p>
       <p style="margin: 5px 0 0 0; color: #475569;">${reason}</p>
     </div>
+    ${refundInfo}
     <p>Jika pembatalan disebabkan oleh habisnya batas waktu pembayaran, Anda masih dapat mencari akomodasi lain yang tersedia dan melakukan pemesanan ulang.</p>
   `,
   );
   await sendMail(email, `Pesanan Dibatalkan - Order #${orderNumber}`, html);
+};
+
+export const sendManualRefundTenantEmail = async (
+  email: string,
+  orderNumber: string,
+  guestName: string,
+  propertyName: string,
+  checkInDate: Date,
+) => {
+  const html = getEmailWrapper(
+    "Refund Manual Diperlukan - PURWALOKA",
+    `
+    <h2>Pengembalian Dana Manual Diperlukan</h2>
+    <p>Halo,</p>
+    <p>Tamu telah membatalkan pesanan yang sebelumnya telah memiliki bukti pembayaran.</p>
+    <p>Mohon melakukan pengembalian dana (refund) kepada tamu sesuai dengan kebijakan properti Anda, karena transaksi ini dilakukan secara manual di luar sistem pembayaran otomatis.</p>
+    <table style="width: 100%; border-collapse: collapse; margin: 20px 0;">
+      <tr><td style="padding: 8px 0; color: #64748b; width: 150px;">Nomor Order:</td><td style="padding: 8px 0; font-weight: bold;">#${orderNumber}</td></tr>
+      <tr><td style="padding: 8px 0; color: #64748b;">Akomodasi:</td><td style="padding: 8px 0; font-weight: bold;">${propertyName}</td></tr>
+      <tr><td style="padding: 8px 0; color: #64748b;">Nama Tamu:</td><td style="padding: 8px 0; font-weight: bold;">${guestName}</td></tr>
+      <tr><td style="padding: 8px 0; color: #64748b;">Check-in:</td><td style="padding: 8px 0; font-weight: bold;">${new Date(checkInDate).toLocaleDateString("id-ID", { day: "numeric", month: "long", year: "numeric" })}</td></tr>
+    </table>
+    <p>Anda dapat berkomunikasi dengan tamu untuk detail pengembalian dana.</p>
+  `,
+  );
+  await sendMail(email, `Refund Manual Diperlukan - Order #${orderNumber}`, html);
 };
 
 export const sendPaymentRejectionEmail = async (

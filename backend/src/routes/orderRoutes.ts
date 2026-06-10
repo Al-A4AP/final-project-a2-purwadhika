@@ -3,7 +3,7 @@ import { requireAuth, requireRole } from '../middlewares/authMiddleware';
 import { validate } from '../middlewares/validateMiddleware';
 import { uploadPaymentProof } from '../middlewares/uploadMiddleware';
 import { orderLimiter, webhookLimiter } from '../middlewares/rateLimitMiddleware';
-import { cancelUserManualOrderCtrl } from '../controllers/userOrderCancelController';
+import { cancelUserOrderCtrl } from '../controllers/userOrderCancelController';
 import {
   createOrderCtrl,
   getUserOrdersCtrl,
@@ -12,7 +12,8 @@ import {
   uploadPaymentProofCtrl,
   retryMidtransPaymentCtrl,
   switchPaymentToManualCtrl,
-  midtransNotificationCtrl
+  midtransNotificationCtrl,
+  markRefundCompleteCtrl
 } from '../controllers/orderController';
 import { createOrderSchema, paymentAttemptSchema, updateOrderStatusSchema } from '../validations/orderValidation';
 
@@ -24,7 +25,7 @@ router.post('/midtrans-notification', webhookLimiter, midtransNotificationCtrl);
 // User Routes
 router.post('/', requireAuth, requireRole(['USER']), orderLimiter, validate(createOrderSchema), createOrderCtrl);
 router.get('/user', requireAuth, requireRole(['USER']), getUserOrdersCtrl);
-router.post('/:id/cancellations', requireAuth, requireRole(['USER']), cancelUserManualOrderCtrl);
+router.post('/:id/cancellations', requireAuth, requireRole(['USER']), cancelUserOrderCtrl);
 router.post('/:id/payments', requireAuth, requireRole(['USER']), validate(paymentAttemptSchema), retryMidtransPaymentCtrl);
 router.post('/:id/payment-attempts', requireAuth, requireRole(['USER']), retryMidtransPaymentCtrl);
 router.patch('/:id/payment-method', requireAuth, requireRole(['USER']), switchPaymentToManualCtrl);
@@ -34,5 +35,6 @@ router.post('/:id/payment-proof', requireAuth, requireRole(['USER']), uploadPaym
 router.get('/tenant', requireAuth, requireRole(['TENANT']), getTenantOrdersCtrl);
 router.post('/:id/status-transitions', requireAuth, requireRole(['TENANT']), validate(updateOrderStatusSchema), updateOrderStatusCtrl);
 router.patch('/:id/status', requireAuth, requireRole(['TENANT']), validate(updateOrderStatusSchema), updateOrderStatusCtrl);
+router.post('/:id/refund-completions', requireAuth, requireRole(['TENANT']), markRefundCompleteCtrl);
 
 export default router;

@@ -19,6 +19,8 @@ export interface CancelOrderModalState {
   isOpen: boolean;
   orderId: string | null;
   orderNumber: string;
+  status?: string;
+  paymentMethod?: string;
 }
 
 export interface UserOrdersState {

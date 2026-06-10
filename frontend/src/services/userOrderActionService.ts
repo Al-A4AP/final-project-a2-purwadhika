@@ -8,7 +8,7 @@ export interface RetryMidtransResult {
 }
 
 export const userOrderActionService = {
-  async cancelManualOrder(orderId: string): Promise<Order> {
+  async cancelOrder(orderId: string): Promise<Order> {
     const response = await api.post<ApiResponse<Order>>(`/orders/${orderId}/cancellations`);
     return response.data.data;
   },

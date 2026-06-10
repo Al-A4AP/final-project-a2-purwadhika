@@ -35,6 +35,7 @@ export interface TenantOrdersState {
   filterActions: TenantOrderFilterActions;
   filters: TenantOrderFilters;
   handleUpdateStatus: (orderId: string, status: string) => void;
+  handleMarkRefundComplete: (orderId: string) => void;
   loading: boolean;
   orders: Order[];
   pagination: PaginationMeta;

@@ -6,6 +6,7 @@ interface ConfirmModalProps {
   title: string;
   message: string;
   confirmText?: string;
+  cancelText?: string;
   confirmDisabled?: boolean;
   onConfirm: (reason?: string) => void | Promise<void>;
   onCancel: () => void;
@@ -50,7 +51,7 @@ const ConfirmModalBody: FC<ConfirmModalProps & { reason: string, setReason: (v: 
 
 const ConfirmModalActions: FC<ConfirmModalProps> = (props) => (
   <div className="flex justify-end gap-3">
-    <button type="button" onClick={props.onCancel} className={cancelButtonClass}>Batal</button>
+    <button type="button" onClick={props.onCancel} className={cancelButtonClass}>{props.cancelText || 'Batal'}</button>
     <button type="button" onClick={() => props.onConfirm()} disabled={props.confirmDisabled} className={confirmButtonClass}>
       {props.confirmText || 'Ya, Hapus'}
     </button>

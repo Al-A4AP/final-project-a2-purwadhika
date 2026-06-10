@@ -18,7 +18,36 @@ export const useTenantOrderActions = (orders: Order[], refetch: () => void) => {
   const closeConfirm = () => setConfirmModal((prev) => ({ ...prev, isOpen: false }));
   const handleUpdateStatus = (orderId: string, status: string) =>
     requestStatusUpdate({ closeConfirm, orders, orderId, refetch, setConfirmModal, setUpdating, status, submitGuard });
-  return { closeConfirm, confirmModal, handleUpdateStatus, updating };
+
+  const confirmRefundComplete = async (orderId: string) => {
+    if (submitGuard.current) return;
+    submitGuard.current = true;
+    setUpdating(orderId);
+    try {
+      await orderService.markRefundComplete(orderId);
+      toast.success("Refund ditandai selesai.");
+      closeConfirm();
+      refetch();
+    } catch (err) {
+      toast.error(getApiErrorMessage(err, "Gagal menandai refund selesai. Silakan coba lagi."));
+    } finally {
+      submitGuard.current = false;
+      setUpdating(null);
+    }
+  };
+
+  const handleMarkRefundComplete = (orderId: string) => {
+    setConfirmModal({
+      confirmText: "Ya, Tandai Selesai",
+      isOpen: true,
+      message: "Pastikan Anda sudah melakukan pengembalian dana kepada tamu secara manual.\n\nTindakan ini akan menandai refund sebagai selesai di sistem Purwaloka.\n\nLanjutkan?",
+      onConfirm: () => confirmRefundComplete(orderId),
+      title: "Tandai Refund Selesai",
+      showReasonInput: false,
+    });
+  };
+
+  return { closeConfirm, confirmModal, handleUpdateStatus, handleMarkRefundComplete, updating };
 };
 
 const requestStatusUpdate = (options: StatusRequestOptions) => {

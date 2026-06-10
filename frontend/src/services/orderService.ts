@@ -89,5 +89,10 @@ export const orderService = {
       headers: { 'Content-Type': 'multipart/form-data' }
     });
     return res.data.data;
+  },
+
+  async markRefundComplete(orderId: string): Promise<Order> {
+    const res = await api.post<ApiResponse<Order>>(`/orders/${orderId}/refund-completions`);
+    return res.data.data;
   }
 };

@@ -8,6 +8,7 @@ interface OrderMobileCardProps {
   order: Order;
   updating: string | null;
   handleUpdateStatus: (id: string, status: string) => void;
+  handleMarkRefundComplete: (id: string) => void;
 }
 
 export const OrderMobileCard: FC<OrderMobileCardProps> = (props) => (
@@ -19,12 +20,29 @@ export const OrderMobileCard: FC<OrderMobileCardProps> = (props) => (
   </article>
 );
 
-const OrderMobileHeader: FC<Pick<OrderMobileCardProps, 'order'>> = ({ order }) => (
-  <div className="mb-4 flex items-start justify-between gap-3 border-b border-slate-100 pb-4 dark:border-slate-800">
-    <OrderIdentity order={order} />
-    <div className="shrink-0"><OrderStatusBadge status={order.status} /></div>
-  </div>
-);
+const OrderMobileHeader: FC<Pick<OrderMobileCardProps, 'order'>> = ({ order }) => {
+  const needsRefund = order.status === "CANCELLED" && order.payment_method === "MANUAL" && order.payment_proof_url && !order.refund_completed_at;
+  const refundCompleted = order.status === "CANCELLED" && order.payment_method === "MANUAL" && order.payment_proof_url && order.refund_completed_at;
+
+  return (
+    <div className="mb-4 flex items-start justify-between gap-3 border-b border-slate-100 pb-4 dark:border-slate-800">
+      <OrderIdentity order={order} />
+      <div className="flex shrink-0 flex-col items-end gap-2">
+        <OrderStatusBadge status={order.status} />
+        {needsRefund && (
+          <span className="inline-flex items-center justify-center rounded-md px-2 py-1 text-center text-[10px] font-medium bg-orange-100 text-orange-800">
+            Refund Diperlukan
+          </span>
+        )}
+        {refundCompleted && (
+          <span className="inline-flex items-center justify-center rounded-md px-2 py-1 text-center text-[10px] font-medium bg-emerald-100 text-emerald-800">
+            Refund Selesai
+          </span>
+        )}
+      </div>
+    </div>
+  );
+};
 
 const OrderIdentity: FC<Pick<OrderMobileCardProps, 'order'>> = ({ order }) => (
   <div className="min-w-0">
@@ -56,8 +74,15 @@ const PaymentProofLink: FC<Pick<OrderMobileCardProps, 'order'>> = ({ order }) =>
 const OrderMobileActions: FC<OrderMobileCardProps> = (props) => {
   if (props.order.status === 'WAITING_CONFIRMATION') return <ActionWrap><ReviewActions {...props} /></ActionWrap>;
   if (isManualWaitingPayment(props.order)) return <ActionWrap><ManualCancel {...props} /></ActionWrap>;
+  if (props.order.status === "CANCELLED" && props.order.payment_method === "MANUAL" && props.order.payment_proof_url && !props.order.refund_completed_at) return <ActionWrap><RefundComplete {...props} /></ActionWrap>;
   return null;
 };
+
+const RefundComplete: FC<OrderMobileCardProps> = (props) => (
+  <button onClick={() => props.handleMarkRefundComplete(props.order.id)} disabled={isUpdating(props)} className="flex w-full items-center justify-center gap-2 rounded-xl border border-orange-200 bg-white px-4 py-2.5 text-sm font-bold text-orange-600 transition hover:bg-orange-50 disabled:opacity-50 dark:border-orange-900/30 dark:bg-slate-800 dark:hover:bg-orange-900/20" title="Tandai Refund Selesai" aria-label={`Tandai Refund Selesai ${props.order.order_number}`}>
+    <Check size={16} /> Tandai Refund Selesai
+  </button>
+);
 
 const ReviewActions: FC<OrderMobileCardProps> = (props) => (
   <div className="grid grid-cols-2 gap-3">

@@ -31,8 +31,16 @@ const ManualCancelAction: FC<OrderRowProps> = (props) => (
   </button>
 );
 
+const RefundCompleteAction: FC<OrderRowProps> = (props) => (
+  <button onClick={() => props.handleMarkRefundComplete(props.order.id)} disabled={props.updating === props.order.id} className="flex h-9 items-center justify-center gap-1.5 rounded-lg border border-orange-200 bg-white px-3 text-xs font-bold text-orange-600 transition hover:bg-orange-50 disabled:opacity-50 dark:border-orange-900/40 dark:bg-slate-800 dark:text-orange-400 dark:hover:bg-orange-900/20" title="Tandai Refund Selesai" aria-label={`Tandai Refund Selesai ${props.order.order_number}`}>
+    <Check size={16} />
+    Tandai Refund Selesai
+  </button>
+);
+
 export const OrdersTableActions: FC<OrderRowProps> = (props) => {
   if (props.order.status === "WAITING_CONFIRMATION") return <ConfirmationActions {...props} />;
   if (props.order.status === "WAITING_PAYMENT" && props.order.payment_method === "MANUAL") return <ManualCancelAction {...props} />;
+  if (props.order.status === "CANCELLED" && props.order.payment_method === "MANUAL" && props.order.payment_proof_url && !props.order.refund_completed_at) return <RefundCompleteAction {...props} />;
   return null;
 };

@@ -11,7 +11,7 @@ type RoomOwnershipModule = typeof import('../../src/services/tenantRoom/roomOwne
 type ReviewServiceModule = typeof import('../../src/services/reviewService');
 
 const prisma = require('../../src/config/prisma').default as PrismaClientInstance;
-const { cancelUserManualOrder } = require('../../src/services/order/userCancelOrder') as UserCancelOrderModule;
+const { cancelUserOrder } = require('../../src/services/order/userCancelOrder') as UserCancelOrderModule;
 const { retryUserMidtransPayment } = require('../../src/services/order/userMidtransOrder') as UserMidtransOrderModule;
 const { ensureTenantProperty, verifyPeakRateOwner, verifyRoomOwner } = require('../../src/services/tenantRoom/roomOwnership') as RoomOwnershipModule;
 const { deleteTenantReview, replyReview } = require('../../src/services/reviewService') as ReviewServiceModule;
@@ -26,7 +26,7 @@ describe('ownership regression', () => {
     replaceMethod(prisma.order, 'findFirst', async (args: object) => { query = args; return null; });
     replaceMethod(prisma.order, 'update', async () => { updateCalls += 1; return { id: 'order-1' }; });
 
-    await expectRejected(cancelUserManualOrder('order-1', 'user-1'), 'Pesanan tidak ditemukan atau akses ditolak', 404);
+    await expectRejected(cancelUserOrder('order-1', 'user-1'), 'Pesanan tidak ditemukan atau akses ditolak', 404);
 
     assert.deepEqual(getWhere(query), { id: 'order-1', userId: 'user-1' });
     assert.equal(updateCalls, 0);

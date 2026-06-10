@@ -2,6 +2,7 @@ import { Request, Response } from 'express';
 import * as orderService from '../services/orderService';
 import * as userOrderService from '../services/userOrderService';
 import * as userMidtransOrder from '../services/order/userMidtransOrder';
+import { markRefundComplete } from '../services/order/tenantRefundCompletion';
 import { sendSuccess, sendError } from '../utils/response';
 import { uploadBuffer } from '../utils/cloudinaryUpload';
 import { handleControllerError, handleWebhookError } from './controllerErrors';
@@ -38,6 +39,15 @@ export const updateOrderStatusCtrl = async (req: Request, res: Response) => {
     const { status, payment_rejection_reason } = req.body;
     const data = await orderService.updateOrderStatus(id, tenantId, status, payment_rejection_reason);
     return sendSuccess(res, data, 'Status pesanan diperbarui');
+  } catch (err) { return handleControllerError(res, err); }
+};
+
+export const markRefundCompleteCtrl = async (req: Request, res: Response) => {
+  try {
+    const tenantId = req.user!.id as string;
+    const { id } = req.params as { id: string };
+    const data = await markRefundComplete(id, tenantId);
+    return sendSuccess(res, data, 'Refund ditandai selesai');
   } catch (err) { return handleControllerError(res, err); }
 };
 
