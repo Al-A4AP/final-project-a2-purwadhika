@@ -1,14 +1,14 @@
 import { useCallback, useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { useForm, type UseFormReturn } from "react-hook-form";
-import { zodResolver } from "@hookform/resolvers/zod";
+import { propertyFormResolver } from "./propertyFormResolver";
 import { toast } from "react-hot-toast";
 import { getApiErrorMessage } from "@/lib/errorMessage";
 import { propertyService } from "@/services/propertyService";
 import { tenantService } from "@/services/tenantService";
 import type { PropertyCategory } from "@/types";
 import { buildPropertyFormData, toPropertyFormValues } from "./propertyFormData";
-import { propertyFormSchema, type PropertyFormInput } from "./propertyFormSchema";
+import type { PropertyFormInput } from "./propertyFormSchema";
 import type { PropertyFormState } from "./propertyFormTypes";
 import { useAmenityState, type AmenityState } from "./propertyAmenityState";
 import { handlePropertyCrop, useGalleryState, useImageState, type GalleryState, type ImageState } from "./propertyFormMediaState";
@@ -28,7 +28,7 @@ const usePropertyFormContext = () => {
   const navigate = useNavigate();
   const { id } = useParams();
   const isEdit = Boolean(id);
-  const form = useForm<PropertyFormInput>({ resolver: zodResolver(propertyFormSchema) });
+  const form = useForm<PropertyFormInput>({ resolver: propertyFormResolver });
   return { form, id, isEdit, navigate };
 };
 
