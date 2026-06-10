@@ -1,65 +1,89 @@
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { orderService } from "@/services/orderService";
-import type { Order } from "@/types";
+import type { Order, PaginationMeta } from "@/types";
 import { useReviewSubmission } from "../orders/useReviewSubmission";
 
+export type ReviewTab = 'pending' | 'submitted';
+
 export const useUserReviewsState = () => {
-  const { error, fetchOrders, loading, orders } = useReviewOrders();
+  const [activeTab, setActiveTab] = useState<ReviewTab>('pending');
+  const { error, fetchOrders, loading, setLoading, orders, pagination, handlePageChange } = useReviewOrders(activeTab);
   const reviewActions = useReviewSubmission(orders, fetchOrders);
-  const summary = useReviewSummary(orders);
-  return { error, loading, ...summary, ...reviewActions };
+
+  const averageRating = activeTab === 'submitted' 
+    ? (orders.length > 0 ? orders.reduce((sum, order) => sum + (order.review?.rating || 0), 0) / orders.length : 0)
+    : 0;
+
+  const handleTabChange = useCallback((tab: ReviewTab) => {
+    if (tab === activeTab) return;
+    setLoading(true);
+    setActiveTab(tab);
+  }, [activeTab, setLoading]);
+
+  return { 
+    error, 
+    loading, 
+    orders,
+    pagination, 
+    handlePageChange,
+    activeTab,
+    setActiveTab: handleTabChange,
+    averageRating,
+    ...reviewActions 
+  };
 };
 
-const useReviewOrders = () => {
+const useReviewOrders = (activeTab: ReviewTab) => {
   const [orders, setOrders] = useState<Order[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const fetchOrders = useCallback(async () => {
-    await loadReviewOrders({ setError, setLoading, setOrders });
-  }, []);
-  useInitialReviewFetch(fetchOrders);
-  return { error, fetchOrders, loading, orders };
-};
+  const [pagination, setPagination] = useState<PaginationMeta>({ page: 1, limit: 10, total: 0, totalPages: 1 });
+  
+  const requestIdRef = useRef(0);
+  const pageRef = useRef(1);
 
-const useInitialReviewFetch = (fetchOrders: () => Promise<void>) => {
+  const fetchOrders = useCallback(async (page: number = pageRef.current) => {
+    const requestId = ++requestIdRef.current;
+    
+    try {
+      const data = await orderService.getUserOrders({ 
+        page, 
+        limit: 10,
+        status: 'COMPLETED',
+        has_review: activeTab === 'submitted'
+      });
+      
+      if (requestId === requestIdRef.current) {
+        setOrders(data.orders || []);
+        if (data.pagination) {
+          setPagination(data.pagination);
+          pageRef.current = data.pagination.page;
+        }
+        setError(null);
+        setLoading(false);
+      }
+    } catch {
+      if (requestId === requestIdRef.current) {
+        setError("Gagal memuat ulasan. Silakan coba lagi.");
+        setLoading(false);
+      }
+    }
+  }, [activeTab]);
+
   useEffect(() => {
-    Promise.resolve().then(() => fetchOrders());
+    pageRef.current = 1;
+    fetchOrders(1);
+    
+    return () => {
+      requestIdRef.current += 1;
+    };
   }, [fetchOrders]);
+
+  const handlePageChange = useCallback((page: number) => {
+    setLoading(true);
+    fetchOrders(page);
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }, [fetchOrders]);
+
+  return { error, fetchOrders, loading, setLoading, orders, pagination, handlePageChange };
 };
-
-const useReviewSummary = (orders: Order[]) => {
-  const eligibleOrders = useMemo(() => getEligibleReviewOrders(orders), [orders]);
-  const submittedReviews = useMemo(() => getSubmittedReviewOrders(orders), [orders]);
-  const averageRating = useMemo(() => getAverageRating(submittedReviews), [submittedReviews]);
-  return { averageRating, eligibleOrders, submittedReviews, totalReviews: submittedReviews.length };
-};
-
-const loadReviewOrders = async (actions: ReviewOrderActions) => {
-  actions.setLoading(true);
-  try {
-    const data = await orderService.getUserOrders({ limit: 100 });
-    actions.setOrders(data.orders);
-  } catch {
-    actions.setError("Gagal memuat ulasan. Silakan coba lagi.");
-  } finally {
-    actions.setLoading(false);
-  }
-};
-
-const getEligibleReviewOrders = (orders: Order[]) =>
-  orders.filter((order) => order.status === "COMPLETED" && !order.review);
-
-const getSubmittedReviewOrders = (orders: Order[]) =>
-  orders.filter((order) => !!order.review);
-
-const getAverageRating = (orders: Order[]) => {
-  if (orders.length === 0) return 0;
-  const total = orders.reduce((sum, order) => sum + (order.review?.rating || 0), 0);
-  return total / orders.length;
-};
-
-interface ReviewOrderActions {
-  setError: (value: string | null) => void;
-  setLoading: (value: boolean) => void;
-  setOrders: (value: Order[]) => void;
-}

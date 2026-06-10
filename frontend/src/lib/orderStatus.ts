@@ -13,3 +13,10 @@ export const canReviewOrder = (order: Order) => {
   if (order.status === 'COMPLETED') return true;
   return order.status === 'PROCESSED' && new Date(order.check_out_date) < new Date();
 };
+
+export const getUserRefundStatus = (order: Order): "PENDING" | "COMPLETED" | null => {
+  if (order.status === "CANCELLED" && order.payment_method === "MANUAL" && order.payment_proof_url) {
+    return order.refund_completed_at ? "COMPLETED" : "PENDING";
+  }
+  return null;
+};

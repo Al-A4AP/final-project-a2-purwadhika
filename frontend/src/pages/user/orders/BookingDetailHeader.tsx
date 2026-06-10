@@ -3,6 +3,7 @@ import { Link } from "react-router-dom";
 import { ChevronLeft } from "lucide-react";
 import type { Order } from "@/types";
 import { UserOrderStatusBadge } from "./UserOrderStatusBadge";
+import { getUserRefundStatus } from "@/lib/orderStatus";
 
 export const BookingDetailHeader: FC<{ order: Order }> = ({ order }) => {
   return (
@@ -20,7 +21,15 @@ export const BookingDetailHeader: FC<{ order: Order }> = ({ order }) => {
             <p className="text-sm text-slate-500">Dibuat pada {new Date(order.created_at).toLocaleDateString('id-ID', { day: 'numeric', month: 'short', year: 'numeric' })}</p>
           </div>
         </div>
-        <UserOrderStatusBadge status={order.status} />
+        <div className="flex flex-col items-end gap-2">
+          <UserOrderStatusBadge status={order.status} />
+          {getUserRefundStatus(order) === "PENDING" && (
+            <span className="inline-flex items-center justify-center gap-1 rounded-md bg-orange-100 px-2 py-1 text-center text-xs font-medium text-orange-800">Menunggu Refund Manual</span>
+          )}
+          {getUserRefundStatus(order) === "COMPLETED" && (
+            <span className="inline-flex items-center justify-center gap-1 rounded-md bg-emerald-100 px-2 py-1 text-center text-xs font-medium text-emerald-800">Refund Selesai</span>
+          )}
+        </div>
       </div>
     </div>
   );

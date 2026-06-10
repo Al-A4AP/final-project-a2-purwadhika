@@ -24,6 +24,16 @@ export const getUserOrdersCtrl = async (req: Request, res: Response) => {
   } catch (err) { return handleControllerError(res, err); }
 };
 
+export const getUserOrderByIdCtrl = async (req: Request, res: Response) => {
+  try {
+    const userId = req.user!.id as string;
+    const { id } = req.params as { id: string };
+    const data = await userOrderService.getUserOrderById(id, userId);
+    if (!data) return sendError(res, 'Pesanan tidak ditemukan atau Anda tidak memiliki akses.', 404);
+    return sendSuccess(res, data, 'Detail pesanan');
+  } catch (err) { return handleControllerError(res, err); }
+};
+
 export const getTenantOrdersCtrl = async (req: Request, res: Response) => {
   try {
     const tenantId = req.user!.id as string;

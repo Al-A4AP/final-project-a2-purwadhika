@@ -2,6 +2,7 @@ import type { FC } from "react";
 import { formatPrice } from "@/lib/formatters";
 import { OrderPaymentActions } from "@/components/user/order-card/OrderPaymentActions";
 import type { OrderCardProps } from "@/components/user/order-card/types";
+import { getUserRefundStatus } from "@/lib/orderStatus";
 
 export const BookingPaymentPanel: FC<Pick<OrderCardProps, "order" | "uploading" | "handleUploadClick" | "canceling" | "handleCancelClick" | "paymentActionId" | "retryMidtransPayment" | "switchToManualPayment">> = ({ 
   order, uploading, handleUploadClick, canceling, handleCancelClick, 
@@ -27,6 +28,18 @@ export const BookingPaymentPanel: FC<Pick<OrderCardProps, "order" | "uploading" 
               )}
             </div>
           </div>
+          {getUserRefundStatus(order) && (
+            <div className="flex items-start sm:items-center justify-between border-b border-slate-100 pb-4 dark:border-slate-800 flex-col sm:flex-row gap-3">
+              <span className="text-slate-500">Status Refund</span>
+              <div className="font-semibold text-slate-900 dark:text-white">
+                {getUserRefundStatus(order) === "PENDING" ? (
+                  <span className="text-orange-600">Menunggu Refund Manual</span>
+                ) : (
+                  <span className="text-emerald-600">Refund selesai pada {new Date(order.refund_completed_at!).toLocaleDateString("id-ID", { day: "numeric", month: "short", year: "numeric", hour: "2-digit", minute: "2-digit" })}</span>
+                )}
+              </div>
+            </div>
+          )}
           <div className="flex items-center justify-between pt-2">
             <span className="font-bold text-slate-900 dark:text-white">Total Tagihan</span>
             <span className="text-2xl font-black text-red-600">{formatPrice(order.total_price)}</span>

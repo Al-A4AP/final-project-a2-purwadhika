@@ -32,6 +32,7 @@ export interface UserOrderParams {
   limit?: number;
   page?: number;
   status?: string;
+  has_review?: boolean;
 }
 
 export interface TenantOrderParams {
@@ -70,6 +71,11 @@ export const orderService = {
   async getUserOrders(params?: UserOrderParams): Promise<OrderListResponse> {
     const query = buildQueryString(params, true);
     return fetchOrderList('/users/me/orders', query);
+  },
+
+  async getUserOrderById(id: string): Promise<Order> {
+    const res = await api.get<ApiResponse<Order>>(`/users/me/orders/${id}`);
+    return res.data.data;
   },
 
   async getTenantOrders(params?: TenantOrderParams): Promise<OrderListResponse> {

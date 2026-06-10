@@ -4,6 +4,7 @@ import { formatPrice } from '@/lib/formatters';
 import { ChevronRight, MapPin, BedDouble } from 'lucide-react';
 import { OrderPaymentActions } from './order-card/OrderPaymentActions';
 import { OrderReviewForm } from './order-card/OrderReviewForm';
+import { getUserRefundStatus } from '@/lib/orderStatus';
 import type { OrderCardProps } from './order-card/types';
 
 export const OrderCard: FC<OrderCardProps> = (props) => {
@@ -23,8 +24,14 @@ export const OrderCard: FC<OrderCardProps> = (props) => {
               <BedDouble size={40} className="text-slate-400" />
             </div>
           )}
-          <div className="absolute top-4 right-4">
+          <div className="absolute top-4 right-4 flex flex-col items-end gap-2">
             <StatusBadge status={order.status} />
+            {getUserRefundStatus(order) === "PENDING" && (
+              <span className="inline-flex items-center justify-center gap-1 rounded-md bg-orange-100 px-2 py-1 text-center text-xs font-medium text-orange-800 shadow-sm">Menunggu Refund Manual</span>
+            )}
+            {getUserRefundStatus(order) === "COMPLETED" && (
+              <span className="inline-flex items-center justify-center gap-1 rounded-md bg-emerald-100 px-2 py-1 text-center text-xs font-medium text-emerald-800 shadow-sm">Refund Selesai</span>
+            )}
           </div>
         </div>
 

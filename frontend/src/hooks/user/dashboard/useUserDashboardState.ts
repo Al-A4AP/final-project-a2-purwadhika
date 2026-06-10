@@ -2,6 +2,7 @@ import { useEffect, useState, useMemo } from "react";
 import { isAfter, parseISO } from "date-fns";
 import { useAuthStore } from "@/stores/authStore";
 import { orderService } from "@/services/orderService";
+import { getUserRefundStatus } from "@/lib/orderStatus";
 import type { Order } from "@/types";
 
 export const useUserDashboardState = () => {
@@ -11,7 +12,8 @@ export const useUserDashboardState = () => {
   const upcomingStay = useMemo(() => findUpcomingStay(orders), [orders]);
   const reviewReminders = useMemo(() => getReviewReminders(orders), [orders]);
   const recentOrders = useMemo(() => getRecentOrders(orders), [orders]);
-  return { error, loading, orders, recentOrders, reviewReminders, stats, upcomingStay, user };
+  const pendingRefundCount = useMemo(() => orders.filter((order) => getUserRefundStatus(order) === "PENDING").length, [orders]);
+  return { error, loading, orders, recentOrders, reviewReminders, stats, upcomingStay, user, pendingRefundCount };
 };
 
 const useDashboardOrders = (isAuthenticated: boolean) => {

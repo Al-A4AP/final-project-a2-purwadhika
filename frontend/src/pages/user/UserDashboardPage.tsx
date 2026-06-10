@@ -8,9 +8,10 @@ import { DashboardQuickActions } from "./dashboard/DashboardQuickActions";
 import { DashboardRecent } from "./dashboard/DashboardRecent";
 import { DashboardReviewReminders } from "./dashboard/DashboardReviewReminders";
 import { DashboardVoucherReferral } from "./dashboard/DashboardVoucherReferral";
+import { DashboardRefundNotice } from "./dashboard/DashboardRefundNotice";
 
 const UserDashboardPage: FC = () => {
-  const { user, loading, error, stats, upcomingStay, reviewReminders, recentOrders } = useUserDashboardState();
+  const { user, loading, error, stats, upcomingStay, reviewReminders, recentOrders, pendingRefundCount } = useUserDashboardState();
 
   return (
     <div className="min-h-screen bg-slate-50 px-4 py-8 md:p-12 dark:bg-slate-900 pb-24">
@@ -25,6 +26,7 @@ const UserDashboardPage: FC = () => {
           </div>
         ) : (
           <>
+            <DashboardRefundNotice count={pendingRefundCount} />
             <div className="grid gap-8 lg:grid-cols-3">
               <div className="lg:col-span-2">
                 <DashboardUpcomingStay order={upcomingStay} />

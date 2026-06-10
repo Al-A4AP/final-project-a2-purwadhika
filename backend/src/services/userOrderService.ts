@@ -7,6 +7,7 @@ export interface GetUserOrdersOptions {
   startDate?: string; endDate?: string;
   sortBy?: string; sortOrder?: 'asc' | 'desc';
   page?: number; limit?: number;
+  has_review?: boolean;
 }
 
 export const getUserOrders = async (userId: string, options: GetUserOrdersOptions = {}) => {
@@ -15,6 +16,14 @@ export const getUserOrders = async (userId: string, options: GetUserOrdersOption
   const where = buildUserOrdersWhere(userId, options);
   const [orders, total] = await fetchUserOrders(where, { limit, page, sortBy, sortOrder });
   return { orders, pagination: buildPagination(page, limit, total) };
+};
+
+export const getUserOrderById = async (id: string, userId: string) => {
+  await syncExpiredUserOrders(userId);
+  return prisma.order.findFirst({
+    where: { id, userId },
+    include: getUserOrderInclude(),
+  });
 };
 
 const syncExpiredUserOrders = (userId: string) => {
@@ -47,6 +56,9 @@ const buildUserOrdersWhere = (userId: string, options: GetUserOrdersOptions): Pr
   const where: Prisma.OrderWhereInput = { userId };
   if (options.orderNumber) where.order_number = { contains: options.orderNumber, mode: 'insensitive' };
   if (options.status) where.status = options.status as OrderStatus;
+  if (options.has_review !== undefined) {
+    where.review = options.has_review ? { isNot: null } : { is: null };
+  }
   applyStayDateFilters(where, options);
   return where;
 };

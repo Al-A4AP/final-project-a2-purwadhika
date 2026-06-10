@@ -40,6 +40,9 @@ const isValidDate = (value: string) =>
 const optionalOrderStatus = () =>
   z.preprocess(cleanScalar, z.nativeEnum(OrderStatus).optional());
 
+const optionalBooleanString = () =>
+  z.preprocess((val) => val === 'true' ? true : val === 'false' ? false : undefined, z.boolean().optional());
+
 export const propertyListQuerySchema = z.object({
   page: optionalPositiveInt(100),
   limit: optionalPositiveInt(100),
@@ -89,6 +92,7 @@ export const userOrderQuerySchema = z.object({
   sortOrder: optionalEnum(orderDirections),
   page: optionalPositiveInt(100),
   limit: optionalPositiveInt(100),
+  has_review: optionalBooleanString(),
 });
 
 export const tenantOrderQuerySchema = z.object({
