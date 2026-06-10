@@ -12,5 +12,6 @@ export const useRoomsLogic = (id?: string) => {
   const submit = useRoomSubmit(id, form, data.fetchRooms);
   const availability = useAvailabilityActions(modals);
   const peakRates = usePeakRateActions(modals, data.fetchRooms);
-  return { ...data, ...form, ...submit, ...modals, ...availability, ...peakRates };
+  const basePrice = data.rooms.find((r) => r.id === modals.selectedRoomId)?.base_price || 0;
+  return { ...data, ...form, ...submit, ...modals, ...availability, ...peakRates, basePrice };
 };

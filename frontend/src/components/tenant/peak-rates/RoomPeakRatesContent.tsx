@@ -12,7 +12,7 @@ export const RoomPeakRatesContent: FC<RoomPeakRatesModalProps> = (props) => {
       <div className="bg-white dark:bg-slate-800 rounded-xl max-w-lg w-full p-6 space-y-6 shadow-xl border dark:border-slate-700">
         <PeakRatesHeader onClose={props.onClose} />
         <PeakRatesListSection editingRateId={props.editingRateId} peakRates={props.peakRates} onDeleteRate={props.onDeleteRate} onEditRate={props.onEditRate} />
-        <PeakRateForm editingRateId={props.editingRateId} peakForm={props.peakForm} onFormChange={props.onFormChange} onSaveRate={props.onSaveRate} onCancelEdit={props.onCancelEdit} />
+        <PeakRateForm basePrice={props.basePrice} isSaving={props.isSaving} editingRateId={props.editingRateId} peakForm={props.peakForm} onFormChange={props.onFormChange} onSaveRate={props.onSaveRate} onCancelEdit={props.onCancelEdit} />
         <PeakRatesFooter onClose={props.onClose} />
       </div>
     </div>

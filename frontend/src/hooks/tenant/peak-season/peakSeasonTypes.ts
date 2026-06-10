@@ -47,10 +47,12 @@ export interface PeakSeasonRoomActions {
 }
 
 export interface PeakSeasonRateModalState {
+  basePrice: number;
   close: () => void;
   confirmDelete: () => Promise<void>;
   editingRateId: string | null;
   isOpen: boolean;
+  isSaving: boolean;
   onCancelEdit: () => void;
   onDeleteRate: (id: string | null) => void;
   onEditRate: (rate: PeakSeasonRate) => void;

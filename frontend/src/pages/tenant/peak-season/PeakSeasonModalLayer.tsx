@@ -13,6 +13,8 @@ export const PeakSeasonModalLayer: FC<{ state: PeakSeasonPageState }> = ({ state
 const PeakRateModal: FC<{ state: PeakSeasonPageState }> = ({ state }) => (
   <RoomPeakRatesModal
     isOpen={state.modal.isOpen}
+    isSaving={state.modal.isSaving}
+    basePrice={state.modal.basePrice}
     peakRates={state.modal.peakRates}
     peakForm={state.modal.peakForm}
     editingRateId={state.modal.editingRateId}

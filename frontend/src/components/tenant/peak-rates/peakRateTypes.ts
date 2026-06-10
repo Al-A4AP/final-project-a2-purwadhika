@@ -11,6 +11,8 @@ export type PeakRateFormData = {
 
 export type RoomPeakRatesModalProps = {
   isOpen: boolean;
+  isSaving: boolean;
+  basePrice: number;
   peakRates: PeakSeasonRate[];
   peakForm: PeakRateFormData;
   editingRateId: string | null;
@@ -24,5 +26,5 @@ export type RoomPeakRatesModalProps = {
 
 export type PeakRateFormProps = Pick<
   RoomPeakRatesModalProps,
-  "editingRateId" | "peakForm" | "onCancelEdit" | "onFormChange" | "onSaveRate"
+  "editingRateId" | "peakForm" | "onCancelEdit" | "onFormChange" | "onSaveRate" | "isSaving" | "basePrice"
 >;

@@ -15,13 +15,15 @@ export const usePeakSeasonRateModal = (refreshRooms: (propertyId: string) => Pro
   const [peakRates, setPeakRates] = useState<PeakSeasonRate[]>([]);
   const [pendingDeleteId, setPendingDeleteId] = useState<string | null>(null);
   const [selection, setSelection] = useState<PeakSelection | null>(null);
+  const [isSaving, setIsSaving] = useState<boolean>(false);
+  
   const open = useOpenRateModal(setEditingRateId, setPeakForm, setPeakRates, setSelection);
   const close = useCallback(() => { setSelection(null); setPendingDeleteId(null); }, []);
   const onEditRate = useCallback((rate: PeakSeasonRate) => { setEditingRateId(rate.id); setPeakForm(createEditPeakForm(rate)); }, []);
   const onCancelEdit = useCallback(() => { setEditingRateId(null); setPeakForm(createEmptyPeakForm()); }, []);
-  const onSaveRate = useSaveRate({ editingRateId, peakForm, peakRates, refreshRooms, selection, setEditingRateId, setPeakForm, setPeakRates });
+  const onSaveRate = useSaveRate({ editingRateId, peakForm, peakRates, refreshRooms, selection, setEditingRateId, setPeakForm, setPeakRates, setIsSaving });
   const confirmDelete = useDeleteRate({ pendingDeleteId, refreshRooms, selection, setPeakRates, setPendingDeleteId });
-  return { close, confirmDelete, editingRateId, isOpen: Boolean(selection), onCancelEdit, onDeleteRate: setPendingDeleteId, onEditRate, onFormChange: setPeakForm, onSaveRate, open, peakForm, peakRates, pendingDeleteId, roomLabel: selection?.room.room_type || "", selectedRoomId: selection?.room.id || null };
+  return { basePrice: selection?.room.base_price || 0, close, confirmDelete, editingRateId, isOpen: Boolean(selection), isSaving, onCancelEdit, onDeleteRate: setPendingDeleteId, onEditRate, onFormChange: setPeakForm, onSaveRate, open, peakForm, peakRates, pendingDeleteId, roomLabel: selection?.room.room_type || "", selectedRoomId: selection?.room.id || null };
 };
 
 const useOpenRateModal = (
@@ -36,11 +38,14 @@ const useOpenRateModal = (
   void loadPeakRates(room.id, setRates);
 }, [setEditingId, setForm, setRates, setSelection]);
 
-const useSaveRate = (params: SaveRateParams) => useCallback((event: FormEvent) => {
+const useSaveRate = (params: SaveRateParams) => useCallback(async (event: FormEvent) => {
   event.preventDefault();
   if (!params.selection) return toast.error("Kamar belum dipilih.");
   if (hasPeakRateConflict(params.peakRates, params.peakForm, params.editingRateId)) return showConflict();
-  void saveRate(params);
+  
+  params.setIsSaving(true);
+  await saveRate(params);
+  params.setIsSaving(false);
 }, [params]);
 
 const saveRate = async (params: SaveRateParams) => {
@@ -100,6 +105,7 @@ interface SaveRateParams {
   setEditingRateId: (id: string | null) => void;
   setPeakForm: (form: PeakRateFormData) => void;
   setPeakRates: (rates: PeakSeasonRate[]) => void;
+  setIsSaving: (isSaving: boolean) => void;
 }
 
 interface DeleteRateParams {

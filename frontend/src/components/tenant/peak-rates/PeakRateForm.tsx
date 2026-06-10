@@ -3,6 +3,7 @@ import { PeakRateAdjustFields } from "./PeakRateAdjustFields";
 import { PeakRateDateFields } from "./PeakRateDateFields";
 import { PeakRateDescriptionInput } from "./PeakRateDescriptionInput";
 import { PeakRateSubmitButton } from "./PeakRateSubmitButton";
+import { PeakRatePreview } from "./PeakRatePreview";
 import type { PeakRateFormProps } from "./peakRateTypes";
 
 export const PeakRateForm: FC<PeakRateFormProps> = (props) => {
@@ -16,7 +17,8 @@ export const PeakRateForm: FC<PeakRateFormProps> = (props) => {
         <PeakRateAdjustFields {...props} />
         <PeakRateDescriptionInput {...props} />
       </div>
-      <PeakRateSubmitButton isEditing={Boolean(props.editingRateId)} onCancelEdit={props.onCancelEdit} />
+      <PeakRatePreview basePrice={props.basePrice} rateType={props.peakForm.rate_type as "PERCENTAGE" | "NOMINAL"} rateValue={props.peakForm.rate_value} />
+      <PeakRateSubmitButton isEditing={Boolean(props.editingRateId)} isSaving={Boolean(props.isSaving)} onCancelEdit={props.onCancelEdit} />
     </form>
   );
 };

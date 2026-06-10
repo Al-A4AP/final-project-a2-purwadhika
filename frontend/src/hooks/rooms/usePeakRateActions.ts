@@ -12,11 +12,12 @@ export const usePeakRateActions = (modals: RoomModalState, fetchRooms: () => voi
   const [peakRates, setPeakRates] = useState<PeakSeasonRate[]>([]);
   const [peakForm, setPeakForm] = useState<PeakRateForm>(createEmptyPeakForm);
   const [editingPeakRateId, setEditingPeakRateId] = useState<string | null>(null);
+  const [isSavingPeak, setIsSavingPeak] = useState<boolean>(false);
   const handleOpenPeakModal = useOpenPeakModal(modals, setPeakRates, setPeakForm);
   const onEditRate = useEditPeakRate(setPeakForm, setEditingPeakRateId);
   const onCancelPeakEdit = useCancelPeakEdit(setPeakForm, setEditingPeakRateId);
-  const onSavePeakRate = useSavePeakRate({ editingPeakRateId, fetchRooms, peakForm, peakRates, roomId: modals.selectedRoomId, setEditingPeakRateId, setPeakForm, setPeakRates });
-  return { editingPeakRateId, handleOpenPeakModal, onCancelPeakEdit, onEditRate, onSavePeakRate, peakForm, peakRates, setPeakForm, setPeakRates };
+  const onSavePeakRate = useSavePeakRate({ editingPeakRateId, fetchRooms, peakForm, peakRates, roomId: modals.selectedRoomId, setEditingPeakRateId, setPeakForm, setPeakRates, setIsSavingPeak });
+  return { editingPeakRateId, handleOpenPeakModal, isSavingPeak, onCancelPeakEdit, onEditRate, onSavePeakRate, peakForm, peakRates, setPeakForm, setPeakRates };
 };
 
 const useOpenPeakModal = (
@@ -37,13 +38,17 @@ type SavePeakRateParams = {
   setEditingPeakRateId: (id: string | null) => void;
   setPeakRates: PeakRateSetter,
   setPeakForm: (form: PeakRateForm) => void,
+  setIsSavingPeak: (isSaving: boolean) => void;
 };
 
-const useSavePeakRate = (params: SavePeakRateParams) => useCallback((event: FormEvent) => {
+const useSavePeakRate = (params: SavePeakRateParams) => useCallback(async (event: FormEvent) => {
   event.preventDefault();
   if (!params.roomId) return toast.error("Kamar belum dipilih.");
   if (hasPeakRateConflict(params.peakRates, params.peakForm, params.editingPeakRateId)) return showPeakConflict();
-  void savePeakRate(params);
+  
+  params.setIsSavingPeak(true);
+  await savePeakRate(params);
+  params.setIsSavingPeak(false);
 }, [params]);
 
 const useEditPeakRate = (setPeakForm: (form: PeakRateForm) => void, setEditingId: (id: string | null) => void) =>

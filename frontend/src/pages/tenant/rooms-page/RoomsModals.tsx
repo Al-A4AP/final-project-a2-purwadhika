@@ -13,10 +13,12 @@ interface RoomsModalsProps {
   closeConfirmModal: () => void;
   confirmModal: { isOpen: boolean; message: string; onConfirm: () => void; title: string };
   confirmAvailabilityRange: () => void;
+  basePrice: number;
   customerBookedDays: Date[];
   editingPeakRateId: string | null;
   isAvailModalOpen: boolean;
   isPeakModalOpen: boolean;
+  isSavingPeak: boolean;
   onCancelPeakEdit: () => void;
   onDeleteRate: (id: string) => void;
   onEditRate: (rate: PeakSeasonRate) => void;
@@ -34,7 +36,7 @@ interface RoomsModalsProps {
 export const RoomsModals: FC<RoomsModalsProps> = (props) => (
   <>
     <RoomAvailabilityModal isOpen={props.isAvailModalOpen} tenantBlockedDays={props.tenantBlockedDays} customerBookedDays={props.customerBookedDays} range={props.availabilityRange} isAvailable={props.availabilityIsAvailable} isSaving={props.availabilitySaving} onRangeChange={props.setAvailabilityRange} onAvailableChange={props.setAvailabilityIsAvailable} onConfirm={props.confirmAvailabilityRange} onClose={() => props.setIsAvailModalOpen(false)} />
-    <RoomPeakRatesModal isOpen={props.isPeakModalOpen} peakRates={props.peakRates} peakForm={props.peakForm} editingRateId={props.editingPeakRateId} onFormChange={props.setPeakForm} onSaveRate={props.onSavePeakRate} onEditRate={props.onEditRate} onCancelEdit={props.onCancelPeakEdit} onDeleteRate={props.onDeleteRate} onClose={() => props.setIsPeakModalOpen(false)} />
+    <RoomPeakRatesModal isOpen={props.isPeakModalOpen} isSaving={props.isSavingPeak} basePrice={props.basePrice} peakRates={props.peakRates} peakForm={props.peakForm} editingRateId={props.editingPeakRateId} onFormChange={props.setPeakForm} onSaveRate={props.onSavePeakRate} onEditRate={props.onEditRate} onCancelEdit={props.onCancelPeakEdit} onDeleteRate={props.onDeleteRate} onClose={() => props.setIsPeakModalOpen(false)} />
     <ConfirmModal isOpen={props.confirmModal.isOpen} title={props.confirmModal.title} message={props.confirmModal.message} onConfirm={props.confirmModal.onConfirm} onCancel={props.closeConfirmModal} />
   </>
 );
