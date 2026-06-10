@@ -8,10 +8,24 @@ export interface DashboardAnalytics {
   pagination: PaginationMeta;
 }
 
+export interface PeakRateRange {
+  start_date: string;
+  end_date: string;
+  rate_type: "PERCENTAGE" | "NOMINAL";
+  rate_value: number;
+}
+
+export interface BlockedRange {
+  start_date: string;
+  end_date: string;
+}
+
 export interface OccupancyRoom {
   id: string;
   room_type: string;
   orders: OccupancyOrder[];
+  peakRateRanges: PeakRateRange[];
+  blockedRanges: BlockedRange[];
 }
 
 export interface OccupancyProperty {
