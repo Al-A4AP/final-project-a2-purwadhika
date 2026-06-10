@@ -21,8 +21,17 @@ export const completeOrder = (orderId: string, now: Date) => prisma.order.update
 });
 
 export const findCheckInReminderOrders = (range: ReminderRange) => prisma.order.findMany({
-  where: { status: 'PROCESSED', check_in_date: { gte: range.start, lt: range.end } },
+  where: { 
+    status: 'PROCESSED', 
+    check_in_reminder_sent_at: null,
+    check_in_date: { gt: range.start, lte: range.end } 
+  },
   include: { user: true, property: true },
+});
+
+export const updateCheckInReminderSent = (orderId: string, now: Date) => prisma.order.update({
+  where: { id: orderId },
+  data: { check_in_reminder_sent_at: now },
 });
 
 export type ReminderRange = { start: Date; end: Date };

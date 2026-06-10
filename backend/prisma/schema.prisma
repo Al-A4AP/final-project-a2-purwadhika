@@ -231,6 +231,7 @@ model Order {
   expires_at               DateTime?
   refund_completed_at      DateTime?
   refund_completed_by      String?
+  check_in_reminder_sent_at DateTime?
   updated_at               DateTime        @default(now()) @updatedAt
   delete                   Boolean?        @default(false)
   property                 Property        @relation(fields: [propertyId], references: [id])

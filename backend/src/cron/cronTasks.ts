@@ -1,5 +1,5 @@
 import { sendBookingReminderEmail, sendCancellationEmail } from '../utils/emailService';
-import { cancelOrder, completeOrder, findCheckInReminderOrders, findExpiredUnpaidOrders, findProcessedOrdersAfterCheckout } from './cronQueries';
+import { cancelOrder, completeOrder, findCheckInReminderOrders, findExpiredUnpaidOrders, findProcessedOrdersAfterCheckout, updateCheckInReminderSent } from './cronQueries';
 import { getCheckInReminderRange } from './cronRanges';
 import type { ExpiredOrder, ProcessedOrder, ReminderOrder } from './cronQueries';
 
@@ -17,7 +17,8 @@ export const completeProcessedOrders = async () => {
 
 export const sendCheckInReminders = async () => {
   const orders = await findCheckInReminderOrders(getCheckInReminderRange());
-  await Promise.all(orders.map(sendReminderEmail));
+  const now = new Date();
+  await Promise.allSettled(orders.map((order) => sendReminderEmail(order, now)));
 };
 
 const cancelExpiredOrder = async (order: ExpiredOrder, now: Date) => {
@@ -25,5 +26,7 @@ const cancelExpiredOrder = async (order: ExpiredOrder, now: Date) => {
   await sendCancellationEmail(order.user.email, order.order_number, 'Batas waktu pembayaran telah berakhir').catch(() => {});
 };
 const completeProcessedOrder = (order: ProcessedOrder, now: Date) => completeOrder(order.id, now);
-const sendReminderEmail = (order: ReminderOrder) =>
-  sendBookingReminderEmail(order.user.email, order.order_number, order.property.name).catch(() => {});
+const sendReminderEmail = async (order: ReminderOrder, now: Date) => {
+  await sendBookingReminderEmail(order.user.email, order.order_number, order.property.name);
+  await updateCheckInReminderSent(order.id, now);
+};

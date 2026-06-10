@@ -1,4 +1,7 @@
-export const getCheckInReminderRange = () => ({
-  start: new Date(Date.now() + 24 * 60 * 60 * 1000),
-  end: new Date(Date.now() + 25 * 60 * 60 * 1000),
-});
+export const getCheckInReminderRange = () => {
+  const now = new Date();
+  return {
+    start: now,
+    end: new Date(now.getTime() + 24 * 60 * 60 * 1000),
+  };
+};
