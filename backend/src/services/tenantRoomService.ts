@@ -4,7 +4,7 @@ import { buildAvailabilityRangeDates } from './tenantRoom/availabilityRange';
 import { buildTenantAvailabilityView } from './tenantRoom/availabilityView';
 import { buildRoomCreateData, buildRoomUpdateData, normalizeAvailabilityDate } from './tenantRoom/roomData';
 import { createRoomPeakRate, findRoomPeakRates, softDeletePeakRate, updateRoomPeakRate } from './tenantRoom/peakRates';
-import { createRoomRecord, findRoomAvailabilities, findRoomBookedOrders, findRoomById, findRoomsByProperty, softDeleteRoomRecord, updateRoomRecord, upsertRoomAvailability, upsertRoomAvailabilityRange } from './tenantRoom/roomQueries';
+import { createRoomRecord, findRoomAvailabilities, findRoomBookedOrders, findRoomById, findRoomsByProperty, softDeleteRoomRecord, updateRoomRecord, upsertRoomAvailability, upsertRoomAvailabilityRange, countActiveOrdersForRoom, countOverlappingOrders } from './tenantRoom/roomQueries';
 import { ensureTenantProperty, verifyPeakRateOwner, verifyRoomOwner } from './tenantRoom/roomOwnership';
 import type { PeakRateFormData, RoomFormData } from './tenantRoom/tenantRoomTypes';
 import { isWholeUnitCategory } from './tenantRoom/wholeUnitCategory';
@@ -31,6 +31,8 @@ export const updateRoom = async (roomId: string, tenantId: string, data: RoomFor
 
 export const deleteRoom = async (roomId: string, tenantId: string) => {
   await verifyRoomOwner(roomId, tenantId);
+  const activeOrders = await countActiveOrdersForRoom(roomId);
+  if (activeOrders > 0) throw new AppError('Kamar tidak dapat dihapus karena sudah memiliki riwayat pemesanan aktif.', 400);
   return softDeleteRoomRecord(roomId);
 };
 
@@ -70,6 +72,10 @@ export const setRoomAvailability = async (roomId: string, tenantId: string, date
 
 export const setRoomAvailabilityRange = async (roomId: string, tenantId: string, start: Date, end: Date, isAvailable: boolean) => {
   await verifyRoomOwner(roomId, tenantId);
+  if (!isAvailable) {
+    const overlappingOrders = await countOverlappingOrders(roomId, start, end);
+    if (overlappingOrders > 0) throw new AppError('Ketersediaan tidak dapat diubah karena tanggal tersebut sudah memiliki pemesanan aktif.', 400);
+  }
   return upsertRoomAvailabilityRange(roomId, buildAvailabilityRangeDates(start, end), isAvailable);
 };
 

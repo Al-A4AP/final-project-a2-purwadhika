@@ -18,7 +18,7 @@ export const updatePropertySchema = createPropertySchema.partial().extend({
 });
 
 export const createRoomSchema = z.object({
-  room_type: z.string().min(3, 'Tipe kamar minimal 3 karakter'),
+  room_type: z.string().trim().min(3, 'Tipe kamar minimal 3 karakter'),
   base_price: z.string().regex(/^\d+$/, 'Harga harus berupa angka'),
   child_price: z.string().regex(/^\d+$/, 'Harga anak harus berupa angka').optional().or(z.literal('')),
   capacity: z.string().regex(/^\d+$/, 'Kapasitas harus berupa angka'),

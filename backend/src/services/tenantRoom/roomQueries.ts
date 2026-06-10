@@ -35,6 +35,17 @@ export const findRoomBookedOrders = (roomId: string) =>
     select: { check_in_date: true, check_out_date: true, id: true, roomId: true },
     orderBy: { check_in_date: 'asc' },
   });
+export const countActiveOrdersForRoom = (roomId: string) =>
+  prisma.order.count({ where: { roomId, status: { not: 'CANCELLED' } } });
+export const countOverlappingOrders = (roomId: string, start: Date, end: Date) =>
+  prisma.order.count({
+    where: {
+      roomId,
+      status: { in: BOOKED_ROOM_STATUSES },
+      check_in_date: { lt: end },
+      check_out_date: { gt: start }
+    }
+  });
 export const upsertRoomAvailability = (roomId: string, date: Date, isAvailable: boolean) =>
   prisma.roomAvailability.upsert({
     where: { roomId_date: { roomId, date } },
