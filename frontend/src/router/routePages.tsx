@@ -53,6 +53,5 @@ export const TenantOrdersPage = Loadable(lazy(() => import("@/pages/tenant/Order
 export const TenantReviewsPage = Loadable(lazy(() => import("@/pages/tenant/ReviewsPage")), "tenant");
 export const ReportsPage = Loadable(lazy(() => import("@/pages/tenant/ReportsPage")), "tenant");
 export const PropertyReportPage = Loadable(lazy(() => import("@/pages/tenant/PropertyReportPage")), "tenant");
-export const OccupancyPage = Loadable(lazy(() => import("@/pages/tenant/OccupancyPage")), "tenant");
 export const PeakSeasonPage = Loadable(lazy(() => import("@/pages/tenant/PeakSeasonPage")), "tenant");
 export const VouchersPage = Loadable(lazy(() => import("@/pages/tenant/VouchersPage")), "tenant");

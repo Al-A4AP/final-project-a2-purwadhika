@@ -1,5 +1,5 @@
 import type { ReactNode } from "react";
-import { createBrowserRouter } from "react-router-dom";
+import { createBrowserRouter, Navigate } from "react-router-dom";
 import { RouteErrorPage } from "@/components/common/RouteErrorPage";
 import UserLayout from "@/components/layout/UserLayout";
 import AuthLayout from "@/components/layout/AuthLayout";
@@ -8,7 +8,7 @@ import ProtectedRoute from "./ProtectedRoute";
 import {
   AboutPage, BookingDetailPage, BookingPage, CategoriesPage,
   ContactPage, DashboardPage, ExplorePage, ForgotPasswordPage,
-  HomePage, LegalPage, LoginPage, NotFoundPage, OccupancyPage,
+  HomePage, LegalPage, LoginPage, NotFoundPage,
   OrdersPage, PaymentSuccessPage, PeakSeasonPage,
   ProfilePage, PropertiesListPage, PropertyDetailPage, PropertyFormPage,
   PropertyReportPage, RegisterPage, ReportsPage, RoomsPage, SavedPropertiesPage,
@@ -74,7 +74,7 @@ const tenantRoutes = [
   tenantRoute("profile", <ProfilePage />),
   tenantRoute("reports", <ReportsPage />),
   tenantRoute("property-report", <PropertyReportPage />),
-  tenantRoute("occupancy", <OccupancyPage />),
+  tenantRoute("occupancy", <Navigate to="/tenant/property-report" replace />),
   tenantRoute("peak-season", <PeakSeasonPage />),
   tenantRoute("vouchers", <VouchersPage />),
 ];
