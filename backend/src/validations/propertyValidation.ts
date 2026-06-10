@@ -1,10 +1,10 @@
 import { z } from 'zod';
 
 export const createPropertySchema = z.object({
-  name: z.string().min(3, 'Nama minimal 3 karakter'),
-  description: z.string().min(20, 'Deskripsi minimal 20 karakter'),
-  address: z.string().min(5, 'Alamat wajib diisi'),
-  city: z.string().min(2, 'Kota wajib diisi'),
+  name: z.string().trim().min(3, 'Nama minimal 3 karakter'),
+  description: z.string().trim().min(20, 'Deskripsi minimal 20 karakter'),
+  address: z.string().trim().min(5, 'Alamat wajib diisi'),
+  city: z.string().trim().min(2, 'Kota wajib diisi'),
   province: z.string().optional(),
   amenities: z.string().optional(),
   categoryId: z.string().min(1, 'Kategori wajib dipilih'),

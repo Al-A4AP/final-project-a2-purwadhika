@@ -14,7 +14,7 @@ const JWT_EXPIRES = env.JWT_EXPIRES_IN;
 const ONE_HOUR = 60 * 60 * 1000;
 
 export const registerUser = async (data: RegisterUserData) => {
-  await assertEmailAvailable(data.email);
+  await assertEmailAvailable(data.email, data.role || 'USER');
   const user = await createPendingEmailUser(data);
   const rawToken = await createActivationToken(user.id);
   await sendVerificationEmail(user.email, rawToken).catch(() => {});
@@ -71,9 +71,13 @@ export const logout = async (token: string) => {
   revokeToken(token);
 };
 
-const assertEmailAvailable = async (email: string) => {
+const assertEmailAvailable = async (email: string, tryingToRegisterRole: string) => {
   const exists = await prisma.user.findUnique({ where: { email } });
-  if (exists) throw new AppError('Email sudah terdaftar', 409);
+  if (exists) {
+    const roleName = exists.role === 'TENANT' ? 'Tenant' : 'User';
+    const targetRoleName = tryingToRegisterRole === 'TENANT' ? 'Tenant' : 'User';
+    throw new AppError(`Akun ini sudah terdaftar sebagai ${roleName}. Silakan login sebagai ${roleName} atau gunakan email lain untuk mendaftar sebagai ${targetRoleName}.`, 409);
+  }
 };
 
 const createPendingEmailUser = async (data: RegisterUserData) =>

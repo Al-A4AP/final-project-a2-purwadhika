@@ -99,6 +99,12 @@ export const updateProperty = async (
 
 export const deleteProperty = async (id: string, tenantId: string) => {
   await findTenantPropertyOrThrow(id, tenantId);
+  const orderCount = await prisma.order.count({
+    where: { propertyId: id, status: { not: "CANCELLED" } },
+  });
+  if (orderCount > 0) {
+    throw new AppError("Properti tidak dapat dihapus karena sudah memiliki riwayat pemesanan aktif.", 400);
+  }
   return softDeleteTenantProperty(id);
 };
 

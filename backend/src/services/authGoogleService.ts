@@ -51,8 +51,11 @@ const verifyExistingGoogleUser = async (
   user: GoogleAuthUser,
   requestedRole?: Role,
 ) => {
-  if (requestedRole && user.role !== requestedRole)
-    throw new AppError("Email Google sudah terdaftar dengan role berbeda", 409);
+  if (requestedRole && user.role !== requestedRole) {
+    const roleName = user.role === 'TENANT' ? 'Tenant' : 'User';
+    const targetRoleName = requestedRole === 'TENANT' ? 'Tenant' : 'User';
+    throw new AppError(`Akun ini sudah terdaftar sebagai ${roleName}. Silakan login sebagai ${roleName} atau gunakan email lain untuk mendaftar sebagai ${targetRoleName}.`, 409);
+  }
   if (user.verified_at) return user;
   return prisma.user.update({
     where: { id: user.id },

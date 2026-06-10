@@ -40,7 +40,7 @@ const assertPasswordInput = ({ old_password, new_password }: PasswordChangeData)
 
 const assertEmailPasswordAccount = (user: User) => {
   if (user.auth_provider === 'EMAIL' && user.password_set_at) return;
-  throw new AppError('Password hanya dapat diubah untuk akun email dan password', 400);
+  throw new AppError('Akun Anda terhubung dengan Google. Password tidak dapat diubah dari aplikasi ini.', 400);
 };
 
 const assertOldPassword = async (oldHash: string, oldPassword: string) => {

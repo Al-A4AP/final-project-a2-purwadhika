@@ -5,6 +5,7 @@ export const formatPrice = (price: number): string => {
     style: "currency",
     currency: "IDR",
     minimumFractionDigits: 0,
+    maximumFractionDigits: 0,
   }).format(price);
 };
 
@@ -13,6 +14,7 @@ export const formatCurrency = (price: number): string =>
     style: "currency",
     currency: "IDR",
     minimumFractionDigits: 0,
+    maximumFractionDigits: 0,
   }).format(price);
 
 export const formatDate = (date: Date | string): string => {

@@ -10,10 +10,10 @@ import { usePropertyDetailData } from './usePropertyDetailData';
 export const usePropertyDetailPageState = () => {
   const route = usePropertyDetailRoute();
   const dates = usePropertyDetailDates();
-  const auth = usePropertyDetailAuth();
   const data = usePropertyDetailData(route.id, dates.checkIn, dates.checkOut, route.goHome);
-  const booking = usePropertyBookingActions({ ...dates, filters: dates.filters, id: route.id, navigate: route.navigate });
   const selection = useSelectedRoomState(data.property?.rooms || []);
+  const auth = usePropertyDetailAuth(selection.selectedRoom, dates.checkIn, dates.checkOut);
+  const booking = usePropertyBookingActions({ ...dates, filters: dates.filters, id: route.id, navigate: route.navigate });
   const handlers = usePropertyDetailHandlers(dates, booking, selection.selectRoom);
   return { ...route, ...dates, ...auth, booking, data, ...selection, ...handlers };
 };
@@ -32,9 +32,20 @@ const usePropertyDetailDates = () => {
   return { checkIn, checkOut, filters, setCheckIn, setCheckOut };
 };
 
-const usePropertyDetailAuth = () => {
+const usePropertyDetailAuth = (selectedRoom: Room | null, checkIn: string, checkOut: string) => {
   const { isAuthenticated, isTenant, user } = useAuthStore();
-  const bookingBlockedReason = getBookingBlockedReason(isAuthenticated, user?.verified_at);
+  let bookingBlockedReason = getBookingBlockedReason(isAuthenticated, user?.verified_at);
+  if (!bookingBlockedReason) {
+    if (!checkIn || !checkOut) {
+      bookingBlockedReason = "Pilih tanggal check-in dan check-out";
+    } else if (!selectedRoom) {
+      bookingBlockedReason = "Pilih kamar terlebih dahulu";
+    } else if (selectedRoom.is_available === false) {
+      bookingBlockedReason = selectedRoom.availability_source === 'CUSTOMER_BOOKED'
+        ? "Kamar sudah dipesan pada tanggal tersebut"
+        : "Tanggal yang dipilih tidak tersedia";
+    }
+  }
   return { bookingBlockedReason, isTenant };
 };
 
