@@ -12,6 +12,6 @@ export const ContactForm: FC<{ state: ContactFormState }> = ({ state }) => (
     </div>
     <TextInputField label="Subjek" name="subject" type="text" placeholder="Bagaimana kami bisa membantu?" state={state} />
     <MessageField state={state} />
-    <ContactSubmitButton />
+    <ContactSubmitButton loading={state.loading} />
   </form>
 );

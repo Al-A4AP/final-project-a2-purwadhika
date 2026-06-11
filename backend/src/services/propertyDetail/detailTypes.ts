@@ -35,6 +35,8 @@ export interface PropertyDetailFilters {
 }
 
 export interface PropertyRecord {
+  id: string;
+  rental_type: string;
   _count?: { orders: number };
   images?: unknown[];
   reviews?: RatingReview[];

@@ -3,12 +3,12 @@ import type { DateAvailabilityStatus, DatePrice } from "./pricingCalendarTypes";
 
 const pad = (value: number) => String(value).padStart(2, "0");
 
-const getDateKey = (date: Date) =>
+export const getDateKey = (date: Date) =>
   `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())}`;
 
 const getAvailabilityRecords = (room: Room) => room.availabilities || room.availability || [];
 
-const getDateStatus = (room: Room, dateKey: string): DateAvailabilityStatus | null => {
+export const getDateStatus = (room: Room, dateKey: string): DateAvailabilityStatus | null => {
   const record = getAvailabilityRecords(room).find((item) => !item.is_available && item.date.startsWith(dateKey));
   if (!record) return null;
   if (record.source === "CUSTOMER_BOOKED") return "CUSTOMER_BOOKED";

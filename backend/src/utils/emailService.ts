@@ -21,8 +21,8 @@ const transporter = nodemailer.createTransport({
 
 const FROM = `"PURWALOKA" <${env.EMAIL_USER}>`;
 
-const sendMail = async (to: string, subject: string, html: string) => {
-  await transporter.sendMail({ from: FROM, to, subject, html });
+const sendMail = async (to: string, subject: string, html: string, replyTo?: string) => {
+  await transporter.sendMail({ from: FROM, to, subject, html, replyTo });
 };
 
 export const sendVerificationEmail = async (email: string, token: string) => {
@@ -284,3 +284,31 @@ interface OrderConfirmationData {
 }
 
 type OrderDetailRow = readonly [string, string, boolean];
+
+export const sendContactMessageEmail = async (
+  name: string,
+  email: string,
+  subject: string,
+  message: string,
+) => {
+  if (!env.EMAIL_USER) return;
+  const html = getEmailWrapper(
+    "Pesan Kontak Baru - PURWALOKA",
+    `
+    <h2>Pesan Baru dari Halaman Kontak</h2>
+    <p>Halo Tim Support,</p>
+    <p>Anda menerima pesan baru melalui halaman kontak PURWALOKA:</p>
+    <table style="width: 100%; border-collapse: collapse; margin: 20px 0;">
+      <tr><td style="padding: 8px 0; color: #64748b; width: 100px;">Nama:</td><td style="padding: 8px 0; font-weight: bold;">${escapeHtml(name)}</td></tr>
+      <tr><td style="padding: 8px 0; color: #64748b;">Email:</td><td style="padding: 8px 0; font-weight: bold;">${escapeHtml(email)}</td></tr>
+      <tr><td style="padding: 8px 0; color: #64748b;">Subjek:</td><td style="padding: 8px 0; font-weight: bold;">${escapeHtml(subject)}</td></tr>
+    </table>
+    <div style="background-color: #f8fafc; border-left: 4px solid #2980B9; padding: 15px; margin: 20px 0; border-radius: 4px;">
+      <p style="margin: 0; font-weight: bold; color: #2980B9;">Pesan:</p>
+      <p style="margin: 5px 0 0 0; color: #475569; white-space: pre-wrap;">${escapeHtml(message)}</p>
+    </div>
+    <p>Silakan balas langsung ke email pengirim: <a href="mailto:${escapeHtml(email)}">${escapeHtml(email)}</a></p>
+  `,
+  );
+  await sendMail(env.EMAIL_USER, `Pesan Kontak: ${subject}`, html, email);
+};

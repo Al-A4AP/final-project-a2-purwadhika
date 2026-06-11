@@ -28,17 +28,20 @@ export const buildRoomCalendarAvailability = (
   room: CalendarRoom,
   manual: CalendarAvailability[],
   orders: CalendarOrder[],
+  rentalType: string,
   range: CalendarRange,
-) => [...manual.map(markTenantAvailability), ...buildFullBookedDays(room, orders, range)];
+) => [...manual.map(markTenantAvailability), ...buildFullBookedDays(room, orders, rentalType, range)];
 
 const markTenantAvailability = (availability: CalendarAvailability) => ({
   ...availability,
   source: availability.is_available ? 'TENANT_AVAILABLE' : 'TENANT_BLOCKED',
 });
 
-const buildFullBookedDays = (room: CalendarRoom, orders: CalendarOrder[], range: CalendarRange) =>
-  getFullBookedDates(orders, room.quantity, range)
+const buildFullBookedDays = (room: CalendarRoom, orders: CalendarOrder[], rentalType: string, range: CalendarRange) => {
+  const quantity = rentalType === 'WHOLE_PROPERTY' ? 1 : room.quantity;
+  return getFullBookedDates(orders, quantity, range)
     .map(([date]) => buildBookedAvailability(room.id, date));
+};
 
 const getFullBookedDates = (orders: CalendarOrder[], quantity: number, range: CalendarRange) =>
   [...countBookedNights(orders).entries()]

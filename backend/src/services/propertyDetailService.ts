@@ -10,7 +10,7 @@ const buildPropertyDetailResponse = async (
 ) => {
   const property = await findProperty(id);
   const { checkIn, checkOut } = parseDateFilters(filters);
-  const rooms = await fetchDetailedRoomsStatus(property.rooms, checkIn, checkOut);
+  const rooms = await fetchDetailedRoomsStatus(property as any, checkIn, checkOut);
   return { property, rooms };
 };
 

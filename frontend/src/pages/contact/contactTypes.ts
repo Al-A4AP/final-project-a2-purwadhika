@@ -23,6 +23,7 @@ export type FaqItemData = {
 export type ContactFormState = {
   form: ContactFormData;
   submitted: boolean;
+  loading: boolean;
   updateField: (name: keyof ContactFormData, value: string) => void;
   handleSubmit: (event: FormEvent<HTMLFormElement>) => void;
 };

@@ -7,25 +7,36 @@ const ACTIVE_BOOKING_STATUSES: OrderStatus[] = ['WAITING_PAYMENT', 'WAITING_CONF
 export const getAvailabilityClient = (tx?: AvailabilityClient) => tx || prisma;
 
 export const loadRoomOrThrow = async (client: AvailabilityClient, roomId: string) => {
-  const room = await client.room.findFirst({ where: { id: roomId, deleted_at: null } });
+  const room = await client.room.findFirst({
+    where: { id: roomId, deleted_at: null },
+    include: { property: { select: { id: true, rental_type: true } } },
+  });
   if (!room) throw new Error('Kamar tidak ditemukan');
   return room;
 };
 
-export const loadBlockedAvailabilities = (client: AvailabilityClient, roomId: string, range: StayRange) => (
-  client.roomAvailability.findMany({
-    where: { roomId, date: { gte: range.checkIn, lt: range.checkOut }, is_available: false },
-  })
-);
+export type RoomWithPropertyContext = NonNullable<Awaited<ReturnType<typeof loadRoomOrThrow>>>;
 
-export const loadOverlappingOrders = (client: AvailabilityClient, roomId: string, range: StayRange) => (
-  client.order.findMany({
+export const loadBlockedAvailabilities = (client: AvailabilityClient, room: RoomWithPropertyContext, range: StayRange) => {
+  const scope = room.property.rental_type === 'WHOLE_PROPERTY'
+    ? { room: { propertyId: room.property.id } }
+    : { roomId: room.id };
+  return client.roomAvailability.findMany({
+    where: { ...scope, date: { gte: range.checkIn, lt: range.checkOut }, is_available: false },
+  });
+};
+
+export const loadOverlappingOrders = (client: AvailabilityClient, room: RoomWithPropertyContext, range: StayRange) => {
+  const scope = room.property.rental_type === 'WHOLE_PROPERTY'
+    ? { propertyId: room.property.id }
+    : { roomId: room.id };
+  return client.order.findMany({
     where: {
-      roomId,
+      ...scope,
       deleted_at: null,
       status: { in: ACTIVE_BOOKING_STATUSES },
       check_in_date: { lt: range.checkOut },
       check_out_date: { gt: range.checkIn },
     },
-  })
-);
+  });
+};

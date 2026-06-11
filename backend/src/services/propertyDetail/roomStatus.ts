@@ -1,8 +1,10 @@
 import { checkAvailability } from "../availabilityService";
 import { calculateStayDetails } from "../pricingService";
+import prisma from "../../config/prisma";
+import { loadBlockedAvailabilities, loadOverlappingOrders } from "../availability/availabilityQueries";
 import { getDefaultCalendarRange } from "./detailDates";
 import { findRoomRelation } from "./detailQueries";
-import type { RoomCalendarRange, RoomRecord, RoomRelation } from "./detailTypes";
+import type { PropertyRecord, RoomCalendarRange, RoomRecord, RoomRelation } from "./detailTypes";
 import {
   buildRoomCalendarPayload,
   buildUnavailableRoomStatus,
@@ -11,39 +13,53 @@ import {
 const buildPricedRoomStatus = async (
   room: RoomRecord,
   roomRel: RoomRelation | null,
+  rentalType: string,
   range: RoomCalendarRange,
   checkIn: Date,
   checkOut: Date,
 ) => {
   const priceDetails = await calculateStayDetails(room.id, checkIn, checkOut);
-  return { ...buildRoomCalendarPayload(room, roomRel, range), is_available: true, priceDetails };
+  return { ...buildRoomCalendarPayload(room, roomRel, rentalType, range), is_available: true, priceDetails };
 };
 
 const buildAvailableRoomStatus = async (
   room: RoomRecord,
   roomRel: RoomRelation | null,
+  rentalType: string,
   range: RoomCalendarRange,
   checkIn: Date,
   checkOut: Date,
 ) => {
   const avail = await checkAvailability(room.id, checkIn, checkOut);
-  if (!avail.available) return buildUnavailableRoomStatus(room, roomRel, range, avail);
-  return buildPricedRoomStatus(room, roomRel, range, checkIn, checkOut);
+  if (!avail.available) return buildUnavailableRoomStatus(room, roomRel, rentalType, range, avail);
+  return buildPricedRoomStatus(room, roomRel, rentalType, range, checkIn, checkOut);
 };
 
 const buildRoomStatus = async (
   room: RoomRecord,
+  property: PropertyRecord,
   checkIn: Date | null,
   checkOut: Date | null,
 ) => {
   const range = getDefaultCalendarRange();
-  const roomRel = await findRoomRelation(room.id, range);
-  if (!checkIn || !checkOut) return buildRoomCalendarPayload(room, roomRel, range);
-  return buildAvailableRoomStatus(room, roomRel, range, checkIn, checkOut);
+  const roomRel = await findRoomRelation(room.id, range) as RoomRelation | null;
+
+  const roomCtx = { id: room.id, property: { id: property.id, rental_type: property.rental_type } } as any;
+  const stayRange = { checkIn: range.start, checkOut: range.end };
+  const orders = await loadOverlappingOrders(prisma, roomCtx, stayRange);
+  const availability = await loadBlockedAvailabilities(prisma, roomCtx, stayRange);
+  
+  if (roomRel) {
+    roomRel.orders = orders;
+    roomRel.availability = availability;
+  }
+
+  if (!checkIn || !checkOut) return buildRoomCalendarPayload(room, roomRel, property.rental_type, range);
+  return buildAvailableRoomStatus(room, roomRel, property.rental_type, range, checkIn, checkOut);
 };
 
 export const fetchDetailedRoomsStatus = (
-  rooms: RoomRecord[],
+  property: PropertyRecord,
   checkIn: Date | null,
   checkOut: Date | null,
-) => Promise.all(rooms.map((room) => buildRoomStatus(room, checkIn, checkOut)));
+) => Promise.all((property.rooms || []).map((room) => buildRoomStatus(room, property, checkIn, checkOut)));

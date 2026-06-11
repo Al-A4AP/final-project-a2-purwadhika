@@ -9,20 +9,27 @@ export const findOccupancyCalendar = async (tenantId: string) => {
     select: {
       id: true,
       name: true,
+      rental_type: true,
       rooms: { where: { deleted_at: null }, select: buildRoomOccupancySelect() },
     },
   });
 
-  return properties.map((p) => ({
-    ...p,
-    rooms: p.rooms.map((r) => ({
-      id: r.id,
-      room_type: r.room_type,
-      orders: r.orders,
-      peakRateRanges: r.peakRates,
-      blockedRanges: mergeAvailabilityToRanges(r.availability),
-    })),
-  }));
+  return properties.map((p) => {
+    const isWhole = p.rental_type === 'WHOLE_PROPERTY';
+    const allOrders = isWhole ? Array.from(new Map(p.rooms.flatMap((r) => r.orders).map((o) => [o.id, o])).values()) : [];
+    const allAvailability = isWhole ? p.rooms.flatMap((r) => r.availability) : [];
+
+    return {
+      ...p,
+      rooms: p.rooms.map((r) => ({
+        id: r.id,
+        room_type: r.room_type,
+        orders: isWhole ? allOrders : r.orders,
+        peakRateRanges: r.peakRates,
+        blockedRanges: mergeAvailabilityToRanges(isWhole ? allAvailability : r.availability),
+      })),
+    };
+  });
 };
 
 const mergeAvailabilityToRanges = (availability: { date: Date }[]) => {

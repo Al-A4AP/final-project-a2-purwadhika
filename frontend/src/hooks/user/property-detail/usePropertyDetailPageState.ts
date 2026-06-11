@@ -3,7 +3,7 @@ import { useNavigate, useParams } from 'react-router-dom';
 import type { Room } from '@/types';
 import { useAuthStore } from '@/stores/authStore';
 import { useFilterStore } from '@/stores/filterStore';
-import { getBookingBlockedReason } from './propertyDetailAccess';
+import { getBookingBlockedReason, isSelectedRangeUnavailable } from './propertyDetailAccess';
 import { usePropertyBookingActions } from './usePropertyBookingActions';
 import { usePropertyDetailData } from './usePropertyDetailData';
 
@@ -40,6 +40,8 @@ const usePropertyDetailAuth = (selectedRoom: Room | null, checkIn: string, check
       bookingBlockedReason = "Pilih tanggal check-in dan check-out";
     } else if (!selectedRoom) {
       bookingBlockedReason = "Pilih kamar terlebih dahulu";
+    } else if (isSelectedRangeUnavailable(selectedRoom, checkIn, checkOut)) {
+      bookingBlockedReason = "Tanggal yang dipilih tidak tersedia";
     } else if (selectedRoom.is_available === false) {
       bookingBlockedReason = selectedRoom.availability_source === 'CUSTOMER_BOOKED'
         ? "Kamar sudah dipesan pada tanggal tersebut"

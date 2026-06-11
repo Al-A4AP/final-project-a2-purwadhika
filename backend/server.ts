@@ -15,6 +15,7 @@ import tenantRoutes from './src/routes/tenantRoutes';
 import userRoutes from './src/routes/userRoutes';
 import reviewRoutes from './src/routes/reviewRoutes';
 import webhookRoutes from './src/routes/webhookRoutes';
+import contactRoutes from './src/routes/contactRoutes';
 
 const app = express();
 const PORT = env.PORT;
@@ -41,6 +42,7 @@ app.use('/api/tenants/me', tenantRoutes);      // RESTful — Tahap 4
 app.use('/api/orders', orderRoutes);
 app.use('/api/users', userRoutes);
 app.use('/api/webhooks', webhookRoutes);
+app.use('/api/contact-messages', contactRoutes);
 app.use('/api', reviewRoutes);
 
 // 404

@@ -1,5 +1,5 @@
 import { buildNights, normalizeStayRange } from './availability/availabilityDates';
-import { getAvailabilityClient, loadBlockedAvailabilities, loadOverlappingOrders, loadRoomOrThrow } from './availability/availabilityQueries';
+import { getAvailabilityClient, loadBlockedAvailabilities, loadOverlappingOrders, loadRoomOrThrow, type RoomWithPropertyContext } from './availability/availabilityQueries';
 import { availableResult, blockedResult, fullResult } from './availability/availabilityResults';
 import { findBlockedNight, findFullyBookedNight } from './availability/availabilityRules';
 import type { AvailabilityClient, AvailabilityResult } from './availability/availabilityTypes';
@@ -18,14 +18,14 @@ const buildAvailabilityContext = async (roomId: string, checkInDate: Date, check
   const client = getAvailabilityClient(tx);
   const room = await loadRoomOrThrow(client, roomId);
   const range = normalizeStayRange(checkInDate, checkOutDate);
-  const [availabilities, orders] = await loadAvailabilityData(client, roomId, range);
+  const [availabilities, orders] = await loadAvailabilityData(client, room, range);
   return { availabilities, nights: buildNights(range), orders, room };
 };
 
-const loadAvailabilityData = (client: AvailabilityClient, roomId: string, range: ReturnType<typeof normalizeStayRange>) =>
+const loadAvailabilityData = (client: AvailabilityClient, room: RoomWithPropertyContext, range: ReturnType<typeof normalizeStayRange>) =>
   Promise.all([
-    loadBlockedAvailabilities(client, roomId, range),
-    loadOverlappingOrders(client, roomId, range),
+    loadBlockedAvailabilities(client, room, range),
+    loadOverlappingOrders(client, room, range),
   ]);
 
 const resolveAvailability = (context: AvailabilityContext) => {
