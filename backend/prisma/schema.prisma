@@ -399,3 +399,13 @@ enum RentalType {
   PER_ROOM
   WHOLE_PROPERTY
 }
+
+model RevokedToken {
+  id         String   @id @default(cuid())
+  token_hash String   @unique
+  expires_at DateTime
+  created_at DateTime @default(now())
+
+  @@index([expires_at])
+  @@map("revoked_tokens")
+}

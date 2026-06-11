@@ -106,9 +106,23 @@ Frontend tidak menyimpan JWT auth di localStorage, sehingga risiko pencurian tok
 
 ### Logout dan Token Revocation
 
-Status: cukup baik.
+Status: sangat baik.
 
-Logout menghapus cookie dan memasukkan token ke blacklist service. Catatan: token blacklist saat ini bersifat in-memory. Ini cukup untuk single process, tetapi untuk production multi-instance lebih kuat memakai Redis atau database.
+Logout menghapus cookie dan memasukkan token ke blacklist service. 
+
+### Persistent Token Revocation
+
+Status: IMPLEMENTED
+
+Implementation:
+- PostgreSQL-backed blacklist
+- SHA256 token hashing
+- Multi-instance safe
+- Automatic cleanup cron
+
+Risk Eliminated:
+- Logout bypass after server restart
+- Multi-instance token resurrection
 
 ## Browser Storage
 

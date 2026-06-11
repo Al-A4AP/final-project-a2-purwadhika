@@ -14,10 +14,10 @@ const verifyRequestToken = (token: string) => {
   return isAuthJwtPayload(decoded) ? decoded : null;
 };
 
-export const requireAuth = (req: Request, res: Response, next: NextFunction) => {
+export const requireAuth = async (req: Request, res: Response, next: NextFunction) => {
   const token = getRequestToken(req);
   if (!token) return sendError(res, 'Token tidak ditemukan', 401);
-  if (isTokenBlacklisted(token)) return sendError(res, 'Token sudah di-revoke', 401);
+  if (await isTokenBlacklisted(token)) return sendError(res, 'Token sudah di-revoke', 401);
   try {
     const decoded = verifyRequestToken(token);
     if (!decoded) return sendError(res, 'Token tidak valid atau kadaluarsa', 401);

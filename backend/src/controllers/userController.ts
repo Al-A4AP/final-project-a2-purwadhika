@@ -3,6 +3,7 @@ import * as svc from '../services/userService';
 import { requestEmailChange } from '../services/userEmailService';
 import { sendSuccess, sendError } from '../utils/response';
 import { handleControllerError } from './controllerErrors';
+import { AUTH_COOKIE_NAME, clearAuthCookieOptions } from '../config/authCookie';
 
 export const updateProfileCtrl = async (req: Request, res: Response) => {
   try {
@@ -22,7 +23,13 @@ export const updateAvatarCtrl = async (req: Request, res: Response) => {
 export const changePasswordCtrl = async (req: Request, res: Response) => {
   try {
     const data = await svc.changePassword(req.user!.id, req.body);
-    return sendSuccess(res, data, 'Password berhasil diubah');
+    const token = req.headers.authorization?.split(' ')[1] || req.cookies?.[AUTH_COOKIE_NAME];
+    if (token) {
+      const { revokeToken } = await import('../services/tokenBlacklistService');
+      await revokeToken(token);
+      res.clearCookie(AUTH_COOKIE_NAME, clearAuthCookieOptions);
+    }
+    return sendSuccess(res, data, 'Password berhasil diubah, silakan login ulang');
   } catch (err) { return handleControllerError(res, err); }
 };
 

@@ -34,6 +34,10 @@ export const updateCheckInReminderSent = (orderId: string, now: Date) => prisma.
   data: { check_in_reminder_sent_at: now },
 });
 
+export const deleteExpiredRevokedTokens = (now: Date) => prisma.revokedToken.deleteMany({
+  where: { expires_at: { lt: now } },
+});
+
 export type ReminderRange = { start: Date; end: Date };
 export type ExpiredOrder = Awaited<ReturnType<typeof findExpiredUnpaidOrders>>[number];
 export type ReminderOrder = Awaited<ReturnType<typeof findCheckInReminderOrders>>[number];

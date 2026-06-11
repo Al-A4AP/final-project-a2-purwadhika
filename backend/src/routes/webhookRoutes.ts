@@ -4,6 +4,7 @@ import {
   cancelExpiredUnpaidOrders,
   completeProcessedOrders,
   sendCheckInReminders,
+  cleanupExpiredRevokedTokens,
 } from '../cron/cronTasks';
 
 const router = Router();
@@ -20,11 +21,12 @@ router.post('/cron', async (req, res) => {
   }
 
   try {
-    // Jalankan semua tugas cron secara paralel (atau berurutan jika saling bergantung, tapi di sini aman paralel)
+    // Jalankan semua tugas cron secara paralel
     await Promise.all([
       cancelExpiredUnpaidOrders(),
       completeProcessedOrders(),
       sendCheckInReminders(),
+      cleanupExpiredRevokedTokens(),
     ]);
 
     res.json({ success: true, message: 'Semua tugas cron berhasil dijalankan' });

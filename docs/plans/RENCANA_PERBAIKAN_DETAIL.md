@@ -34,6 +34,7 @@ File ini menyimpan rencana aktif dan sisa rekomendasi yang belum dilaksanakan at
 | Whole Property double booking backend guard | Selesai |
 | Whole Property property detail calendar sync | Selesai |
 | Whole Property CTA disabled state | Selesai |
+| Persistent Token Blacklist (Database-backed & SHA256) | Selesai |
 
 ## Sisa Rencana Opsional yang Belum Dilaksanakan
 
@@ -110,28 +111,7 @@ Tahapan aman:
 5. Jalankan lint/build sesuai area terdampak.
 
 
-### 3. Persistent Token Blacklist
 
-Risiko: Menengah  
-Prioritas: Production hardening jika backend multi-instance
-
-Masalah:
-
-Token blacklist saat logout masih in-memory. Ini cukup untuk single process, tetapi tidak ideal untuk deployment multi-instance.
-
-File yang kemungkinan terdampak:
-
-- `backend/src/services/tokenBlacklistService.ts`
-- `backend/src/config/prisma.ts`
-- `backend/prisma/schema.prisma` jika memakai database
-- Alternatif config Redis jika memakai Redis
-
-Tahapan aman:
-
-1. Tentukan storage: Redis lebih cocok untuk expiry token, database lebih mudah tanpa infra tambahan.
-2. Jika database, buat model blacklist token dan migration.
-3. Update service blacklist untuk read/write persistent storage.
-4. Tambahkan test logout dan revoked token.
 
 ### 4. Saved Properties Menjadi Data Akun
 

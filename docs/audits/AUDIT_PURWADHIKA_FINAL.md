@@ -250,7 +250,7 @@ README di folder `frontend` dan `backend` sudah dihapus oleh user dan tidak dibu
 | Cleanup legacy REST alias setelah regression test | Menengah | Opsional sebelum final REST ketat |
 | Review kandidat function-length advisory bertahap | Rendah-menengah | Opsional clean code |
 | Tambahkan CSRF token jika cookie-auth production cross-origin | Menengah | Production hardening |
-| Gunakan persistent token blacklist jika backend multi-instance | Menengah | Production hardening |
+| Gunakan persistent token blacklist jika backend multi-instance | Selesai | Sudah diimplementasikan dengan Prisma PostgreSQL + SHA256 hashing |
 | Pindahkan saved properties ke backend jika ingin sinkron lintas device | Menengah | Product improvement |
 
 ## Kesimpulan

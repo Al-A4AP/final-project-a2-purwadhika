@@ -68,7 +68,7 @@ export const getMe = async (userId: string) => {
 
 export const logout = async (token: string) => {
   const { revokeToken } = await import('./tokenBlacklistService');
-  revokeToken(token);
+  await revokeToken(token);
 };
 
 const assertEmailAvailable = async (email: string, tryingToRegisterRole: string) => {

@@ -21,6 +21,12 @@ export const sendCheckInReminders = async () => {
   await Promise.allSettled(orders.map((order) => sendReminderEmail(order, now)));
 };
 
+export const cleanupExpiredRevokedTokens = async () => {
+  const now = new Date();
+  const { deleteExpiredRevokedTokens } = await import('./cronQueries');
+  await deleteExpiredRevokedTokens(now);
+};
+
 const cancelExpiredOrder = async (order: ExpiredOrder, now: Date) => {
   await cancelOrder(order.id, now);
   await sendCancellationEmail(order.user.email, order.order_number, 'Batas waktu pembayaran telah berakhir').catch(() => {});
