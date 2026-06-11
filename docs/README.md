@@ -2,7 +2,7 @@
 
 Folder ini menyimpan dokumentasi pendukung final project agar root project tetap ringkas dan mudah diperiksa.
 
-Tanggal audit dokumentasi terbaru: 09 Juni 2026.
+Tanggal audit dokumentasi terbaru: 11 Juni 2026.
 
 ## Struktur
 
@@ -27,7 +27,7 @@ README di folder `frontend` dan `backend` sudah dihapus oleh user dan tidak dibu
 
 | Area                           | Status                                                                 |
 | ------------------------------ | ---------------------------------------------------------------------- |
-| Frontend Architecture & UI/UX  | Tersentralisasi di `hooks/`, UI _view-only_ untuk Tenant, UX konsisten |
+| Frontend Architecture & UI/UX  | Tersentralisasi di `hooks/`, sinkronisasi UI Calendar & CTA, UX konsisten |
 | Frontend lint                  | Lulus                                                                  |
 | Frontend build                 | Lulus                                                                  |
 | Backend build                  | Lulus                                                                  |
@@ -39,6 +39,7 @@ README di folder `frontend` dan `backend` sudah dihapus oleh user dan tidak dibu
 | Ownership                      | Baik dan teruji                                                        |
 | Browser storage                | Tidak ada JWT auth token di localStorage                               |
 | Zod Form Validation            | Diselesaikan via Pure Custom Resolver tanpa menyentuh dependency luar  |
+| UI Booking CTA                 | Tersinkronisasi penuh dengan array kalender untuk perlindungan _double-booking_ |
 
 ## Catatan Clean Code
 

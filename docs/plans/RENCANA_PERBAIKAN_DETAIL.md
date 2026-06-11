@@ -1,6 +1,6 @@
 # Rencana Perbaikan Sisa Setelah Audit Final
 
-Tanggal update: 08 Juni 2026  
+Tanggal update: 11 Juni 2026  
 Acuan: audit clean code, REST API guidelines, ownership, security, PURWADHIKA, dan Vercel Serverless Architecture
 
 ## Ringkasan
@@ -31,6 +31,9 @@ File ini menyimpan rencana aktif dan sisa rekomendasi yang belum dilaksanakan at
 | Function-length audit otomatis advisory | Selesai (103 kandidat terpantau) |
 | Explore desktop sidebar filter dan mobile auto-close filter | Selesai |
 | Tenant reports/reviews/property performance pagination | Selesai |
+| Whole Property double booking backend guard | Selesai |
+| Whole Property property detail calendar sync | Selesai |
+| Whole Property CTA disabled state | Selesai |
 
 ## Sisa Rencana Opsional yang Belum Dilaksanakan
 

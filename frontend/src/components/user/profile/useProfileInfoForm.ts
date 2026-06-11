@@ -1,14 +1,14 @@
 import { useForm } from "react-hook-form";
-import { zodResolver } from "@hookform/resolvers/zod";
 import type { User } from "@/types";
-import { profileSchema, type ProfileInput } from "@/validations/profile";
+import { type ProfileInput } from "@/validations/profile";
 import { compactProfileData } from "./profileFormData";
+import { profileFormResolver } from "./profileFormResolver";
 
 export const useProfileInfoForm = (user: User | null, onSave: (data: ProfileInput) => Promise<void>) => {
   const form = useForm<ProfileInput>({
-    resolver: zodResolver(profileSchema),
+    resolver: profileFormResolver,
     defaultValues: {
-      domicile_address: user?.domicile_address || "",
+      ktp_number: user?.ktp_number || "",
       ktp_address: user?.ktp_address || "",
       legal_name: user?.legal_name || "",
       name: user?.name || "",

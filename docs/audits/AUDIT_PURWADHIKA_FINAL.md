@@ -1,6 +1,6 @@
 # Audit Keseluruhan PURWADHIKA
 
-Tanggal audit: 08 Juni 2026  
+Tanggal audit: 11 Juni 2026  
 Project: PURWALOKA - Property Renting Web App  
 Acuan: `docs/guidelines/PURWADHIKA.md`
 
@@ -25,6 +25,7 @@ Seluruh temuan browser terbaru pada 07 Juni 2026 telah dieksekusi dan diimplemen
 | Booking guest data | Selesai | Ditambahkan validasi ketat *Data Tamu* sebelum lanjut ke proses konfirmasi reservasi |
 | Tenant order rejection | Selesai | Tenant diwajibkan menulis alasan teks ketika menolak pembayaran manual; status dikembalikan otomatis ke `WAITING_PAYMENT` agar user bisa *retry* |
 | Profile navigation | Selesai | Tombol 'Kembali' diletakkan di halaman Profil yang secara otomatis kembali ke *Dashboard* sesuai *role* pengguna |
+| Whole Property Availability & CTA | Selesai | Kalender sinkron menampilkan tanggal terpesan/diblokir pada mode _whole property_, dan Booking CTA otomatis lumpuh/dinonaktifkan jika ada bentrokan rentang tanggal (*double-booking guard*) |
 
 
 

@@ -1,6 +1,6 @@
 # Audit Ownership dan Keamanan
 
-Tanggal audit: 07 Juni 2026  
+Tanggal audit: 11 Juni 2026  
 Project: PURWALOKA - Property Renting Web App  
 Acuan: ownership data, authorization, browser storage, dan hardening backend
 
@@ -10,7 +10,7 @@ Ownership dan keamanan berada pada kondisi baik. Route tenant dan user utama sud
 
 Auth token disimpan sebagai HTTP-only cookie dari backend, bukan localStorage. LocalStorage frontend hanya dipakai untuk preferensi UI dan saved properties lokal. Risiko keamanan yang tersisa bersifat production hardening, bukan blocker fitur final.
 
-Catatan UAT browser terbaru: Seluruh temuan perbaikan 07 Juni 2026 yang menyentuh *ownership* data kategori, properti, voucher, dan penolakan *order* telah dieksekusi dengan tetap mempertahankan keamanan berlapis.
+Catatan UAT browser terbaru: Seluruh temuan perbaikan 07 Juni 2026 yang menyentuh *ownership* data kategori, properti, voucher, dan penolakan *order* telah dieksekusi dengan tetap mempertahankan keamanan berlapis. Selain itu, hardening pada 11 Juni memastikan pemesanan *Whole Property* tidak bisa tumpang tindih (*double-booking*) melalui sinkronisasi kalender dan CTA.
 
 ## Verifikasi
 
@@ -36,6 +36,7 @@ Area yang perlu dijaga saat implementasi:
 | Voucher tenant | Tenant melihat/mengubah voucher reward private user | Voucher reward dengan `user_vouchers` tetap tidak muncul di voucher management tenant |
 | Tenant reject payment reason | Tenant mengubah order tenant lain atau user melihat alasan order lain | Tetap validasi property ownership pada order dan filter user order by `userId` |
 | Booking guest data | Data guest milik order user terekspos ke user lain | User order endpoint tetap filter by authenticated `userId` |
+| Sinkronisasi Ketersediaan Whole Property | User dapat memesan properti yang sudah dipesan user lain (*double booking*) pada rentang tanggal sama | Sinkronisasi UX Kalender-CTA di sisi frontend; tetap ada *guard backend* pada `createOrder` yang mengecek `PROPERTY_ID` agar database tidak kebobolan |
 
 Tambahkan regression test jika perubahan membuka surface ownership baru, terutama pada category/property rental type dan tenant order rejection reason.
 

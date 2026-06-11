@@ -23,7 +23,7 @@ const buildUserIdentity = (user: User | null): BookingGuestIdentity => ({
   bookingForSelf: true,
   email: user?.email || "",
   ktpAddress: user?.ktp_address || "",
-  ktpNumber: "",
+  ktpNumber: user?.ktp_number || "",
   legalName: user?.legal_name || user?.name || "",
   name: user?.name || "",
   phone: user?.phone || "",

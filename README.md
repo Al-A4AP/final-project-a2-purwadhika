@@ -16,7 +16,7 @@ Aplikasi ini telah dideploy dan dapat diakses secara publik pada tautan berikut:
 
 ## Status Audit Terakhir
 
-Audit dokumentasi diperbarui pada 09 Juni 2026 dengan acuan `docs/guidelines/PURWADHIKA.md` dan `docs/guidelines/REST_API_GUIDELINES.md`.
+Audit dokumentasi diperbarui pada 11 Juni 2026 dengan acuan `docs/guidelines/PURWADHIKA.md` dan `docs/guidelines/REST_API_GUIDELINES.md`.
 
 | Area                           | Status                  | Catatan                                                                                                                  |
 | ------------------------------ | ----------------------- | ------------------------------------------------------------------------------------------------------------------------ |
@@ -24,6 +24,7 @@ Audit dokumentasi diperbarui pada 09 Juni 2026 dengan acuan `docs/guidelines/PUR
 | Frontend Architecture & UI/UX  | Selesai                 | Logika tersentralisasi di hooks, otorisasi UI tenant ketat (view-only mode), dan komponen premium (Love Badge konsisten) |
 | Fitur 1                        | Selesai                 | Homepage, auth/profile, katalog properti, detail properti, tenant CRUD property/room/category, availability, peak season |
 | Fitur 2                        | Selesai                 | Booking, manual payment, Midtrans, tenant order management, review, laporan pendapatan/properti/okupasi                  |
+| Sinkronisasi UI Calendar & CTA | Selesai                 | Tombol Booking CTA nonaktif secara dinamis bila rentang tanggal bertabrakan dengan jadwal terpesan/diblokir            |
 | File source >200 baris         | Sesuai                  | Tidak ditemukan pada `backend/src`, `backend/tests`, `frontend/src`                                                      |
 | Function maksimal 15 baris     | Dipantau                | `npm run audit:functions` tersedia sebagai advisory tool; hasil terbaru 103 kandidat manual review                        |
 | `any`, `debugger`, `console.*` | Sesuai                  | Bersih dari `any`, `debugger`, dan `console.*` pada source utama                                                         |
@@ -69,7 +70,7 @@ README hanya dipertahankan di:
 | Auth/register/verify/login/logout                 | Selesai | `frontend/src/pages/auth/`, `frontend/src/hooks/auth/`, `backend/src/routes/authRoutes.ts`, `backend/src/services/authService.ts`                                          |
 | Profile USER/TENANT                               | Selesai | `frontend/src/pages/user/ProfilePage.tsx`, `frontend/src/components/user/profile/`, `backend/src/routes/userRoutes.ts`, `backend/src/services/userService.ts`              |
 | Property detail, gallery, map, facilities, review | Selesai | `frontend/src/pages/user/PropertyDetailPage.tsx`, `frontend/src/components/property/`, `backend/src/services/propertyDetailService.ts`                                     |
-| Public calendar dan availability                  | Selesai | `frontend/src/components/property/`, `frontend/src/services/availabilityService.ts`, `backend/src/services/publicAvailabilityService.ts`                                   |
+| Public calendar, availability, & CTA Sync         | Selesai | `frontend/src/components/property/`, `frontend/src/services/availabilityService.ts`, `backend/src/services/publicAvailabilityService.ts`                                   |
 | Tenant property CRUD                              | Selesai | `frontend/src/pages/tenant/PropertiesListPage.tsx`, `frontend/src/pages/tenant/PropertyFormPage.tsx`, `backend/src/services/tenantPropertyService.ts`                      |
 | Tenant room CRUD dan room images                  | Selesai | `frontend/src/pages/tenant/RoomsPage.tsx`, `frontend/src/components/tenant/room-form/`, `backend/src/services/tenantRoomService.ts`                                        |
 | Tenant category management                        | Selesai | `frontend/src/pages/tenant/CategoriesPage.tsx`, `backend/src/services/categoryService.ts`                                                                                  |

@@ -55,11 +55,11 @@ const updateUserPassword = async (userId: string, newPassword: string) =>
   });
 
 const buildProfileUpdateData = (user: User, data: ProfileUpdateData) => ({
-  domicile_address: data.domicile_address ?? user.domicile_address,
-  ktp_address: data.ktp_address ?? user.ktp_address,
-  legal_name: data.legal_name ?? user.legal_name,
-  name: data.name ?? user.name,
-  phone: data.phone ?? user.phone,
+  ktp_number: data.ktp_number !== undefined ? data.ktp_number : user.ktp_number,
+  ktp_address: data.ktp_address !== undefined ? data.ktp_address : user.ktp_address,
+  legal_name: data.legal_name !== undefined ? data.legal_name : user.legal_name,
+  name: data.name !== undefined ? data.name : user.name,
+  phone: data.phone !== undefined ? data.phone : user.phone,
 });
 
 const sanitizeUser = (user: User): SafeUser => {
@@ -68,7 +68,7 @@ const sanitizeUser = (user: User): SafeUser => {
 };
 
 interface ProfileUpdateData {
-  domicile_address?: string;
+  ktp_number?: string;
   ktp_address?: string;
   legal_name?: string;
   name?: string;

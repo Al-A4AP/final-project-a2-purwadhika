@@ -8,6 +8,7 @@ export interface User {
   name: string;
   legal_name?: string | null;
   phone?: string;
+  ktp_number?: string | null;
   ktp_address?: string | null;
   domicile_address?: string | null;
   referral_code?: string | null;

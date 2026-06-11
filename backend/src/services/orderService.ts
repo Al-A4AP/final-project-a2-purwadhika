@@ -79,8 +79,24 @@ const executeOrderTransaction = (context: OrderContext) =>
     const price = await getStayPriceOrThrow(tx, context);
     const voucher = await applyVoucherToOrder(tx, context.propertyId, context.voucher_code, price.totalPrice, context.userId, context.nights);
     const referral = await buildReferralOrderData(tx, context.userId, context.referral_code);
+    if (context.booking_for_self !== false) await syncUserProfileFromBooking(tx, context);
     return tx.order.create({ data: buildOrderCreateData(context, voucher, referral), include: orderCreateInclude });
   });
+
+const syncUserProfileFromBooking = async (tx: Prisma.TransactionClient, context: OrderContext) => {
+  const user = await tx.user.findUnique({ where: { id: context.userId } });
+  if (!user || user.role !== 'USER') return;
+
+  const updateData: Prisma.UserUpdateInput = {};
+  if (!user.ktp_number && context.guest_ktp_number) updateData.ktp_number = context.guest_ktp_number;
+  if (!user.legal_name && context.guest_legal_name) updateData.legal_name = context.guest_legal_name;
+  if (!user.ktp_address && context.guest_ktp_address) updateData.ktp_address = context.guest_ktp_address;
+  if (!user.phone && context.guest_phone) updateData.phone = context.guest_phone;
+
+  if (Object.keys(updateData).length > 0) {
+    await tx.user.update({ where: { id: user.id }, data: updateData });
+  }
+};
 
 const buildPaymentResponse = (order: CreatedOrder, nights: number, method: PaymentMethod) =>
   method === PaymentMethod.MIDTRANS && order.total_price > 0 ? processMidtransPayment(order, nights) : emptySnapData();

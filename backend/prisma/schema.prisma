@@ -17,6 +17,7 @@ model User {
   name                      String
   legal_name                String?
   phone                     String?
+  ktp_number                String?
   ktp_address               String?
   domicile_address          String?
   referral_code             String?             @unique

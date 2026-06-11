@@ -1,6 +1,7 @@
 import { toast } from "react-hot-toast";
 import { getTodayUtc, toUtcBookingDate } from "./bookingDates";
 import type { useBookingCheckout } from "./useBookingCheckout";
+import { PHONE_REGEX } from "@/constants/validation";
 
 type CheckoutParams = Parameters<typeof useBookingCheckout>[0];
 
@@ -10,6 +11,7 @@ export const validateCheckout = ({ agreementAccepted, guestIdentity, guests, que
   if (!guestIdentity.legalName.trim()) return showError("Nama sesuai KTP wajib diisi.");
   if (!guestIdentity.ktpNumber.trim() || !/^\d{16}$/.test(guestIdentity.ktpNumber.trim())) return showError("Nomor KTP harus terdiri dari 16 digit angka.");
   if (!guestIdentity.phone.trim()) return showError("Nomor telepon tamu wajib diisi.");
+  if (!PHONE_REGEX.test(guestIdentity.phone.trim())) return showError("Format nomor telepon tidak valid.");
   if (!guestIdentity.ktpAddress.trim()) return showError("Alamat sesuai KTP wajib diisi.");
   if (!agreementAccepted) return showError("Checklist persetujuan reservasi wajib dicentang.");
   if (guests.adults < 1) return showError("Pemesanan harus menyertakan minimal 1 orang dewasa.");

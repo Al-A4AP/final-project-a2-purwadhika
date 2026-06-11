@@ -1,6 +1,6 @@
 # Audit Clean Code dan REST API Guidelines
 
-Tanggal audit: 09 Juni 2026  
+Tanggal audit: 11 Juni 2026  
 Project: PURWALOKA - Property Renting Web App  
 Acuan: `docs/guidelines/PURWADHIKA.md` bagian Clean Code dan `docs/guidelines/REST_API_GUIDELINES.md`
 
@@ -10,7 +10,7 @@ Audit teknis terakhir menunjukkan source utama aman dari sisi build, lint, dan t
 
 REST API jalur utama sudah mengikuti pola resource-oriented. Beberapa legacy alias masih aktif untuk backward compatibility dan dicatat sebagai rencana cleanup opsional sebelum standar REST dibuat sangat ketat.
 
-Catatan terbaru: Seluruh temuan UAT browser 07 Juni 2026 yang menyangkut perubahan lanjutan pada dashboard, schema kategori/properti, voucher, booking, alasan penolakan order, dan navigasi profil telah diselesaikan dengan sukses. Audit clean code dan REST API telah dipastikan aman pasca eksekusi.
+Catatan terbaru: Seluruh temuan UAT browser 07 Juni 2026 yang menyangkut perubahan lanjutan pada dashboard, schema kategori/properti, voucher, booking, alasan penolakan order, navigasi profil, dan perlindungan _double-booking_ tingkat Calendar/CTA (11 Juni) telah diselesaikan dengan sukses. Audit clean code dan REST API telah dipastikan aman pasca eksekusi.
 
 ## Verifikasi yang Dijalankan
 
@@ -34,6 +34,7 @@ Status: sangat baik dan terstruktur (*Clean Architecture*).
 *   **Pemisahan Logika (Separation of Concerns):** Seluruh logika bisnis pada area *User* maupun *Tenant* telah dimigrasikan sepenuhnya ke direktori `hooks/` (misal: `hooks/tenant/reports/`), sehingga `pages/` kini 100% bertindak sebagai *Presentational Layer* murni.
 *   **Otorisasi UX Lintas Peran:** Antarmuka secara ketat memblokir akses reservasi bagi peran `TENANT`. Jika diakses oleh Tenant, UI secara cerdas beralih ke *View-Only Mode* dengan menyembunyikan *Reservation Panel*, pemilih tanggal, serta melebarkan tata letak secara dinamis agar estetika tetap elegan dan terpusat (*Quiet Luxury*).
 *   **Konsistensi Komponen Global:** Komponen aksi (seperti *Love Badge* / `SavePropertyButton`) menggunakan pola `variant` (`overlay` vs `outline`) guna menghapus kebergantungan pada *CSS forced-overrides* (`!important`), memecahkan isu visibilitas di *Light Mode*, dan memastikan ikon merah menyala (`fill-rose-500`) seragam di seluruh halaman.
+*   **Reuse Logika Kalender:** Fungsi pembacaan ketersediaan array kalender `getDateStatus` berhasil dipisahkan menjadi _exported helper_, sehingga fitur CTA *Booking* dapat mendaur-ulang (*reuse*) mesin analisis tanggal tanpa melakukan duplikasi logika bisnis. Hal ini sepenuhnya sejalan dengan prinsip DRY (Don't Repeat Yourself).
 
 ### Batas File 200 Baris
 
@@ -66,7 +67,7 @@ Hasil terbaru:
 
 ### Snapshot Kandidat Function-Length Advisory
 
-Daftar ini adalah snapshot tracking, bukan hard rule dan bukan daftar final yang harus dipecah semuanya. Ringkasan terbaru per 09 Juni 2026 menunjukkan 103 kandidat. Untuk daftar lengkap aktual, jalankan `npm run audit:functions` karena hasil dapat berubah setiap kali ada refactor.
+Daftar ini adalah snapshot tracking, bukan hard rule dan bukan daftar final yang harus dipecah semuanya. Ringkasan terbaru per 11 Juni 2026 menunjukkan 103 kandidat. Untuk daftar lengkap aktual, jalankan `npm run audit:functions` karena hasil dapat berubah setiap kali ada refactor.
 
 Kandidat prioritas terbaru (Top 7):
 
