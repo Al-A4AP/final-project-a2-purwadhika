@@ -1,6 +1,17 @@
-import { useCallback, useState, type Dispatch, type MouseEvent, type SetStateAction } from "react";
+import {
+  useCallback,
+  useEffect,
+  useState,
+  type Dispatch,
+  type MouseEvent,
+  type SetStateAction,
+} from "react";
 import type { Property } from "@/types";
-import { loadSavedProperties, removeSavedProperty, toggleSavedProperty } from "./savedPropertiesStorage";
+import {
+  loadSavedProperties,
+  removeSavedProperty,
+  toggleSavedProperty,
+} from "./savedPropertiesStorage";
 
 export interface SavedProperty {
   id: string;
@@ -13,8 +24,30 @@ export interface SavedProperty {
   saved_at: number;
 }
 
+let savedPropertiesStore: SavedProperty[] = loadSavedProperties();
+const savedPropertiesListeners = new Set<
+  Dispatch<SetStateAction<SavedProperty[]>>
+>();
+
+const notifySavedProperties = (properties: SavedProperty[]) => {
+  savedPropertiesListeners.forEach((listener) => listener(properties));
+};
+
+const subscribeSavedProperties = (
+  listener: Dispatch<SetStateAction<SavedProperty[]>>,
+) => {
+  savedPropertiesListeners.add(listener);
+  return () => {
+    savedPropertiesListeners.delete(listener);
+  };
+};
+
 export const useSavedProperties = () => {
-  const [savedProperties, setSavedProperties] = useState<SavedProperty[]>(loadSavedProperties);
+  const [savedProperties, setSavedProperties] =
+    useState<SavedProperty[]>(savedPropertiesStore);
+
+  useEffect(() => subscribeSavedProperties(setSavedProperties), []);
+
   return useSavedPropertyActions(savedProperties, setSavedProperties);
 };
 
@@ -22,24 +55,43 @@ const useSavedPropertyActions = (
   savedProperties: SavedProperty[],
   setSavedProperties: Dispatch<SetStateAction<SavedProperty[]>>,
 ) => {
-  const isSaved = useCallback((id: string) => {
-    return savedProperties.some(p => p.id === id);
-  }, [savedProperties]);
+  const isSaved = useCallback(
+    (id: string) => {
+      return savedProperties.some((p) => p.id === id);
+    },
+    [savedProperties],
+  );
 
-  const toggleSave = useCallback((property: Property, event?: MouseEvent) => {
-    stopSaveEvent(event);
-    setSavedProperties((items) => toggleSavedProperty(items, property));
-  }, [setSavedProperties]);
+  const toggleSave = useCallback(
+    (property: Property, event?: MouseEvent) => {
+      stopSaveEvent(event);
+      setSavedProperties((items) => {
+        const next = toggleSavedProperty(items, property);
+        savedPropertiesStore = next;
+        notifySavedProperties(next);
+        return next;
+      });
+    },
+    [setSavedProperties],
+  );
 
-  const removeProperty = useCallback((id: string) => {
-    setSavedProperties((items) => removeSavedProperty(items, id));
-  }, [setSavedProperties]);
+  const removeProperty = useCallback(
+    (id: string) => {
+      setSavedProperties((items) => {
+        const next = removeSavedProperty(items, id);
+        savedPropertiesStore = next;
+        notifySavedProperties(next);
+        return next;
+      });
+    },
+    [setSavedProperties],
+  );
 
   return {
     savedProperties,
     isSaved,
     toggleSave,
-    removeProperty
+    removeProperty,
   };
 };
 
