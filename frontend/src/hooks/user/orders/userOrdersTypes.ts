@@ -5,6 +5,7 @@ export interface UserOrderFilters {
   checkOutDate: string;
   orderNumber: string;
   status: string;
+  sortOrder: "asc" | "desc";
 }
 
 export interface UserOrderFilterActions {
@@ -13,6 +14,7 @@ export interface UserOrderFilterActions {
   setCheckOutDate: (value: string) => void;
   setOrderNumber: (value: string) => void;
   setStatus: (value: string) => void;
+  setSortOrder: (value: "asc" | "desc") => void;
 }
 
 export interface CancelOrderModalState {
@@ -33,7 +35,9 @@ export interface UserOrdersState {
   fetchOrders: (page?: number) => void;
   filters: UserOrderFilters;
   filterActions: UserOrderFilterActions;
-  handleFileChange: (event: React.ChangeEvent<HTMLInputElement>) => Promise<void>;
+  handleFileChange: (
+    event: React.ChangeEvent<HTMLInputElement>,
+  ) => Promise<void>;
   handleCancelClick: (orderId: string) => void;
   retryMidtransPayment: (orderId: string) => void;
   switchToManualPayment: (orderId: string) => void;

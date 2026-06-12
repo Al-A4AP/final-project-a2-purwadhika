@@ -1,8 +1,12 @@
-import { api } from './api';
-import type { ApiResponse, Order, PaginationMeta } from '@/types';
+import { api } from "./api";
+import type { ApiResponse, Order, PaginationMeta } from "@/types";
 
 type OrderListResponse = { orders: Order[]; pagination: PaginationMeta };
-type CreateOrderResponse = { order: Order; snapToken?: string; snapRedirectUrl?: string };
+type CreateOrderResponse = {
+  order: Order;
+  snapToken?: string;
+  snapRedirectUrl?: string;
+};
 type QueryValue = number | string | undefined;
 
 export interface CreateOrderPayload {
@@ -10,7 +14,7 @@ export interface CreateOrderPayload {
   roomId: string;
   check_in_date: string;
   check_out_date: string;
-  payment_method: 'MANUAL' | 'MIDTRANS';
+  payment_method: "MANUAL" | "MIDTRANS";
   booking_for_self: boolean;
   guest_name?: string;
   guest_legal_name: string;
@@ -32,6 +36,8 @@ export interface UserOrderParams {
   limit?: number;
   page?: number;
   status?: string;
+  sortBy?: string;
+  sortOrder?: "asc" | "desc";
   has_review?: boolean;
 }
 
@@ -41,19 +47,29 @@ export interface TenantOrderParams {
   startDate?: string;
   endDate?: string;
   sortBy?: string;
-  sortOrder?: 'asc' | 'desc';
+  sortOrder?: "asc" | "desc";
   page?: number;
   limit?: number;
 }
 
-const appendQueryValue = (query: URLSearchParams, key: string, value: QueryValue, omitEmpty: boolean) => {
-  if (value === undefined || (omitEmpty && value === '')) return;
+const appendQueryValue = (
+  query: URLSearchParams,
+  key: string,
+  value: QueryValue,
+  omitEmpty: boolean,
+) => {
+  if (value === undefined || (omitEmpty && value === "")) return;
   query.append(key, String(value));
 };
 
-const buildQueryString = <T extends object>(params: T | undefined, omitEmpty = false) => {
+const buildQueryString = <T extends object>(
+  params: T | undefined,
+  omitEmpty = false,
+) => {
   const query = new URLSearchParams();
-  Object.entries(params || {}).forEach(([key, value]) => appendQueryValue(query, key, value as QueryValue, omitEmpty));
+  Object.entries(params || {}).forEach(([key, value]) =>
+    appendQueryValue(query, key, value as QueryValue, omitEmpty),
+  );
   return query.toString();
 };
 
@@ -64,13 +80,16 @@ const fetchOrderList = async (path: string, query: string) => {
 
 export const orderService = {
   async createOrder(payload: CreateOrderPayload): Promise<CreateOrderResponse> {
-    const res = await api.post<ApiResponse<CreateOrderResponse>>('/orders', payload);
+    const res = await api.post<ApiResponse<CreateOrderResponse>>(
+      "/orders",
+      payload,
+    );
     return res.data.data;
   },
 
   async getUserOrders(params?: UserOrderParams): Promise<OrderListResponse> {
     const query = buildQueryString(params, true);
-    return fetchOrderList('/users/me/orders', query);
+    return fetchOrderList("/users/me/orders", query);
   },
 
   async getUserOrderById(id: string): Promise<Order> {
@@ -78,27 +97,42 @@ export const orderService = {
     return res.data.data;
   },
 
-  async getTenantOrders(params?: TenantOrderParams): Promise<OrderListResponse> {
+  async getTenantOrders(
+    params?: TenantOrderParams,
+  ): Promise<OrderListResponse> {
     const query = buildQueryString(params);
-    return fetchOrderList('/tenants/me/orders', query);
+    return fetchOrderList("/tenants/me/orders", query);
   },
 
-  async updateOrderStatus(orderId: string, status: string, payment_rejection_reason?: string): Promise<Order> {
-    const res = await api.post<ApiResponse<Order>>(`/orders/${orderId}/status-transitions`, { status, payment_rejection_reason });
+  async updateOrderStatus(
+    orderId: string,
+    status: string,
+    payment_rejection_reason?: string,
+  ): Promise<Order> {
+    const res = await api.post<ApiResponse<Order>>(
+      `/orders/${orderId}/status-transitions`,
+      { status, payment_rejection_reason },
+    );
     return res.data.data;
   },
 
   async uploadPaymentProof(orderId: string, file: File): Promise<Order> {
     const formData = new FormData();
-    formData.append('payment_proof', file);
-    const res = await api.post<ApiResponse<Order>>(`/orders/${orderId}/payment-proof`, formData, {
-      headers: { 'Content-Type': 'multipart/form-data' }
-    });
+    formData.append("payment_proof", file);
+    const res = await api.post<ApiResponse<Order>>(
+      `/orders/${orderId}/payment-proof`,
+      formData,
+      {
+        headers: { "Content-Type": "multipart/form-data" },
+      },
+    );
     return res.data.data;
   },
 
   async markRefundComplete(orderId: string): Promise<Order> {
-    const res = await api.post<ApiResponse<Order>>(`/orders/${orderId}/refund-completions`);
+    const res = await api.post<ApiResponse<Order>>(
+      `/orders/${orderId}/refund-completions`,
+    );
     return res.data.data;
-  }
+  },
 };
