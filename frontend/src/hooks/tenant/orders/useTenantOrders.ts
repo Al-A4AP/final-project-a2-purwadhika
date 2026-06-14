@@ -12,16 +12,52 @@ export const useTenantOrders = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const filters = useTenantOrderFilters();
-  const [pagination, setPagination] = useState<PaginationMeta>({ page: 1, limit: 10, total: 0, totalPages: 1 });
-  const fetchOrders = useFetchTenantOrders(filters.values, setOrders, setPagination, setLoading, setError);
+  const [pagination, setPagination] = useState<PaginationMeta>({
+    page: 1,
+    limit: 10,
+    total: 0,
+    totalPages: 1,
+  });
+  const fetchOrders = useFetchTenantOrders(
+    filters.values,
+    setOrders,
+    setPagination,
+    setLoading,
+    setError,
+  );
   useLoadTenantProperties(setProperties);
-  useEffect(() => { Promise.resolve().then(() => fetchOrders(1)); }, [fetchOrders]);
-  return { error, fetchOrders, filterActions: filters.actions, filters: filters.values, loading, orders, pagination, properties };
+  useEffect(() => {
+    Promise.resolve().then(() => fetchOrders(1));
+  }, [fetchOrders]);
+  return {
+    error,
+    fetchOrders,
+    filterActions: filters.actions,
+    filters: filters.values,
+    loading,
+    orders,
+    pagination,
+    properties,
+  };
 };
 
-const useLoadTenantProperties = (setProperties: (properties: TenantProperty[]) => void) => {
-  useEffect(() => { tenantService.getProperties({ limit: 100 }).then((data) => setProperties(data.properties)).catch(() => {}); }, [setProperties]);
+const useLoadTenantProperties = (
+  setProperties: (properties: TenantProperty[]) => void,
+) => {
+  useEffect(() => {
+    tenantService
+      .getProperties({ limit: 100 })
+      .then((data) => setProperties(data.properties))
+      .catch(() => {});
+  }, [setProperties]);
 };
+
+const sortWithPendingFirst = (orders: Order[]) =>
+  [...orders].sort((a, b) => {
+    const aPending = a.status === "WAITING_CONFIRMATION" ? 0 : 1;
+    const bPending = b.status === "WAITING_CONFIRMATION" ? 0 : 1;
+    return aPending - bPending;
+  });
 
 const useFetchTenantOrders = (
   filters: TenantOrderFilters,
@@ -29,14 +65,30 @@ const useFetchTenantOrders = (
   setPagination: (pagination: PaginationMeta) => void,
   setLoading: (loading: boolean) => void,
   setError: (error: string | null) => void,
-) => useCallback((page = 1) => {
-  setLoading(true);
-  setError(null);
-  orderService.getTenantOrders(buildTenantOrderParams(filters, page))
-    .then((data) => { setOrders(data.orders); setPagination(data.pagination); })
-    .catch((err) => { setError(getApiErrorMessage(err, "Pesanan tenant belum bisa dimuat. Periksa koneksi lalu coba lagi.")); setOrders([]); })
-    .finally(() => setLoading(false));
-}, [filters, setError, setLoading, setOrders, setPagination]);
+) =>
+  useCallback(
+    (page = 1) => {
+      setLoading(true);
+      setError(null);
+      orderService
+        .getTenantOrders(buildTenantOrderParams(filters, page))
+        .then((data) => {
+          setOrders(sortWithPendingFirst(data.orders));
+          setPagination(data.pagination);
+        })
+        .catch((err) => {
+          setError(
+            getApiErrorMessage(
+              err,
+              "Pesanan tenant belum bisa dimuat. Periksa koneksi lalu coba lagi.",
+            ),
+          );
+          setOrders([]);
+        })
+        .finally(() => setLoading(false));
+    },
+    [filters, setError, setLoading, setOrders, setPagination],
+  );
 
 const buildTenantOrderParams = (filters: TenantOrderFilters, page: number) => ({
   propertyId: filters.selectedPropertyId || undefined,
