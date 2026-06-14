@@ -111,7 +111,7 @@ const DateField: FC<TextFieldProps & { label: string }> = ({
   value,
 }) => (
   <div className="relative">
-    <Calendar className={FIELD_ICON_CLASS} />
+    {/*<Calendar className={FIELD_ICON_CLASS} />*/}
     <CustomDatePickerPopup
       value={value}
       onChange={onChange}
