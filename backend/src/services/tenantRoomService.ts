@@ -10,6 +10,7 @@ import type { PeakRateFormData, RoomFormData } from './tenantRoom/tenantRoomType
 import { isWholeUnitCategory } from './tenantRoom/wholeUnitCategory';
 
 const MAX_ROOM_TYPES_PER_PROPERTY = 5;
+const MAX_ROOM_STOCK = 20;
 
 export const getRooms = async (propertyId: string, tenantId: string) => {
   await ensureTenantProperty(propertyId, tenantId);
@@ -18,10 +19,12 @@ export const getRooms = async (propertyId: string, tenantId: string) => {
 
 export const createRoom = async (propertyId: string, tenantId: string, data: RoomFormData, file?: Express.Multer.File) => {
   const property = await ensureTenantProperty(propertyId, tenantId);
+  const isWholeUnit = isWholeUnitCategory(property.category?.name);
   await assertRoomTypeLimit(propertyId);
+  assertRoomStock(data, isWholeUnit);
   if (!file) throw new AppError('Foto kamar wajib diupload', 400);
   const image = await uploadRoomImage(file);
-  return createRoomRecord(buildRoomCreateData(propertyId, data, image, isWholeUnitCategory(property.category?.name)));
+  return createRoomRecord(buildRoomCreateData(propertyId, data, image, isWholeUnit));
 };
 
 const assertRoomTypeLimit = async (propertyId: string) => {
@@ -34,9 +37,17 @@ const assertRoomTypeLimit = async (propertyId: string) => {
 export const updateRoom = async (roomId: string, tenantId: string, data: RoomFormData, file?: Express.Multer.File) => {
   const room = await verifyRoomOwner(roomId, tenantId);
   const isWholeUnit = isWholeUnitCategory(room.property.category?.name);
+  assertRoomStock(data, isWholeUnit);
   const updated = await updateRoomRecord(roomId, buildRoomUpdateData(data, room, isWholeUnit));
   if (file) await addRoomImage(roomId, file);
   return file ? findRoomById(roomId) : updated;
+};
+
+const assertRoomStock = (data: RoomFormData, isWholeUnit: boolean) => {
+  if (isWholeUnit || data.quantity === undefined) return;
+  const quantity = Number(data.quantity);
+  if (!Number.isFinite(quantity) || quantity < 1) throw new AppError('Stok kamar minimal 1.', 400);
+  if (quantity > MAX_ROOM_STOCK) throw new AppError('Stok kamar maksimal 20.', 400);
 };
 
 export const deleteRoom = async (roomId: string, tenantId: string) => {

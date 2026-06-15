@@ -1,4 +1,5 @@
 import type { PropertyDetail, Room } from "@/types";
+import type { Order } from "@/types";
 import type { VoucherPreview } from "@/types";
 import type { BookingDateFormState } from "./date-fields/bookingDateFieldTypes";
 
@@ -56,6 +57,8 @@ export type BookingPageState = {
   paymentMethod: PaymentMethod;
   setPaymentMethod: (method: PaymentMethod) => void;
   processing: boolean;
+  createdOrder: Order | null;
+  createPendingOrder: () => Promise<boolean>;
   handleCheckout: (paymentProofFile?: File | null) => Promise<void>;
   totals: BookingTotals | null;
 };

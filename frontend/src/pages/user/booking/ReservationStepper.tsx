@@ -17,8 +17,11 @@ export const ReservationStepper: FC<ReservationStepperProps> = ({ state }) => {
   const isManual = state.paymentMethod === "MANUAL";
   const totalSteps = isManual ? 6 : 5;
   const steps = buildReservationSteps(isManual);
-  const canContinue = canContinueStep(currentStep, isManual, proofFile, state);
-  const handleNext = () => setCurrentStep((p) => Math.min(p + 1, totalSteps));
+  const canContinue = canContinueStep(currentStep, isManual, proofFile, state) && !state.processing;
+  const handleNext = async () => {
+    if (currentStep === 3 && !await state.createPendingOrder()) return;
+    setCurrentStep((p) => Math.min(p + 1, totalSteps));
+  };
   const handlePrev = () => setCurrentStep((p) => Math.max(p - 1, 1));
 
   return (

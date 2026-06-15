@@ -2,7 +2,7 @@ import type { OrderStatus } from '@prisma/client';
 import prisma from '../../config/prisma';
 import type { AvailabilityClient, StayRange } from './availabilityTypes';
 
-const ACTIVE_BOOKING_STATUSES: OrderStatus[] = ['WAITING_PAYMENT', 'WAITING_CONFIRMATION', 'PROCESSED', 'COMPLETED'];
+const ACTIVE_BOOKING_STATUSES: OrderStatus[] = ['WAITING_CONFIRMATION', 'PROCESSED', 'COMPLETED'];
 
 export const getAvailabilityClient = (tx?: AvailabilityClient) => tx || prisma;
 
@@ -34,9 +34,16 @@ export const loadOverlappingOrders = (client: AvailabilityClient, room: RoomWith
     where: {
       ...scope,
       deleted_at: null,
-      status: { in: ACTIVE_BOOKING_STATUSES },
+      ...activeOrderStatusWhere(),
       check_in_date: { lt: range.checkOut },
       check_out_date: { gt: range.checkIn },
     },
   });
 };
+
+const activeOrderStatusWhere = () => ({
+  OR: [
+    { status: { in: ACTIVE_BOOKING_STATUSES } },
+    { status: 'WAITING_PAYMENT' as OrderStatus, OR: [{ expires_at: null }, { expires_at: { gt: new Date() } }] },
+  ],
+});

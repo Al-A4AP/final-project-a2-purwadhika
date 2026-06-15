@@ -1,7 +1,7 @@
 import { useForm } from 'react-hook-form';
-import { zodResolver } from '@hookform/resolvers/zod';
-import { passwordSchema, type PasswordInput } from '@/validations/profile';
+import type { PasswordInput } from '@/validations/profile';
 import { PasswordFields } from './password-change/PasswordFields';
+import { passwordFormResolver } from './passwordFormResolver';
 import { submitPasswordChange } from './password-change/passwordSubmit';
 import { ProfileSection } from './ProfileSection';
 import { ProfileSubmitButton } from './ProfileSubmitButton';
@@ -12,7 +12,7 @@ interface Props {
 }
 
 export const PasswordChangeForm = ({ inputClass, onSave }: Props) => {
-  const form = useForm<PasswordInput>({ resolver: zodResolver(passwordSchema) });
+  const form = useForm<PasswordInput>({ resolver: passwordFormResolver });
   const submit = (data: PasswordInput) => submitPasswordChange(data, onSave, form.reset);
 
   return (

@@ -1,12 +1,19 @@
 import { sendBookingReminderEmail, sendCancellationEmail } from '../utils/emailService';
-import { cancelOrder, completeOrder, findCheckInReminderOrders, findExpiredUnpaidOrders, findProcessedOrdersAfterCheckout, updateCheckInReminderSent } from './cronQueries';
+import { getManualConfirmationCutoff } from '../constants/orderConstants';
+import { cancelOrder, completeOrder, findCheckInReminderOrders, findExpiredManualConfirmationOrders, findExpiredUnpaidOrders, findProcessedOrdersAfterCheckout, updateCheckInReminderSent } from './cronQueries';
 import { getCheckInReminderRange } from './cronRanges';
-import type { ExpiredOrder, ProcessedOrder, ReminderOrder } from './cronQueries';
+import type { ExpiredManualConfirmationOrder, ExpiredOrder, ProcessedOrder, ReminderOrder } from './cronQueries';
 
 export const cancelExpiredUnpaidOrders = async () => {
   const now = new Date();
-  const orders = await findExpiredUnpaidOrders(now);
-  await Promise.all(orders.map((order) => cancelExpiredOrder(order, now)));
+  const [unpaid, manualConfirmations] = await Promise.all([
+    findExpiredUnpaidOrders(now),
+    findExpiredManualConfirmationOrders(getManualConfirmationCutoff(now)),
+  ]);
+  await Promise.all([
+    ...unpaid.map((order) => cancelExpiredOrder(order, now)),
+    ...manualConfirmations.map((order) => cancelExpiredManualConfirmation(order, now)),
+  ]);
 };
 
 export const completeProcessedOrders = async () => {
@@ -30,6 +37,10 @@ export const cleanupExpiredRevokedTokens = async () => {
 const cancelExpiredOrder = async (order: ExpiredOrder, now: Date) => {
   await cancelOrder(order.id, now);
   await sendCancellationEmail(order.user.email, order.order_number, 'Batas waktu pembayaran telah berakhir').catch(() => {});
+};
+const cancelExpiredManualConfirmation = async (order: ExpiredManualConfirmationOrder, now: Date) => {
+  await cancelOrder(order.id, now);
+  await sendCancellationEmail(order.user.email, order.order_number, 'Batas waktu konfirmasi pembayaran telah berakhir').catch(() => {});
 };
 const completeProcessedOrder = (order: ProcessedOrder, now: Date) => completeOrder(order.id, now);
 const sendReminderEmail = async (order: ReminderOrder, now: Date) => {

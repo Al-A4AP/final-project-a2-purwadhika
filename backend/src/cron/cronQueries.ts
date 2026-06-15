@@ -6,6 +6,11 @@ export const findExpiredUnpaidOrders = (now: Date) => prisma.order.findMany({
   include: { user: true },
 });
 
+export const findExpiredManualConfirmationOrders = (cutoff: Date) => prisma.order.findMany({
+  where: { status: 'WAITING_CONFIRMATION', payment_proof_url: { not: null }, updated_at: { lt: cutoff } },
+  include: { user: true },
+});
+
 export const cancelOrder = (orderId: string, now: Date) => prisma.order.update({
   where: { id: orderId },
   data: { status: 'CANCELLED', canceled_at: now },
@@ -40,5 +45,6 @@ export const deleteExpiredRevokedTokens = (now: Date) => prisma.revokedToken.del
 
 export type ReminderRange = { start: Date; end: Date };
 export type ExpiredOrder = Awaited<ReturnType<typeof findExpiredUnpaidOrders>>[number];
+export type ExpiredManualConfirmationOrder = Awaited<ReturnType<typeof findExpiredManualConfirmationOrders>>[number];
 export type ReminderOrder = Awaited<ReturnType<typeof findCheckInReminderOrders>>[number];
 export type ProcessedOrder = Order;

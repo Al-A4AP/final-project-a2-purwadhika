@@ -15,6 +15,7 @@ interface RoomTextFieldProps {
   required?: boolean;
   type?: string;
   min?: string;
+  max?: string;
   step?: string;
   isPrice?: boolean;
 }
@@ -28,7 +29,7 @@ export const RoomTextField: FC<RoomTextFieldProps> = (props) => {
 
   return (
     <RoomFieldShell label={props.label} className={props.className}>
-      {props.isPrice ? <PriceInput {...props} inputType={inputType} value={inputValue} updateValue={updateValue} /> : <input type={inputType} min={props.min} step={props.step} value={inputValue} onChange={(event) => updateValue(event.target.value)} placeholder={props.placeholder} className={props.inputClass} required={props.required} />}
+      {props.isPrice ? <PriceInput {...props} inputType={inputType} value={inputValue} updateValue={updateValue} /> : <input type={inputType} min={props.min} max={props.max} step={props.step} value={inputValue} onChange={(event) => updateValue(event.target.value)} placeholder={props.placeholder} className={props.inputClass} required={props.required} />}
     </RoomFieldShell>
   );
 };
@@ -36,6 +37,6 @@ export const RoomTextField: FC<RoomTextFieldProps> = (props) => {
 const PriceInput: FC<RoomTextFieldProps & { inputType: string; value: string; updateValue: (value: string) => void }> = (props) => (
   <div className="relative">
     <span className="absolute left-3 top-1/2 -translate-y-1/2 text-xs font-semibold text-slate-400">Rp</span>
-    <input type={props.inputType} inputMode="numeric" min={props.min} step={props.step} value={props.value} onChange={(event) => props.updateValue(event.target.value)} placeholder={props.placeholder} className={`${props.inputClass} pl-10`} required={props.required} />
+    <input type={props.inputType} inputMode="numeric" min={props.min} max={props.max} step={props.step} value={props.value} onChange={(event) => props.updateValue(event.target.value)} placeholder={props.placeholder} className={`${props.inputClass} pl-10`} required={props.required} />
   </div>
 );

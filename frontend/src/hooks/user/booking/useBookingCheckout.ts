@@ -4,7 +4,8 @@ import { toast } from "react-hot-toast";
 import { getApiErrorMessage } from "@/lib/errorMessage";
 import { openSnapPayment } from "@/lib/midtransSnap";
 import { orderService } from "@/services/orderService";
-import type { PropertyDetail, Room } from "@/types";
+import { userOrderActionService } from "@/services/userOrderActionService";
+import type { Order, PropertyDetail, Room } from "@/types";
 import { createCheckoutPayload } from "./checkoutPayload";
 import { validateCheckout } from "./checkoutValidation";
 import type { BookingGuestIdentity, BookingGuests, BookingQuery, PaymentMethod } from "./bookingTypes";
@@ -15,35 +16,79 @@ export const useBookingCheckout = (params: {
   voucherCode: string;
 }) => {
   const [processing, setProcessing] = useState(false);
-  const handleCheckout = async (paymentProofFile?: File | null) => { await checkout(params, setProcessing, paymentProofFile); };
-  return { processing, handleCheckout };
+  const [createdOrder, setCreatedOrder] = useState<Order | null>(null);
+  const [snapToken, setSnapToken] = useState<string | null>(null);
+  const orderState = { createdOrder, setCreatedOrder, setSnapToken, snapToken };
+  const createPendingOrder = () => reserveOrder(params, orderState, setProcessing);
+  const handleCheckout = async (paymentProofFile?: File | null) => { await checkout(params, orderState, setProcessing, paymentProofFile); };
+  return { processing, createdOrder, createPendingOrder, handleCheckout };
 };
 
-const checkout = async (params: Parameters<typeof useBookingCheckout>[0], setProcessing: (processing: boolean) => void, paymentProofFile?: File | null) => {
+const checkout = async (params: CheckoutParams, state: CheckoutOrderState, setProcessing: (processing: boolean) => void, paymentProofFile?: File | null) => {
   if (!params.property || !params.room) return;
   if (!validateCheckout(params)) return;
   setProcessing(true);
-  try { await submitCheckout(params, paymentProofFile); }
+  try { await submitCheckout(params, state, paymentProofFile); }
   catch (err) { toast.error(getApiErrorMessage(err, "Checkout gagal. Periksa tanggal, jumlah tamu, dan metode pembayaran lalu coba lagi.")); }
   finally { setProcessing(false); }
 };
 
-const submitCheckout = async (params: Parameters<typeof useBookingCheckout>[0], paymentProofFile?: File | null) => {
+const reserveOrder = async (
+  params: CheckoutParams,
+  state: CheckoutOrderState,
+  setProcessing: (processing: boolean) => void,
+) => {
+  if (state.createdOrder) return true;
+  if (!params.property || !params.room) return false;
+  if (!validateCheckout(params)) return false;
+  setProcessing(true);
+  try {
+    const result = await createOrder(params);
+    state.setCreatedOrder(result.order);
+    state.setSnapToken(result.snapToken || null);
+    toast.success("Reservasi dibuat. Selesaikan pembayaran dalam 1 jam.");
+    return true;
+  } catch (err) {
+    toast.error(getApiErrorMessage(err, "Reservasi gagal dibuat. Selesaikan atau batalkan pesanan menunggu pembayaran sebelumnya."));
+    return false;
+  } finally {
+    setProcessing(false);
+  }
+};
+
+const submitCheckout = async (params: CheckoutParams, state: CheckoutOrderState, paymentProofFile?: File | null) => {
+  const order = state.createdOrder ?? await createAndStoreOrder(params, state);
+  if (params.paymentMethod === "MIDTRANS") return openMidtransPayment(params, order.id, state.snapToken);
+  await switchToManualAndUpload(order, paymentProofFile);
+  navigateToPaymentSuccess(params, order.id);
+};
+
+const createAndStoreOrder = async (params: CheckoutParams, state: CheckoutOrderState) => {
+  const result = await createOrder(params);
+  state.setCreatedOrder(result.order);
+  state.setSnapToken(result.snapToken || null);
+  return result.order;
+};
+
+const createOrder = (params: CheckoutParams) => {
   const payload = createCheckoutPayload(params.property!, params.room!, params.query, params.paymentMethod, params.guests, params.guestIdentity, params.voucherCode);
-  const result = await orderService.createOrder(payload);
-  if (openMidtransIfNeeded(params, result.snapToken)) return;
-  await uploadManualProofIfNeeded(result.order?.id, params.paymentMethod, paymentProofFile);
-  navigateToPaymentSuccess(params, result.order?.id);
+  return orderService.createOrder(payload);
 };
 
-const openMidtransIfNeeded = (params: Parameters<typeof useBookingCheckout>[0], snapToken?: string | null) => {
-  if (params.paymentMethod !== "MIDTRANS" || !snapToken) return false;
-  openSnapPayment(snapToken, params.navigate);
-  return true;
+const openMidtransPayment = async (params: CheckoutParams, orderId: string, snapToken: string | null) => {
+  if (snapToken) return openSnapPayment(snapToken, params.navigate);
+  const result = await userOrderActionService.retryMidtransPayment(orderId);
+  if (!result.snapToken) return toast.error("Token pembayaran belum tersedia. Coba lagi dari Riwayat Reservasi.");
+  openSnapPayment(result.snapToken, params.navigate);
 };
 
-const uploadManualProofIfNeeded = async (orderId: string | undefined, method: PaymentMethod, file?: File | null) => {
-  if (method !== "MANUAL" || !file || !orderId) return toast.success("Pemesanan berhasil dibuat!");
+const switchToManualAndUpload = async (order: Order, file?: File | null) => {
+  const manualOrder = order.payment_method === "MANUAL" ? order : await userOrderActionService.switchToManualPayment(order.id);
+  await uploadManualProofIfNeeded(manualOrder.id, file);
+};
+
+const uploadManualProofIfNeeded = async (orderId: string, file?: File | null) => {
+  if (!file) return toast.success("Pemesanan berhasil dibuat!");
   try {
     await orderService.uploadPaymentProof(orderId, file);
     toast.success("Pesanan dan bukti pembayaran berhasil dikirim!");
@@ -52,5 +97,14 @@ const uploadManualProofIfNeeded = async (orderId: string | undefined, method: Pa
   }
 };
 
-const navigateToPaymentSuccess = (params: Parameters<typeof useBookingCheckout>[0], orderId?: string) =>
+const navigateToPaymentSuccess = (params: CheckoutParams, orderId?: string) =>
   params.navigate(`/payment/success?order_id=${orderId || ""}`);
+
+type CheckoutParams = Parameters<typeof useBookingCheckout>[0];
+
+type CheckoutOrderState = {
+  createdOrder: Order | null;
+  setCreatedOrder: (order: Order) => void;
+  setSnapToken: (token: string | null) => void;
+  snapToken: string | null;
+};

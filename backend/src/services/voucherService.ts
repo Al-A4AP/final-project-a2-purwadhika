@@ -73,7 +73,7 @@ export const applyVoucherToOrder = async (tx: Prisma.TransactionClient, property
   await assertNewUserVoucherAllowed(tx, userId, voucher);
   assertVoucherQuota(voucher);
   const discountAmount = calculateDiscount(subtotal, voucher, total_nights);
-  await tx.voucher.update({ where: { id: voucher.id }, data: { used_count: { increment: 1 } } });
+  await incrementVoucherUsage(tx, voucher);
   await markAssignedVoucherUsed(tx, userId, voucher.id);
   return { discountAmount, subtotalPrice: subtotal, totalPrice: subtotal - discountAmount, voucherId: voucher.id };
 };
@@ -116,6 +116,17 @@ const assertVoucherCodeAvailable = async (code: string, exceptId?: string) => {
 const assertVoucherQuota = (voucher: Pick<Voucher, 'quota' | 'used_count'>) => {
   if (voucher.quota !== null && voucher.used_count >= voucher.quota) throw new AppError('Kuota voucher sudah habis', 400);
 };
+
+const incrementVoucherUsage = async (db: DbClient, voucher: Pick<Voucher, 'id' | 'quota'>) => {
+  const result = await db.voucher.updateMany({
+    where: buildVoucherQuotaWhere(voucher),
+    data: { used_count: { increment: 1 } },
+  });
+  if (result.count !== 1) throw new AppError('Kuota voucher sudah habis', 400);
+};
+
+const buildVoucherQuotaWhere = (voucher: Pick<Voucher, 'id' | 'quota'>): Prisma.VoucherWhereInput =>
+  voucher.quota === null ? { id: voucher.id } : { id: voucher.id, used_count: { lt: voucher.quota } };
 
 const assertSupportedVoucher = (voucher: Pick<Voucher, 'discount_type'>) => {
   if (voucher.discount_type === VoucherDiscountType.NOMINAL) {

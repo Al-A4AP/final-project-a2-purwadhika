@@ -18,6 +18,7 @@ const QuantityField: FC<Pick<RoomFormFieldsProps, "form" | "isWholeUnit" | "onCh
       label="Jumlah Unit / Stok Kamar" 
       type="number" 
       min="1" 
+      max="20"
       placeholder="1" 
       required 
     />

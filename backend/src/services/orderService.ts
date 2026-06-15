@@ -3,31 +3,14 @@ import prisma from '../config/prisma';
 import { createPaymentDeadline } from '../constants/orderConstants';
 import { AppError } from '../middlewares/errorHandler';
 import { sendOrderConfirmationEmail } from '../utils/emailService';
+import { checkAvailability } from './availabilityService';
 import { createSnapTransaction, handleNotification } from './midtransService';
+import { lockStayRange } from './order/bookingLocks';
 import { getTenantOrders as getTenantOrderList, type GetTenantOrdersOptions } from './order/tenantOrderList';
 import { updateTenantOrderStatus } from './order/tenantOrderStatus';
+import type { CreateOrderData, GuestCounts } from './order/orderTypes';
 import { getValidatedStayDetails } from './pricingService';
 import { applyVoucherToOrder } from './voucherService';
-
-interface CreateOrderData {
-  userId: string;
-  propertyId: string;
-  roomId: string;
-  check_in_date: string;
-  check_out_date: string;
-  payment_method: PaymentMethod;
-  booking_for_self?: boolean;
-  guest_name?: string;
-  guest_legal_name?: string;
-  guest_phone?: string;
-  guest_email?: string;
-  guest_ktp_address?: string;
-  guest_ktp_number?: string;
-  voucher_code?: string;
-  adults: number;
-  children: number;
-  babies: number;
-}
 
 export type { GetTenantOrdersOptions };
 export const getTenantOrders = getTenantOrderList;
@@ -36,6 +19,7 @@ export const updateOrderStatus = updateTenantOrderStatus;
 export const createOrder = async (data: CreateOrderData) => {
   const context = await buildOrderContext(data);
   const order = await executeOrderTransaction(context);
+  await syncUserProfileFromBooking(context).catch(() => undefined);
   const snapData = await buildPaymentResponse(order, context.nights, data.payment_method);
   sendOrderCreatedEmail(order);
   return { order, ...snapData };
@@ -53,33 +37,41 @@ const buildOrderContext = async (data: CreateOrderData) => {
   await validateActiveWaitingPaymentOrders(data.userId);
   const dates = parseStayDates(data.check_in_date, data.check_out_date);
   validateDates(dates.checkIn, dates.checkOut);
-  return { ...data, ...dates, guests: pickGuestCounts(data), nights: getNights(dates.checkIn, dates.checkOut) };
+  const stayDetails = await getStayPriceForRoom(data.roomId, dates.checkIn, dates.checkOut);
+  return { ...data, ...dates, guests: pickGuestCounts(data), nights: stayDetails.nights, stayDetails };
 };
 
 const MAX_ACTIVE_WAITING_PAYMENT_ORDERS = 3;
 
 const validateActiveWaitingPaymentOrders = async (userId: string) => {
+  await cancelExpiredUserWaitingPayments(userId);
   const count = await prisma.order.count({
-    where: { userId, status: OrderStatus.WAITING_PAYMENT },
+    where: { userId, status: OrderStatus.WAITING_PAYMENT, OR: [{ expires_at: null }, { expires_at: { gt: new Date() } }] },
   });
   if (count >= MAX_ACTIVE_WAITING_PAYMENT_ORDERS) {
     throw new AppError('Anda masih memiliki 3 pesanan yang menunggu pembayaran. Selesaikan atau batalkan salah satu pesanan terlebih dahulu.', 400);
   }
 };
 
+const cancelExpiredUserWaitingPayments = (userId: string) =>
+  prisma.order.updateMany({
+    where: { userId, status: OrderStatus.WAITING_PAYMENT, expires_at: { lt: new Date() } },
+    data: { status: OrderStatus.CANCELLED, canceled_at: new Date() },
+  });
 
 const executeOrderTransaction = (context: OrderContext) =>
   prisma.$transaction(async (tx) => {
     const room = await loadOrderRoom(tx, context);
     validateCapacity(context.guests, room.capacity);
-    const price = await getStayPriceOrThrow(tx, context);
-    const voucher = await applyVoucherToOrder(tx, context.propertyId, context.voucher_code, price.totalPrice, context.userId, context.nights);
-    if (context.booking_for_self !== false) await syncUserProfileFromBooking(tx, context);
+    await lockStayRange(tx, room, context.checkIn, context.checkOut);
+    await assertStayAvailable(tx, context);
+    const voucher = await applyVoucherToOrder(tx, context.propertyId, context.voucher_code, context.stayDetails.totalPrice, context.userId, context.nights);
     return tx.order.create({ data: buildOrderCreateData(context, voucher), include: orderCreateInclude });
   });
 
-const syncUserProfileFromBooking = async (tx: Prisma.TransactionClient, context: OrderContext) => {
-  const user = await tx.user.findUnique({ where: { id: context.userId } });
+const syncUserProfileFromBooking = async (context: OrderContext) => {
+  if (context.booking_for_self === false) return;
+  const user = await prisma.user.findUnique({ where: { id: context.userId } });
   if (!user || user.role !== 'USER') return;
 
   const updateData: Prisma.UserUpdateInput = {};
@@ -89,7 +81,7 @@ const syncUserProfileFromBooking = async (tx: Prisma.TransactionClient, context:
   if (!user.phone && context.guest_phone) updateData.phone = context.guest_phone;
 
   if (Object.keys(updateData).length > 0) {
-    await tx.user.update({ where: { id: user.id }, data: updateData });
+    await prisma.user.update({ where: { id: user.id }, data: updateData });
   }
 };
 
@@ -123,14 +115,22 @@ const validateCapacity = (guests: GuestCounts, capacity: number) => {
 };
 
 const loadOrderRoom = async (tx: Prisma.TransactionClient, context: OrderContext) => {
-  const room = await tx.room.findFirst({ where: { id: context.roomId, propertyId: context.propertyId, deleted_at: null } });
+  const room = await tx.room.findFirst({
+    where: { id: context.roomId, propertyId: context.propertyId, deleted_at: null },
+    include: { property: { select: { id: true, rental_type: true } } },
+  });
   if (!room) throw new AppError('Kamar tidak ditemukan pada properti ini', 404);
   return room;
 };
 
-const getStayPriceOrThrow = async (tx: Prisma.TransactionClient, context: OrderContext) => {
-  try { return await getValidatedStayDetails(context.roomId, context.checkIn, context.checkOut, tx); }
+const getStayPriceForRoom = async (roomId: string, checkIn: Date, checkOut: Date) => {
+  try { return await getValidatedStayDetails(roomId, checkIn, checkOut); }
   catch (err) { throw new AppError(getErrorMessage(err), 400); }
+};
+
+const assertStayAvailable = async (tx: Prisma.TransactionClient, context: OrderContext) => {
+  const availability = await checkAvailability(context.roomId, context.checkIn, context.checkOut, tx);
+  if (!availability.available) throw new AppError(availability.reason || 'Kamar penuh', 400);
 };
 
 const buildOrderCreateData = (context: OrderContext, voucher: VoucherOrderResult): Prisma.OrderCreateInput => ({
@@ -177,7 +177,10 @@ const assertPaymentProofNotExpired = async (order: UserPaymentOrder) => {
 };
 
 const markPaymentProofUploaded = (orderId: string, imageUrl: string) =>
-  prisma.order.update({ where: { id: orderId }, data: { payment_proof_url: imageUrl, status: OrderStatus.WAITING_CONFIRMATION } });
+  prisma.order.update({
+    where: { id: orderId },
+    data: { expires_at: null, payment_proof_url: imageUrl, status: OrderStatus.WAITING_CONFIRMATION },
+  });
 
 const sendOrderCreatedEmail = (order: CreatedOrder) =>
   sendOrderConfirmationEmail(order.user.email, order.order_number, order.property.name, order.room.room_type, order.check_in_date, order.check_out_date, order.total_price).catch(() => {});
@@ -187,9 +190,6 @@ const parseStayDates = (checkIn: string, checkOut: string) =>
 
 const pickGuestCounts = ({ adults, children, babies }: CreateOrderData) =>
   ({ adults, children, babies });
-
-const getNights = (checkIn: Date, checkOut: Date) =>
-  Math.ceil((checkOut.getTime() - checkIn.getTime()) / 86400000);
 
 const startOfUtcDay = (date: Date) => {
   const value = new Date(date);
@@ -217,9 +217,3 @@ type CreatedOrder = Prisma.OrderGetPayload<{ include: typeof orderCreateInclude 
 type UserPaymentOrder = NonNullable<Awaited<ReturnType<typeof findUserOrderOrThrow>>>;
 type OrderContext = Awaited<ReturnType<typeof buildOrderContext>>;
 type VoucherOrderResult = Awaited<ReturnType<typeof applyVoucherToOrder>>;
-
-interface GuestCounts {
-  adults: number;
-  children: number;
-  babies: number;
-}

@@ -22,7 +22,10 @@ export const createRoomSchema = z.object({
   base_price: z.string().regex(/^\d+$/, 'Harga harus berupa angka'),
   child_price: z.string().regex(/^\d+$/, 'Harga anak harus berupa angka').optional().or(z.literal('')),
   capacity: z.string().regex(/^\d+$/, 'Kapasitas harus berupa angka'),
-  quantity: z.string().regex(/^\d+$/, 'Jumlah kamar harus berupa angka').optional(),
+  quantity: z.string()
+    .regex(/^[1-9]\d*$/, 'Jumlah kamar harus minimal 1')
+    .refine((value) => Number(value) <= 20, 'Stok kamar maksimal 20.')
+    .optional(),
   description: z.string().optional(),
 });
 

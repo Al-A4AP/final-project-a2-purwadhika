@@ -47,14 +47,14 @@ const GuestStep: FC<{ state: BookingPageState }> = ({ state }) => (
 const AgreementReviewStep: FC<{ state: BookingPageState }> = ({ state }) => (
   <div className="space-y-6 animate-in fade-in slide-in-from-right-4 duration-300">
     <StepIntro title="Tinjauan & Persetujuan" description="Pastikan detail reservasi sudah benar sebelum memilih pembayaran." />
+    <VoucherCodeBox state={state} />
     <AgreementStep state={state} />
   </div>
 );
 
 const PaymentStep: FC<{ state: BookingPageState }> = ({ state }) => (
   <div className="space-y-6 animate-in fade-in slide-in-from-right-4 duration-300">
-    <StepIntro title="Pembayaran & Konfirmasi" description="Pilih metode pembayaran yang paling nyaman untuk Anda." />
-    <VoucherCodeBox state={state} />
+    <StepIntro title="Pembayaran & Konfirmasi" description="Selesaikan pembayaran atau unggah bukti transfer dalam 1 jam agar reservasi tidak otomatis dibatalkan." />
     <PaymentMethodSelector paymentMethod={state.paymentMethod} onChange={state.setPaymentMethod} />
   </div>
 );
