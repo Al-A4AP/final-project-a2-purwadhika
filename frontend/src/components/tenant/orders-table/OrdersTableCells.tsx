@@ -6,7 +6,9 @@ import { PaymentProofLink } from "./PaymentProofLink";
 
 export const OrderGuestCell: FC<{ order: Order }> = ({ order }) => (
   <td className="px-6 py-4">
-    <p className="font-semibold text-slate-900 dark:text-white">{order.order_number}</p>
+    <p className="font-semibold text-slate-900 dark:text-white">
+      {order.order_number}
+    </p>
     <p className="text-xs text-slate-500 mt-0.5">{order.user?.name}</p>
     <p className="text-xs text-slate-400">{order.user?.email}</p>
   </td>
@@ -14,8 +16,16 @@ export const OrderGuestCell: FC<{ order: Order }> = ({ order }) => (
 
 export const OrderPropertyCell: FC<{ order: Order }> = ({ order }) => (
   <td className="px-6 py-4">
-    <p className="font-semibold text-slate-900 dark:text-white">{order.property?.name}</p>
+    <p className="font-semibold text-slate-900 dark:text-white">
+      {order.property?.name}
+    </p>
     <p className="text-xs text-slate-500 mt-0.5">{order.room?.room_type}</p>
+  </td>
+);
+
+export const OrderCreatedAtCell: FC<{ order: Order }> = ({ order }) => (
+  <td className="px-6 py-4 text-sm text-slate-600 dark:text-slate-400">
+    <p>{formatDate(order.created_at)}</p>
   </td>
 );
 
@@ -28,14 +38,24 @@ export const OrderDatesCell: FC<{ order: Order }> = ({ order }) => (
 
 export const OrderPaymentCell: FC<{ order: Order }> = ({ order }) => (
   <td className="px-6 py-4">
-    <p className="font-semibold text-slate-900 dark:text-white">{formatPrice(order.total_price)}</p>
+    <p className="font-semibold text-slate-900 dark:text-white">
+      {formatPrice(order.total_price)}
+    </p>
     <p className="text-xs text-slate-500 mt-0.5">{order.payment_method}</p>
   </td>
 );
 
 export const OrderStatusCell: FC<{ order: Order }> = ({ order }) => {
-  const needsRefund = order.status === "CANCELLED" && order.payment_method === "MANUAL" && order.payment_proof_url && !order.refund_completed_at;
-  const refundCompleted = order.status === "CANCELLED" && order.payment_method === "MANUAL" && order.payment_proof_url && order.refund_completed_at;
+  const needsRefund =
+    order.status === "CANCELLED" &&
+    order.payment_method === "MANUAL" &&
+    order.payment_proof_url &&
+    !order.refund_completed_at;
+  const refundCompleted =
+    order.status === "CANCELLED" &&
+    order.payment_method === "MANUAL" &&
+    order.payment_proof_url &&
+    order.refund_completed_at;
 
   return (
     <td className="px-6 py-4">
@@ -51,7 +71,12 @@ export const OrderStatusCell: FC<{ order: Order }> = ({ order }) => {
             Refund Selesai
           </span>
         )}
-        {order.payment_proof_url && <PaymentProofLink orderNumber={order.order_number} url={order.payment_proof_url} />}
+        {order.payment_proof_url && (
+          <PaymentProofLink
+            orderNumber={order.order_number}
+            url={order.payment_proof_url}
+          />
+        )}
       </div>
     </td>
   );
