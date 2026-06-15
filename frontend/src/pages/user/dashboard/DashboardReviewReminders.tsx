@@ -51,7 +51,7 @@ export const DashboardReviewReminders: FC<DashboardReviewRemindersProps> = ({
               </div>
             </div>
             <Link
-              to={`/orders/${order.id}`}
+              to={`/reviews`}
               className="w-full whitespace-nowrap rounded-xl bg-amber-500 px-6 py-3 text-center font-bold text-white transition hover:bg-amber-600 md:w-auto"
             >
               Beri Ulasan
