@@ -19,6 +19,8 @@ export const findRoomsByProperty = (propertyId: string) => prisma.room.findMany(
   include: roomInclude,
   orderBy: { created_at: 'asc' },
 });
+export const countActiveRoomsByProperty = (propertyId: string) =>
+  prisma.room.count({ where: { propertyId, deleted_at: null } });
 export const createRoomRecord = (data: Prisma.RoomUncheckedCreateInput) =>
   prisma.room.create({ data, include: roomInclude });
 export const updateRoomRecord = (roomId: string, data: Prisma.RoomUncheckedUpdateInput) =>

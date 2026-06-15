@@ -7,7 +7,6 @@ import { TravelDetailsCard } from "./TravelDetailsCard";
 import { AgreementStep } from "./AgreementStep";
 import { GuestIdentityForm } from "./GuestIdentityForm";
 import { ManualProofUpload, StepIntro } from "./ManualProofUpload";
-import { ReferralCodeBox } from "./ReferralCodeBox";
 import { VoucherCodeBox } from "./VoucherCodeBox";
 
 interface ReservationStepContentProps {
@@ -56,13 +55,12 @@ const PaymentStep: FC<{ state: BookingPageState }> = ({ state }) => (
   <div className="space-y-6 animate-in fade-in slide-in-from-right-4 duration-300">
     <StepIntro title="Pembayaran & Konfirmasi" description="Pilih metode pembayaran yang paling nyaman untuk Anda." />
     <VoucherCodeBox state={state} />
-    <ReferralCodeBox state={state} />
     <PaymentMethodSelector paymentMethod={state.paymentMethod} onChange={state.setPaymentMethod} />
   </div>
 );
 
 const SummaryStep: FC<ReservationStepContentProps> = ({ proofFile, state }) => (
   <div className="space-y-6 animate-in fade-in slide-in-from-right-4 duration-300">
-    <BookingSummary guestIdentity={state.guestIdentity} property={state.property!} room={state.room!} nights={state.totals!.nights} guests={state.guests} discountAmount={state.voucherPreview?.discountAmount} totalPrice={state.totals!.totalPrice} totalRoomPrice={state.totals!.totalRoomPrice} processing={state.processing} onCheckout={() => state.handleCheckout(proofFile)} />
+    <BookingSummary guestIdentity={state.guestIdentity} property={state.property!} room={state.room!} nights={state.totals!.nights} guests={state.guests} discountAmount={state.voucherPreview?.discountAmount} voucher={state.voucherPreview?.voucher} totalPrice={state.totals!.totalPrice} totalRoomPrice={state.totals!.totalRoomPrice} processing={state.processing} onCheckout={() => state.handleCheckout(proofFile)} />
   </div>
 );

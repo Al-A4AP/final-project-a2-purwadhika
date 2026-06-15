@@ -12,7 +12,7 @@ import type { BookingGuestIdentity, BookingGuests, BookingQuery, PaymentMethod }
 export const useBookingCheckout = (params: {
   agreementAccepted: boolean; query: BookingQuery; property: PropertyDetail | null; room: Room | null;
   guestIdentity: BookingGuestIdentity; guests: BookingGuests; paymentMethod: PaymentMethod; navigate: NavigateFunction;
-  referralCode: string; voucherCode: string;
+  voucherCode: string;
 }) => {
   const [processing, setProcessing] = useState(false);
   const handleCheckout = async (paymentProofFile?: File | null) => { await checkout(params, setProcessing, paymentProofFile); };
@@ -29,7 +29,7 @@ const checkout = async (params: Parameters<typeof useBookingCheckout>[0], setPro
 };
 
 const submitCheckout = async (params: Parameters<typeof useBookingCheckout>[0], paymentProofFile?: File | null) => {
-  const payload = createCheckoutPayload(params.property!, params.room!, params.query, params.paymentMethod, params.guests, params.guestIdentity, params.voucherCode, params.referralCode);
+  const payload = createCheckoutPayload(params.property!, params.room!, params.query, params.paymentMethod, params.guests, params.guestIdentity, params.voucherCode);
   const result = await orderService.createOrder(payload);
   if (openMidtransIfNeeded(params, result.snapToken)) return;
   await uploadManualProofIfNeeded(result.order?.id, params.paymentMethod, paymentProofFile);

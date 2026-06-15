@@ -2,13 +2,14 @@ import type { FC } from "react";
 import { ArrowLeft, Plus } from "lucide-react";
 
 interface RoomsPageHeaderProps {
+  canAddRoom: boolean;
   onBack: () => void;
   propertyName?: string;
   onAdd: () => void;
   isWholeUnit: boolean;
 }
 
-export const RoomsPageHeader: FC<RoomsPageHeaderProps> = ({ onBack, propertyName, onAdd, isWholeUnit }) => (
+export const RoomsPageHeader: FC<RoomsPageHeaderProps> = ({ canAddRoom, onBack, propertyName, onAdd, isWholeUnit }) => (
   <div className="mb-8 flex flex-col gap-6 md:flex-row md:items-end md:justify-between">
     <div className="flex flex-col gap-4">
       <button 
@@ -29,14 +30,16 @@ export const RoomsPageHeader: FC<RoomsPageHeaderProps> = ({ onBack, propertyName
     </div>
     
     {!isWholeUnit && (
-      <div className="flex shrink-0">
+      <div className="flex shrink-0 flex-col gap-2">
         <button 
+          disabled={!canAddRoom}
           onClick={onAdd}
-          className="flex w-full items-center justify-center gap-2 rounded-xl bg-slate-900 px-6 py-3 text-sm font-bold text-white shadow-sm transition hover:bg-slate-800 dark:bg-white dark:text-slate-900 dark:hover:bg-slate-200 md:w-auto"
+          className="flex w-full items-center justify-center gap-2 rounded-xl bg-slate-900 px-6 py-3 text-sm font-bold text-white shadow-sm transition hover:bg-slate-800 disabled:cursor-not-allowed disabled:opacity-50 dark:bg-white dark:text-slate-900 dark:hover:bg-slate-200 md:w-auto"
         >
           <Plus size={18} />
           Tambah Kamar
         </button>
+        {!canAddRoom && <p className="text-xs font-medium text-amber-600 dark:text-amber-300">Maksimal 5 jenis kamar untuk satu properti.</p>}
       </div>
     )}
   </div>

@@ -50,13 +50,13 @@ const VoucherDiscountFields: FC<FormPartProps> = ({ form, setForm }) => {
   const handleValueChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     let val = event.target.value ? Number(event.target.value) : 0;
     if (isPercentage && val > 90) val = 90;
-    if (isFreeNights && val > 30) val = 30; // sensible limit for free nights
+    if (isFreeNights && val > 30) val = 30;
     setForm({ ...form, discount_value: val });
   };
   return (
     <div className="grid gap-3 sm:grid-cols-2">
-      <label className="space-y-1.5"><span className={labelClass}>Tipe</span><select value={form.discount_type} onChange={handleTypeChange} className={inputClass}><option value="PERCENTAGE">Persentase</option><option value="NOMINAL">Nominal</option><option value="FREE_NIGHTS">Menginap Gratis</option></select></label>
-      <label className="space-y-1.5"><span className={labelClass}>{isFreeNights ? "Jumlah Malam Gratis" : "Nilai"}</span><input type="number" min={isPercentage ? 1 : isFreeNights ? 1 : 10000} max={isPercentage ? 90 : isFreeNights ? 30 : undefined} value={form.discount_value || ""} onChange={handleValueChange} className={inputClass} placeholder={isFreeNights ? "Misal: 1" : isPercentage ? "Misal: 15" : "Misal: 50000"} required /></label>
+      <label className="space-y-1.5"><span className={labelClass}>Tipe</span><select value={form.discount_type} onChange={handleTypeChange} className={inputClass}><option value="PERCENTAGE">Persentase</option><option value="FREE_NIGHTS">Menginap Gratis</option></select></label>
+      <label className="space-y-1.5"><span className={labelClass}>{isFreeNights ? "Jumlah Malam Gratis" : "Persentase Diskon"}</span><input type="number" min={1} max={isPercentage ? 90 : 30} value={form.discount_value || ""} onChange={handleValueChange} className={inputClass} placeholder={isFreeNights ? "Misal: 1" : "Misal: 15"} required /></label>
       <label className="space-y-1.5 sm:col-span-2"><span className={labelClass}>Kuota (Opsional)</span><input type="number" min={1} value={form.quota || ""} onChange={(event) => setForm({ ...form, quota: numberOrNull(event.target.value) })} className={inputClass} placeholder="Kosongkan untuk tanpa batas" /></label>
     </div>
   );
@@ -93,7 +93,7 @@ const defaultVoucherForm = (): VoucherFormInput => ({ code: "", discount_type: "
 const voucherToForm = (voucher: Voucher): VoucherFormInput => ({
   code: voucher.code,
   description: voucher.description || "",
-  discount_type: voucher.discount_type,
+  discount_type: voucher.discount_type === "NOMINAL" ? "PERCENTAGE" : voucher.discount_type,
   discount_value: voucher.discount_value,
   expires_at: toDateString(new Date(voucher.expires_at)),
   is_active: voucher.is_active,

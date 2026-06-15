@@ -22,7 +22,6 @@ export interface CreateOrderPayload {
   guest_email?: string;
   guest_ktp_address: string;
   guest_domicile_address?: string;
-  referral_code?: string;
   voucher_code?: string;
   adults: number;
   children: number;

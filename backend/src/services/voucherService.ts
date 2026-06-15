@@ -54,7 +54,6 @@ export const assignVoucherToUser = async (tenantId: string, voucherId: string, u
 };
 
 export const previewUserVoucher = async (userId: string, input: VoucherPreviewInput) => {
-  await ensureUserReferralCode(userId);
   const voucher = await findActiveVoucherForProperty(prisma, input.propertyId, input.voucher_code);
   await assertAssignedVoucherAccess(prisma, userId, voucher.id);
   await assertNewUserVoucherAllowed(prisma, userId, voucher);
@@ -63,9 +62,8 @@ export const previewUserVoucher = async (userId: string, input: VoucherPreviewIn
 };
 
 export const getUserVoucherSummary = async (userId: string) => {
-  const user = await ensureUserReferralCode(userId);
   const assignedVouchers = await findAssignedActiveVouchers(userId);
-  return { referralCode: user.referral_code, vouchers: assignedVouchers.map(serializeVoucher) };
+  return { vouchers: assignedVouchers.map(serializeVoucher) };
 };
 
 export const applyVoucherToOrder = async (tx: Prisma.TransactionClient, propertyId: string, code: string | undefined, subtotal: number, userId: string, total_nights = 1) => {
@@ -90,6 +88,7 @@ const findActiveVoucherForProperty = async (db: DbClient, propertyId: string, co
   const tenantId = await findPropertyTenantId(db, propertyId);
   const voucher = await db.voucher.findFirst({ where: buildActiveVoucherWhere(tenantId, code) });
   if (!voucher) throw new AppError('Voucher tidak valid atau sudah tidak aktif', 400);
+  assertSupportedVoucher(voucher);
   assertVoucherQuota(voucher);
   return voucher;
 };
@@ -118,6 +117,12 @@ const assertVoucherQuota = (voucher: Pick<Voucher, 'quota' | 'used_count'>) => {
   if (voucher.quota !== null && voucher.used_count >= voucher.quota) throw new AppError('Kuota voucher sudah habis', 400);
 };
 
+const assertSupportedVoucher = (voucher: Pick<Voucher, 'discount_type'>) => {
+  if (voucher.discount_type === VoucherDiscountType.NOMINAL) {
+    throw new AppError('Voucher nominal tidak didukung', 400);
+  }
+};
+
 const assertAssignedVoucherAccess = async (db: DbClient, userId: string, voucherId: string) => {
   if (!await hasVoucherAssignments(db, voucherId)) return;
   if (await findUsableAssignedVoucher(db, userId, voucherId)) return;
@@ -143,7 +148,7 @@ const calculateDiscount = (subtotal: number, voucher: Pick<Voucher, 'discount_ty
   } else if (voucher.discount_type === VoucherDiscountType.PERCENTAGE) {
     raw = Math.floor((subtotal * voucher.discount_value) / 100);
   } else {
-    raw = voucher.discount_value;
+    throw new AppError('Voucher nominal tidak didukung', 400);
   }
   const cappedDiscount = voucher.max_discount ? Math.min(raw, voucher.max_discount) : raw;
   if (voucher.discount_type !== 'FREE_NIGHTS') {
@@ -151,16 +156,6 @@ const calculateDiscount = (subtotal: number, voucher: Pick<Voucher, 'discount_ty
   }
   return Math.min(cappedDiscount, subtotal);
 };
-
-const ensureUserReferralCode = async (userId: string) => {
-  const user = await prisma.user.findUnique({ where: { id: userId, deleted_at: null } });
-  if (!user) throw new AppError('User tidak ditemukan', 404);
-  if (user.referral_code) return user;
-  return prisma.user.update({ where: { id: userId }, data: { referral_code: buildReferralCode(user.name, user.id) } });
-};
-
-const findPublicActiveVouchers = () =>
-  prisma.voucher.findMany({ where: { ...buildPublicVoucherWhere(), deleted_at: null, userVouchers: { none: {} } }, orderBy: { expires_at: 'asc' }, take: 12 });
 
 const findAssignedActiveVouchers = async (userId: string) => {
   const assignments = await prisma.userVoucher.findMany({
@@ -182,11 +177,6 @@ const usableAssignedVoucherWhere = () => ({
 });
 
 const buildPublicVoucherWhere = () => ({ expires_at: { gte: new Date() }, is_active: true, starts_at: { lte: new Date() } });
-
-const mergeVouchers = (primary: Voucher[], secondary: Voucher[]) => {
-  const ids = new Set(primary.map((voucher) => voucher.id));
-  return [...primary, ...secondary.filter((voucher) => !ids.has(voucher.id))];
-};
 
 const buildVoucherCreateData = (tenantId: string, data: VoucherInput) => ({ ...buildVoucherUpdateData(data), tenantId });
 
@@ -213,4 +203,3 @@ const buildVoucherUpdateData = (data: VoucherInput) => {
 const serializeVoucher = (voucher: Voucher) => ({ ...voucher, code: voucher.code });
 const normalizeVoucherCode = (code: string) => code.trim().toUpperCase();
 const buildNoVoucherResult = (subtotal: number) => ({ discountAmount: 0, subtotalPrice: subtotal, totalPrice: subtotal, voucherId: null });
-const buildReferralCode = (name: string, id: string) => `${name.replace(/[^a-z0-9]/gi, '').slice(0, 6).toUpperCase() || 'USER'}${id.slice(-6).toUpperCase()}`;

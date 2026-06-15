@@ -2,17 +2,19 @@
 
 Folder ini menyimpan dokumentasi pendukung final project agar root project tetap ringkas dan mudah diperiksa.
 
-Tanggal audit dokumentasi terbaru: 11 Juni 2026.
+Tanggal audit dokumentasi terbaru: 15 Juni 2026.
 
 ## Struktur
 
 - `audits/AUDIT_CLEAN_CODE_REST_API_GUIDELINES.md`: audit clean code, function-length advisory, lint/build, dan kepatuhan REST API.
-- `audits/AUDIT_OWNERSHIP_SECURITY.md`: audit ownership, authorization, browser storage, dan keamanan.
+- `audits/AUDIT_OWNERSHIP_SECURITY.md`: audit ownership, authorization, browser storage, PII, dan keamanan.
 - `audits/AUDIT_PURWADHIKA_FINAL.md`: audit keseluruhan berdasarkan requirement PURWADHIKA.
-- `plans/RENCANA_PERBAIKAN_DETAIL.md`: sisa rencana yang belum dilaksanakan atau masih opsional.
+- `audits/AUDIT_ZOD_RESOLVER_BUG.md`: histori bug Zod resolver pada React Hook Form.
+- `plans/RENCANA_PERBAIKAN_DETAIL.md`: rencana perbaikan aktif berdasarkan audit terbaru.
 - `guidelines/PURWADHIKA.md`: requirement final project.
 - `guidelines/REST_API_GUIDELINES.md`: panduan REST resource naming.
 - `guidelines/CODE_LINE_CHECK_GUIDELINES.md`: panduan pengecekan batas baris.
+- `guidelines/TOOLS_GUIDELINE.md`: panduan penggunaan tool audit advisory.
 
 ## Kebijakan README
 
@@ -21,54 +23,56 @@ README hanya dipertahankan di:
 - `README.md` pada root project.
 - `docs/README.md` di folder dokumentasi ini.
 
-README di folder `frontend` dan `backend` sudah dihapus oleh user dan tidak dibuat ulang. Detail frontend/backend dirangkum di README root dan audit docs.
+README di folder `frontend` dan `backend` tidak dibuat ulang.
 
 ## Ringkasan Audit Terbaru
 
-| Area                           | Status                                                                 |
-| ------------------------------ | ---------------------------------------------------------------------- |
-| Frontend Architecture & UI/UX  | Tersentralisasi di `hooks/`, sinkronisasi UI Calendar & CTA, UX konsisten |
-| Frontend lint                  | Lulus                                                                  |
-| Frontend build                 | Lulus                                                                  |
-| Backend build                  | Lulus                                                                  |
-| Ownership test                 | Lulus, 7/7                                                             |
-| File source >200 baris         | Tidak ditemukan pada `backend/src`, `backend/tests`, `frontend/src`    |
-| `any`, `debugger`, `console.*` | Bersih dari `any`, `debugger`, dan `console.*` pada source utama       |
-| Function length audit          | 103 kandidat manual review; advisory only                              |
-| REST API                       | Jalur utama sesuai resource-oriented; legacy alias masih dicatat       |
-| Ownership                      | Baik dan teruji                                                        |
-| Browser storage                | Tidak ada JWT auth token di localStorage                               |
-| Zod Form Validation            | Diselesaikan via Pure Custom Resolver tanpa menyentuh dependency luar  |
-| UI Booking CTA                 | Tersinkronisasi penuh dengan array kalender untuk perlindungan _double-booking_ |
+| Area | Status aktual |
+| --- | --- |
+| Frontend lint | Lulus |
+| Frontend build | Lulus |
+| Backend build | Lulus |
+| Ownership test | Lulus, 7/7 |
+| File source >200 baris | 1 file: `backend/src/utils/emailService.ts` |
+| Function length audit | 155 kandidat manual review; advisory only |
+| `any`, `debugger`, `console.*` | Masih ada `as any`, `as unknown`, dan `console.*` residue |
+| REST API | Jalur utama resource-oriented; legacy alias masih dicatat |
+| Ownership | Baik pada test utama; PII response perlu data minimization |
+| Transaction | Create order + voucher perlu refactor transaction scope |
+| Referral | Source flow non-migration selesai; destructive migration belum dilakukan |
+| Voucher nominal | Source flow non-migration selesai; destructive migration belum dilakukan |
+| `domicile_address` | Diputuskan tidak digunakan lagi, belum dihapus dari schema/type |
+| Room max 5 type | Selesai di backend dan frontend |
 
 ## Catatan Clean Code
 
-- Batas file 200 baris terpenuhi pada source utama.
-- `backend/prisma/schema.prisma` berisi 261 baris dan dicatat sebagai pengecualian teknis deklaratif.
-- `tools/audit-function-length.js` adalah alat bantu audit, bukan hard rule build.
-- Output function-length harus dinilai manual agar refactor tidak berlebihan.
+- `npm run audit:functions` adalah alat bantu audit, bukan hard rule build.
+- Banyak kandidat frontend berupa JSX presentasional panjang; refactor tetap perlu penilaian manual.
+- Saat ini masih ada 1 file source utama >200 baris.
+- Dokumentasi lama yang menyebut 103 kandidat atau lint/build sepenuhnya lulus sudah tidak lagi akurat.
 
 ## Catatan REST API
 
-Jalur utama sudah mengikuti resource-oriented API, misalnya:
+Jalur utama sudah resource-oriented, tetapi legacy alias masih aktif:
 
-- `/api/users/me/orders`
-- `/api/tenants/me/orders`
-- `/api/tenants/me/properties`
-- `/api/orders/:id/payments`
-- `/api/orders/:id/status-transitions`
-- `/api/reviews/:reviewId/replies`
-- `/api/locations/geocodes`
+- `GET /api/orders/user`
+- `GET /api/orders/tenant`
+- `POST /api/orders/:id/payment-attempts`
+- `PATCH /api/orders/:id/status`
+- `POST /api/reviews/:reviewId/reply`
+- `POST /api/tenants/me/rooms/:roomId/availability/range`
+- `PATCH /api/tenants/me/rooms/:roomId/images/:imageId/main`
 
-Legacy alias masih aktif untuk backward compatibility dan dicatat di plan cleanup.
+Cleanup legacy alias dilakukan setelah regression test.
 
 ## Catatan Ownership dan Security
 
-- Tenant resource dilindungi `requireAuth`, `requireRole(['TENANT'])`, dan ownership middleware.
-- Ownership regression test berada di `backend/tests/ownership/ownership.test.ts`.
-- Auth token memakai HTTP-only cookie backend.
-- LocalStorage hanya dipakai untuk tema, saved properties lokal, dan cleanup legacy storage.
-- SessionStorage dipakai untuk auth notice sementara.
+- Auth token memakai HTTP-only cookie, bukan localStorage.
+- Ownership regression test lulus 7/7.
+- Tenant route utama memakai `requireAuth`, `requireRole`, dan ownership middleware.
+- PII/KTP pada list order tenant/report perlu ditinjau ulang agar response hanya mengirim field yang dibutuhkan UI.
+- Referral removal dan voucher simplification sudah selesai pada source flow aktif tanpa destructive migration.
+- Schema/data legacy referral dan voucher nominal hanya boleh dihapus lewat migration setelah konfirmasi user.
 
 ## Cara Verifikasi Cepat
 
@@ -81,3 +85,10 @@ cd ../backend
 npm run build
 npm run test:ownership
 ```
+
+Status terakhir:
+
+- `frontend npm run lint`: lulus.
+- `frontend npm run build`: lulus.
+- `backend npm run build`: lulus.
+- `backend npm run test:ownership`: lulus.

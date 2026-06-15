@@ -7,7 +7,6 @@ import { createSnapTransaction, handleNotification } from './midtransService';
 import { getTenantOrders as getTenantOrderList, type GetTenantOrdersOptions } from './order/tenantOrderList';
 import { updateTenantOrderStatus } from './order/tenantOrderStatus';
 import { getValidatedStayDetails } from './pricingService';
-import { buildReferralOrderData, issueReferralRewardForProcessedOrder } from './referralRewardService';
 import { applyVoucherToOrder } from './voucherService';
 
 interface CreateOrderData {
@@ -25,7 +24,6 @@ interface CreateOrderData {
   guest_ktp_address?: string;
   guest_ktp_number?: string;
   guest_domicile_address?: string;
-  referral_code?: string;
   voucher_code?: string;
   adults: number;
   children: number;
@@ -39,7 +37,6 @@ export const updateOrderStatus = updateTenantOrderStatus;
 export const createOrder = async (data: CreateOrderData) => {
   const context = await buildOrderContext(data);
   const order = await executeOrderTransaction(context);
-  await issueRewardForImmediateOrder(order);
   const snapData = await buildPaymentResponse(order, context.nights, data.payment_method);
   sendOrderCreatedEmail(order);
   return { order, ...snapData };
@@ -78,9 +75,8 @@ const executeOrderTransaction = (context: OrderContext) =>
     validateCapacity(context.guests, room.capacity);
     const price = await getStayPriceOrThrow(tx, context);
     const voucher = await applyVoucherToOrder(tx, context.propertyId, context.voucher_code, price.totalPrice, context.userId, context.nights);
-    const referral = await buildReferralOrderData(tx, context.userId, context.referral_code);
     if (context.booking_for_self !== false) await syncUserProfileFromBooking(tx, context);
-    return tx.order.create({ data: buildOrderCreateData(context, voucher, referral), include: orderCreateInclude });
+    return tx.order.create({ data: buildOrderCreateData(context, voucher), include: orderCreateInclude });
   });
 
 const syncUserProfileFromBooking = async (tx: Prisma.TransactionClient, context: OrderContext) => {
@@ -138,13 +134,12 @@ const getStayPriceOrThrow = async (tx: Prisma.TransactionClient, context: OrderC
   catch (err) { throw new AppError(getErrorMessage(err), 400); }
 };
 
-const buildOrderCreateData = (context: OrderContext, voucher: VoucherOrderResult, referral: ReferralOrderData): Prisma.OrderCreateInput => ({
+const buildOrderCreateData = (context: OrderContext, voucher: VoucherOrderResult): Prisma.OrderCreateInput => ({
   order_number: generateOrderNumber(), user: { connect: { id: context.userId } },
   property: { connect: { id: context.propertyId } }, room: { connect: { id: context.roomId } },
   check_in_date: context.checkIn, check_out_date: context.checkOut, discount_amount: voucher.discountAmount,
   subtotal_price: voucher.subtotalPrice, total_price: voucher.totalPrice,
   ...(voucher.voucherId ? { voucher: { connect: { id: voucher.voucherId } } } : {}),
-  ...referral,
   ...buildGuestCreateData(context),
   payment_method: context.payment_method,
   ...buildPaymentState(voucher.totalPrice),
@@ -186,11 +181,6 @@ const assertPaymentProofNotExpired = async (order: UserPaymentOrder) => {
 const markPaymentProofUploaded = (orderId: string, imageUrl: string) =>
   prisma.order.update({ where: { id: orderId }, data: { payment_proof_url: imageUrl, status: OrderStatus.WAITING_CONFIRMATION } });
 
-const issueRewardForImmediateOrder = async (order: CreatedOrder) => {
-  if (order.status !== OrderStatus.PROCESSED) return;
-  await issueReferralRewardForProcessedOrder(order.id).catch(() => undefined);
-};
-
 const sendOrderCreatedEmail = (order: CreatedOrder) =>
   sendOrderConfirmationEmail(order.user.email, order.order_number, order.property.name, order.room.room_type, order.check_in_date, order.check_out_date, order.total_price).catch(() => {});
 
@@ -228,7 +218,6 @@ export const handleMidtransNotification = handleNotification;
 type CreatedOrder = Prisma.OrderGetPayload<{ include: typeof orderCreateInclude }>;
 type UserPaymentOrder = NonNullable<Awaited<ReturnType<typeof findUserOrderOrThrow>>>;
 type OrderContext = Awaited<ReturnType<typeof buildOrderContext>>;
-type ReferralOrderData = Awaited<ReturnType<typeof buildReferralOrderData>>;
 type VoucherOrderResult = Awaited<ReturnType<typeof applyVoucherToOrder>>;
 
 interface GuestCounts {

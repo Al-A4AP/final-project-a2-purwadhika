@@ -28,7 +28,6 @@ export interface Order {
   guest_ktp_number?: string | null;
   guest_domicile_address?: string | null;
   discount_amount?: number;
-  referral_code?: string | null;
   voucherId?: string | null;
   status: OrderStatus;
   payment_method: PaymentMethod;

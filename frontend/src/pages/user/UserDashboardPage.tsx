@@ -7,7 +7,7 @@ import { DashboardActiveSummary } from "./dashboard/DashboardActiveSummary";
 import { DashboardQuickActions } from "./dashboard/DashboardQuickActions";
 import { DashboardRecent } from "./dashboard/DashboardRecent";
 import { DashboardReviewReminders } from "./dashboard/DashboardReviewReminders";
-import { DashboardVoucherReferral } from "./dashboard/DashboardVoucherReferral";
+import { DashboardVouchers } from "./dashboard/DashboardVouchers";
 import { DashboardRefundNotice } from "./dashboard/DashboardRefundNotice";
 
 const UserDashboardPage: FC = () => {
@@ -35,7 +35,7 @@ const UserDashboardPage: FC = () => {
               </div>
               <div className="lg:col-span-1">
                 <DashboardActiveSummary stats={stats} />
-                <DashboardVoucherReferral />
+                <DashboardVouchers />
                 <DashboardQuickActions />
               </div>
             </div>

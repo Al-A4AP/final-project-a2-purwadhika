@@ -1,33 +1,23 @@
 # Audit Keseluruhan PURWADHIKA
 
-Tanggal audit: 11 Juni 2026  
+Tanggal audit: 15 Juni 2026  
 Project: PURWALOKA - Property Renting Web App  
 Acuan: `docs/guidelines/PURWADHIKA.md`
 
 ## Ringkasan Eksekutif
 
-Project sudah memenuhi mayoritas requirement utama PURWADHIKA untuk Property Renting Web App. Fitur user, tenant, transaksi, review, report, mobile responsiveness, clean code, ownership, dan REST guideline jalur utama sudah tersedia dan terverifikasi.
+Project PURWALOKA sudah memiliki cakupan fitur utama yang luas: homepage, auth user/tenant, profile, catalog, property detail, tenant CRUD, room, category, availability, peak season, booking, payment manual/Midtrans, review, dan report.
 
-Status audit teknis terakhir: fitur utama tersedia dan verifikasi teknis lulus. Arsitektur telah sepenuhnya dioptimalkan untuk Vercel Serverless, termasuk sistem Proxy Frontend dan Webhook Cronjob. Proyek ini sudah siap untuk penilaian akhir.
+Namun berdasarkan audit 15 Juni 2026, project belum boleh dinyatakan final-ready karena masih ada P0/P1 aktif:
 
-## Catatan UAT Browser Terbaru (SELESAI)
-
-Seluruh temuan browser terbaru pada 07 Juni 2026 telah dieksekusi dan diimplementasikan secara tuntas:
-
-| Area | Status | Ringkasan Perbaikan |
-| --- | --- | --- |
-| Dashboard tenant date logic | Selesai | Data historis dibatasi sampai tanggal saat ini; tersedia opsi rentang minggu/bulan/tahun/seluruh data max 3 tahun |
-| Vercel Serverless Architecture | Selesai | Frontend memproxy backend lewat `vercel.json` (atasi masalah Cookie/CORS); Kuki auth diset `sameSite: lax` |
-| Webhook Cron Jobs | Selesai | Menggantikan `node-cron` persisten menjadi rute webhook API (`/api/webhooks/cron`) yang diamankan dengan `CRON_SECRET` |
-| Tenant category data | Selesai | Kategori dilengkapi deskripsi dan *default rental type* untuk mempermudah saat membuat properti |
-| Tenant property rental mode | Selesai | Properti kini mendukung mode sewa `PER_ROOM` / `WHOLE_PROPERTY`; navigasi *Kelola Kamar* otomatis disembunyikan untuk *whole property* |
-| Voucher tenant | Selesai | Form voucher lebih presisi (alfanumerik 8 huruf, date-only, batasan nilai maks 90%); dukungan baru untuk Voucher *Free Nights* (Menginap Gratis) |
-| Booking guest data | Selesai | Ditambahkan validasi ketat *Data Tamu* sebelum lanjut ke proses konfirmasi reservasi |
-| Tenant order rejection | Selesai | Tenant diwajibkan menulis alasan teks ketika menolak pembayaran manual; status dikembalikan otomatis ke `WAITING_PAYMENT` agar user bisa *retry* |
-| Profile navigation | Selesai | Tombol 'Kembali' diletakkan di halaman Profil yang secara otomatis kembali ke *Dashboard* sesuai *role* pengguna |
-| Whole Property Availability & CTA | Selesai | Kalender sinkron menampilkan tanggal terpesan/diblokir pada mode _whole property_, dan Booking CTA otomatis lumpuh/dinonaktifkan jika ada bentrokan rentang tanggal (*double-booking guard*) |
-
-
+- P0: transaction timeout saat voucher digunakan.
+- P0: potensi double booking pada request paralel.
+- P1: bug profile change password kosong bisa stuck loading.
+- P1: referral sudah dilepas dari source flow aktif, tetapi schema/data legacy belum dihapus.
+- P1: voucher nominal sudah dilepas dari UI/validation/service aktif, tetapi schema/data legacy belum dihapus.
+- P1: `domicile_address` tidak digunakan lagi tetapi masih ada di schema/type/payload.
+- P1: rule jenis kamar maksimal 5 sudah diterapkan.
+- P1: clean code regression tersisa pada 1 file source >200 baris dan residue type/log.
 
 ## Verifikasi Terbaru
 
@@ -37,79 +27,84 @@ Seluruh temuan browser terbaru pada 07 Juni 2026 telah dieksekusi dan diimplemen
 | Frontend build | Lulus |
 | Backend build | Lulus |
 | Backend ownership test | Lulus, 7/7 |
-| File source >200 baris | Tidak ditemukan pada `backend/src`, `backend/tests`, `frontend/src` |
-| `any`, `debugger`, `console.*` | Bersih pada source utama |
-| Function length audit advisory | 103 kandidat manual review; bukan build blocker |
-| Pemisahan Hak Akses UI (Role UI) | Lulus (Akses reservasi Tenant 100% terkunci) |
-| Konsistensi Desain (UX) | Lulus (Komponen global rapi & arsitektur *frontend* solid) |
+| File source >200 baris | 1 file ditemukan |
+| Function length audit advisory | 155 kandidat manual review |
+| `any`, `debugger`, `console.*` | Masih ada residue `as any`, `as unknown`, dan `console.*` |
+| REST API | Jalur utama baik, legacy alias masih ada |
+| Ownership | Test utama lulus |
 
 ## Main Features
 
 | Requirement | Status | Catatan |
 | --- | --- | --- |
-| Web app property renting | Terpenuhi | User flow penyewa dan tenant tersedia |
-| Role user dan tenant | Terpenuhi | Protected route dan backend role middleware tersedia |
-| User dapat mencari properti berdasarkan destinasi/tanggal | Terpenuhi | Homepage dan Explore memakai search/filter/sort/pagination |
-| Perbandingan harga/ketersediaan | Terpenuhi | Detail properti menampilkan ketersediaan/harga kamar dan status blocked/booked |
-| Tenant kelola harga musiman | Terpenuhi | Halaman `/tenant/peak-season` menjadi pusat pengelolaan peak season |
-| Tenant kelola ketersediaan | Terpenuhi | Availability calendar dan range update tersedia |
-| Tenant memiliki lebih dari satu room | Terpenuhi | Room management per property tersedia |
-| Tenant melihat laporan penjualan | Terpenuhi | Laporan Pendapatan, Laporan Properti, dan Okupasi tersedia |
-| Review satu arah setelah menginap | Terpenuhi | User review dan tenant reply/delete tersedia sesuai role |
+| Web app property renting | Tersedia | User dan tenant flow tersedia |
+| Role user dan tenant | Tersedia | Protected route dan backend role middleware tersedia |
+| User mencari properti berdasarkan destinasi/tanggal | Tersedia | Homepage dan Explore memakai search/filter/sort/pagination |
+| Perbandingan harga/ketersediaan | Tersedia | Detail properti dan calendar tersedia |
+| Tenant kelola harga musiman | Tersedia | Halaman `/tenant/peak-season` tersedia |
+| Tenant kelola ketersediaan | Tersedia | Availability calendar dan range update tersedia |
+| Tenant punya lebih dari satu room | Tersedia | Rule maksimal 5 jenis kamar sudah diterapkan |
+| Tenant melihat laporan penjualan | Tersedia | Reports, property report, occupancy tersedia |
+| Review setelah menginap | Tersedia | User review dan tenant reply/delete tersedia |
 
 ## Feature 1
 
 ### Homepage / Landing Page
 
-Status: terpenuhi.
-
-Tersedia homepage dengan carousel hero, search destination/date/guest, kategori, properti terdekat/terbaru, property card, CTA tenant, footer, loading/empty/error state, dan navigasi ke Explore.
+Status: tersedia.
 
 File terkait:
 
 - `frontend/src/pages/user/HomePage.tsx`
 - `frontend/src/components/user/HeroSection.tsx`
 - `frontend/src/components/user/SearchForm.tsx`
-- `frontend/src/pages/user/home/`
+- `frontend/src/hooks/user/home/`
 - `frontend/src/stores/filterStore.ts`
+
+Catatan:
+
+- Homepage tidak lagi menampilkan promo referral.
+- CTA voucher diarahkan ke penggunaan voucher aktif tenant.
 
 ### User / Tenant Authentication and Profiles
 
-Status: terpenuhi.
-
-Fitur register/login user dan tenant, Google login, email verification, reset password, profile, avatar, change password, dan change email sudah tersedia.
+Status: tersedia dengan P1 bug.
 
 File terkait:
 
 - `backend/src/routes/authRoutes.ts`
 - `backend/src/controllers/authController.ts`
 - `backend/src/services/authService.ts`
-- `backend/src/services/authGoogleService.ts`
 - `backend/src/services/userService.ts`
 - `frontend/src/pages/auth/`
 - `frontend/src/pages/user/ProfilePage.tsx`
-- `frontend/src/hooks/auth/`
+- `frontend/src/components/user/profile/`
+
+Catatan:
+
+- Change password form masih memakai `zodResolver`.
+- Project punya histori bug Zod 4 + `@hookform/resolvers@3.10.0`.
+- `domicile_address` tidak lagi dipakai UI tetapi masih ada di schema/type.
 
 ### Property Catalog dan Search
 
-Status: terpenuhi.
-
-Katalog properti memakai search, category, price, amenities, sort, pagination, dan server-side processing untuk endpoint utama. Explore desktop memiliki sidebar kiri untuk search/filter/sort, sedangkan mobile memakai panel filter yang dapat ditutup dan otomatis tertutup setelah aksi utama.
+Status: tersedia.
 
 File terkait:
 
 - `backend/src/routes/propertyRoutes.ts`
 - `backend/src/services/propertyService.ts`
 - `backend/src/services/propertyList/`
-- `backend/src/validations/queryValidation.ts`
 - `frontend/src/pages/user/ExplorePage.tsx`
-- `frontend/src/components/user/propertyFilterDropdown/`
+
+Catatan:
+
+- REST jalur utama cukup baik.
+- Legacy alias tetap perlu cleanup setelah regression test.
 
 ### Property Detail
 
-Status: terpenuhi.
-
-Detail properti menampilkan gallery carousel, lokasi peta, fasilitas, review, room card, selected room, availability/pricing, dan booking CTA.
+Status: tersedia.
 
 File terkait:
 
@@ -117,13 +112,14 @@ File terkait:
 - `frontend/src/components/property/`
 - `backend/src/services/propertyDetailService.ts`
 - `backend/src/services/propertyDetail/`
-- `backend/src/services/publicAvailabilityService.ts`
+
+Catatan:
+
+- Masih ada `as any` di service detail/room status.
 
 ### Tenant Property, Room, Category, Availability, Peak Season
 
-Status: terpenuhi.
-
-Tenant dapat mengelola property, room, images, category, availability, dan peak season. Category default dilindungi dari delete/edit. Peak season dikelola di halaman khusus `/tenant/peak-season`.
+Status: tersedia.
 
 File terkait:
 
@@ -137,42 +133,49 @@ File terkait:
 - `backend/src/services/tenantRoomService.ts`
 - `backend/src/services/categoryService.ts`
 
+Catatan:
+
+- Rule maksimal 5 jenis kamar sudah diterapkan pada backend dan frontend.
+- Whole-property/room quantity logic perlu terus memakai backend sebagai source of truth.
+
 ## Feature 2
 
 ### User Transaction Process
 
-Status: terpenuhi.
-
-User dapat membuat reservasi, memilih metode pembayaran manual/Midtrans, upload bukti transfer, retry Midtrans, switch ke manual, melihat riwayat/order detail, dan cancel manual order saat masih menunggu pembayaran.
+Status: tersedia dengan P0 risk.
 
 File terkait:
 
 - `backend/src/routes/orderRoutes.ts`
 - `backend/src/controllers/orderController.ts`
 - `backend/src/services/orderService.ts`
-- `backend/src/services/order/`
+- `backend/src/services/voucherService.ts`
 - `frontend/src/pages/user/BookingPage.tsx`
-- `frontend/src/pages/user/OrdersPage.tsx`
-- `frontend/src/pages/user/BookingDetailPage.tsx`
+
+Catatan:
+
+- Create order transaction masih perlu hardening saat voucher digunakan.
+- Potensi double booking paralel masih perlu guard atomic.
+- `guest_domicile_address` masih ada meski tidak digunakan.
 
 ### Tenant Transaction Management
 
-Status: terpenuhi.
-
-Tenant dapat melihat order, konfirmasi pembayaran manual, menolak/membatalkan sesuai rule, dan melihat status order. Auto-cancel unpaid order dan auto-complete processed order tersedia melalui eksekusi Webhook Serverless `/api/webhooks/cron` menggunakan `CRON_SECRET`.
+Status: tersedia.
 
 File terkait:
 
-- `backend/src/routes/webhookRoutes.ts`
-- `backend/src/services/orderService.ts`
+- `backend/src/services/order/tenantOrderStatus.ts`
+- `backend/src/services/order/tenantOrderList.ts`
 - `frontend/src/pages/tenant/OrdersPage.tsx`
-- `frontend/src/components/tenant/`
+
+Catatan:
+
+- PII/KTP pada list tenant order perlu data minimization.
+- Tenant status flow sudah tidak memicu reward referral, tetapi tetap perlu regression QA.
 
 ### Review
 
-Status: terpenuhi.
-
-User dapat memberi review setelah checkout/status memenuhi rule. Tenant dapat reply dan delete review dalam scope ownership. Halaman ulasan tenant menampilkan rating per kategori dan per properti dengan paginasi.
+Status: tersedia.
 
 File terkait:
 
@@ -182,13 +185,14 @@ File terkait:
 - `backend/src/services/tenantReviewService.ts`
 - `frontend/src/pages/user/UserReviewsPage.tsx`
 - `frontend/src/pages/tenant/ReviewsPage.tsx`
-- `frontend/src/pages/tenant/reviews/`
+
+Catatan:
+
+- Ownership test review lulus.
 
 ### Report and Analysis
 
-Status: terpenuhi.
-
-Tenant memiliki Laporan Pendapatan, Laporan Properti, dan Okupasi Kamar sebagai halaman terpisah. Card performa per properti memakai paginasi untuk menjaga UX tenant yang memiliki banyak properti.
+Status: tersedia.
 
 File terkait:
 
@@ -197,62 +201,76 @@ File terkait:
 - `frontend/src/pages/tenant/ReportsPage.tsx`
 - `frontend/src/pages/tenant/PropertyReportPage.tsx`
 - `frontend/src/pages/tenant/OccupancyPage.tsx`
-- `frontend/src/pages/tenant/property-report/`
+
+Catatan:
+
+- Report query/response perlu ditinjau untuk data minimization PII.
 
 ## Standardization
 
 ### Validation
 
-Status: terpenuhi.
+Status: tersedia dengan gap.
 
-Backend memakai Zod validation dan middleware `validate`. Frontend memakai React Hook Form dan Zod pada form penting. Upload file divalidasi lewat middleware dan service.
+Gap:
+
+- Password form perlu custom resolver.
+- Voucher validation hanya menerima `PERCENTAGE` dan `FREE_NIGHTS`.
+- Room max 5 sudah divalidasi backend.
+- `domicile_address` masih divalidasi/payload optional meski tidak digunakan.
 
 ### Pagination, Filtering, Sorting
 
-Status: terpenuhi pada jalur utama.
+Status: sebagian besar tersedia.
 
-Daftar properti, tenant properties, categories, orders, reports, reviews, dan property performance memakai pagination/filter/sort sesuai kebutuhan. Beberapa ringkasan kecil tetap client-side karena datanya sudah merupakan agregasi tampilan, bukan collection utama yang besar.
+Catatan:
+
+- Collection utama sudah memakai pagination/filter/sort di banyak area.
+- Tetap perlu regression test browser setelah referral/voucher non-migration removal.
 
 ### Frontend
 
-Status: terpenuhi.
+Status: tersedia dengan clean code gap.
 
-Frontend terstruktur menjadi `components`, `pages`, `hooks`, `services`, `stores`, `router`, `types`, dan `validations`. UI memiliki responsive mobile/web, loading state, empty state, error state, modal konfirmasi, filter chips, route error boundary, dan layout tenant/user terpisah.
+Catatan:
+
+- Build lulus.
+- Lint gagal.
+- Banyak komponen besar menjadi kandidat review manual.
 
 ### Backend
 
-Status: terpenuhi.
+Status: tersedia dengan P0/P1 gap.
 
-Backend terstruktur menjadi `routes`, `controllers`, `services`, `middlewares`, `validations`, `utils`, `config`, `cron`, dan domain helper. REST API utama menggunakan route berbasis resource dan role/ownership middleware.
+Catatan:
+
+- Build lulus.
+- `orderService.ts`, `voucherService.ts`, `emailService.ts` melewati 200 baris.
+- Transaction order perlu refactor.
 
 ### Clean Code
 
-Status: terpenuhi dengan catatan advisory.
+Status: belum final.
 
-Clean code umumnya terjaga, namun terdapat residu: `as any` di `tenantPropertyFilters.ts` dan `console.error` di `webhookRoutes.ts`. Function-length audit menemukan 103 kandidat manual review. Hasil ini tidak menjadi hard rule karena banyak kandidat berupa JSX presentasional panjang yang perlu dinilai manual.
+Temuan:
 
-## Struktur Dokumentasi
+- 1 file source >200 baris.
+- 155 function-length advisory candidates.
+- Lint frontend lulus.
+- Masih ada residue `as any`, `as unknown`, `console.*`.
 
-Status: sesuai arahan terbaru.
+## P0/P1 Rekomendasi
 
-README hanya dipakai di:
-
-- `README.md`
-- `docs/README.md`
-
-README di folder `frontend` dan `backend` sudah dihapus oleh user dan tidak dibuat ulang.
-
-## Rekomendasi Final
-
-| Rekomendasi | Risiko | Prioritas |
+| Prioritas | Rekomendasi | Risiko |
 | --- | --- | --- |
-| Eksekusi rencana UAT browser 07 Juni 2026 | Menengah | Prioritas aktif |
-| Cleanup legacy REST alias setelah regression test | Menengah | Opsional sebelum final REST ketat |
-| Review kandidat function-length advisory bertahap | Rendah-menengah | Opsional clean code |
-| Tambahkan CSRF token jika cookie-auth production cross-origin | Menengah | Production hardening |
-| Gunakan persistent token blacklist jika backend multi-instance | Selesai | Sudah diimplementasikan dengan Prisma PostgreSQL + SHA256 hashing |
-| Pindahkan saved properties ke backend jika ingin sinkron lintas device | Menengah | Product improvement |
+| P0 | Refactor create order transaction agar tidak timeout saat voucher | Tinggi |
+| P0 | Tambah guard anti double booking paralel | Tinggi |
+| P1 | Perbaiki profile password resolver | Rendah |
+| P1 | Hapus schema/data legacy referral jika migration disetujui | Tinggi jika migration langsung |
+| P1 | Hapus schema/data legacy voucher nominal jika migration disetujui | Sedang-tinggi |
+| P1 | Hapus `domicile_address` setelah konfirmasi migration | Sedang |
+| P1 | Bersihkan file >200 baris dan residue type/log | Sedang |
 
 ## Kesimpulan
 
-Project memiliki fitur utama yang lengkap dan verifikasi teknis terakhir lulus (Build, Lint, Ownership Tests berhasil). Seluruh perombakan infrastruktur *cloud* dan pembaruan arsitektur (*Vercel Proxy*, *Webhook Cron*, *Cookie Lax*) telah diselesaikan secara komprehensif tanpa mengorbankan keamanan data atau kaidah *clean code*. Project dapat dinyatakan final dan siap untuk dipresentasikan dan diproduksi.
+Project sudah memiliki fondasi fitur utama yang kuat, tetapi status 15 Juni 2026 adalah **belum final-ready**. Fokus berikutnya sebaiknya P0 transaction/double booking, lalu P1 password form, migration legacy referral/voucher jika disetujui, `domicile_address` removal, dan clean code regression tersisa.

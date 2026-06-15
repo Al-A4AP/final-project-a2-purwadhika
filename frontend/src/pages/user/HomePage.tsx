@@ -154,8 +154,8 @@ const PromosCta: FC = () => (
           <div className="mb-4 inline-block rounded-xl bg-blue-100 p-3 text-blue-600 dark:bg-blue-900/30 dark:text-blue-400">
             <ShieldCheck size={24} />
           </div>
-          <h2 className="text-2xl font-bold text-slate-900 dark:text-white">Dapatkan Voucher 5%</h2>
-          <p className="mt-2 text-slate-600 dark:text-slate-400">Gunakan kode referral teman Anda di pesanan pertama dan dapatkan potongan eksklusif!</p>
+          <h2 className="text-2xl font-bold text-slate-900 dark:text-white">Dapatkan Voucher Menginap</h2>
+          <p className="mt-2 text-slate-600 dark:text-slate-400">Gunakan voucher aktif dari tenant saat reservasi dan nikmati potongan khusus.</p>
         </div>
         <Link to="/auth/register" className="mt-auto inline-flex w-full items-center justify-center gap-2 rounded-xl bg-slate-900 px-5 py-3 text-center text-sm font-bold text-white transition hover:bg-slate-800 dark:bg-white dark:text-slate-900 dark:hover:bg-slate-200 sm:w-fit">
           Daftar Sekarang <ArrowRight size={16} />

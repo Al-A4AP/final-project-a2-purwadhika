@@ -1,50 +1,39 @@
 # Audit Ownership dan Keamanan
 
-Tanggal audit: 11 Juni 2026  
+Tanggal audit: 15 Juni 2026  
 Project: PURWALOKA - Property Renting Web App  
-Acuan: ownership data, authorization, browser storage, dan hardening backend
+Acuan: ownership data, authorization, browser storage, PII, transaksi, dan hardening backend.
 
 ## Ringkasan
 
-Ownership dan keamanan berada pada kondisi baik. Route tenant dan user utama sudah memakai `requireAuth`, `requireRole`, validasi input, dan middleware ownership untuk resource tenant seperti properti, kamar, peak rate, availability, dan review. Regression test ownership terbaru lulus 7/7.
+Ownership dasar berada pada kondisi baik. Regression test ownership lulus 7/7. Auth token memakai HTTP-only cookie, bukan localStorage.
 
-Auth token disimpan sebagai HTTP-only cookie dari backend, bukan localStorage. LocalStorage frontend hanya dipakai untuk preferensi UI dan saved properties lokal. Risiko keamanan yang tersisa bersifat production hardening, bukan blocker fitur final.
+Namun audit terbaru menemukan beberapa risiko yang perlu ditangani sebelum dinyatakan final-ready:
 
-Catatan UAT browser terbaru: Seluruh temuan perbaikan 07 Juni 2026 yang menyentuh *ownership* data kategori, properti, voucher, dan penolakan *order* telah dieksekusi dengan tetap mempertahankan keamanan berlapis. Selain itu, hardening pada 11 Juni memastikan pemesanan *Whole Property* tidak bisa tumpang tindih (*double-booking*) melalui sinkronisasi kalender dan CTA.
+- Potensi double booking pada request paralel.
+- Prisma transaction timeout saat voucher digunakan.
+- PII/KTP pada response list tenant/report perlu data minimization.
+- Referral source flow aktif sudah dilepas tanpa destructive migration; schema/data legacy belum di-drop.
+- Voucher nominal sudah dilepas dari UI/validation/service aktif tanpa destructive migration; schema/data legacy belum di-drop.
+- `domicile_address` tidak digunakan lagi tetapi masih ada di schema/type.
 
 ## Verifikasi
 
 | Pemeriksaan | Hasil |
 | --- | --- |
-| `backend npm.cmd run test:ownership` | Lulus, 7/7 test pass |
-| `backend npm.cmd run build` | Lulus |
-| `frontend npm.cmd run lint` | Lulus |
-| Scan localStorage/sessionStorage | Tidak ada JWT auth token di localStorage |
-| Scan frontend secret LocationIQ | LocationIQ request memakai backend proxy |
-| Scan `document.cookie` frontend | Tidak ditemukan penggunaan langsung di frontend |
+| `backend npm run test:ownership` | Lulus, 7/7 |
+| `backend npm run build` | Lulus |
+| `frontend npm run build` | Lulus |
+| `frontend npm run lint` | Lulus |
+| Scan browser storage | Tidak ditemukan auth token aktif di localStorage |
 
 ## Ownership
 
-### Dampak Rencana UAT Browser 07 Juni 2026
-
-Area yang perlu dijaga saat implementasi:
-
-| Area | Risiko Ownership | Mitigasi |
-| --- | --- | --- |
-| Category description dan rental type | Tenant mencoba edit/delete kategori default sistem | Default category tetap `tenantId = null` dan read-only untuk tenant |
-| Property rental type | Tenant mengubah property milik tenant lain | Tetap gunakan `verifyPropertyOwnership` dan filter `tenantId` di service |
-| Voucher tenant | Tenant melihat/mengubah voucher reward private user | Voucher reward dengan `user_vouchers` tetap tidak muncul di voucher management tenant |
-| Tenant reject payment reason | Tenant mengubah order tenant lain atau user melihat alasan order lain | Tetap validasi property ownership pada order dan filter user order by `userId` |
-| Booking guest data | Data guest milik order user terekspos ke user lain | User order endpoint tetap filter by authenticated `userId` |
-| Sinkronisasi Ketersediaan Whole Property | User dapat memesan properti yang sudah dipesan user lain (*double booking*) pada rentang tanggal sama | Sinkronisasi UX Kalender-CTA di sisi frontend; tetap ada *guard backend* pada `createOrder` yang mengecek `PROPERTY_ID` agar database tidak kebobolan |
-
-Tambahkan regression test jika perubahan membuka surface ownership baru, terutama pada category/property rental type dan tenant order rejection reason.
-
 ### Proteksi Tenant Resource
 
-Status: sesuai.
+Status: baik.
 
-Route tenant dilindungi oleh:
+Route tenant utama dilindungi:
 
 - `requireAuth`
 - `requireRole(['TENANT'])`
@@ -60,19 +49,7 @@ File utama:
 - `backend/src/middlewares/ownership/`
 - `backend/src/services/tenantRoom/roomOwnership.ts`
 
-### Route Ownership yang Terlihat
-
-Contoh proteksi yang sudah diterapkan:
-
-- Tenant property detail/update/delete memakai `verifyPropertyOwnership`.
-- Property image add/delete memakai `verifyPropertyOwnership`.
-- Room CRUD/image/availability/peak-rate memakai `verifyRoomOwnership`.
-- Peak rate update/delete memakai `verifyPeakRateOwnership`.
-- Tenant review reply/delete diuji melalui ownership regression.
-
 ### Regression Test Ownership
-
-Status: sesuai.
 
 File:
 
@@ -88,41 +65,156 @@ Kasus yang lulus:
 - Tenant tidak bisa reply review property tenant lain.
 - Tenant tidak bisa delete review property tenant lain.
 
-## Auth dan Session Security
+## P0 Security/Data Integrity
 
-### Auth Token
+### Potensi Double Booking Paralel
+
+Severity: P0
+
+Root cause:
+
+Availability check masih berbasis read/count order aktif. Belum ada lock/constraint yang menjamin dua request paralel tidak sama-sama lolos untuk stok terbatas.
+
+File:
+
+- `backend/src/services/orderService.ts`
+- `backend/src/services/availabilityService.ts`
+- `backend/src/services/availability/availabilityQueries.ts`
+- `backend/src/services/availability/availabilityRules.ts`
+
+Risk:
+
+- Overbooking kamar/properti.
+- Tenant/user melihat status ketersediaan yang tidak konsisten.
+
+Recommended fix:
+
+- Tambahkan guard atomic, misalnya Postgres advisory lock per room/property + date, atau inventory lock table jika migration disetujui.
+
+### Transaction Timeout Saat Voucher Digunakan
+
+Severity: P0
+
+Root cause:
+
+Interactive transaction create order masih terlalu panjang dan mencakup availability, pricing, voucher, profile sync, dan create order.
+
+File:
+
+- `backend/src/services/orderService.ts`
+- `backend/src/services/voucherService.ts`
+- `backend/src/services/pricingService.ts`
+
+Risk:
+
+- User gagal checkout saat voucher digunakan.
+- Order/payment state bisa membingungkan jika frontend sudah masuk flow pembayaran.
+
+Recommended fix:
+
+- Perpendek transaction scope.
+- Pastikan Midtrans dan email tetap di luar transaction.
+- Buat voucher quota update atomic.
+
+## P1 Security and Privacy
+
+### PII/KTP Response Minimization
+
+Severity: P1
+
+Root cause:
+
+Query order tenant/report memakai Prisma `include`, sehingga scalar field order dapat ikut terkirim default, termasuk guest PII.
+
+File yang perlu diaudit saat fix:
+
+- `backend/src/services/order/tenantOrderList.ts`
+- `backend/src/services/tenantReport/reportQueries.ts`
+- `frontend/src/types/order.ts`
+
+Risk:
+
+- Data sensitif dikirim lebih luas dari kebutuhan UI.
+
+Recommended fix:
+
+- Ganti `include` menjadi `select` eksplisit.
+- Pisahkan response list summary dan detail order.
+- Jangan kirim KTP/alamat penuh pada list jika tidak dibutuhkan.
+
+### Referral Legacy Migration
+
+Severity: P1
+
+Root cause:
+
+Referral sudah dilepas dari UI, create order payload, voucher summary, Midtrans processed flow, dan tenant approval flow. Schema/data legacy belum dihapus karena itu membutuhkan destructive migration.
+
+Risk:
+
+- Jika destructive migration dilakukan tanpa audit data, histori order/user lama bisa rusak.
+- Migration drop table/column bersifat destructive.
+
+Recommended fix:
+
+- Pertahankan kondisi source flow non-migration yang sudah selesai.
+- Migration hanya setelah user konfirmasi.
+
+### Voucher Nominal Removal
+
+Severity: P1
+
+Root cause:
+
+`NOMINAL` masih ada sebagai enum/schema/type legacy, tetapi tidak lagi tersedia di form tenant dan ditolak oleh backend validation/service aktif.
+
+Risk:
+
+- Existing data `NOMINAL` bisa menghambat enum migration.
+
+Recommended fix:
+
+- Pertahankan non-migration layer yang sudah selesai.
+- Soft-delete/convert data nominal existing sebelum migration enum.
+
+### `domicile_address` Removal
+
+Severity: P1
+
+Root cause:
+
+Field tidak dipakai UI tetapi masih ada di schema/type/payload.
+
+Risk:
+
+- API contract drift.
+- Migration drop column menghapus data lama.
+
+Recommended fix:
+
+- Hapus dari code path dulu.
+- Migration drop column hanya setelah user konfirmasi.
+
+## Auth dan Session Security
 
 Status: baik.
 
-Auth token diset dari backend sebagai cookie:
+Auth token:
 
-- file: `backend/src/config/authCookie.ts`
-- cookie name: `auth_token`
-- `httpOnly: true`
-- `sameSite: strict`
-- `secure: true` saat production
+- Cookie: `auth_token`
+- HTTP-only cookie dari backend
+- Tidak disimpan di localStorage
 
-Frontend tidak menyimpan JWT auth di localStorage, sehingga risiko pencurian token melalui XSS lebih rendah.
+File:
 
-### Logout dan Token Revocation
+- `backend/src/config/authCookie.ts`
+- `backend/src/services/tokenBlacklistService.ts`
+- `backend/src/middlewares/authMiddleware.ts`
 
-Status: sangat baik.
+Catatan:
 
-Logout menghapus cookie dan memasukkan token ke blacklist service. 
-
-### Persistent Token Revocation
-
-Status: IMPLEMENTED
-
-Implementation:
-- PostgreSQL-backed blacklist
-- SHA256 token hashing
-- Multi-instance safe
-- Automatic cleanup cron
-
-Risk Eliminated:
-- Logout bypass after server restart
-- Multi-instance token resurrection
+- Dokumentasi lama yang menyebut token blacklist masih in-memory sudah tidak akurat jika code memakai model `RevokedToken`.
+- Tetap pastikan deployment production menjalankan cleanup revoked token.
 
 ## Browser Storage
 
@@ -131,33 +223,22 @@ Storage yang masih dipakai:
 | Lokasi | Storage | Tujuan | Risiko |
 | --- | --- | --- | --- |
 | `frontend/src/stores/theme/themeStorage.ts` | localStorage | Preferensi tema | Rendah |
-| `frontend/src/hooks/savedPropertiesStorage.ts` | localStorage | Wishlist/saved properties lokal | Rendah-menengah |
-| `frontend/src/lib/authNotice.ts` | sessionStorage | Notice sementara setelah redirect auth | Rendah |
-| `frontend/src/lib/browserStorageCleanup.ts` | localStorage remove | Membersihkan legacy auth storage | Positif |
+| `frontend/src/hooks/savedPropertiesStorage.ts` | localStorage | Wishlist lokal | Rendah-menengah |
+| `frontend/src/lib/authNotice.ts` | sessionStorage | Notice auth sementara | Rendah |
+| `frontend/src/lib/browserStorageCleanup.ts` | localStorage remove | Bersihkan legacy auth storage | Positif |
 
-Tidak ditemukan penyimpanan auth token aktif di localStorage.
+Tidak ditemukan JWT auth token aktif di localStorage.
 
-## Security Hardening
+## Upload Security
 
-### Yang Sudah Baik
+Status: cukup, perlu hardening jika produksi ketat.
 
-- Security headers tersedia di `backend/src/middlewares/securityHeaders.ts`.
-- CORS dikendalikan lewat allowed origins.
-- Rate limiter tersedia untuk global API, auth, resend, order, dan Midtrans webhook.
-- Upload file memakai middleware Multer dan validasi ukuran/extension sesuai area.
-- LocationIQ request diproxy dari backend sehingga token tidak perlu diekspos sebagai frontend source.
-- Response error memakai helper terpusat.
-- Query/body divalidasi dengan Zod.
+Catatan:
 
-### Sisa Risiko dan Rekomendasi
-
-| Risiko | Skala | Rekomendasi |
-| --- | --- | --- |
-| Belum ada CSRF token eksplisit untuk cookie-auth | Menengah | Tambahkan CSRF token jika production memakai cookie cross-origin atau domain kompleks |
-| Token blacklist masih in-memory | Menengah | Gunakan Redis/database jika backend deploy multi-instance |
-| Legacy endpoint alias masih aktif | Rendah-menengah | Deprecate atau hapus setelah regression test |
-| Saved properties masih localStorage | Rendah-menengah | Pindahkan ke backend jika wishlist wajib sinkron lintas device |
+- Upload divalidasi oleh Multer dari size dan mimetype.
+- Untuk hardening lebih kuat, validasi magic bytes/file signature dapat ditambahkan.
+- Cloudinary delete/upload property image sudah dipisah dari DB transaction pada flow utama.
 
 ## Kesimpulan
 
-Tidak ditemukan celah kritikal dari audit statis terbaru. Ownership sudah teruji dan keamanan utama sudah baik. Sisa rekomendasi lebih mengarah ke hardening production dan penyempurnaan jangka panjang.
+Ownership dasar baik dan test lulus. Risiko utama saat ini bukan cross-tenant access, melainkan data integrity dan privacy: double booking paralel, transaction timeout saat voucher, dan PII response minimization. Referral/voucher nominal sudah dilepas dari source flow aktif, tetapi migration legacy referral/voucher nominal dan `domicile_address` tetap perlu rencana bertahap agar tidak merusak data existing.

@@ -1,6 +1,6 @@
 import type { FC } from "react";
 import { TicketPercent, X } from "lucide-react";
-import { formatPrice } from "@/lib/formatters";
+import { formatVoucherBenefit } from "@/lib/voucherFormatters";
 import type { BookingPageState } from "@/hooks/user/booking/bookingTypes";
 
 export const VoucherCodeBox: FC<{ state: BookingPageState }> = ({ state }) => (
@@ -18,7 +18,7 @@ export const VoucherCodeBox: FC<{ state: BookingPageState }> = ({ state }) => (
 
 const VoucherAppliedNotice: FC<{ state: BookingPageState }> = ({ state }) => (
   <div className="mt-3 flex items-center justify-between rounded-xl bg-white px-3 py-2 text-sm dark:bg-slate-900">
-    <span className="text-slate-600 dark:text-slate-300">Diskon {formatPrice(state.voucherPreview!.discountAmount)} diterapkan.</span>
+    <span className="text-slate-600 dark:text-slate-300">{formatVoucherBenefit(state.voucherPreview!.voucher)} diterapkan.</span>
     <button type="button" onClick={state.clearVoucher} className="text-slate-400 hover:text-red-500" title="Hapus voucher" aria-label="Hapus voucher"><X size={16} /></button>
   </div>
 );

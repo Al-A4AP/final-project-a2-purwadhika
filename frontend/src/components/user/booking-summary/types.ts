@@ -1,4 +1,4 @@
-import type { PropertyDetail, Room } from "@/types";
+import type { PropertyDetail, Room, Voucher } from "@/types";
 import type { BookingGuestIdentity } from "@/hooks/user/booking/bookingTypes";
 
 export interface BookingSummaryProps {
@@ -12,4 +12,5 @@ export interface BookingSummaryProps {
   discountAmount?: number;
   totalPrice: number;
   totalRoomPrice: number;
+  voucher?: Voucher;
 }

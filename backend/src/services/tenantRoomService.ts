@@ -4,10 +4,12 @@ import { buildAvailabilityRangeDates } from './tenantRoom/availabilityRange';
 import { buildTenantAvailabilityView } from './tenantRoom/availabilityView';
 import { buildRoomCreateData, buildRoomUpdateData, normalizeAvailabilityDate } from './tenantRoom/roomData';
 import { createRoomPeakRate, findRoomPeakRates, softDeletePeakRate, updateRoomPeakRate } from './tenantRoom/peakRates';
-import { createRoomRecord, findRoomAvailabilities, findRoomBookedOrders, findRoomById, findRoomsByProperty, softDeleteRoomRecord, updateRoomRecord, upsertRoomAvailability, upsertRoomAvailabilityRange, countActiveOrdersForRoom, countOverlappingOrders } from './tenantRoom/roomQueries';
+import { createRoomRecord, findRoomAvailabilities, findRoomBookedOrders, findRoomById, findRoomsByProperty, softDeleteRoomRecord, updateRoomRecord, upsertRoomAvailability, upsertRoomAvailabilityRange, countActiveOrdersForRoom, countActiveRoomsByProperty, countOverlappingOrders } from './tenantRoom/roomQueries';
 import { ensureTenantProperty, verifyPeakRateOwner, verifyRoomOwner } from './tenantRoom/roomOwnership';
 import type { PeakRateFormData, RoomFormData } from './tenantRoom/tenantRoomTypes';
 import { isWholeUnitCategory } from './tenantRoom/wholeUnitCategory';
+
+const MAX_ROOM_TYPES_PER_PROPERTY = 5;
 
 export const getRooms = async (propertyId: string, tenantId: string) => {
   await ensureTenantProperty(propertyId, tenantId);
@@ -16,9 +18,17 @@ export const getRooms = async (propertyId: string, tenantId: string) => {
 
 export const createRoom = async (propertyId: string, tenantId: string, data: RoomFormData, file?: Express.Multer.File) => {
   const property = await ensureTenantProperty(propertyId, tenantId);
+  await assertRoomTypeLimit(propertyId);
   if (!file) throw new AppError('Foto kamar wajib diupload', 400);
   const image = await uploadRoomImage(file);
   return createRoomRecord(buildRoomCreateData(propertyId, data, image, isWholeUnitCategory(property.category?.name)));
+};
+
+const assertRoomTypeLimit = async (propertyId: string) => {
+  const count = await countActiveRoomsByProperty(propertyId);
+  if (count >= MAX_ROOM_TYPES_PER_PROPERTY) {
+    throw new AppError('Maksimal 5 jenis kamar untuk satu properti.', 400);
+  }
 };
 
 export const updateRoom = async (roomId: string, tenantId: string, data: RoomFormData, file?: Express.Multer.File) => {

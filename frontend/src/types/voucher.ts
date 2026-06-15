@@ -39,6 +39,5 @@ export interface VoucherPreview {
 }
 
 export interface UserVoucherSummary {
-  referralCode: string | null;
   vouchers: Voucher[];
 }

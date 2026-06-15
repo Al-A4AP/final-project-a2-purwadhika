@@ -2,7 +2,7 @@ import type { FC } from "react";
 import { useState } from "react";
 import { Pencil, Send, Trash2 } from "lucide-react";
 import { EmptyState } from "@/components/common/EmptyState";
-import { formatPrice } from "@/lib/formatters";
+import { formatVoucherBenefit } from "@/lib/voucherFormatters";
 import type { Voucher } from "@/types";
 import type { useTenantVouchersPage } from "@/hooks/tenant/vouchers/useTenantVouchersPage";
 import { ConfirmModal } from "@/components/common/ConfirmModal";
@@ -89,7 +89,7 @@ const VoucherInfo: FC<{ voucher: Voucher }> = ({ voucher }) => (
 
 const VoucherMeta: FC<{ voucher: Voucher }> = ({ voucher }) => (
   <div className="mt-4 grid gap-3 text-sm text-slate-600 dark:text-slate-300 sm:grid-cols-3">
-    <span>Diskon: <strong>{formatDiscount(voucher)}</strong></span>
+    <span>Manfaat: <strong>{formatVoucherBenefit(voucher)}</strong></span>
     <span>Kuota: <strong>{voucher.quota ? `${voucher.used_count}/${voucher.quota}` : `${voucher.used_count} terpakai`}</strong></span>
     <span>Berakhir: <strong>{new Date(voucher.expires_at).toLocaleDateString("id-ID")}</strong></span>
   </div>
@@ -102,9 +102,6 @@ const VoucherActions: FC<{ onDelete: () => void; onEdit: (voucher: Voucher) => v
     <button type="button" onClick={onDelete} className={dangerButtonClass} title="Hapus voucher" aria-label="Hapus voucher"><Trash2 size={16} /></button>
   </div>
 );
-
-const formatDiscount = (voucher: Voucher) =>
-  voucher.discount_type === "PERCENTAGE" ? `${voucher.discount_value}%` : formatPrice(voucher.discount_value);
 
 const activeClass = "rounded-full bg-emerald-100 px-2 py-1 text-xs font-semibold text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-300";
 const inactiveClass = "rounded-full bg-slate-100 px-2 py-1 text-xs font-semibold text-slate-500 dark:bg-slate-800 dark:text-slate-300";

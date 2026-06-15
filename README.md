@@ -9,39 +9,68 @@ Final Project Purwadhika JCWDBGPM-11, Group 1:
 
 ## Live Deployment
 
-Aplikasi ini telah dideploy dan dapat diakses secara publik pada tautan berikut:
-
-- **Frontend (Web Utama)**: [https://final-project-a2-purwadhika-fronten.vercel.app](https://final-project-a2-purwadhika-fronten.vercel.app)
-- **Backend (API)**: [https://final-project-a2-purwadhika-backend.vercel.app](https://final-project-a2-purwadhika-backend.vercel.app)
+- Frontend: [https://final-project-a2-purwadhika-fronten.vercel.app](https://final-project-a2-purwadhika-fronten.vercel.app)
+- Backend API: [https://final-project-a2-purwadhika-backend.vercel.app](https://final-project-a2-purwadhika-backend.vercel.app)
 
 ## Status Audit Terakhir
 
-Audit dokumentasi diperbarui pada 11 Juni 2026 dengan acuan `docs/guidelines/PURWADHIKA.md` dan `docs/guidelines/REST_API_GUIDELINES.md`.
+Tanggal audit dokumentasi: 15 Juni 2026.
 
-| Area                           | Status                  | Catatan                                                                                                                  |
-| ------------------------------ | ----------------------- | ------------------------------------------------------------------------------------------------------------------------ |
-| Fitur utama                    | Selesai                 | User, tenant, booking, payment, review, report, dan ownership tersedia                                                   |
-| Frontend Architecture & UI/UX  | Selesai                 | Logika tersentralisasi di hooks, otorisasi UI tenant ketat (view-only mode), dan komponen premium (Love Badge konsisten) |
-| Fitur 1                        | Selesai                 | Homepage, auth/profile, katalog properti, detail properti, tenant CRUD property/room/category, availability, peak season |
-| Fitur 2                        | Selesai                 | Booking, manual payment, Midtrans, tenant order management, review, laporan pendapatan/properti/okupasi                  |
-| Sinkronisasi UI Calendar & CTA | Selesai                 | Tombol Booking CTA nonaktif secara dinamis bila rentang tanggal bertabrakan dengan jadwal terpesan/diblokir            |
-| File source >200 baris         | Sesuai                  | Tidak ditemukan pada `backend/src`, `backend/tests`, `frontend/src`                                                      |
-| Function maksimal 15 baris     | Dipantau                | `npm run audit:functions` tersedia sebagai advisory tool; hasil terbaru 103 kandidat manual review                        |
-| `any`, `debugger`, `console.*` | Sesuai                  | Bersih dari `any`, `debugger`, dan `console.*` pada source utama                                                         |
-| Frontend lint/build            | Lulus                   | `npm.cmd run lint` dan `npm.cmd run build` lulus                                                                         |
-| Backend build                  | Lulus                   | `npm.cmd run build` lulus                                                                                                |
-| Ownership test                 | Lulus                   | `npm.cmd run test:ownership` lulus, 7/7                                                                                  |
-| REST API                       | Sesuai pada jalur utama | Legacy alias masih aktif untuk backward compatibility                                                                    |
-| Browser storage                | Aman                    | Auth token tidak disimpan di localStorage                                                                                |
-| Zod Form Validation            | Selesai                 | Bug resolver ditangani dengan Pure Custom Resolver tanpa menyentuh dependency eksternal                                  |
+Acuan:
 
-Laporan lengkap tersedia di:
+- `docs/guidelines/PURWADHIKA.md`
+- `docs/guidelines/REST_API_GUIDELINES.md`
+- `docs/guidelines/CODE_LINE_CHECK_GUIDELINES.md`
+- `docs/guidelines/TOOLS_GUIDELINE.md`
+
+Update limited scope terakhir menyelesaikan room max 5, referral non-migration removal, voucher nominal non-migration removal, Free Stay display, dan cleanup lint. Tidak ada destructive migration, commit, atau push.
+
+| Area | Status aktual | Catatan |
+| --- | --- | --- |
+| Fitur utama | Mayoritas tersedia | User, tenant, booking, payment, review, report, ownership sudah ada |
+| Frontend build | Lulus | `frontend npm run build` lulus |
+| Backend build | Lulus | `backend npm run build` lulus |
+| Ownership test | Lulus | `backend npm run test:ownership` lulus 7/7 |
+| Frontend lint | Lulus | `frontend npm run lint` lulus |
+| File source >200 baris | Belum sesuai | 1 file source utama >200 baris: `backend/src/utils/emailService.ts` |
+| Function-length advisory | Dipantau | 155 kandidat manual review, bukan hard rule |
+| `any`, `console.*`, `debugger` | Ada residue | `as any`, `as unknown`, dan `console.*` masih ditemukan pada beberapa file |
+| REST API | Jalur utama baik | Legacy alias masih aktif untuk backward compatibility |
+| Ownership/security | Baik dengan catatan | Ownership test lulus; PII/order response dan transaction flow perlu review lanjutan |
+| Transaction voucher/payment | Perlu perbaikan | Prisma interactive transaction bisa timeout saat voucher dipakai |
+| Referral | Source flow non-migration selesai | UI/payload/service aktif sudah dilepas; schema/data legacy belum di-drop |
+| Voucher nominal | Source flow non-migration selesai | Form tidak menyediakan nominal; backend menolak nominal; enum/data legacy belum di-drop |
+| Free Stay voucher | Selesai | Tampil sebagai `Gratis X Malam` |
+| `domicile_address` | Akan dihapus | Masih ada di schema/type/payload, tidak lagi digunakan UI |
+
+Laporan lengkap:
 
 - [`docs/audits/AUDIT_PURWADHIKA_FINAL.md`](./docs/audits/AUDIT_PURWADHIKA_FINAL.md)
 - [`docs/audits/AUDIT_CLEAN_CODE_REST_API_GUIDELINES.md`](./docs/audits/AUDIT_CLEAN_CODE_REST_API_GUIDELINES.md)
 - [`docs/audits/AUDIT_OWNERSHIP_SECURITY.md`](./docs/audits/AUDIT_OWNERSHIP_SECURITY.md)
 - [`docs/audits/AUDIT_ZOD_RESOLVER_BUG.md`](./docs/audits/AUDIT_ZOD_RESOLVER_BUG.md)
 - [`docs/plans/RENCANA_PERBAIKAN_DETAIL.md`](./docs/plans/RENCANA_PERBAIKAN_DETAIL.md)
+
+## Prioritas Perbaikan Aktif
+
+P0:
+
+1. Perpendek scope `prisma.$transaction` pada create order, terutama saat voucher digunakan.
+2. Tambahkan guard anti double booking yang aman untuk request paralel.
+
+P1:
+
+1. Perbaiki bug change password kosong yang bisa membuat loading tidak berhenti.
+2. Hapus schema/data legacy referral setelah konfirmasi migration.
+3. Hapus enum/data legacy voucher nominal setelah konfirmasi migration.
+5. Hapus `domicile_address` setelah migration disetujui.
+6. Perbaiki clean code regression yang tersisa.
+
+P2:
+
+1. Cleanup legacy REST alias setelah regression test.
+2. Review function-length advisory secara manual.
+3. Update UI/UX minor setelah bug kritikal selesai.
 
 ## Kebijakan Dokumentasi
 
@@ -50,45 +79,43 @@ README hanya dipertahankan di:
 - `README.md` pada root project.
 - `docs/README.md` pada folder dokumentasi.
 
+README di folder `frontend` dan `backend` tidak dibuat ulang.
+
 ## Eksternal API yang Digunakan
 
-1. **LocationIQ API**: geocoding dan reverse geocoding melalui backend proxy.
-2. **Midtrans API**: payment gateway untuk pembayaran digital dan webhook notifikasi status.
-3. **Cloudinary API**: penyimpanan gambar profil, properti, kamar, dan bukti transfer.
-4. **Supabase PostgreSQL**: database relasional utama melalui Prisma ORM.
-5. **Google OAuth API**: social sign-in/sign-up untuk user dan tenant.
-6. **SMTP Nodemailer**: email verifikasi, reset password, perubahan email, dan reminder check-in.
+1. LocationIQ API: geocoding dan reverse geocoding melalui backend proxy.
+2. Midtrans API: payment gateway dan webhook status pembayaran.
+3. Cloudinary API: penyimpanan gambar profil, properti, kamar, dan bukti transfer.
+4. Supabase PostgreSQL: database utama melalui Prisma ORM.
+5. Google OAuth API: social sign-in/sign-up.
+6. SMTP Nodemailer: email verifikasi, reset password, perubahan email, reminder, dan notifikasi transaksi.
 
 ## Fitur 1 - Property Renting Core
 
-| Requirement                                       | Status  | Folder/file terkait                                                                                                                                                        |
-| ------------------------------------------------- | ------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Homepage/Landing page                             | Selesai | `frontend/src/pages/user/HomePage.tsx`, `frontend/src/components/user/HeroSection.tsx`, `frontend/src/components/user/SearchForm.tsx`                                      |
-| Search destination, date, guest, price, amenities | Selesai | `frontend/src/components/user/search/`, `frontend/src/components/user/propertyFilterDropdown/`, `frontend/src/stores/filterStore.ts`, `backend/src/services/propertyList/` |
-| Explore property list                             | Selesai | `frontend/src/pages/user/ExplorePage.tsx`; desktop memakai sidebar search/filter/sort, mobile memakai panel filter                                                         |
-| Sort dan pagination properti                      | Selesai | `backend/src/services/propertyService.ts`, `backend/src/services/propertyPriceSortService.ts`, `frontend/src/pages/user/home/`                                             |
-| Auth/register/verify/login/logout                 | Selesai | `frontend/src/pages/auth/`, `frontend/src/hooks/auth/`, `backend/src/routes/authRoutes.ts`, `backend/src/services/authService.ts`                                          |
-| Profile USER/TENANT                               | Selesai | `frontend/src/pages/user/ProfilePage.tsx`, `frontend/src/components/user/profile/`, `backend/src/routes/userRoutes.ts`, `backend/src/services/userService.ts`              |
-| Property detail, gallery, map, facilities, review | Selesai | `frontend/src/pages/user/PropertyDetailPage.tsx`, `frontend/src/components/property/`, `backend/src/services/propertyDetailService.ts`                                     |
-| Public calendar, availability, & CTA Sync         | Selesai | `frontend/src/components/property/`, `frontend/src/services/availabilityService.ts`, `backend/src/services/publicAvailabilityService.ts`                                   |
-| Tenant property CRUD                              | Selesai | `frontend/src/pages/tenant/PropertiesListPage.tsx`, `frontend/src/pages/tenant/PropertyFormPage.tsx`, `backend/src/services/tenantPropertyService.ts`                      |
-| Tenant room CRUD dan room images                  | Selesai | `frontend/src/pages/tenant/RoomsPage.tsx`, `frontend/src/components/tenant/room-form/`, `backend/src/services/tenantRoomService.ts`                                        |
-| Tenant category management                        | Selesai | `frontend/src/pages/tenant/CategoriesPage.tsx`, `backend/src/services/categoryService.ts`                                                                                  |
-| Peak season management                            | Selesai | `frontend/src/pages/tenant/PeakSeasonPage.tsx`, `backend/src/services/pricing/`, `backend/src/services/tenantRoom/`                                                        |
+| Requirement | Status | Folder/file terkait |
+| --- | --- | --- |
+| Homepage/landing page | Tersedia | `frontend/src/pages/user/HomePage.tsx`, `frontend/src/components/user/HeroSection.tsx`, `frontend/src/components/user/SearchForm.tsx` |
+| Explore property list | Tersedia | `frontend/src/pages/user/ExplorePage.tsx`, `backend/src/services/propertyList/` |
+| Auth/register/verify/login/logout | Tersedia | `frontend/src/pages/auth/`, `frontend/src/hooks/auth/`, `backend/src/routes/authRoutes.ts` |
+| Profile USER/TENANT | Tersedia dengan bug password | `frontend/src/pages/user/ProfilePage.tsx`, `frontend/src/components/user/profile/`, `backend/src/services/userService.ts` |
+| Property detail | Tersedia | `frontend/src/pages/user/PropertyDetailPage.tsx`, `frontend/src/components/property/`, `backend/src/services/propertyDetailService.ts` |
+| Tenant property CRUD | Tersedia | `frontend/src/pages/tenant/PropertiesListPage.tsx`, `frontend/src/pages/tenant/PropertyFormPage.tsx`, `backend/src/services/tenantPropertyService.ts` |
+| Tenant room CRUD | Tersedia dengan rule max 5 jenis kamar | `frontend/src/pages/tenant/RoomsPage.tsx`, `backend/src/services/tenantRoomService.ts` |
+| Tenant category management | Tersedia | `frontend/src/pages/tenant/CategoriesPage.tsx`, `backend/src/services/categoryService.ts` |
+| Peak season management | Tersedia | `frontend/src/pages/tenant/PeakSeasonPage.tsx`, `backend/src/services/tenantRoom/` |
 
 ## Fitur 2 - Transaction, Review, Report
 
-| Requirement                                   | Status  | Folder/file terkait                                                                                                                     |
-| --------------------------------------------- | ------- | --------------------------------------------------------------------------------------------------------------------------------------- |
-| User booking flow                             | Selesai | `frontend/src/pages/user/BookingPage.tsx`, `backend/src/routes/orderRoutes.ts`, `backend/src/services/orderService.ts`                  |
-| Payment manual dan Midtrans                   | Selesai | `frontend/src/components/user/PaymentMethodSelector.tsx`, `frontend/src/lib/midtransSnap.ts`, `backend/src/services/midtransService.ts` |
-| Payment proof 1 jam                           | Selesai | `backend/src/constants/orderConstants.ts`, `backend/src/cron/`                                                                          |
-| Tenant transaction management                 | Selesai | `frontend/src/pages/tenant/OrdersPage.tsx`, `backend/src/services/orderService.ts`                                                      |
-| Auto-cancel unpaid reservations               | Selesai | `backend/src/cron/cronScheduler.ts`, `backend/src/cron/cronTasks.ts`, `ENABLE_CRON=true`                                                |
-| Review setelah menginap                       | Selesai | `frontend/src/pages/user/UserReviewsPage.tsx`, `backend/src/services/reviewService.ts`                                                  |
-| Tenant reply/delete review dan rating summary | Selesai | `frontend/src/pages/tenant/ReviewsPage.tsx`, `frontend/src/pages/tenant/reviews/`, `backend/src/services/tenantReviewService.ts`        |
-| Laporan pendapatan                            | Selesai | `frontend/src/pages/tenant/ReportsPage.tsx`, `backend/src/services/tenantReport/`                                                       |
-| Laporan properti dan okupasi kamar            | Selesai | `frontend/src/pages/tenant/PropertyReportPage.tsx`, `frontend/src/pages/tenant/OccupancyPage.tsx`                                       |
+| Requirement | Status | Folder/file terkait |
+| --- | --- | --- |
+| User booking flow | Tersedia, transaction perlu hardening | `frontend/src/pages/user/BookingPage.tsx`, `backend/src/services/orderService.ts` |
+| Manual payment dan Midtrans | Tersedia | `frontend/src/lib/midtransSnap.ts`, `backend/src/services/midtransService.ts` |
+| Payment proof deadline | Tersedia, perlu konfirmasi final durasi | `backend/src/constants/orderConstants.ts`, `backend/src/cron/` |
+| Tenant transaction management | Tersedia | `frontend/src/pages/tenant/OrdersPage.tsx`, `backend/src/services/order/tenantOrderStatus.ts` |
+| Auto-cancel unpaid reservations | Tersedia | `backend/src/cron/cronTasks.ts`, `backend/src/routes/webhookRoutes.ts` |
+| Review setelah menginap | Tersedia | `frontend/src/pages/user/UserReviewsPage.tsx`, `backend/src/services/reviewService.ts` |
+| Tenant reply/delete review | Tersedia | `frontend/src/pages/tenant/ReviewsPage.tsx`, `backend/src/services/tenantReviewService.ts` |
+| Laporan pendapatan/properti/okupasi | Tersedia | `frontend/src/pages/tenant/ReportsPage.tsx`, `frontend/src/pages/tenant/PropertyReportPage.tsx`, `frontend/src/pages/tenant/OccupancyPage.tsx` |
 
 ## Struktur Project
 
@@ -96,10 +123,6 @@ README hanya dipertahankan di:
 final-pro-a2/
   backend/
     prisma/
-      migrations/
-      scripts/
-      seed/
-      schema.prisma
     src/
       config/
       constants/
@@ -112,15 +135,12 @@ final-pro-a2/
       utils/
       validations/
     tests/
-    server.ts
   docs/
     audits/
     guidelines/
     plans/
-    README.md
   frontend/
     src/
-      assets/
       components/
       hooks/
       lib/
@@ -131,46 +151,7 @@ final-pro-a2/
       types/
       validations/
   tools/
-    audit-function-length.js
-  README.md
 ```
-
-## Tech Stack
-
-Frontend:
-
-- React 19, Vite, TypeScript, React Router 7
-- Tailwind CSS 4
-- Zustand
-- React Hook Form dan Zod
-- Recharts
-- React Day Picker
-- Lucide React
-- Leaflet/React Leaflet
-- Google OAuth client
-- Axios
-- Motion (Framer Motion)
-- React Hot Toast
-- React Easy Crop
-- jwt-decode
-
-Backend:
-
-- Node.js
-- Express.js
-- TypeScript
-- Prisma ORM
-- Supabase PostgreSQL
-- Cloudinary
-- Midtrans
-- Nodemailer
-- Webhook Serverless Cron (pengganti node-cron)
-- Zod
-- express-rate-limit
-- Bcrypt.js (Password Hashing)
-- JSONWebToken (JWT Auth)
-- Multer (File Upload Handling)
-- Cookie Parser & CORS
 
 ## Setup Local
 
@@ -226,29 +207,6 @@ Frontend:
 - `VITE_GOOGLE_CLIENT_ID`
 - `VITE_MIDTRANS_CLIENT_KEY`
 
-## Database dan Seed
-
-```bash
-cd backend
-npx prisma db seed
-```
-
-Untuk melengkapi fasilitas properti existing tanpa menghapus data:
-
-```bash
-cd backend
-npm run backfill:amenities
-```
-
-Mode apply membutuhkan environment:
-
-```bash
-set APPLY_AMENITIES=true
-npm run backfill:amenities
-```
-
-Pastikan koneksi database mengarah ke Supabase yang benar sebelum menjalankan script yang menulis data.
-
 ## Verifikasi
 
 ```bash
@@ -261,15 +219,17 @@ npm run build
 npm run test:ownership
 ```
 
-## Deployment (Vercel Serverless Architecture)
+Status 15 Juni 2026:
 
-Aplikasi ini telah dioptimalkan sepenuhnya untuk berjalan di lingkungan **Serverless Vercel**:
+- Frontend lint: lulus.
+- Frontend build: lulus.
+- Backend build: lulus.
+- Backend ownership test: lulus 7/7.
 
-- **Frontend**: Dideploy sebagai static Vite app di Vercel. Menggunakan `vercel.json` Rewrites untuk melakukan proxy request API ke backend, menghilangkan kendala _Cross-Origin Cookies (CORS)_.
-- **Backend**: Dideploy sebagai Vercel Serverless Functions.
-- **Cron Jobs**: Mekanisme pembatalan pesanan dan notifikasi (`node-cron` persisten) telah dimigrasikan menjadi rute **Serverless Webhook** (`/api/webhooks/cron`) yang diamankan menggunakan `CRON_SECRET`. Pemicu (trigger) dilakukan secara eksternal menggunakan layanan seperti `cron-job.org`.
-- **Authentication**: Kuki otentikasi diatur dengan `sameSite: 'lax'` dan di-proxy melalui frontend untuk stabilitas penuh saat menggunakan integrasi _OAuth_ (Google Login) maupun _Payment Gateway_ (Midtrans).
+## Deployment
+
+Frontend dideploy sebagai Vite app. Backend berjalan sebagai Express API dengan Prisma, Supabase PostgreSQL, Cloudinary, Midtrans, dan webhook cron. Untuk deployment yang memakai cookie auth lintas domain, pastikan konfigurasi proxy/CORS/cookie sama dengan konfigurasi production yang diuji.
 
 ## Catatan Final
 
-Project memiliki fondasi fitur utama yang lengkap dan verifikasi teknis terakhir lulus. Seluruh rencana arsitektur untuk penyesuaian produksi Vercel (08 Juni 2026) telah selesai dieksekusi secara sempurna. Proyek ini sekarang dapat berjalan dengan stabil di lingkungan _cloud production_. Sisa rencana opsional jangka panjang tetap tersedia di [`docs/plans/RENCANA_PERBAIKAN_DETAIL.md`](./docs/plans/RENCANA_PERBAIKAN_DETAIL.md).
+Project memiliki fitur utama yang luas dan sebagian besar requirement Purwadhika sudah tersedia. Namun status audit 15 Juni 2026 belum boleh dianggap final-ready sampai P0/P1 pada dokumen audit dan plan diselesaikan, terutama transaction timeout saat voucher digunakan, potensi double booking paralel, bug profile password, migration legacy referral/voucher jika disetujui, `domicile_address`, dan clean code regression tersisa.

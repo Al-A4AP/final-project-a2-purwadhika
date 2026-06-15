@@ -3,14 +3,13 @@ import type { CreateOrderPayload } from "@/services/orderService";
 import { toUtcDateTime } from "./bookingDates";
 import type { BookingGuestIdentity, BookingGuests, BookingQuery, PaymentMethod } from "./bookingTypes";
 
-export const createCheckoutPayload = (property: PropertyDetail, room: Room, query: BookingQuery, paymentMethod: PaymentMethod, guests: BookingGuests, identity: BookingGuestIdentity, voucherCode?: string, referralCode?: string): CreateOrderPayload => ({
+export const createCheckoutPayload = (property: PropertyDetail, room: Room, query: BookingQuery, paymentMethod: PaymentMethod, guests: BookingGuests, identity: BookingGuestIdentity, voucherCode?: string): CreateOrderPayload => ({
   propertyId: property.id,
   roomId: room.id,
   check_in_date: toUtcDateTime(query.checkIn!),
   check_out_date: toUtcDateTime(query.checkOut!),
   payment_method: paymentMethod,
   ...buildGuestPayload(identity),
-  ...(referralCode?.trim() ? { referral_code: referralCode.trim().toUpperCase() } : {}),
   ...(voucherCode?.trim() ? { voucher_code: voucherCode.trim().toUpperCase() } : {}),
   adults: guests.adults,
   children: guests.children,

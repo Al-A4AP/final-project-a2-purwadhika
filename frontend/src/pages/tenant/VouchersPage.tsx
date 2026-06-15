@@ -27,7 +27,7 @@ const VouchersHeader: FC = () => (
       <TicketPercent size={22} />
     </div>
     <div>
-      <h1 className="text-2xl font-bold text-slate-900 dark:text-white">Voucher & Referral</h1>
+      <h1 className="text-2xl font-bold text-slate-900 dark:text-white">Voucher</h1>
       <p className="text-sm text-slate-500 dark:text-slate-400">Kelola kode promo yang bisa dipakai pelanggan saat reservasi.</p>
     </div>
   </div>

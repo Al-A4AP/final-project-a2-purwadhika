@@ -48,9 +48,6 @@ export type BookingPageState = {
   voucherLoading: boolean;
   applyVoucher: () => Promise<void>;
   clearVoucher: () => void;
-  clearReferralCode: () => void;
-  referralCode: string;
-  setReferralCode: (code: string) => void;
   setVoucherCode: (code: string) => void;
   setGuestIdentityField: (field: keyof BookingGuestIdentity, value: boolean | string) => void;
   updateGuest: (type: GuestType, delta: number) => void;

@@ -3,7 +3,7 @@ import { z } from 'zod';
 export const voucherSchema = z.object({
   code: z.string().trim().toUpperCase().regex(/^[A-Z0-9]+$/, 'Kode voucher hanya boleh berisi huruf dan angka').min(3, 'Kode voucher minimal 3 karakter').max(15, 'Kode voucher maksimal 15 karakter'),
   description: z.string().trim().max(160, 'Deskripsi maksimal 160 karakter').optional().or(z.literal('')),
-  discount_type: z.enum(['PERCENTAGE', 'NOMINAL', 'FREE_NIGHTS']).default('PERCENTAGE'),
+  discount_type: z.enum(['PERCENTAGE', 'FREE_NIGHTS']).default('PERCENTAGE'),
   discount_value: z.coerce.number().int().positive('Nilai diskon wajib lebih dari 0'),
   expires_at: z.string().datetime({ message: 'Tanggal berakhir tidak valid' }),
   is_active: z.boolean().optional(),
@@ -25,9 +25,6 @@ function validateVoucherRules(data: VoucherInput, ctx: z.RefinementCtx) {
   if (data.discount_type === 'PERCENTAGE') {
     if (data.discount_value < 1) addIssue(ctx, 'discount_value', 'Diskon persentase minimal 1%');
     if (data.discount_value > 90) addIssue(ctx, 'discount_value', 'Diskon persentase maksimal 90%');
-  } else if (data.discount_type === 'NOMINAL') {
-    if (data.discount_value < 10000) addIssue(ctx, 'discount_value', 'Diskon nominal minimal Rp 10.000');
-    if (data.discount_value > 1000000) addIssue(ctx, 'discount_value', 'Diskon nominal maksimal Rp 1.000.000');
   } else if (data.discount_type === 'FREE_NIGHTS') {
     if (data.discount_value < 1) addIssue(ctx, 'discount_value', 'Jumlah malam gratis minimal 1');
     if (data.discount_value > 30) addIssue(ctx, 'discount_value', 'Jumlah malam gratis maksimal 30');

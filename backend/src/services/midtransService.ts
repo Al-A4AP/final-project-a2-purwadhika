@@ -4,7 +4,6 @@ import { findOrderForPayment, updatePaymentStatus } from './midtrans/midtransQue
 import { resolveOrderStatus } from './midtrans/midtransStatus';
 import { buildSnapParameter } from './midtrans/snapPayload';
 import type { MidtransStatusResponse, NotificationData } from './midtrans/midtransTypes';
-import { issueReferralRewardForProcessedOrder } from './referralRewardService';
 
 export const createSnapTransaction = async (orderId: string, totalPrice: number, nights: number, userName: string, userEmail: string, userPhone: string, propertyName: string, roomType: string, roomId: string) => {
   const input = { orderId, totalPrice, nights, userName, userEmail, userPhone, propertyName, roomType, roomId };
@@ -20,13 +19,12 @@ export const handleNotification = async (notificationData: NotificationData) => 
   const newStatus = resolveOrderStatus(order.status, statusResponse);
   if (newStatus === order.status) return;
   await updatePaymentStatus(order.id, newStatus, statusResponse.transaction_id);
-  if (newStatus === 'PROCESSED') await handleProcessedPayment(order.id, order.user.email, order.order_number);
+  if (newStatus === 'PROCESSED') await handleProcessedPayment(order.user.email, order.order_number);
 };
 
 const getMidtransStatus = (notificationData: NotificationData): Promise<MidtransStatusResponse> =>
   snap.transaction.notification(notificationData);
-const handleProcessedPayment = async (orderId: string, email: string, orderNumber: string) => {
-  await issueReferralRewardForProcessedOrder(orderId).catch(() => {});
+const handleProcessedPayment = async (email: string, orderNumber: string) => {
   await notifyPaymentConfirmed(email, orderNumber);
 };
 const notifyPaymentConfirmed = (email: string, orderNumber: string) =>

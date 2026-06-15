@@ -13,7 +13,7 @@ export const BookingSummary: FC<BookingSummaryProps> = (props) => (
     <BookingPropertyPreview property={props.property} room={props.room} />
     <BookingGuestIdentity identity={props.guestIdentity} />
     <BookingPriceBreakdown guests={props.guests} nights={props.nights} room={props.room} totalRoomPrice={props.totalRoomPrice} />
-    <BookingDiscountRow discountAmount={props.discountAmount} />
+    <BookingDiscountRow discountAmount={props.discountAmount} voucher={props.voucher} />
     <BookingTotal totalPrice={props.totalPrice - (props.discountAmount || 0)} />
     <CheckoutButton processing={props.processing} onCheckout={props.onCheckout} />
   </div>

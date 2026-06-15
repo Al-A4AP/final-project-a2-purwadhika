@@ -1,5 +1,5 @@
 import type { FC } from "react";
-import { Search, Filter, Calendar } from "lucide-react";
+import { Search, Filter } from "lucide-react";
 import { CustomDatePickerPopup } from "@/components/common/CustomDatePickerPopup";
 import { ORDER_STATUS_FILTER_OPTIONS } from "@/lib/constants";
 import type {
@@ -111,7 +111,6 @@ const DateField: FC<TextFieldProps & { label: string }> = ({
   value,
 }) => (
   <div className="relative">
-    {/*<Calendar className={FIELD_ICON_CLASS} />*/}
     <CustomDatePickerPopup
       value={value}
       onChange={onChange}

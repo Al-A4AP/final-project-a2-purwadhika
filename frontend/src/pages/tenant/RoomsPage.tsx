@@ -19,6 +19,7 @@ const RoomsPageLayout: FC<RoomsPageLayoutProps> = ({ deleteActions, handleToggle
         propertyName={state.property?.name} 
         onAdd={handleToggleForm} 
         isWholeUnit={isWholeUnit} 
+        canAddRoom={state.rooms.length < 5}
       />
       
       <RoomsSummary rooms={state.rooms} />

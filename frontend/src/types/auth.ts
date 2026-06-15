@@ -11,7 +11,6 @@ export interface User {
   ktp_number?: string | null;
   ktp_address?: string | null;
   domicile_address?: string | null;
-  referral_code?: string | null;
   avatar_url?: string;
   auth_provider?: AuthProvider;
   password_set_at?: string | null;
