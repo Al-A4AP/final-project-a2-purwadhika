@@ -13,7 +13,6 @@ export const createOrderSchema = z.object({
   guest_email: z.string().email('Email tamu tidak valid').optional().or(z.literal('')),
   guest_ktp_address: optionalText(),
   guest_ktp_number: z.string().trim().regex(/^\d{16}$/, 'Nomor KTP harus terdiri dari 16 digit angka').optional().or(z.literal('')),
-  guest_domicile_address: optionalText(),
   voucher_code: z.string().trim().min(3, 'Kode voucher minimal 3 karakter').optional().or(z.literal('')),
   adults: z.number().int().min(1, 'Minimal 1 orang dewasa'),
   children: z.number().int().min(0, 'Jumlah anak-anak tidak boleh negatif'),

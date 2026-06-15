@@ -9,35 +9,34 @@ datasource db {
 model User {
   id                        String              @id @default(cuid())
   email                     String              @unique
-  pending_email             String?
   password_hash             String
-  auth_provider             AuthProvider        @default(EMAIL)
-  password_set_at           DateTime?
   role                      Role                @default(USER)
   name                      String
-  legal_name                String?
   phone                     String?
-  ktp_number                String?
-  ktp_address               String?
-  domicile_address          String?
-  referral_code             String?             @unique
   avatar_url                String?
   verified_at               DateTime?
-  email_change_requested_at DateTime?
   deleted_at                DateTime?
   created_at                DateTime            @default(now())
   updated_at                DateTime            @default(now()) @updatedAt
+  pending_email             String?
+  email_change_requested_at DateTime?
+  auth_provider             AuthProvider        @default(EMAIL)
+  password_set_at           DateTime?
+  legal_name                String?
+  ktp_address               String?
+  referral_code             String?             @unique
+  ktp_number                String?
   emailVerifications        EmailVerification[]
   orders                    Order[]
   passwordResets            PasswordReset[]
   tenantProperties          Property[]          @relation("TenantProperties")
+  propertyCategories        PropertyCategory[]  @relation("TenantCategories")
+  referralRewardsTriggered  ReferralReward[]    @relation("ReferralRewardsTriggered")
+  referralRewardsEarned     ReferralReward[]    @relation("ReferralRewardsEarned")
   reviewReplies             ReviewReply[]
   reviews                   Review[]
-  propertyCategories        PropertyCategory[]  @relation("TenantCategories")
-  tenantVouchers            Voucher[]           @relation("TenantVouchers")
   userVouchers              UserVoucher[]
-  referralRewardsEarned     ReferralReward[]    @relation("ReferralRewardsEarned")
-  referralRewardsTriggered  ReferralReward[]    @relation("ReferralRewardsTriggered")
+  tenantVouchers            Voucher[]           @relation("TenantVouchers")
 
   @@map("users")
 }
@@ -46,12 +45,12 @@ model EmailVerification {
   id           String                   @id @default(cuid())
   userId       String
   token        String                   @unique
-  purpose      EmailVerificationPurpose @default(ACCOUNT_ACTIVATION)
-  target_email String?
   expires_at   DateTime
   used_at      DateTime?
   created_at   DateTime                 @default(now())
   updated_at   DateTime                 @default(now()) @updatedAt
+  purpose      EmailVerificationPurpose @default(ACCOUNT_ACTIVATION)
+  target_email String?
   user         User                     @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@index([userId, purpose])
@@ -74,12 +73,12 @@ model PasswordReset {
 model PropertyCategory {
   id                  String     @id @default(cuid())
   name                String
-  description         String?
-  default_rental_type RentalType @default(PER_ROOM)
-  tenantId            String?
-  tenant              User?      @relation("TenantCategories", fields: [tenantId], references: [id])
   updated_at          DateTime   @default(now()) @updatedAt
+  tenantId            String?
+  default_rental_type RentalType @default(PER_ROOM)
+  description         String?
   properties          Property[]
+  tenant              User?      @relation("TenantCategories", fields: [tenantId], references: [id])
 
   @@unique([tenantId, name])
   @@map("property_categories")
@@ -91,7 +90,6 @@ model Property {
   categoryId         String
   name               String
   description        String
-  rental_type        RentalType       @default(PER_ROOM)
   featured_image_url String?
   address            String
   city               String
@@ -103,6 +101,7 @@ model Property {
   province           String?
   updated_at         DateTime         @default(now()) @updatedAt
   delete             Boolean?         @default(false)
+  rental_type        RentalType       @default(PER_ROOM)
   orders             Order[]
   category           PropertyCategory @relation(fields: [categoryId], references: [id])
   tenant             User             @relation("TenantProperties", fields: [tenantId], references: [id])
@@ -200,48 +199,47 @@ model PeakSeasonRate {
 }
 
 model Order {
-  id                       String          @id @default(cuid())
-  order_number             String          @unique
-  userId                   String
-  roomId                   String
-  propertyId               String
-  check_in_date            DateTime
-  check_out_date           DateTime
-  subtotal_price           Int?
-  total_price              Int
-  discount_amount          Int             @default(0)
-  booking_for_self         Boolean         @default(true)
-  guest_name               String?
-  guest_legal_name         String?
-  guest_phone              String?
-  guest_email              String?
-  guest_ktp_address        String?
-  guest_ktp_number         String?
-  guest_domicile_address   String?
-  voucherId                String?
-  referral_code            String?
-  status                   OrderStatus     @default(WAITING_PAYMENT)
-  payment_method           PaymentMethod   @default(MANUAL)
-  payment_proof_url        String?
-  payment_rejection_reason String?
-  midtrans_transaction_id  String?
-  payment_verified_at      DateTime?
-  deleted_at               DateTime?
-  canceled_at              DateTime?
-  created_at               DateTime        @default(now())
-  completed_at             DateTime?
-  expires_at               DateTime?
-  refund_completed_at      DateTime?
-  refund_completed_by      String?
+  id                        String          @id @default(cuid())
+  order_number              String          @unique
+  userId                    String
+  roomId                    String
+  propertyId                String
+  check_in_date             DateTime
+  check_out_date            DateTime
+  total_price               Int
+  status                    OrderStatus     @default(WAITING_PAYMENT)
+  payment_method            PaymentMethod   @default(MANUAL)
+  payment_proof_url         String?
+  midtrans_transaction_id   String?
+  payment_verified_at       DateTime?
+  deleted_at                DateTime?
+  canceled_at               DateTime?
+  created_at                DateTime        @default(now())
+  completed_at              DateTime?
+  expires_at                DateTime?
+  updated_at                DateTime        @default(now()) @updatedAt
+  delete                    Boolean?        @default(false)
+  booking_for_self          Boolean         @default(true)
+  guest_name                String?
+  guest_legal_name          String?
+  guest_phone               String?
+  guest_email               String?
+  guest_ktp_address         String?
+  subtotal_price            Int?
+  discount_amount           Int             @default(0)
+  voucherId                 String?
+  referral_code             String?
+  payment_rejection_reason  String?
+  refund_completed_at       DateTime?
+  refund_completed_by       String?
   check_in_reminder_sent_at DateTime?
-  updated_at               DateTime        @default(now()) @updatedAt
-  delete                   Boolean?        @default(false)
-  property                 Property        @relation(fields: [propertyId], references: [id])
-  room                     Room            @relation(fields: [roomId], references: [id])
-  user                     User            @relation(fields: [userId], references: [id])
-  voucher                  Voucher?        @relation(fields: [voucherId], references: [id])
-  review                   Review?
-  referralReward           ReferralReward?
+  guest_ktp_number          String?
+  property                  Property        @relation(fields: [propertyId], references: [id])
+  room                      Room            @relation(fields: [roomId], references: [id])
+  user                      User            @relation(fields: [userId], references: [id])
+  voucher                   Voucher?        @relation(fields: [voucherId], references: [id])
+  referralReward            ReferralReward?
+  review                    Review?
 
   @@index([userId])
   @@index([roomId])
@@ -271,10 +269,10 @@ model Voucher {
   deleted_at      DateTime?
   created_at      DateTime            @default(now())
   updated_at      DateTime            @default(now()) @updatedAt
-  tenant          User                @relation("TenantVouchers", fields: [tenantId], references: [id])
   orders          Order[]
   referralRewards ReferralReward[]
   userVouchers    UserVoucher[]
+  tenant          User                @relation("TenantVouchers", fields: [tenantId], references: [id])
 
   @@index([tenantId])
   @@index([code])
@@ -356,6 +354,16 @@ model ReviewReply {
   @@map("review_replies")
 }
 
+model RevokedToken {
+  id         String   @id @default(cuid())
+  token_hash String   @unique
+  expires_at DateTime
+  created_at DateTime @default(now())
+
+  @@index([expires_at])
+  @@map("revoked_tokens")
+}
+
 enum Role {
   USER
   TENANT
@@ -398,14 +406,4 @@ enum VoucherDiscountType {
 enum RentalType {
   PER_ROOM
   WHOLE_PROPERTY
-}
-
-model RevokedToken {
-  id         String   @id @default(cuid())
-  token_hash String   @unique
-  expires_at DateTime
-  created_at DateTime @default(now())
-
-  @@index([expires_at])
-  @@map("revoked_tokens")
 }

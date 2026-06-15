@@ -26,7 +26,6 @@ export interface Order {
   guest_email?: string | null;
   guest_ktp_address?: string | null;
   guest_ktp_number?: string | null;
-  guest_domicile_address?: string | null;
   discount_amount?: number;
   voucherId?: string | null;
   status: OrderStatus;

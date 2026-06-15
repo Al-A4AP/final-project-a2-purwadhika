@@ -23,7 +23,6 @@ interface CreateOrderData {
   guest_email?: string;
   guest_ktp_address?: string;
   guest_ktp_number?: string;
-  guest_domicile_address?: string;
   voucher_code?: string;
   adults: number;
   children: number;
@@ -152,7 +151,6 @@ const buildPaymentState = (totalPrice: number) =>
 
 const buildGuestCreateData = (context: OrderContext) => ({
   booking_for_self: context.booking_for_self ?? true,
-  guest_domicile_address: context.guest_domicile_address || null,
   guest_email: context.guest_email || null,
   guest_ktp_address: context.guest_ktp_address || null,
   guest_ktp_number: context.guest_ktp_number || null,
