@@ -60,6 +60,16 @@ const pageEnd = (options: NormalizedTenantPropertyOptions) =>
   pageStart(options) + options.limit;
 
 export const countTenantProperties = (where: Prisma.PropertyWhereInput) => prisma.property.count({ where });
+export const findTenantPropertyNameConflict = (tenantId: string, name: string, exceptId?: string) =>
+  prisma.property.findFirst({
+    where: {
+      tenantId,
+      deleted_at: null,
+      name: { equals: name.trim(), mode: 'insensitive' },
+      ...(exceptId ? { id: { not: exceptId } } : {}),
+    },
+    select: { id: true },
+  });
 export const findTenantProperty = (id: string, tenantId: string) =>
   prisma.property.findFirst({ where: { id, tenantId, deleted_at: null } });
 export const findTenantPropertyDetail = (id: string, tenantId: string) =>

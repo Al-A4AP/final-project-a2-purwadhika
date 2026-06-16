@@ -30,10 +30,13 @@ const useFileChangeHandler = (
 };
 
 const canUploadProof = (order: Order) => {
-  if (order.status === "WAITING_PAYMENT") return true;
+  if (order.status === "WAITING_PAYMENT" && order.payment_method === "MANUAL" && !isExpired(order.expires_at)) return true;
   toast.error("Bukti pembayaran hanya dapat diunggah untuk pesanan yang menunggu pembayaran.");
   return false;
 };
+
+const isExpired = (expiresAt?: string) =>
+  Boolean(expiresAt && new Date(expiresAt).getTime() <= Date.now());
 
 const uploadPaymentProof = async (
   orderId: string,

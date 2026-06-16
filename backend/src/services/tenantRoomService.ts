@@ -4,7 +4,7 @@ import { buildAvailabilityRangeDates } from './tenantRoom/availabilityRange';
 import { buildTenantAvailabilityView } from './tenantRoom/availabilityView';
 import { buildRoomCreateData, buildRoomUpdateData, normalizeAvailabilityDate } from './tenantRoom/roomData';
 import { createRoomPeakRate, findRoomPeakRates, softDeletePeakRate, updateRoomPeakRate } from './tenantRoom/peakRates';
-import { createRoomRecord, findRoomAvailabilities, findRoomBookedOrders, findRoomById, findRoomsByProperty, softDeleteRoomRecord, updateRoomRecord, upsertRoomAvailability, upsertRoomAvailabilityRange, countActiveOrdersForRoom, countActiveRoomsByProperty, countOverlappingOrders } from './tenantRoom/roomQueries';
+import { createRoomRecord, findRoomAvailabilities, findRoomBookedOrders, findRoomById, findRoomsByProperty, softDeleteRoomRecord, updateRoomRecord, upsertRoomAvailability, upsertRoomAvailabilityRange, countActiveOrdersForRoom, countActiveRoomsByProperty, countOverlappingOrders, findRoomTypeConflict } from './tenantRoom/roomQueries';
 import { ensureTenantProperty, verifyPeakRateOwner, verifyRoomOwner } from './tenantRoom/roomOwnership';
 import type { PeakRateFormData, RoomFormData } from './tenantRoom/tenantRoomTypes';
 import { isWholeUnitCategory } from './tenantRoom/wholeUnitCategory';
@@ -21,6 +21,7 @@ export const createRoom = async (propertyId: string, tenantId: string, data: Roo
   const property = await ensureTenantProperty(propertyId, tenantId);
   const isWholeUnit = isWholeUnitCategory(property.category?.name);
   await assertRoomTypeLimit(propertyId);
+  await assertRoomNameAvailable(propertyId, data.room_type);
   assertRoomStock(data, isWholeUnit);
   if (!file) throw new AppError('Foto kamar wajib diupload', 400);
   const image = await uploadRoomImage(file);
@@ -37,6 +38,7 @@ const assertRoomTypeLimit = async (propertyId: string) => {
 export const updateRoom = async (roomId: string, tenantId: string, data: RoomFormData, file?: Express.Multer.File) => {
   const room = await verifyRoomOwner(roomId, tenantId);
   const isWholeUnit = isWholeUnitCategory(room.property.category?.name);
+  await assertRoomNameAvailable(room.propertyId, data.room_type, roomId);
   assertRoomStock(data, isWholeUnit);
   const updated = await updateRoomRecord(roomId, buildRoomUpdateData(data, room, isWholeUnit));
   if (file) await addRoomImage(roomId, file);
@@ -48,6 +50,16 @@ const assertRoomStock = (data: RoomFormData, isWholeUnit: boolean) => {
   const quantity = Number(data.quantity);
   if (!Number.isFinite(quantity) || quantity < 1) throw new AppError('Stok kamar minimal 1.', 400);
   if (quantity > MAX_ROOM_STOCK) throw new AppError('Stok kamar maksimal 20.', 400);
+};
+
+const assertRoomNameAvailable = async (
+  propertyId: string,
+  roomType?: string,
+  exceptRoomId?: string,
+) => {
+  if (!roomType?.trim()) return;
+  const duplicate = await findRoomTypeConflict(propertyId, roomType, exceptRoomId);
+  if (duplicate) throw new AppError('Nama kamar sudah digunakan pada properti ini.', 409);
 };
 
 export const deleteRoom = async (roomId: string, tenantId: string) => {

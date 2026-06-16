@@ -1,1 +1,9 @@
 export const PHONE_REGEX = /^\+?[0-9]{8,15}$/;
+export const ADDRESS_MIN_LENGTH = 20;
+export const ADDRESS_MAX_LENGTH = 300;
+export const CITY_MIN_LENGTH = 3;
+export const CITY_MAX_LENGTH = 50;
+export const PROVINCE_MIN_LENGTH = 3;
+export const PROVINCE_MAX_LENGTH = 50;
+export const MAX_PROPERTIES_PER_TENANT = 30;
+export const REVIEW_COMMENT_MAX_LENGTH = 500;

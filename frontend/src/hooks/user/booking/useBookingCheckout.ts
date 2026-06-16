@@ -46,7 +46,7 @@ const reserveOrder = async (
     const result = await createOrder(params);
     state.setCreatedOrder(result.order);
     state.setSnapToken(result.snapToken || null);
-    toast.success("Reservasi dibuat. Selesaikan pembayaran dalam 1 jam.");
+    toast.success(getReservationMessage(result.order.total_price));
     return true;
   } catch (err) {
     toast.error(getApiErrorMessage(err, "Reservasi gagal dibuat. Selesaikan atau batalkan pesanan menunggu pembayaran sebelumnya."));
@@ -58,6 +58,7 @@ const reserveOrder = async (
 
 const submitCheckout = async (params: CheckoutParams, state: CheckoutOrderState, paymentProofFile?: File | null) => {
   const order = state.createdOrder ?? await createAndStoreOrder(params, state);
+  if (order.total_price <= 0) return navigateToPaymentSuccess(params, order.id);
   if (params.paymentMethod === "MIDTRANS") return openMidtransPayment(params, order.id, state.snapToken);
   await switchToManualAndUpload(order, paymentProofFile);
   navigateToPaymentSuccess(params, order.id);
@@ -99,6 +100,11 @@ const uploadManualProofIfNeeded = async (orderId: string, file?: File | null) =>
 
 const navigateToPaymentSuccess = (params: CheckoutParams, orderId?: string) =>
   params.navigate(`/payment/success?order_id=${orderId || ""}`);
+
+const getReservationMessage = (totalPrice: number) =>
+  totalPrice <= 0
+    ? "Reservasi gratis berhasil dikonfirmasi."
+    : "Reservasi dibuat. Selesaikan pembayaran dalam 1 jam.";
 
 type CheckoutParams = Parameters<typeof useBookingCheckout>[0];
 

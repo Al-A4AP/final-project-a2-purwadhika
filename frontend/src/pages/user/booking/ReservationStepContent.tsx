@@ -54,8 +54,7 @@ const AgreementReviewStep: FC<{ state: BookingPageState }> = ({ state }) => (
 
 const PaymentStep: FC<{ state: BookingPageState }> = ({ state }) => (
   <div className="space-y-6 animate-in fade-in slide-in-from-right-4 duration-300">
-    <StepIntro title="Pembayaran & Konfirmasi" description="Selesaikan pembayaran atau unggah bukti transfer dalam 1 jam agar reservasi tidak otomatis dibatalkan." />
-    <PaymentMethodSelector paymentMethod={state.paymentMethod} onChange={state.setPaymentMethod} />
+    {isFreeReservation(state) ? <FreeReservationNotice /> : <PaymentSelection state={state} />}
   </div>
 );
 
@@ -64,3 +63,17 @@ const SummaryStep: FC<ReservationStepContentProps> = ({ proofFile, state }) => (
     <BookingSummary guestIdentity={state.guestIdentity} property={state.property!} room={state.room!} nights={state.totals!.nights} guests={state.guests} discountAmount={state.voucherPreview?.discountAmount} voucher={state.voucherPreview?.voucher} totalPrice={state.totals!.totalPrice} totalRoomPrice={state.totals!.totalRoomPrice} processing={state.processing} onCheckout={() => state.handleCheckout(proofFile)} />
   </div>
 );
+
+const PaymentSelection: FC<{ state: BookingPageState }> = ({ state }) => (
+  <>
+    <StepIntro title="Pembayaran & Konfirmasi" description="Selesaikan pembayaran atau unggah bukti transfer dalam 1 jam agar reservasi tidak otomatis dibatalkan." />
+    <PaymentMethodSelector paymentMethod={state.paymentMethod} onChange={state.setPaymentMethod} />
+  </>
+);
+
+const FreeReservationNotice = () => (
+  <StepIntro title="Konfirmasi Reservasi" description="Voucher menutup seluruh biaya menginap. Tidak ada pembayaran yang perlu diselesaikan." />
+);
+
+const isFreeReservation = (state: BookingPageState) =>
+  Boolean(state.totals && state.totals.totalPrice - (state.voucherPreview?.discountAmount || 0) <= 0);

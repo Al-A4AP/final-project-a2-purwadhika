@@ -3,6 +3,7 @@ import { toast } from "react-hot-toast";
 import { reviewService } from "@/services/reviewService";
 import { getApiErrorMessage } from "@/lib/errorMessage";
 import { canReviewOrder } from "@/lib/orderStatus";
+import { REVIEW_COMMENT_MAX_LENGTH } from "@/constants/validation";
 import type { Order } from "@/types";
 
 export const useReviewSubmission = (orders: Order[], refetch: () => void) => {
@@ -39,9 +40,18 @@ const canSubmitReview = (order: Order) => {
   return true;
 };
 
+const getNormalizedComment = (comment: string) => comment.trim();
+
+const validateReviewInput = (options: ReviewSubmitOptions) => {
+  if (options.rating < 1 || options.rating > 5) { toast.error("Rating wajib dipilih antara 1 sampai 5."); return false; }
+  if (getNormalizedComment(options.comment).length > REVIEW_COMMENT_MAX_LENGTH) { toast.error(`Komentar maksimal ${REVIEW_COMMENT_MAX_LENGTH} karakter.`); return false; }
+  return true;
+};
+
 const submitReview = async (options: ReviewSubmitOptions) => {
+  if (!validateReviewInput(options)) return;
   options.setSubmittingReview(true);
-  try { await reviewService.createReview(options.reviewOrderId!, options.rating, options.comment); onReviewSuccess(options); }
+  try { await reviewService.createReview(options.reviewOrderId!, options.rating, getNormalizedComment(options.comment)); onReviewSuccess(options); }
   catch (err) { toast.error(getApiErrorMessage(err, "Ulasan gagal dikirim. Periksa rating dan komentar lalu coba lagi.")); }
   finally { options.setSubmittingReview(false); }
 };

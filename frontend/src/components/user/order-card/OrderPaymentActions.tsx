@@ -7,13 +7,19 @@ import { UploadProofAction } from "./UploadProofAction";
 type PaymentActionProps = Pick<OrderCardProps, "canceling" | "handleCancelClick" | "handleUploadClick" | "order" | "paymentActionId" | "retryMidtransPayment" | "switchToManualPayment" | "uploading">;
 
 const canUploadProof = (props: Pick<OrderCardProps, "order">) =>
-  props.order.status === "WAITING_PAYMENT" && props.order.payment_method === "MANUAL";
+  isOpenWaitingPayment(props.order) && props.order.payment_method === "MANUAL";
 
 const canCancelOrder = (props: Pick<OrderCardProps, "order">) =>
-  props.order.status === "WAITING_PAYMENT" || (props.order.status === "WAITING_CONFIRMATION" && props.order.payment_method === "MANUAL");
+  isOpenWaitingPayment(props.order) || (props.order.status === "WAITING_CONFIRMATION" && props.order.payment_method === "MANUAL");
 
 const canManageMidtrans = (props: Pick<OrderCardProps, "order">) =>
-  props.order.payment_method === "MIDTRANS" && ["WAITING_PAYMENT", "CANCELLED"].includes(props.order.status);
+  props.order.payment_method === "MIDTRANS" && isOpenWaitingPayment(props.order);
+
+const isOpenWaitingPayment = (order: OrderCardProps["order"]) =>
+  order.status === "WAITING_PAYMENT" && !isExpired(order.expires_at);
+
+const isExpired = (expiresAt?: string) =>
+  Boolean(expiresAt && new Date(expiresAt).getTime() <= Date.now());
 
 export const OrderPaymentActions: FC<PaymentActionProps> = (props) => (
   <>

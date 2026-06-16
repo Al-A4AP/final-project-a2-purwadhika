@@ -155,7 +155,7 @@ const markAssignedVoucherUsed = async (db: DbClient, userId: string, voucherId: 
 const calculateDiscount = (subtotal: number, voucher: Pick<Voucher, 'discount_type' | 'discount_value' | 'max_discount'>, total_nights = 1) => {
   let raw = 0;
   if (voucher.discount_type === 'FREE_NIGHTS') {
-    raw = Math.floor((subtotal / total_nights) * voucher.discount_value);
+    raw = calculateFreeNightDiscount(subtotal, voucher.discount_value, total_nights);
   } else if (voucher.discount_type === VoucherDiscountType.PERCENTAGE) {
     raw = Math.floor((subtotal * voucher.discount_value) / 100);
   } else {
@@ -166,6 +166,12 @@ const calculateDiscount = (subtotal: number, voucher: Pick<Voucher, 'discount_ty
     return Math.min(cappedDiscount, Math.floor(subtotal * 0.9));
   }
   return Math.min(cappedDiscount, subtotal);
+};
+
+const calculateFreeNightDiscount = (subtotal: number, freeNights: number, totalNights: number) => {
+  const nights = Math.max(1, totalNights);
+  const discountedNights = Math.min(freeNights, nights);
+  return Math.floor((subtotal / nights) * discountedNights);
 };
 
 const findAssignedActiveVouchers = async (userId: string) => {

@@ -14,7 +14,10 @@ export const BookingSummary: FC<BookingSummaryProps> = (props) => (
     <BookingGuestIdentity identity={props.guestIdentity} />
     <BookingPriceBreakdown guests={props.guests} nights={props.nights} room={props.room} totalRoomPrice={props.totalRoomPrice} />
     <BookingDiscountRow discountAmount={props.discountAmount} voucher={props.voucher} />
-    <BookingTotal totalPrice={props.totalPrice - (props.discountAmount || 0)} />
-    <CheckoutButton processing={props.processing} onCheckout={props.onCheckout} />
+    <BookingTotal totalPrice={getPayableTotal(props)} />
+    <CheckoutButton processing={props.processing} onCheckout={props.onCheckout} totalPrice={getPayableTotal(props)} />
   </div>
 );
+
+const getPayableTotal = (props: BookingSummaryProps) =>
+  Math.max(0, props.totalPrice - (props.discountAmount || 0));

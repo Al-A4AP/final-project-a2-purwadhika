@@ -1,7 +1,18 @@
 import type { FC } from "react";
 
-export const CheckoutButton: FC<{ onCheckout: () => void; processing: boolean }> = ({ onCheckout, processing }) => (
+interface CheckoutButtonProps {
+  onCheckout: () => void;
+  processing: boolean;
+  totalPrice: number;
+}
+
+export const CheckoutButton: FC<CheckoutButtonProps> = ({ onCheckout, processing, totalPrice }) => (
   <button onClick={onCheckout} disabled={processing} className="w-full rounded-lg bg-red-600 py-3 font-bold text-white transition hover:bg-red-700 disabled:opacity-70">
-    {processing ? "Memproses..." : "Lanjutkan Pembayaran"}
+    {getButtonLabel(processing, totalPrice)}
   </button>
 );
+
+const getButtonLabel = (processing: boolean, totalPrice: number) => {
+  if (processing) return "Memproses...";
+  return totalPrice <= 0 ? "Konfirmasi Reservasi" : "Lanjutkan Pembayaran";
+};

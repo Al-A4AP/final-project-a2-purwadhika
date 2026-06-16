@@ -2,6 +2,7 @@ import type { FC } from "react";
 import type { PropertyFormState } from "@/hooks/tenant/property-form/propertyFormTypes";
 import { TextField } from "./FormFields";
 import { MapPin } from "lucide-react";
+import { ADDRESS_MAX_LENGTH, CITY_MAX_LENGTH, PROVINCE_MAX_LENGTH } from "@/constants/validation";
 
 export const PropertyLocationFields: FC<{ state: PropertyFormState }> = ({ state }) => {
   const { errors } = state.form.formState;
@@ -25,12 +26,15 @@ export const PropertyLocationFields: FC<{ state: PropertyFormState }> = ({ state
           placeholder="Contoh: Jakarta Selatan" 
           register={state.form.register} 
           error={errors.city} 
+          maxLength={CITY_MAX_LENGTH}
         />
         <TextField 
           label="Provinsi" 
           name="province" 
           placeholder="Contoh: DKI Jakarta" 
           register={state.form.register} 
+          error={errors.province}
+          maxLength={PROVINCE_MAX_LENGTH}
         />
         <div className="md:col-span-2">
           <TextField 
@@ -39,6 +43,7 @@ export const PropertyLocationFields: FC<{ state: PropertyFormState }> = ({ state
             placeholder="Contoh: Jl. Sudirman No. 123, RT 01/RW 02..." 
             register={state.form.register} 
             error={errors.address} 
+            maxLength={ADDRESS_MAX_LENGTH}
             helperText="Alamat spesifik untuk membantu navigasi tamu."
           />
         </div>

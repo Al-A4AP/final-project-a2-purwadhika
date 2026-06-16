@@ -1,6 +1,7 @@
 import { uploadBuffer } from "../utils/cloudinaryUpload";
 import { AppError } from "../middlewares/errorHandler";
 import prisma from "../config/prisma";
+import { MAX_PROPERTIES_PER_TENANT } from "../constants/validation";
 import { getTenantDashboardStats } from "./tenantProperty/dashboardStats";
 import {
   buildPropertyCreateData,
@@ -18,6 +19,7 @@ import {
   findTenantProperties,
   findTenantProperty,
   findTenantPropertyDetail,
+  findTenantPropertyNameConflict,
   softDeleteTenantProperty,
   updateTenantProperty,
 } from "./tenantProperty/tenantPropertyQueries";
@@ -72,6 +74,8 @@ export const createProperty = async (
   file?: Express.Multer.File,
 ) => {
   if (!file) throw new AppError("Foto utama properti wajib diupload", 400);
+  await ensurePropertyLimit(tenantId);
+  await ensurePropertyNameAvailable(tenantId, data.name);
   await ensureCategoryAccessible(data.categoryId, tenantId);
   const featuredImageUrl = await uploadFeaturedImage(file);
   return createTenantProperty(
@@ -86,6 +90,7 @@ export const updateProperty = async (
   file?: Express.Multer.File,
 ) => {
   const existing = await findTenantPropertyOrThrow(id, tenantId);
+  await ensurePropertyNameAvailable(tenantId, data.name, id);
   if (data.categoryId)
     await ensureCategoryAccessible(data.categoryId, tenantId);
   const featuredImageUrl = file
@@ -133,6 +138,24 @@ const buildPagination = (page: number, limit: number, total: number) => ({
 });
 const uploadFeaturedImage = async (file?: Express.Multer.File) =>
   file ? (await uploadBuffer(file.buffer)).url : undefined;
+
+const ensurePropertyLimit = async (tenantId: string) => {
+  const total = await countTenantProperties({ tenantId, deleted_at: null });
+  if (total >= MAX_PROPERTIES_PER_TENANT) {
+    throw new AppError(`Maksimal ${MAX_PROPERTIES_PER_TENANT} properti per tenant.`, 400);
+  }
+};
+
+const ensurePropertyNameAvailable = async (
+  tenantId: string,
+  name?: string,
+  exceptId?: string,
+) => {
+  if (!name?.trim()) return;
+  const duplicate = await findTenantPropertyNameConflict(tenantId, name, exceptId);
+  if (duplicate) throw new AppError("Nama properti sudah digunakan oleh tenant ini.", 409);
+};
+
 const findTenantPropertyOrThrow = async (id: string, tenantId: string) => {
   const property = await findTenantProperty(id, tenantId);
   if (!property) throw new AppError("Properti tidak ditemukan", 404);
