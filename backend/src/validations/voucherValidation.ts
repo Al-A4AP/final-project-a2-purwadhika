@@ -15,7 +15,10 @@ export const voucherSchema = z.object({
 }).superRefine(validateVoucherRules);
 
 export const voucherPreviewSchema = z.object({
+  check_in_date: z.string().datetime({ message: 'Tanggal check-in tidak valid' }).optional(),
+  check_out_date: z.string().datetime({ message: 'Tanggal check-out tidak valid' }).optional(),
   propertyId: z.string().min(1, 'Properti wajib dipilih'),
+  roomId: z.string().optional(),
   subtotal: z.coerce.number().int().positive('Subtotal wajib lebih dari 0'),
   voucher_code: z.string().trim().min(3, 'Kode voucher wajib diisi'),
   total_nights: z.coerce.number().int().positive().default(1),

@@ -102,9 +102,12 @@ const executeOrderTransaction = (context: OrderContext) =>
         tx,
         context.propertyId,
         context.voucher_code,
-        context.stayDetails.totalPrice,
         context.userId,
-        context.nights,
+        {
+          breakdown: context.stayDetails.breakdown,
+          subtotal: context.stayDetails.totalPrice,
+          totalNights: context.nights,
+        },
       );
       return tx.order.create({
         data: buildOrderCreateData(context, voucher),

@@ -2,6 +2,7 @@ import { useState } from "react";
 import toast from "react-hot-toast";
 import { getApiErrorMessage } from "@/lib/errorMessage";
 import { voucherService } from "@/services/voucherService";
+import { toUtcDateTime } from "./bookingDates";
 import type { BookingQuery, BookingTotals } from "./bookingTypes";
 import type { VoucherPreview } from "@/types";
 
@@ -21,13 +22,23 @@ const previewVoucher = async (query: BookingQuery, totals: BookingTotals | null,
   }
   setLoading(true);
   try {
-    setPreview(await voucherService.previewVoucher({ propertyId: query.propertyId, subtotal: totals.totalPrice, voucher_code: code, total_nights: totals.nights }));
+    setPreview(await voucherService.previewVoucher(buildPreviewPayload(query, totals, code)));
     toast.success("Voucher diterapkan");
   } catch (err) {
     setPreview(null);
     toast.error(getApiErrorMessage(err, "Voucher tidak valid atau sudah tidak aktif."));
   } finally { setLoading(false); }
 };
+
+const buildPreviewPayload = (query: BookingQuery, totals: BookingTotals, code: string) => ({
+  check_in_date: query.checkIn ? toUtcDateTime(query.checkIn) : undefined,
+  check_out_date: query.checkOut ? toUtcDateTime(query.checkOut) : undefined,
+  propertyId: query.propertyId!,
+  roomId: query.roomId || undefined,
+  subtotal: totals.totalPrice,
+  total_nights: totals.nights,
+  voucher_code: code,
+});
 
 type SetBoolean = (value: boolean) => void;
 type SetPreview = (preview: VoucherPreview | null) => void;

@@ -1,6 +1,8 @@
 import { Prisma, VoucherDiscountType, type Voucher } from '@prisma/client';
 import prisma from '../config/prisma';
 import { AppError } from '../middlewares/errorHandler';
+import { calculateDiscount, getPayableTotal, type VoucherPricing } from './voucher/voucherDiscount';
+import { getVoucherPreviewPricing } from './voucher/voucherPreviewPricing';
 import type { VoucherInput, VoucherPreviewInput } from '../validations/voucherValidation';
 
 type DbClient = typeof prisma | Prisma.TransactionClient;
@@ -55,10 +57,11 @@ export const assignVoucherToUser = async (tenantId: string, voucherId: string, u
 
 export const previewUserVoucher = async (userId: string, input: VoucherPreviewInput) => {
   const voucher = await findActiveVoucherForProperty(prisma, input.propertyId, input.voucher_code);
+  const pricing = await getVoucherPreviewPricing(input);
   await assertAssignedVoucherAccess(prisma, userId, voucher.id);
   await assertNewUserVoucherAllowed(prisma, userId, voucher);
-  const discountAmount = calculateDiscount(input.subtotal, voucher, input.total_nights);
-  return { discountAmount, finalPrice: input.subtotal - discountAmount, voucher: serializeVoucher(voucher) };
+  const discountAmount = calculateDiscount(pricing, voucher);
+  return { discountAmount, finalPrice: getPayableTotal(pricing.subtotal, discountAmount), voucher: serializeVoucher(voucher) };
 };
 
 export const getUserVoucherSummary = async (userId: string) => {
@@ -66,16 +69,16 @@ export const getUserVoucherSummary = async (userId: string) => {
   return { vouchers: assignedVouchers.map(serializeVoucher) };
 };
 
-export const applyVoucherToOrder = async (tx: Prisma.TransactionClient, propertyId: string, code: string | undefined, subtotal: number, userId: string, total_nights = 1) => {
-  if (!code?.trim()) return buildNoVoucherResult(subtotal);
+export const applyVoucherToOrder = async (tx: Prisma.TransactionClient, propertyId: string, code: string | undefined, userId: string, pricing: VoucherPricing) => {
+  if (!code?.trim()) return buildNoVoucherResult(pricing.subtotal);
   const voucher = await findActiveVoucherForProperty(tx, propertyId, code);
   await assertAssignedVoucherAccess(tx, userId, voucher.id);
   await assertNewUserVoucherAllowed(tx, userId, voucher);
   assertVoucherQuota(voucher);
-  const discountAmount = calculateDiscount(subtotal, voucher, total_nights);
+  const discountAmount = calculateDiscount(pricing, voucher);
   await incrementVoucherUsage(tx, voucher);
   await markAssignedVoucherUsed(tx, userId, voucher.id);
-  return { discountAmount, subtotalPrice: subtotal, totalPrice: subtotal - discountAmount, voucherId: voucher.id };
+  return { discountAmount, subtotalPrice: pricing.subtotal, totalPrice: getPayableTotal(pricing.subtotal, discountAmount), voucherId: voucher.id };
 };
 
 const findTenantVoucherOrThrow = async (id: string, tenantId: string) => {
@@ -150,28 +153,6 @@ const markAssignedVoucherUsed = async (db: DbClient, userId: string, voucherId: 
   const assignment = await findUsableAssignedVoucher(db, userId, voucherId);
   if (!assignment) return;
   await db.userVoucher.update({ where: { id: assignment.id }, data: { used_at: new Date() } });
-};
-
-const calculateDiscount = (subtotal: number, voucher: Pick<Voucher, 'discount_type' | 'discount_value' | 'max_discount'>, total_nights = 1) => {
-  let raw = 0;
-  if (voucher.discount_type === 'FREE_NIGHTS') {
-    raw = calculateFreeNightDiscount(subtotal, voucher.discount_value, total_nights);
-  } else if (voucher.discount_type === VoucherDiscountType.PERCENTAGE) {
-    raw = Math.floor((subtotal * voucher.discount_value) / 100);
-  } else {
-    throw new AppError('Voucher nominal tidak didukung', 400);
-  }
-  const cappedDiscount = voucher.max_discount ? Math.min(raw, voucher.max_discount) : raw;
-  if (voucher.discount_type !== 'FREE_NIGHTS') {
-    return Math.min(cappedDiscount, Math.floor(subtotal * 0.9));
-  }
-  return Math.min(cappedDiscount, subtotal);
-};
-
-const calculateFreeNightDiscount = (subtotal: number, freeNights: number, totalNights: number) => {
-  const nights = Math.max(1, totalNights);
-  const discountedNights = Math.min(freeNights, nights);
-  return Math.floor((subtotal / nights) * discountedNights);
 };
 
 const findAssignedActiveVouchers = async (userId: string) => {

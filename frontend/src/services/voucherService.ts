@@ -1,6 +1,16 @@
 import { api } from './api';
 import type { ApiResponse, UserVoucherSummary, Voucher, VoucherFormInput, VoucherPreview } from '@/types';
 
+interface VoucherPreviewRequest {
+  check_in_date?: string;
+  check_out_date?: string;
+  propertyId: string;
+  roomId?: string;
+  subtotal: number;
+  total_nights?: number;
+  voucher_code: string;
+}
+
 export const voucherService = {
   async assignVoucher(id: string, email: string): Promise<void> {
     await api.post(`/tenants/me/vouchers/${id}/assign`, { email });
@@ -20,7 +30,7 @@ export const voucherService = {
     const res = await api.get<ApiResponse<UserVoucherSummary>>('/users/me/vouchers');
     return res.data.data;
   },
-  async previewVoucher(data: { propertyId: string; subtotal: number; voucher_code: string; total_nights?: number }): Promise<VoucherPreview> {
+  async previewVoucher(data: VoucherPreviewRequest): Promise<VoucherPreview> {
     const res = await api.post<ApiResponse<VoucherPreview>>('/users/me/voucher-previews', data);
     return res.data.data;
   },
