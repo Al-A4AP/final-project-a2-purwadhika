@@ -9,12 +9,28 @@ interface CategoryFormModalProps {
   editing: PropertyCategory | null;
   saving: boolean;
   onClose: () => void;
-  onSubmit: (data: { name: string; description?: string; default_rental_type?: string }) => Promise<void> | void;
+  onSubmit: (data: {
+    name: string;
+    description?: string;
+    default_rental_type?: string;
+  }) => Promise<void> | void;
 }
 
-export const CategoryFormModal: FC<CategoryFormModalProps> = ({ isOpen, editing, saving, onClose, onSubmit }) => {
+export const CategoryFormModal: FC<CategoryFormModalProps> = ({
+  isOpen,
+  editing,
+  saving,
+  onClose,
+  onSubmit,
+}) => {
   const {
-    name, setName, description, setDescription, rentalType, setRentalType, handleSubmit
+    name,
+    setName,
+    description,
+    setDescription,
+    rentalType,
+    setRentalType,
+    handleSubmit,
   } = useCategoryForm({ isOpen, editing, onSubmit });
 
   return (
@@ -32,7 +48,10 @@ export const CategoryFormModal: FC<CategoryFormModalProps> = ({ isOpen, editing,
         </div>
 
         <div className="mb-6 space-y-1">
-          <label htmlFor="categoryName" className="block text-sm font-semibold text-slate-700 dark:text-slate-300">
+          <label
+            htmlFor="categoryName"
+            className="block text-sm font-semibold text-slate-700 dark:text-slate-300"
+          >
             Nama Kategori <span className="text-red-500">*</span>
           </label>
           <input
@@ -42,6 +61,7 @@ export const CategoryFormModal: FC<CategoryFormModalProps> = ({ isOpen, editing,
             value={name}
             onChange={(e) => setName(e.target.value)}
             disabled={saving}
+            maxLength={20}
             placeholder="Contoh: Villa, Apartemen, Glamping"
             className="w-full rounded-xl border border-slate-200 bg-white px-4 py-3 text-sm text-slate-900 outline-none transition focus:border-slate-500 focus:ring-1 focus:ring-slate-500 disabled:opacity-60 dark:border-slate-700 dark:bg-slate-900 dark:text-white"
           />
@@ -51,7 +71,10 @@ export const CategoryFormModal: FC<CategoryFormModalProps> = ({ isOpen, editing,
         </div>
 
         <div className="mb-6 space-y-1">
-          <label htmlFor="categoryDescription" className="block text-sm font-semibold text-slate-700 dark:text-slate-300">
+          <label
+            htmlFor="categoryDescription"
+            className="block text-sm font-semibold text-slate-700 dark:text-slate-300"
+          >
             Deskripsi Kategori
           </label>
           <textarea
@@ -66,13 +89,18 @@ export const CategoryFormModal: FC<CategoryFormModalProps> = ({ isOpen, editing,
         </div>
 
         <div className="mb-8 space-y-1">
-          <label htmlFor="categoryRentalType" className="block text-sm font-semibold text-slate-700 dark:text-slate-300">
+          <label
+            htmlFor="categoryRentalType"
+            className="block text-sm font-semibold text-slate-700 dark:text-slate-300"
+          >
             Mode Sewa Default <span className="text-red-500">*</span>
           </label>
           <select
             id="categoryRentalType"
             value={rentalType}
-            onChange={(e) => setRentalType(e.target.value as "PER_ROOM" | "WHOLE_PROPERTY")}
+            onChange={(e) =>
+              setRentalType(e.target.value as "PER_ROOM" | "WHOLE_PROPERTY")
+            }
             disabled={saving}
             className="w-full rounded-xl border border-slate-200 bg-white px-4 py-3 text-sm text-slate-900 outline-none transition focus:border-slate-500 focus:ring-1 focus:ring-slate-500 disabled:opacity-60 dark:border-slate-700 dark:bg-slate-900 dark:text-white"
           >

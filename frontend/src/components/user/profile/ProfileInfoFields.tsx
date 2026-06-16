@@ -22,6 +22,7 @@ const CustomerFields: FC<Props> = ({ form, inputClass, user }) => (
     <ProfileTextField
       label="Nama Pengguna"
       inputClass={inputClass}
+      maxLength={20}
       placeholder={user?.name || "Nama Lengkap"}
       registration={form.register("name")}
       error={form.formState.errors.name?.message}
@@ -38,6 +39,7 @@ const CustomerFields: FC<Props> = ({ form, inputClass, user }) => (
     <ProfileTextField
       label="Nama Lengkap sesuai KTP"
       inputClass={inputClass}
+      maxLength={50}
       placeholder="Nama legal sesuai dokumen"
       registration={form.register("legal_name")}
       error={form.formState.errors.legal_name?.message}
@@ -45,6 +47,7 @@ const CustomerFields: FC<Props> = ({ form, inputClass, user }) => (
     <ProfileTextField
       label="Alamat sesuai KTP"
       inputClass={inputClass}
+      maxLength={100}
       placeholder="Alamat pada KTP"
       registration={form.register("ktp_address")}
       error={form.formState.errors.ktp_address?.message}
@@ -54,6 +57,7 @@ const CustomerFields: FC<Props> = ({ form, inputClass, user }) => (
       inputClass={inputClass}
       placeholder="+62812xxxxxxxx"
       inputMode="tel"
+      maxLength={15}
       registration={form.register("phone")}
       error={form.formState.errors.phone?.message}
     />
@@ -65,6 +69,7 @@ const TenantFields: FC<Props> = ({ form, inputClass, user }) => (
     <ProfileTextField
       label="Nama Pengguna"
       inputClass={inputClass}
+      maxLength={20}
       placeholder={user?.name || "Nama Pengguna"}
       registration={form.register("name")}
       error={form.formState.errors.name?.message}
@@ -74,12 +79,14 @@ const TenantFields: FC<Props> = ({ form, inputClass, user }) => (
       inputClass={inputClass}
       placeholder="+62812xxxxxxxx"
       inputMode="tel"
+      maxLength={15}
       registration={form.register("phone")}
       error={form.formState.errors.phone?.message}
     />
     <ProfileTextField
       label="Alamat Operasional"
       inputClass={inputClass}
+      maxLength={100}
       placeholder="Alamat lengkap"
       registration={form.register("ktp_address")}
       error={form.formState.errors.ktp_address?.message}
