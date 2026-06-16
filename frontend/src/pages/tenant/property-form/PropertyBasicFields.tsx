@@ -1,4 +1,5 @@
 import type { FC } from "react";
+import { PROPERTY_DESCRIPTION_MAX_LENGTH } from "@/constants/validation";
 import type { PropertyCategory } from "@/types";
 import type { PropertyFormState } from "@/hooks/tenant/property-form/propertyFormTypes";
 import {
@@ -50,8 +51,8 @@ export const PropertyBasicFields: FC<{ state: PropertyFormState }> = ({
           placeholder="Ceritakan keunikan dan keunggulan properti Anda..."
           register={state.form.register}
           error={errors.description}
-          helperText="Deskripsi yang menarik meningkatkan peluang pemesanan."
-          maxLength={2000}
+          helperText={`Opsional, maksimal ${PROPERTY_DESCRIPTION_MAX_LENGTH} karakter.`}
+          maxLength={PROPERTY_DESCRIPTION_MAX_LENGTH}
         />
       </div>
     </div>

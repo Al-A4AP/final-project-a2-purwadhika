@@ -23,5 +23,6 @@ export const buildPropertyFormData = (data: PropertyFormInput, amenities: string
 };
 
 const appendPropertyValue = (formData: FormData, key: string, value?: string) => {
+  if (key === "description") return formData.append(key, value || "");
   if (key !== "amenities" && value) formData.append(key, value);
 };

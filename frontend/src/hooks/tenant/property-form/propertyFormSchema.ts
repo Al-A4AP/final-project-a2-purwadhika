@@ -6,11 +6,12 @@ import {
   CITY_MIN_LENGTH,
   PROVINCE_MAX_LENGTH,
   PROVINCE_MIN_LENGTH,
+  PROPERTY_DESCRIPTION_MAX_LENGTH,
 } from "@/constants/validation";
 
 export const propertyFormSchema = z.object({
   name: z.string().trim().min(3, "Minimal 3 karakter"),
-  description: z.string().trim().min(20, "Minimal 20 karakter"),
+  description: z.string().trim().max(PROPERTY_DESCRIPTION_MAX_LENGTH, `Deskripsi maksimal ${PROPERTY_DESCRIPTION_MAX_LENGTH} karakter`).optional().default(""),
   categoryId: z.string().min(1, "Pilih kategori"),
   rental_type: z.enum(["PER_ROOM", "WHOLE_PROPERTY"]).default("PER_ROOM"),
   address: z.string().trim().min(ADDRESS_MIN_LENGTH, `Alamat minimal ${ADDRESS_MIN_LENGTH} karakter`).max(ADDRESS_MAX_LENGTH, `Alamat maksimal ${ADDRESS_MAX_LENGTH} karakter`),

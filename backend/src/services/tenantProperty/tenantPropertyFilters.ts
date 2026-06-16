@@ -24,7 +24,7 @@ export const buildPropertyCreateData = (tenantId: string, data: PropertyFormData
   category: { connect: { id: data.categoryId } },
   rental_type: (data.rental_type as RentalType) || 'PER_ROOM',
   name: data.name!,
-  description: data.description!,
+  description: data.description ?? '',
   address: data.address!,
   city: data.city!,
   province: data.province || undefined,
@@ -75,7 +75,7 @@ const buildCoordinateUpdate = (data: PropertyFormData, existing: Property) => ({
 const buildPropertyTextUpdate = (data: PropertyFormData, existing: Property) => ({
   categoryId: data.categoryId || existing.categoryId,
   name: data.name || existing.name,
-  description: data.description || existing.description,
+  description: data.description ?? existing.description,
   address: data.address || existing.address,
   city: data.city || existing.city,
   province: data.province ?? existing.province,

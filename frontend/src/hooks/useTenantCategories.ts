@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useReducer } from 'react';
 import { toast } from 'react-hot-toast';
+import { CATEGORY_DESCRIPTION_MAX_LENGTH } from '@/constants/validation';
 import { getApiErrorMessage } from '@/lib/errorMessage';
 import { tenantService } from '@/services/tenantService';
 import type { PaginationMeta, PropertyCategory } from '@/types';
@@ -59,9 +60,10 @@ const handleCategoryLoadError = (err: unknown, dispatch: React.Dispatch<{ patch:
 const useCategorySave = (state: CategoryState, dispatch: React.Dispatch<{ patch: Patch }>, load: (page?: number) => Promise<void>) => (
   useCallback(async (data: { name: string; description?: string; default_rental_type?: string }, editing?: PropertyCategory | null) => {
     if (data.name.trim().length < 2) return toast.error('Nama kategori minimal 2 karakter');
+    if (!isValidCategoryDescription(data.description)) return toast.error(`Deskripsi maksimal ${CATEGORY_DESCRIPTION_MAX_LENGTH} karakter`);
     dispatch({ patch: { saving: true } });
     try {
-      await persistCategory({ ...data, name: data.name.trim() }, editing);
+      await persistCategory(normalizeCategoryPayload(data), editing);
       toast.success(editing ? 'Kategori berhasil diperbarui' : 'Kategori berhasil dibuat');
       await load(editing ? state.pagination.page : 1);
     } catch (err) { toast.error(getApiErrorMessage(err, getCategorySaveFallback(editing))); }
@@ -103,3 +105,12 @@ const getCategorySaveFallback = (editing?: PropertyCategory | null) =>
   editing
     ? 'Kategori gagal diperbarui. Pastikan nama belum digunakan.'
     : 'Kategori gagal dibuat. Pastikan nama belum digunakan.';
+
+const isValidCategoryDescription = (description?: string) =>
+  (description?.trim().length || 0) <= CATEGORY_DESCRIPTION_MAX_LENGTH;
+
+const normalizeCategoryPayload = (data: {
+  name: string;
+  description?: string;
+  default_rental_type?: string;
+}) => ({ ...data, description: data.description?.trim(), name: data.name.trim() });

@@ -1,6 +1,7 @@
 import type { FC } from "react";
 import { Loader2, Tags } from "lucide-react";
 import { Modal } from "@/components/common/Modal";
+import { CATEGORY_DESCRIPTION_MAX_LENGTH } from "@/constants/validation";
 import type { PropertyCategory } from "@/types";
 import { useCategoryForm } from "@/hooks/tenant/categories/useCategoryForm";
 
@@ -82,10 +83,14 @@ export const CategoryFormModal: FC<CategoryFormModalProps> = ({
             value={description}
             onChange={(e) => setDescription(e.target.value)}
             disabled={saving}
+            maxLength={CATEGORY_DESCRIPTION_MAX_LENGTH}
             placeholder="Opsional: Deskripsi tambahan"
             className="w-full rounded-xl border border-slate-200 bg-white px-4 py-3 text-sm text-slate-900 outline-none transition focus:border-slate-500 focus:ring-1 focus:ring-slate-500 disabled:opacity-60 dark:border-slate-700 dark:bg-slate-900 dark:text-white"
             rows={3}
           />
+          <p className="text-xs text-slate-500 dark:text-slate-400">
+            {description.trim().length}/{CATEGORY_DESCRIPTION_MAX_LENGTH} karakter
+          </p>
         </div>
 
         <div className="mb-8 space-y-1">
