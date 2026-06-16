@@ -1,21 +1,27 @@
 # Audit Ownership dan Keamanan
 
-Tanggal audit: 15 Juni 2026  
+Tanggal audit: 16 Juni 2026  
 Project: PURWALOKA - Property Renting Web App  
 Acuan: ownership data, authorization, browser storage, PII, transaksi, dan hardening backend.
 
 ## Ringkasan
 
-Ownership dasar berada pada kondisi baik. Regression test ownership lulus 7/7. Auth token memakai HTTP-only cookie, bukan localStorage.
+Ownership dasar berada pada kondisi baik. Regression test ownership lulus 7/7. Auth token memakai HTTP-only cookie, bukan localStorage. Persistent token blacklist sudah database-backed, sehingga lebih aman untuk deployment multi-instance dibanding blacklist in-memory.
 
-Namun audit terbaru menemukan beberapa risiko yang perlu ditangani sebelum dinyatakan final-ready:
+Risiko besar yang sebelumnya aktif sudah diturunkan:
 
-- Potensi double booking pada request paralel.
-- Prisma transaction timeout saat voucher digunakan.
+- Double booking sudah diberi advisory lock, availability recheck, dan atomic voucher update.
+- Transaction timeout saat voucher digunakan sudah diperbaiki dengan scope transaction yang lebih pendek.
+- Referral sudah dihapus dari active flow.
+- Voucher nominal sudah dihapus dari active flow.
+- `domicile_address` tidak ditemukan pada source aktif.
+
+Risiko yang masih perlu ditindaklanjuti:
+
+- Manual concurrency QA untuk double booking.
+- Manual QA payment expiry 1 jam dan manual confirmation 2 jam.
 - PII/KTP pada response list tenant/report perlu data minimization.
-- Referral source flow aktif sudah dilepas tanpa destructive migration; schema/data legacy belum di-drop.
-- Voucher nominal sudah dilepas dari UI/validation/service aktif tanpa destructive migration; schema/data legacy belum di-drop.
-- `domicile_address` tidak digunakan lagi tetapi masih ada di schema/type.
+- Legacy schema/data referral/voucher nominal hanya boleh dibersihkan dengan migration setelah konfirmasi.
 
 ## Verifikasi
 
@@ -65,56 +71,74 @@ Kasus yang lulus:
 - Tenant tidak bisa reply review property tenant lain.
 - Tenant tidak bisa delete review property tenant lain.
 
-## P0 Security/Data Integrity
+## Auth dan Session Security
 
-### Potensi Double Booking Paralel
+Status: baik.
 
-Severity: P0
+Auth token:
 
-Root cause:
+- Cookie: `auth_token`
+- HTTP-only cookie dari backend
+- Tidak disimpan di localStorage
+- Logout memasukkan token ke persistent blacklist
 
-Availability check masih berbasis read/count order aktif. Belum ada lock/constraint yang menjamin dua request paralel tidak sama-sama lolos untuk stok terbatas.
+Persistent token blacklist:
+
+- Database-backed melalui model revoked token.
+- Token disimpan sebagai SHA256 hash.
+- Multi-instance safe.
+- Cleanup expired token dilakukan melalui cron.
+
+File:
+
+- `backend/src/config/authCookie.ts`
+- `backend/src/services/tokenBlacklistService.ts`
+- `backend/src/middlewares/authMiddleware.ts`
+- `backend/src/cron/cronTasks.ts`
+
+## Booking, Payment, dan Inventory Security
+
+### Double Booking Protection
+
+Status: implemented, perlu manual concurrency QA.
+
+Kontrol yang ada:
+
+- Postgres advisory lock pada flow booking.
+- Availability recheck sebelum final write.
+- Atomic voucher update untuk mencegah quota race.
+- Inventory lock terjadi saat order dibuat pada tahap `Lanjut ke Pembayaran`.
 
 File:
 
 - `backend/src/services/orderService.ts`
+- `backend/src/services/order/bookingLocks.ts`
 - `backend/src/services/availabilityService.ts`
-- `backend/src/services/availability/availabilityQueries.ts`
-- `backend/src/services/availability/availabilityRules.ts`
+- `backend/src/services/voucherService.ts`
 
-Risk:
+Risk tersisa:
 
-- Overbooking kamar/properti.
-- Tenant/user melihat status ketersediaan yang tidak konsisten.
+- Harus diuji manual dengan dua request paralel pada kamar/property stok terbatas.
 
-Recommended fix:
+### Payment Window
 
-- Tambahkan guard atomic, misalnya Postgres advisory lock per room/property + date, atau inventory lock table jika migration disetujui.
+Status: implemented.
 
-### Transaction Timeout Saat Voucher Digunakan
-
-Severity: P0
-
-Root cause:
-
-Interactive transaction create order masih terlalu panjang dan mencakup availability, pricing, voucher, profile sync, dan create order.
+- `WAITING_PAYMENT`: 1 jam.
+- Setelah 1 jam: auto cancel dan inventory release.
+- `WAITING_CONFIRMATION`: 2 jam untuk manual payment proof.
+- Setelah 2 jam tanpa konfirmasi tenant: auto cancel.
 
 File:
 
+- `backend/src/constants/orderConstants.ts`
+- `backend/src/cron/cronQueries.ts`
+- `backend/src/cron/cronTasks.ts`
 - `backend/src/services/orderService.ts`
-- `backend/src/services/voucherService.ts`
-- `backend/src/services/pricingService.ts`
 
-Risk:
+Risk tersisa:
 
-- User gagal checkout saat voucher digunakan.
-- Order/payment state bisa membingungkan jika frontend sudah masuk flow pembayaran.
-
-Recommended fix:
-
-- Perpendek transaction scope.
-- Pastikan Midtrans dan email tetap di luar transaction.
-- Buat voucher quota update atomic.
+- Manual QA cron dan sync status perlu dilakukan pada environment yang sama dengan deployment target.
 
 ## P1 Security and Privacy
 
@@ -124,7 +148,7 @@ Severity: P1
 
 Root cause:
 
-Query order tenant/report memakai Prisma `include`, sehingga scalar field order dapat ikut terkirim default, termasuk guest PII.
+Beberapa query order tenant/report berpotensi memakai Prisma `include`, sehingga scalar field order dapat ikut terkirim default, termasuk guest PII.
 
 File yang perlu diaudit saat fix:
 
@@ -142,79 +166,35 @@ Recommended fix:
 - Pisahkan response list summary dan detail order.
 - Jangan kirim KTP/alamat penuh pada list jika tidak dibutuhkan.
 
-### Referral Legacy Migration
+### Referral Legacy Data
 
-Severity: P1
+Severity: P1 jika migration dilakukan sembarangan.
 
-Root cause:
+Status:
 
-Referral sudah dilepas dari UI, create order payload, voucher summary, Midtrans processed flow, dan tenant approval flow. Schema/data legacy belum dihapus karena itu membutuhkan destructive migration.
-
-Risk:
-
-- Jika destructive migration dilakukan tanpa audit data, histori order/user lama bisa rusak.
-- Migration drop table/column bersifat destructive.
+- Referral sudah tidak digunakan pada booking, voucher, dashboard, dan reward active flow.
+- Jika masih ada schema/data legacy di database, migration destructive belum boleh dilakukan tanpa konfirmasi.
 
 Recommended fix:
 
-- Pertahankan kondisi source flow non-migration yang sudah selesai.
-- Migration hanya setelah user konfirmasi.
+- Audit data existing.
+- Siapkan migration hanya setelah user setuju.
+- Pastikan tidak ada frontend/backend active flow yang masih mengirim `referral_code`.
 
-### Voucher Nominal Removal
+### Voucher Nominal Legacy Data
 
-Severity: P1
+Severity: P1 jika migration enum dilakukan langsung.
 
-Root cause:
+Status:
 
-`NOMINAL` masih ada sebagai enum/schema/type legacy, tetapi tidak lagi tersedia di form tenant dan ditolak oleh backend validation/service aktif.
-
-Risk:
-
-- Existing data `NOMINAL` bisa menghambat enum migration.
+- Active flow hanya mendukung `PERCENTAGE` dan `FREE_NIGHTS`.
+- `NOMINAL` sudah tidak tersedia pada form dan ditolak service aktif.
 
 Recommended fix:
 
-- Pertahankan non-migration layer yang sudah selesai.
-- Soft-delete/convert data nominal existing sebelum migration enum.
-
-### `domicile_address` Removal
-
-Severity: P1
-
-Root cause:
-
-Field tidak dipakai UI tetapi masih ada di schema/type/payload.
-
-Risk:
-
-- API contract drift.
-- Migration drop column menghapus data lama.
-
-Recommended fix:
-
-- Hapus dari code path dulu.
-- Migration drop column hanya setelah user konfirmasi.
-
-## Auth dan Session Security
-
-Status: baik.
-
-Auth token:
-
-- Cookie: `auth_token`
-- HTTP-only cookie dari backend
-- Tidak disimpan di localStorage
-
-File:
-
-- `backend/src/config/authCookie.ts`
-- `backend/src/services/tokenBlacklistService.ts`
-- `backend/src/middlewares/authMiddleware.ts`
-
-Catatan:
-
-- Dokumentasi lama yang menyebut token blacklist masih in-memory sudah tidak akurat jika code memakai model `RevokedToken`.
-- Tetap pastikan deployment production menjalankan cleanup revoked token.
+- Audit voucher nominal existing.
+- Soft-delete atau convert data legacy sebelum enum migration.
+- Migration enum hanya setelah data aman dan user konfirmasi.
 
 ## Browser Storage
 
@@ -237,8 +217,8 @@ Catatan:
 
 - Upload divalidasi oleh Multer dari size dan mimetype.
 - Untuk hardening lebih kuat, validasi magic bytes/file signature dapat ditambahkan.
-- Cloudinary delete/upload property image sudah dipisah dari DB transaction pada flow utama.
+- Cloudinary dan DB transaction perlu terus dijaga agar tidak membuat orphan file.
 
 ## Kesimpulan
 
-Ownership dasar baik dan test lulus. Risiko utama saat ini bukan cross-tenant access, melainkan data integrity dan privacy: double booking paralel, transaction timeout saat voucher, dan PII response minimization. Referral/voucher nominal sudah dilepas dari source flow aktif, tetapi migration legacy referral/voucher nominal dan `domicile_address` tetap perlu rencana bertahap agar tidak merusak data existing.
+Ownership dasar baik dan test lulus. Risiko utama yang tersisa bukan cross-tenant access, melainkan QA operasional dan privacy: concurrency/payment expiry perlu diuji manual, dan response list/report perlu data minimization. Legacy referral/voucher nominal sebaiknya diperlakukan sebagai pekerjaan migration terpisah dengan konfirmasi eksplisit.

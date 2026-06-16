@@ -1,7 +1,15 @@
 import prisma from '../config/prisma';
 
+const formatScriptError = (error: unknown) =>
+  error instanceof Error ? error.stack || error.message : String(error);
+
+const scriptLogger = {
+  error: (error: unknown) => process.stderr.write(`${formatScriptError(error)}\n`),
+  info: (message: string) => process.stdout.write(`${message}\n`),
+};
+
 const backfill = async () => {
-  console.log('Starting backfill...');
+  scriptLogger.info('Starting backfill...');
   
   const updates = [
     { name: 'Hotel', description: 'Akomodasi dengan layanan kamar/fasilitas harian.', default_rental_type: 'PER_ROOM' },
@@ -19,7 +27,7 @@ const backfill = async () => {
         default_rental_type: item.default_rental_type,
       },
     });
-    console.log(`Updated category: ${item.name}`);
+    scriptLogger.info(`Updated category: ${item.name}`);
   }
 
   // Backfill existing properties
@@ -40,11 +48,11 @@ const backfill = async () => {
       });
     }
   }
-  console.log(`Updated rental_type for ${properties.length} properties`);
+  scriptLogger.info(`Updated rental_type for ${properties.length} properties`);
 
-  console.log('Backfill completed successfully!');
+  scriptLogger.info('Backfill completed successfully!');
 };
 
 backfill()
-  .catch(console.error)
+  .catch(scriptLogger.error)
   .finally(() => prisma.$disconnect());

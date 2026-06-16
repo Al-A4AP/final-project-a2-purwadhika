@@ -4,6 +4,7 @@ import prisma from "../../config/prisma";
 import { loadBlockedAvailabilities, loadOverlappingOrders } from "../availability/availabilityQueries";
 import { getDefaultCalendarRange } from "./detailDates";
 import { findRoomRelation } from "./detailQueries";
+import type { RoomAvailabilityContext } from "../availability/availabilityTypes";
 import type { PropertyRecord, RoomCalendarRange, RoomRecord, RoomRelation } from "./detailTypes";
 import {
   buildRoomCalendarPayload,
@@ -42,9 +43,12 @@ const buildRoomStatus = async (
   checkOut: Date | null,
 ) => {
   const range = getDefaultCalendarRange();
-  const roomRel = await findRoomRelation(room.id, range) as RoomRelation | null;
+  const roomRel: RoomRelation | null = await findRoomRelation(room.id, range);
 
-  const roomCtx = { id: room.id, property: { id: property.id, rental_type: property.rental_type } } as any;
+  const roomCtx: RoomAvailabilityContext = {
+    id: room.id,
+    property: { id: property.id, rental_type: property.rental_type },
+  };
   const stayRange = { checkIn: range.start, checkOut: range.end };
   const orders = await loadOverlappingOrders(prisma, roomCtx, stayRange);
   const availability = await loadBlockedAvailabilities(prisma, roomCtx, stayRange);

@@ -1,23 +1,27 @@
 # Audit Keseluruhan PURWADHIKA
 
-Tanggal audit: 15 Juni 2026  
+Tanggal audit: 16 Juni 2026  
 Project: PURWALOKA - Property Renting Web App  
 Acuan: `docs/guidelines/PURWADHIKA.md`
 
 ## Ringkasan Eksekutif
 
-Project PURWALOKA sudah memiliki cakupan fitur utama yang luas: homepage, auth user/tenant, profile, catalog, property detail, tenant CRUD, room, category, availability, peak season, booking, payment manual/Midtrans, review, dan report.
+Project PURWALOKA sudah memiliki cakupan fitur utama yang luas dan semakin mendekati final-ready. Audit final hardening 16 Juni 2026 menunjukkan lint/build/test utama lulus, tidak ada file source di atas 200 baris, dan beberapa risiko besar sebelumnya sudah ditangani pada flow aktif.
 
-Namun berdasarkan audit 15 Juni 2026, project belum boleh dinyatakan final-ready karena masih ada P0/P1 aktif:
+Perubahan penting yang sudah tercermin pada kondisi project:
 
-- P0: transaction timeout saat voucher digunakan.
-- P0: potensi double booking pada request paralel.
-- P1: bug profile change password kosong bisa stuck loading.
-- P1: referral sudah dilepas dari source flow aktif, tetapi schema/data legacy belum dihapus.
-- P1: voucher nominal sudah dilepas dari UI/validation/service aktif, tetapi schema/data legacy belum dihapus.
-- P1: `domicile_address` tidak digunakan lagi tetapi masih ada di schema/type/payload.
-- P1: rule jenis kamar maksimal 5 sudah diterapkan.
-- P1: clean code regression tersisa pada 1 file source >200 baris dan residue type/log.
+- Booking order dibuat saat user klik `Lanjut ke Pembayaran`, bukan saat klik `Reservasi`.
+- `WAITING_PAYMENT` berlaku 1 jam dan otomatis dibatalkan jika lewat.
+- Manual payment `WAITING_CONFIRMATION` berlaku maksimal 2 jam dan otomatis dibatalkan jika tidak dikonfirmasi tenant.
+- Persistent token blacklist sudah database-backed dengan SHA256 hash dan cron cleanup.
+- Referral sudah dihapus dari booking, voucher, dashboard, dan reward active flow.
+- Voucher nominal sudah dihapus dari active flow; voucher aktif hanya `PERCENTAGE` dan `FREE_NIGHTS`.
+- Free nights voucher tampil sebagai `Gratis X Malam`.
+- `domicile_address` sudah tidak ditemukan pada source aktif.
+- Rule maksimal 5 jenis kamar dan stock maksimal 20 sudah diterapkan.
+- Double booking protection sudah memakai advisory lock, availability recheck, dan atomic voucher update.
+
+Catatan utama: perlindungan double booking tetap membutuhkan manual concurrency QA sebelum dinyatakan selesai secara operasional.
 
 ## Verifikasi Terbaru
 
@@ -27,10 +31,12 @@ Namun berdasarkan audit 15 Juni 2026, project belum boleh dinyatakan final-ready
 | Frontend build | Lulus |
 | Backend build | Lulus |
 | Backend ownership test | Lulus, 7/7 |
-| File source >200 baris | 1 file ditemukan |
-| Function length audit advisory | 155 kandidat manual review |
-| `any`, `debugger`, `console.*` | Masih ada residue `as any`, `as unknown`, dan `console.*` |
-| REST API | Jalur utama baik, legacy alias masih ada |
+| File source >200 baris | 3 file backend |
+| Function length audit advisory | 145 kandidat manual review |
+| `any` / cast residue | Tidak ditemukan pada scan source |
+| `console.*` | Tidak ditemukan pada scan source |
+| `debugger` | Tidak ditemukan |
+| REST API | Jalur utama baik, beberapa legacy alias masih ada |
 | Ownership | Test utama lulus |
 
 ## Main Features
@@ -40,12 +46,13 @@ Namun berdasarkan audit 15 Juni 2026, project belum boleh dinyatakan final-ready
 | Web app property renting | Tersedia | User dan tenant flow tersedia |
 | Role user dan tenant | Tersedia | Protected route dan backend role middleware tersedia |
 | User mencari properti berdasarkan destinasi/tanggal | Tersedia | Homepage dan Explore memakai search/filter/sort/pagination |
-| Perbandingan harga/ketersediaan | Tersedia | Detail properti dan calendar tersedia |
+| Perbandingan harga/ketersediaan | Tersedia | Detail properti dan modal availability tersedia |
 | Tenant kelola harga musiman | Tersedia | Halaman `/tenant/peak-season` tersedia |
 | Tenant kelola ketersediaan | Tersedia | Availability calendar dan range update tersedia |
 | Tenant punya lebih dari satu room | Tersedia | Rule maksimal 5 jenis kamar sudah diterapkan |
 | Tenant melihat laporan penjualan | Tersedia | Reports, property report, occupancy tersedia |
 | Review setelah menginap | Tersedia | User review dan tenant reply/delete tersedia |
+| Voucher tenant | Tersedia | Percentage dan free nights aktif |
 
 ## Feature 1
 
@@ -56,6 +63,7 @@ Status: tersedia.
 File terkait:
 
 - `frontend/src/pages/user/HomePage.tsx`
+- `frontend/src/pages/user/ExplorePage.tsx`
 - `frontend/src/components/user/HeroSection.tsx`
 - `frontend/src/components/user/SearchForm.tsx`
 - `frontend/src/hooks/user/home/`
@@ -63,12 +71,12 @@ File terkait:
 
 Catatan:
 
-- Homepage tidak lagi menampilkan promo referral.
-- CTA voucher diarahkan ke penggunaan voucher aktif tenant.
+- Referral promo sudah tidak menjadi bagian flow aktif.
+- Search/filter diarahkan ke browse/explore flow.
 
 ### User / Tenant Authentication and Profiles
 
-Status: tersedia dengan P1 bug.
+Status: tersedia.
 
 File terkait:
 
@@ -76,15 +84,18 @@ File terkait:
 - `backend/src/controllers/authController.ts`
 - `backend/src/services/authService.ts`
 - `backend/src/services/userService.ts`
+- `backend/src/services/tokenBlacklistService.ts`
 - `frontend/src/pages/auth/`
 - `frontend/src/pages/user/ProfilePage.tsx`
 - `frontend/src/components/user/profile/`
 
 Catatan:
 
-- Change password form masih memakai `zodResolver`.
-- Project punya histori bug Zod 4 + `@hookform/resolvers@3.10.0`.
-- `domicile_address` tidak lagi dipakai UI tetapi masih ada di schema/type.
+- Password form resolver sudah diperbaiki agar empty submit tidak stuck loading.
+- Persistent token blacklist sudah implemented.
+- Customer profile: User Name, KTP Number, KTP Name, KTP Address, Phone.
+- Tenant profile: User Name, Phone, Operational Address.
+- `domicile_address` removed dari source aktif.
 
 ### Property Catalog dan Search
 
@@ -100,9 +111,9 @@ File terkait:
 Catatan:
 
 - REST jalur utama cukup baik.
-- Legacy alias tetap perlu cleanup setelah regression test.
+- Legacy alias dapat dibersihkan setelah regression test aman.
 
-### Property Detail
+### Property Detail dan Booking Entry
 
 Status: tersedia.
 
@@ -115,7 +126,8 @@ File terkait:
 
 Catatan:
 
-- Masih ada `as any` di service detail/room status.
+- Flow order tidak dibuat pada klik `Reservasi`.
+- Klik `Reservasi` membawa user ke form booking.
 
 ### Tenant Property, Room, Category, Availability, Peak Season
 
@@ -135,28 +147,41 @@ File terkait:
 
 Catatan:
 
-- Rule maksimal 5 jenis kamar sudah diterapkan pada backend dan frontend.
-- Whole-property/room quantity logic perlu terus memakai backend sebagai source of truth.
+- Rule maksimal 5 jenis kamar sudah diterapkan.
+- Rule stock maksimal 20 sudah diterapkan.
+- Whole-property/room quantity logic tetap harus memakai backend sebagai source of truth.
 
 ## Feature 2
 
 ### User Transaction Process
 
-Status: tersedia dengan P0 risk.
+Status: tersedia dan sudah di-hardening.
+
+Flow terbaru:
+
+1. Property Detail.
+2. Reservasi.
+3. Form Booking.
+4. Tinjauan & Persetujuan.
+5. Lanjut ke Pembayaran.
+6. Order Created (`WAITING_PAYMENT`).
+7. Inventory Locked.
 
 File terkait:
 
 - `backend/src/routes/orderRoutes.ts`
 - `backend/src/controllers/orderController.ts`
 - `backend/src/services/orderService.ts`
+- `backend/src/services/order/bookingLocks.ts`
 - `backend/src/services/voucherService.ts`
 - `frontend/src/pages/user/BookingPage.tsx`
 
 Catatan:
 
-- Create order transaction masih perlu hardening saat voucher digunakan.
-- Potensi double booking paralel masih perlu guard atomic.
-- `guest_domicile_address` masih ada meski tidak digunakan.
+- `WAITING_PAYMENT` berlaku 1 jam.
+- Inventory release saat auto cancel.
+- Voucher transaction timeout sudah diperbaiki.
+- Double booking guard sudah implemented, tetapi manual concurrency QA masih wajib.
 
 ### Tenant Transaction Management
 
@@ -170,8 +195,27 @@ File terkait:
 
 Catatan:
 
-- PII/KTP pada list tenant order perlu data minimization.
-- Tenant status flow sudah tidak memicu reward referral, tetapi tetap perlu regression QA.
+- Manual payment `WAITING_CONFIRMATION` maksimal 2 jam.
+- Jika tenant tidak konfirmasi, sistem auto cancel.
+- PII/KTP pada list tenant order tetap perlu data minimization review.
+
+### Voucher
+
+Status: tersedia.
+
+Supported:
+
+- `PERCENTAGE`
+- `FREE_NIGHTS`
+
+Removed from active flow:
+
+- `NOMINAL`
+
+Catatan:
+
+- Free nights harus tampil `Gratis X Malam`.
+- Migration destructive untuk legacy enum/data hanya boleh dilakukan setelah konfirmasi.
 
 ### Review
 
@@ -210,14 +254,12 @@ Catatan:
 
 ### Validation
 
-Status: tersedia dengan gap.
+Status: baik dengan cleanup lanjutan.
 
-Gap:
-
-- Password form perlu custom resolver.
+- Password form resolver sudah diperbaiki.
 - Voucher validation hanya menerima `PERCENTAGE` dan `FREE_NIGHTS`.
-- Room max 5 sudah divalidasi backend.
-- `domicile_address` masih divalidasi/payload optional meski tidak digunakan.
+- Room max 5 dan stock max 20 sudah divalidasi.
+- `domicile_address` sudah tidak ditemukan pada source aktif.
 
 ### Pagination, Filtering, Sorting
 
@@ -226,51 +268,48 @@ Status: sebagian besar tersedia.
 Catatan:
 
 - Collection utama sudah memakai pagination/filter/sort di banyak area.
-- Tetap perlu regression test browser setelah referral/voucher non-migration removal.
+- Tetap perlu regression test browser setelah perubahan UI besar.
 
 ### Frontend
 
-Status: tersedia dengan clean code gap.
+Status: buildable dan lint lulus.
 
 Catatan:
 
-- Build lulus.
-- Lint gagal.
-- Banyak komponen besar menjadi kandidat review manual.
+- Tidak ada file >200 baris.
+- 130 kandidat function/component frontend masih menjadi advisory manual review.
 
 ### Backend
 
-Status: tersedia dengan P0/P1 gap.
+Status: buildable dan ownership test lulus.
 
 Catatan:
 
-- Build lulus.
-- `orderService.ts`, `voucherService.ts`, `emailService.ts` melewati 200 baris.
-- Transaction order perlu refactor.
+- Tidak ada file >200 baris.
+- 14 kandidat function backend masih menjadi advisory manual review.
+- Sisa file >200 baris perlu dibersihkan bertahap.
 
 ### Clean Code
 
-Status: belum final.
+Status: membaik pada type/log residue, masih perlu file-size cleanup.
 
-Temuan:
+Temuan tersisa:
 
-- 1 file source >200 baris.
-- 155 function-length advisory candidates.
-- Lint frontend lulus.
-- Masih ada residue `as any`, `as unknown`, `console.*`.
+- 3 file backend >200 baris: `orderService.ts`, `voucherService.ts`, `emailContent.ts`.
+- 145 function-length advisory candidates.
+- Tidak ditemukan `as any`, `as unknown as`, `console.*`, atau `debugger` pada scan source.
 
-## P0/P1 Rekomendasi
+## Rekomendasi Lanjutan
 
 | Prioritas | Rekomendasi | Risiko |
 | --- | --- | --- |
-| P0 | Refactor create order transaction agar tidak timeout saat voucher | Tinggi |
-| P0 | Tambah guard anti double booking paralel | Tinggi |
-| P1 | Perbaiki profile password resolver | Rendah |
-| P1 | Hapus schema/data legacy referral jika migration disetujui | Tinggi jika migration langsung |
-| P1 | Hapus schema/data legacy voucher nominal jika migration disetujui | Sedang-tinggi |
-| P1 | Hapus `domicile_address` setelah konfirmasi migration | Sedang |
-| P1 | Bersihkan file >200 baris dan residue type/log | Sedang |
+| P0/P1 | Manual QA concurrency untuk double booking dan payment expiry | Sedang |
+| P1 | PII/data minimization pada order/report list | Sedang |
+| P1 | Cleanup 3 file backend >200 baris | Sedang |
+| P1 | Audit legacy referral/voucher schema sebelum migration | Tinggi jika destructive |
+| P2 | Function-length batch kecil | Rendah-sedang |
+| P2 | REST legacy alias cleanup | Sedang |
 
 ## Kesimpulan
 
-Project sudah memiliki fondasi fitur utama yang kuat, tetapi status 15 Juni 2026 adalah **belum final-ready**. Fokus berikutnya sebaiknya P0 transaction/double booking, lalu P1 password form, migration legacy referral/voucher jika disetujui, `domicile_address` removal, dan clean code regression tersisa.
+Project sudah jauh lebih stabil dibanding audit sebelumnya. Status 16 Juni 2026 adalah **mendekati final-ready**, dengan catatan manual QA concurrency/payment expiry dan privacy minimization masih perlu diselesaikan sebelum klaim final produksi.

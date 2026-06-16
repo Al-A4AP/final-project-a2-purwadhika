@@ -1,288 +1,229 @@
 # Rencana Perbaikan Detail
 
-Tanggal update: 15 Juni 2026  
-Acuan: audit terbaru, clean code, REST API guidelines, ownership, security, dan PURWADHIKA.
+Tanggal update: 16 Juni 2026  
+Acuan: audit final hardening, clean code, REST API guidelines, ownership, security, dan PURWADHIKA.
 
 ## Ringkasan
 
-Rencana lama yang menyatakan seluruh prioritas produksi selesai sudah tidak akurat. Audit 15 Juni 2026 menemukan P0/P1 aktif pada transaction order, double booking, bug profile password, `domicile_address`, migration legacy referral/voucher nominal, dan clean code regression.
+Dokumen ini adalah rencana kerja aktif setelah final hardening phase. Beberapa temuan P0/P1 sebelumnya sudah selesai pada source flow aktif tanpa destructive migration. Fokus berikutnya adalah verifikasi manual, cleanup bertahap, dan hardening lanjutan yang tidak mengubah business logic tanpa konfirmasi.
 
-Update limited scope 15 Juni 2026:
+Status verifikasi terakhir:
 
-- Referral sudah dilepas dari UI, payload, dan service flow aktif tanpa destructive migration.
-- Voucher nominal sudah dilepas dari UI/validation/service aktif tanpa destructive migration.
-- Free Stay voucher sudah diformat `Gratis X Malam`.
-- Rule maksimal 5 jenis kamar per properti sudah diterapkan di backend dan frontend.
-- Frontend lint sudah kembali lulus.
-- Tidak ada destructive migration yang dijalankan.
+| Pemeriksaan | Status |
+| --- | --- |
+| Frontend lint | Lulus |
+| Frontend build | Lulus |
+| Backend build | Lulus |
+| Backend ownership test | Lulus, 7/7 |
+| File source >200 baris | 3 file backend |
+| Function length audit | 145 kandidat advisory |
+| `any` / cast residue | Tidak ditemukan pada scan source |
+| `console.*` | Tidak ditemukan pada scan source |
+| `debugger` | Tidak ditemukan |
 
-Rencana ini memisahkan tahap yang sudah selesai dari tahap yang masih perlu dikerjakan. Bagian yang belum selesai tetap menjadi urutan eksekusi aman untuk agent berikutnya.
+## Selesai Pada Hardening Terbaru
 
-## Tahap 0 - Guardrail Sebelum Edit
+### Booking dan Payment
 
-Risiko: rendah  
-Prioritas: wajib sebelum implementasi
+Status: selesai, perlu manual QA concurrency.
 
-Checklist:
+- Order dibuat saat user klik `Lanjut ke Pembayaran`, bukan saat klik `Reservasi`.
+- Flow terbaru: Property Detail -> Reservasi -> Form Booking -> Tinjauan & Persetujuan -> Lanjut ke Pembayaran -> Order Created (`WAITING_PAYMENT`) -> Inventory Locked.
+- `WAITING_PAYMENT` berlaku 1 jam.
+- Jika melewati 1 jam, sistem auto cancel dan inventory release.
+- Manual payment `WAITING_CONFIRMATION` berlaku maksimal 2 jam.
+- Jika tenant tidak konfirmasi dalam 2 jam, sistem auto cancel.
+- Voucher transaction timeout sudah diperbaiki dengan scope transaction yang lebih pendek.
+- Double booking protection sudah memakai advisory lock, availability recheck, dan atomic voucher update.
 
-1. Baca `docs/guidelines/PURWADHIKA.md`.
-2. Baca `docs/guidelines/REST_API_GUIDELINES.md`.
-3. Baca audit terbaru di `docs/audits/*`.
-4. Jalankan baseline read-only:
-   - `npm run audit:functions`
-   - `cd frontend && npm run lint`
-   - `cd frontend && npm run build`
-   - `cd backend && npm run build`
-   - `cd backend && npm run test:ownership`
-5. Jangan migration tanpa konfirmasi user.
-
-## Tahap 1 - Profile Change Password Loading Bug
-
-Risiko: rendah  
-Prioritas: P1 cepat
-
-Masalah:
-
-Form change password kosong bisa membuat loading tidak berhenti. Kode masih memakai `zodResolver(passwordSchema)`, sedangkan project sudah memiliki histori bug Zod 4 + `@hookform/resolvers@3.10.0`.
-
-File terdampak:
-
-- `frontend/src/components/user/profile/PasswordChangeForm.tsx`
-- `frontend/src/validations/profile.ts`
-- Opsional shared helper: `frontend/src/lib/formResolver.ts`
-
-Rencana:
-
-1. Buat resolver custom berbasis `safeParseAsync`, mirip `registerFormResolver`.
-2. Ganti `zodResolver(passwordSchema)` pada password form.
-3. Tambah invalid-submit handling agar user mendapat toast/pesan field.
-4. Pastikan form tidak `reset()` jika API gagal.
-5. Verifikasi kosong, password lama salah, konfirmasi tidak cocok, dan sukses.
-
-## Tahap 2 - Transaction Timeout Saat Voucher Dipakai
-
-Risiko: tinggi  
-Prioritas: P0
-
-Masalah:
-
-`createOrder` menjalankan terlalu banyak query dalam `prisma.$transaction`, sehingga saat voucher digunakan transaction bisa melewati timeout 5000ms.
-
-File terdampak:
-
-- `backend/src/services/orderService.ts`
-- `backend/src/services/voucherService.ts`
-- `backend/src/services/pricingService.ts`
-- `backend/src/services/availabilityService.ts`
-
-Rencana:
-
-1. Pecah `orderService.ts` terlebih dahulu karena sudah >200 baris.
-2. Pisahkan preflight read-only dari final atomic write.
-3. Pindahkan `syncUserProfileFromBooking` keluar transaction jika tidak wajib atomic dengan order.
-4. Pastikan source flow referral tetap tidak masuk lagi ke create order.
-5. Buat voucher quota update atomic:
-   - update hanya jika `used_count < quota` atau quota null;
-   - validasi assignment tetap scoped by user.
-6. Pastikan Midtrans Snap dan email tetap di luar transaction.
-7. Tambah test/QA untuk voucher valid, voucher quota habis, voucher assigned, dan Midtrans.
-
-## Tahap 3 - Anti Double Booking Paralel
-
-Risiko: tinggi  
-Prioritas: P0
-
-Masalah:
-
-Availability check berbasis read/count belum cukup untuk request paralel.
-
-File terdampak:
-
-- `backend/src/services/orderService.ts`
-- `backend/src/services/availabilityService.ts`
-- `backend/src/services/availability/availabilityQueries.ts`
-- `backend/src/services/availability/availabilityRules.ts`
-- Test baru untuk concurrency order
-
-Rencana:
-
-1. Pilih strategi locking:
-   - tanpa migration: Postgres advisory lock per room/property + date;
-   - dengan migration: inventory/booking lock table per night.
-2. Minta konfirmasi user jika butuh migration.
-3. Final availability check tetap di dalam transaction.
-4. Simulasi 2-5 request paralel untuk stok 1.
-
-## Tahap 4 - Referral Legacy Migration
-
-Risiko: tinggi jika langsung migration  
-Prioritas: P1
-
-Business decision: referral dihapus dari project.
-
-Status limited scope: selesai pada source flow aktif tanpa migration.
-
-File terdampak:
-
-- `backend/prisma/schema.prisma`
-- Migration baru jika user mengizinkan drop kolom/tabel legacy
-
-Selesai:
-
-1. UI referral dan payload referral frontend sudah dihapus.
-2. Validation `referral_code` pada create order sudah dihapus.
-3. Call reward referral pada create order, Midtrans processed, dan tenant approval sudah dihapus.
-4. Voucher summary sudah voucher-only.
-5. File service referral reward dan komponen/hook referral frontend sudah dihapus.
-
-Belum dilakukan:
-
-1. Migration untuk drop:
-   - `users.referral_code`
-   - `orders.referral_code`
-   - table `referral_rewards`
-   - relation/index terkait
-2. Migration hanya setelah konfirmasi user.
-
-## Tahap 5 - Voucher Simplification
-
-Risiko: sedang-tinggi jika enum DB langsung diubah  
-Prioritas: P1
-
-Business decision:
-
-- Dipertahankan: `PERCENTAGE`, `FREE_NIGHTS`.
-- Dihapus: `NOMINAL`.
-
-Status limited scope: selesai pada source flow aktif tanpa migration.
-
-File terdampak:
-
-- `backend/prisma/schema.prisma`
-- `backend/src/validations/voucherValidation.ts`
-- `backend/src/services/voucherService.ts`
-- `backend/src/controllers/voucherController.ts`
-- `frontend/src/types/voucher.ts`
-- `frontend/src/pages/tenant/vouchers/TenantVoucherForm.tsx`
-- `frontend/src/pages/tenant/vouchers/TenantVoucherList.tsx`
-- `frontend/src/pages/user/dashboard/DashboardVouchers.tsx`
-- `frontend/src/pages/user/booking/VoucherCodeBox.tsx`
-- `frontend/src/components/user/booking-summary/BookingDiscountRow.tsx`
-
-Selesai:
-
-1. Buat shared formatter `formatVoucherBenefit`.
-2. Perbaiki Free Stay display menjadi `Gratis X Malam`.
-3. Hapus opsi `NOMINAL` dari frontend form.
-4. Backend validation hanya menerima `PERCENTAGE` dan `FREE_NIGHTS`.
-5. Service aktif menolak voucher nominal legacy dengan error jelas.
-
-Belum dilakukan:
-
-1. Tangani data existing `NOMINAL` sebelum enum migration:
-   - soft-delete voucher nominal; atau
-   - convert manual ke percentage/free nights jika ada keputusan.
-2. Migration enum hanya setelah data existing aman dan user konfirmasi.
-
-## Tahap 6 - Remove `domicile_address`
-
-Risiko: sedang karena migration destructive  
-Prioritas: P1
-
-Business decision: `domicile_address` tidak digunakan lagi.
-
-File terdampak:
-
-- `backend/prisma/schema.prisma`
-- `backend/src/validations/orderValidation.ts`
-- `backend/src/services/orderService.ts`
-- `frontend/src/types/auth.ts`
-- `frontend/src/types/order.ts`
-- `frontend/src/services/orderService.ts`
-
-Rencana:
-
-1. Hapus dari frontend types dan payload.
-2. Hapus dari backend DTO/validation/create data.
-3. Pastikan UI profile dan booking tidak memakai field ini.
-4. Migration drop kolom:
-   - `users.domicile_address`
-   - `orders.guest_domicile_address`
-5. Migration hanya setelah konfirmasi user karena data lama hilang.
-
-## Tahap 7 - Room Type Maksimal 5
-
-Risiko: rendah-sedang  
-Prioritas: P1
-
-Business rule: satu properti maksimal 5 jenis kamar.
+### Security dan Session
 
 Status: selesai.
 
-File terdampak:
+- Persistent token blacklist sudah database-backed.
+- Token disimpan dalam bentuk SHA256 hash.
+- Aman untuk multi-instance deployment.
+- Cleanup dilakukan melalui cron.
 
-- `backend/src/services/tenantRoomService.ts`
-- `backend/src/services/tenantRoom/roomQueries.ts`
-- `backend/src/validations/propertyValidation.ts`
-- `frontend/src/hooks/rooms/useRoomSubmit.ts`
-- `frontend/src/pages/tenant/RoomsPage.tsx`
-- `frontend/src/components/tenant/room-form/RoomFormFields.tsx`
+### Profile
 
-Selesai:
+Status: selesai.
 
-1. Tambah query count active rooms by property.
-2. Di backend `createRoom`, tolak jika count >= 5.
-3. Di frontend, disable/tampilkan pesan jika rooms sudah 5.
-4. QA lanjutan browser: create room ke-6 harus gagal dengan pesan jelas.
+Customer profile:
 
-## Tahap 8 - Clean Code Regression
+- User Name
+- KTP Number
+- KTP Name
+- KTP Address
+- Phone
 
-Risiko: rendah-sedang  
+Tenant profile:
+
+- User Name
+- Phone
+- Operational Address
+
+`domicile_address` sudah dihapus dari flow aktif dan tidak ditemukan lagi pada source search terbaru.
+
+### Referral
+
+Status: selesai pada flow aktif.
+
+Referral system tidak lagi digunakan pada:
+
+- Booking
+- Voucher
+- Dashboard
+- Reward
+
+Catatan: jika masih ada legacy schema/data di database, migration destructive hanya boleh dilakukan setelah konfirmasi user.
+
+### Voucher
+
+Status: selesai pada flow aktif.
+
+Voucher yang didukung:
+
+- `PERCENTAGE`
+- `FREE_NIGHTS`
+
+Voucher yang dihapus dari flow aktif:
+
+- `NOMINAL`
+
+Free nights ditampilkan sebagai `Gratis X Malam`, bukan `X Rp`.
+
+### Room Rules
+
+Status: selesai.
+
+- Maksimal 5 jenis kamar per properti.
+- Maksimal stock kamar 20.
+
+### Refactor Batch
+
+Status: selesai.
+
+- Refactor Batch 1: email utility awal.
+- Refactor Batch 2: `PropertiesListView`.
+- Refactor Batch 3: `RoomsListView`.
+- Refactor Batch 4: `OrderCard`.
+- Type-safety cleanup: property detail, room status, cropper adapter.
+- Script log cleanup: `backend/src/scripts/backfill.ts`.
+
+## Tahap Berikutnya
+
+### Tahap 1 - Manual QA Final Hardening
+
+Risiko: sedang  
+Prioritas: P0/P1 verification
+
+Checklist:
+
+1. Simulasikan dua user booking kamar/property yang sama secara paralel.
+2. Pastikan hanya satu transaksi yang berhasil lock inventory.
+3. Pastikan transaksi lain menerima pesan availability tidak cukup.
+4. Uji `WAITING_PAYMENT` melewati 1 jam.
+5. Uji manual payment `WAITING_CONFIRMATION` melewati 2 jam.
+6. Uji voucher percentage dan free nights pada checkout.
+7. Uji voucher quota habis dan voucher tidak valid.
+
+### Tahap 2 - PII/Data Minimization
+
+Risiko: sedang  
 Prioritas: P1
 
-Temuan:
+Target:
 
-- `backend/src/utils/emailService.ts`: 290 baris.
-- `npm run audit:functions`: 155 kandidat.
-- Frontend lint lulus.
-- Ada residue `as any`, `as unknown`, dan `console.*`.
-
-Rencana:
-
-1. Pecah `emailService.ts` ke template/helper email per domain.
-2. Pastikan `orderService.ts` tidak kembali melewati 200 baris saat transaction fix.
-3. Pastikan `voucherService.ts` tidak kembali melewati 200 baris saat migration legacy voucher.
-4. Ganti `as any` dengan type Prisma/domain.
-5. Ganti `console.*` pada source utama dengan logger atau hapus jika script lama.
-
-## Tahap 9 - Documentation Update Setelah Implementasi
-
-Risiko: rendah  
-Prioritas: dilakukan setelah code fix
-
-File dokumen:
-
-- `README.md`
-- `docs/README.md`
-- `docs/HANDOVER.local.md`
-- `docs/plans/RENCANA_PERBAIKAN_DETAIL.md`
-- `docs/audits/AUDIT_PURWADHIKA_FINAL.md`
-- `docs/audits/AUDIT_OWNERSHIP_SECURITY.md`
-- `docs/audits/AUDIT_CLEAN_CODE_REST_API_GUIDELINES.md`
+- Tenant order list
+- Tenant report
+- Property report
+- User order summary
 
 Rencana:
 
-1. Setelah setiap tahap selesai, update status dari `belum` menjadi `selesai`.
-2. Jangan klaim lint/build lulus sebelum command aktual lulus.
-3. Jangan klaim file <200 sebelum scan aktual lulus.
-4. Update function-length count berdasarkan `npm run audit:functions`.
+1. Audit response yang mengandung KTP, alamat, dan phone.
+2. Ganti Prisma `include` menjadi `select` eksplisit bila memungkinkan.
+3. Pisahkan response summary dan detail.
+4. Pastikan frontend tidak bergantung pada field sensitif di list.
+
+### Tahap 3 - File >200 Cleanup
+
+Risiko: sedang  
+Prioritas: P1
+
+Sisa temuan file >200:
+
+- `backend/src/services/orderService.ts`: 219 baris
+- `backend/src/services/voucherService.ts`: 216 baris
+- `backend/src/utils/emailContent.ts`: 207 baris
+
+Rencana:
+
+1. Refactor per file, jangan sekaligus.
+2. Pecah helper murni dan formatter terlebih dahulu.
+3. Jangan ubah business logic booking, voucher, payment, atau email output.
+4. Jalankan backend build dan ownership test setelah batch backend.
+
+### Tahap 4 - Function Length Advisory
+
+Risiko: rendah-sedang  
+Prioritas: P2
+
+Status:
+
+- 145 kandidat function/component >15 baris.
+- Ini alat bantu audit, bukan hard rule otomatis.
+
+Rencana:
+
+1. Review kandidat per domain, bukan sekaligus.
+2. Prioritaskan komponen yang bercampur logic dan UI.
+3. Hindari refactor mekanis yang membuat code lebih sulit dibaca.
+4. Jalankan lint/build setelah setiap batch kecil.
+
+### Tahap 5 - Legacy Schema Migration
+
+Risiko: tinggi  
+Prioritas: hanya setelah konfirmasi
+
+Area:
+
+- Referral legacy schema/data jika masih ada.
+- Voucher nominal legacy schema/data jika masih ada.
+
+Aturan:
+
+1. Jangan membuat migration tanpa konfirmasi user.
+2. Audit data existing sebelum drop enum/kolom/tabel.
+3. Siapkan rollback plan.
+4. Verifikasi Supabase setelah migration jika disetujui.
+
+### Tahap 6 - REST Legacy Alias Cleanup
+
+Risiko: sedang  
+Prioritas: P2
+
+Rencana:
+
+1. Audit frontend masih memakai endpoint legacy atau tidak.
+2. Tambah deprecation note sebelum menghapus alias.
+3. Hapus alias hanya setelah regression test aman.
+4. Jangan ubah public contract mendadak.
 
 ## Recommended Execution Order
 
-1. Profile password resolver.
-2. Transaction timeout create order + voucher.
-3. Anti double booking paralel.
-4. Clean code residue.
-5. Migration referral/voucher/domicile jika user sudah konfirmasi.
-6. Final lint/build/ownership/browser QA.
-7. Update dokumentasi final.
+1. Manual QA concurrency dan payment expiry.
+2. PII/data minimization.
+3. File >200 cleanup backend.
+4. Function length batch kecil.
+5. Legacy schema migration jika user setuju.
+6. REST legacy alias cleanup.
+
+## Guardrail
+
+- Jangan ubah `docs/guidelines/*`.
+- Jangan migration tanpa konfirmasi.
+- Jangan mengubah ownership, auth, booking, payment, availability, voucher, atau cron logic tanpa root cause jelas.
+- Backend tetap source of truth.
+- `userId` dan `tenantId` harus selalu dari JWT.

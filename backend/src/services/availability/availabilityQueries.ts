@@ -1,6 +1,6 @@
 import type { OrderStatus } from '@prisma/client';
 import prisma from '../../config/prisma';
-import type { AvailabilityClient, StayRange } from './availabilityTypes';
+import type { AvailabilityClient, RoomAvailabilityContext, StayRange } from './availabilityTypes';
 
 const ACTIVE_BOOKING_STATUSES: OrderStatus[] = ['WAITING_CONFIRMATION', 'PROCESSED', 'COMPLETED'];
 
@@ -17,7 +17,7 @@ export const loadRoomOrThrow = async (client: AvailabilityClient, roomId: string
 
 export type RoomWithPropertyContext = NonNullable<Awaited<ReturnType<typeof loadRoomOrThrow>>>;
 
-export const loadBlockedAvailabilities = (client: AvailabilityClient, room: RoomWithPropertyContext, range: StayRange) => {
+export const loadBlockedAvailabilities = (client: AvailabilityClient, room: RoomAvailabilityContext, range: StayRange) => {
   const scope = room.property.rental_type === 'WHOLE_PROPERTY'
     ? { room: { propertyId: room.property.id } }
     : { roomId: room.id };
@@ -26,7 +26,7 @@ export const loadBlockedAvailabilities = (client: AvailabilityClient, room: Room
   });
 };
 
-export const loadOverlappingOrders = (client: AvailabilityClient, room: RoomWithPropertyContext, range: StayRange) => {
+export const loadOverlappingOrders = (client: AvailabilityClient, room: RoomAvailabilityContext, range: StayRange) => {
   const scope = room.property.rental_type === 'WHOLE_PROPERTY'
     ? { propertyId: room.property.id }
     : { roomId: room.id };

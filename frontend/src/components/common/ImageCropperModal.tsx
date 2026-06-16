@@ -1,6 +1,6 @@
-import type { FC } from 'react';
+import type { ComponentType, FC } from 'react';
 import { useState, useCallback } from 'react';
-import CropperComponent from 'react-easy-crop';
+import CropperComponent, { type CropperProps } from 'react-easy-crop';
 import { ZoomIn, ZoomOut } from 'lucide-react';
 import { Modal } from './Modal';
 import type { Area } from '@/lib/cropImage';
@@ -15,22 +15,31 @@ interface Props {
   onCropComplete: (croppedBlob: Blob) => void;
 }
 
-type CropPoint = {
-  x: number;
-  y: number;
-};
+type EasyCropperProps = Pick<
+  CropperProps,
+  'aspect' | 'crop' | 'image' | 'onCropChange' | 'onCropComplete' | 'onZoomChange' | 'zoom'
+>;
 
-type EasyCropperProps = {
-  image: string;
-  crop: CropPoint;
-  zoom: number;
-  aspect: number;
-  onCropChange: (crop: CropPoint) => void;
-  onZoomChange: (zoom: number) => void;
-  onCropComplete: (croppedArea: Area, croppedAreaPixels: Area) => void;
-};
+const cropperComponentModule: unknown = CropperComponent;
+// react-easy-crop class typings are not JSX-compatible with React 19.
+const TypedCropper = cropperComponentModule as ComponentType<CropperProps>;
 
-const EasyCropper = CropperComponent as unknown as FC<EasyCropperProps>;
+const EasyCropper: FC<EasyCropperProps> = (props) => (
+  <TypedCropper
+    {...props}
+    classes={{}}
+    cropperProps={{}}
+    cropShape="rect"
+    keyboardStep={1}
+    maxZoom={3}
+    mediaProps={{}}
+    minZoom={1}
+    restrictPosition
+    rotation={0}
+    style={{}}
+    zoomSpeed={1}
+  />
+);
 
 export const ImageCropperModal: FC<Props> = ({
   isOpen,

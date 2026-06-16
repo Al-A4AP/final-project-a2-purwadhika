@@ -1,3 +1,5 @@
+import type { RentalType } from "@prisma/client";
+
 export type RatingReview = { rating: number };
 
 export type RoomRecord = {
@@ -36,7 +38,7 @@ export interface PropertyDetailFilters {
 
 export interface PropertyRecord {
   id: string;
-  rental_type: string;
+  rental_type: RentalType;
   _count?: { orders: number };
   images?: unknown[];
   reviews?: RatingReview[];
