@@ -8,7 +8,7 @@ Acuan: `docs/guidelines/PURWADHIKA.md`, `docs/guidelines/REST_API_GUIDELINES.md`
 
 Audit final hardening menunjukkan type-safety dan script logging residue sudah dibersihkan. Frontend lint, frontend build, backend build, dan ownership test lulus.
 
-Namun scan terbaru menemukan 3 file backend masih melewati 200 baris. Function-length audit tetap dipakai sebagai alat bantu, bukan hard rule otomatis. Hasil terbaru menemukan 145 kandidat function/component yang perlu dinilai manual.
+Namun scan terbaru menemukan 1 file backend masih melewati 200 baris. Function-length audit tetap dipakai sebagai alat bantu, bukan hard rule otomatis. Hasil terbaru menemukan 145 kandidat function/component yang perlu dinilai manual.
 
 REST API jalur utama tetap resource-oriented. Beberapa legacy alias masih ada untuk backward compatibility dan dapat dibersihkan setelah regression test aman.
 
@@ -20,7 +20,7 @@ REST API jalur utama tetap resource-oriented. Beberapa legacy alias masih ada un
 | `frontend npm run build` | Lulus |
 | `backend npm run build` | Lulus |
 | `backend npm run test:ownership` | Lulus, 7/7 |
-| Scan file source >200 baris | 3 file backend |
+| Scan file source >200 baris | 1 file backend |
 | Scan `console.*` dan `debugger` | Tidak ditemukan |
 | Scan `any`, `as any`, `as unknown as` | Tidak ditemukan |
 | `npm run audit:functions` | 145 kandidat manual review, advisory only |
@@ -33,14 +33,14 @@ Hasil:
 
 | Lines | File |
 | ---: | --- |
-| 219 | `backend/src/services/orderService.ts` |
-| 216 | `backend/src/services/voucherService.ts` |
-| 207 | `backend/src/utils/emailContent.ts` |
+| 343 | `backend/src/services/orderService.ts` |
 
 Catatan:
 
 - File dokumentasi, generated file, dependency, dan migration tidak dihitung sebagai target clean code utama.
 - Batas ini harus dipantau setelah refactor booking, voucher, report, atau UI besar berikutnya.
+- `backend/src/services/voucherService.ts` sudah turun menjadi 173 baris setelah helper voucher dipisah.
+- `backend/src/utils/emailContent.ts` sudah turun menjadi 178 baris.
 
 ## Function-Length Advisory
 
@@ -95,7 +95,7 @@ Perubahan:
 
 | Area | Status |
 | --- | --- |
-| File maksimal 200 baris | Belum sesuai, 3 file backend >200 |
+| File maksimal 200 baris | Belum sesuai, 1 file backend >200 |
 | Function maksimal 15 baris | Belum sepenuhnya, 145 kandidat advisory |
 | Unused code/import | Frontend lint lulus |
 | `console.*` production source | Tidak ditemukan pada scan source |
@@ -148,13 +148,14 @@ Status: masih aktif, bukan blocker runtime.
 | Manual confirmation window | Cron/backend source of truth; UI hanya menampilkan status |
 | Referral removal | Selesai pada source flow aktif; `referral_code` tidak lagi digunakan pada booking/voucher/dashboard/reward |
 | Voucher simplification | Source flow aktif hanya menerima `PERCENTAGE` dan `FREE_NIGHTS` |
+| Voucher free nights | Backend menghitung `discountedNights = min(freeNights, stayNights)`, menggratiskan malam termurah jika breakdown tersedia, dan zero-payment langsung `PROCESSED` |
 | Domicile removal | Tidak ditemukan pada source aktif |
 | Room max 5 dan stock max 20 | Backend menjadi source of truth, frontend hanya UX guard |
 | Persistent token blacklist | Tidak mengubah public REST contract |
 
 ## Rekomendasi
 
-1. Refactor 3 file backend >200 baris per batch kecil.
+1. Refactor `backend/src/services/orderService.ts` >200 baris per batch kecil.
 2. Lanjutkan function-length refactor per batch kecil, mulai dari area presentasional.
 3. Pertahankan typed adapter cropper sebagai workaround React 19/library typing.
 4. Pertahankan logger lokal script tanpa output langsung dari console.
@@ -163,4 +164,4 @@ Status: masih aktif, bukan blocker runtime.
 
 ## Kesimpulan
 
-Clean code sudah membaik pada sisi type-safety dan logging residue: scan target tidak lagi menemukan `any`, `as any`, `as unknown as`, `console.*`, atau `debugger`. Pekerjaan lanjutan utama adalah 3 file backend >200 baris, function-length advisory, dan REST legacy alias.
+Clean code sudah membaik pada sisi type-safety dan logging residue: scan target tidak lagi menemukan `any`, `as any`, `as unknown as`, `console.*`, atau `debugger`. Pekerjaan lanjutan utama adalah `orderService.ts` >200 baris, function-length advisory, dan REST legacy alias.

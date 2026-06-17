@@ -3,14 +3,14 @@ import { useForm } from "react-hook-form";
 import axios from "axios";
 import { useGoogleLogin } from "@react-oauth/google";
 import { useLocation, useNavigate } from "react-router-dom";
-import { zodResolver } from "@hookform/resolvers/zod";
 import { toast } from "react-hot-toast";
 import { useAuthStore } from "@/stores/authStore";
 import { authService } from "@/services/authService";
 import { getAuthRoleFromPath, getRoleHome, getRoleMismatchMessage } from "@/lib/authRole";
-import { loginSchema, type LoginInput } from "@/validations/auth";
+import type { LoginInput } from "@/validations/auth";
 import type { Role, User } from "@/types";
 import { handleLoginError, loginWithPassword } from "./loginActions";
+import { loginFormResolver } from "./loginFormResolver";
 import type { LoginPageState, ResendStatus } from "./loginTypes";
 
 type SetLoginError = ReturnType<typeof useForm<LoginInput>>["setError"];
@@ -20,7 +20,7 @@ const selectSetUser = (state: { setUser: (user: User | null) => void }) => state
 
 export const useLoginPageState = (targetRole?: LoginPageState["role"]): LoginPageState => {
   const role = useTargetRole(targetRole);
-  const form = useForm<LoginInput>({ resolver: zodResolver(loginSchema) });
+  const form = useForm<LoginInput>({ resolver: loginFormResolver });
   const password = usePasswordVisibility();
   const resend = useResendVerification();
   const actions = useLoginActions(role, form.setError, resend);

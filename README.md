@@ -29,7 +29,7 @@ Acuan:
 | Frontend build | Lulus |
 | Backend build | Lulus |
 | Backend ownership test | Lulus, 7/7 |
-| File source >200 baris | 3 file backend: `orderService.ts`, `voucherService.ts`, `emailContent.ts` |
+| File source >200 baris | 1 file backend: `backend/src/services/orderService.ts` (343 baris) |
 | Function-length advisory | 145 kandidat manual review: 131 frontend, 14 backend |
 | `any/as any/as unknown` | Tidak ditemukan pada scan `backend/src` dan `frontend/src` |
 | `console.*` | Tidak ditemukan pada scan `backend/src` dan `frontend/src` |
@@ -46,6 +46,7 @@ Perubahan terakhir yang sudah tercermin di source:
 - `WAITING_PAYMENT` berlaku 1 jam. Jika lewat, order auto-cancel dan inventory dilepas.
 - Upload bukti bayar manual mengubah status menjadi `WAITING_CONFIRMATION`.
 - `WAITING_CONFIRMATION` maksimal 2 jam. Jika tenant tidak konfirmasi, sistem auto-cancel.
+- CTA pembayaran/retry hanya aktif untuk order `WAITING_PAYMENT` yang belum expired.
 - Double booking protection sudah memakai Postgres advisory lock + availability recheck di transaction.
 - Voucher quota update dibuat atomic untuk mengurangi race condition.
 - Transaction checkout dipersingkat agar voucher tidak membuat interactive transaction timeout.
@@ -54,7 +55,8 @@ Perubahan terakhir yang sudah tercermin di source:
 - `domicile_address` sudah tidak digunakan di source/schema aktif.
 - Referral system sudah tidak digunakan pada booking, voucher, dashboard, reward flow aktif. Schema/data legacy referral masih ada dan hanya boleh dihapus lewat migration setelah konfirmasi.
 - Voucher aktif mendukung `PERCENTAGE` dan `FREE_NIGHTS`. Voucher `NOMINAL` tidak tersedia di form dan ditolak oleh service aktif; enum/data legacy masih menunggu migration jika disetujui.
-- Free nights voucher tampil sebagai `Gratis X Malam`, bukan `X Rp`.
+- Free nights voucher memakai `discountedNights = min(freeNights, stayNights)`. Jika nightly breakdown tersedia, malam termurah digratiskan terlebih dahulu.
+- Free nights voucher tampil sebagai `Gratis X Malam`, bukan `X Rp`. Jika total pembayaran menjadi Rp0, sistem tidak membuat transaksi Midtrans dan order langsung masuk `PROCESSED`.
 - Rule kamar: maksimal 5 jenis kamar per properti dan stok kamar maksimal 20.
 - Refactor batch 1-4 selesai: email service, tenant properties list, tenant rooms list, dan user order card.
 
@@ -78,7 +80,7 @@ P1:
 1. PII response minimization pada tenant order/report list.
 2. Cleanup legacy REST alias setelah regression test.
 3. Migration legacy referral/voucher nominal hanya jika user menyetujui.
-4. Refactor 3 file backend yang kembali melewati 200 baris tanpa mengubah business logic.
+4. Refactor `backend/src/services/orderService.ts` yang masih melewati 200 baris tanpa mengubah business logic.
 5. Review function-length advisory bertahap tanpa memecah JSX secara mekanis.
 
 ## Kebijakan Dokumentasi
@@ -253,7 +255,7 @@ Status 16 Juni 2026:
 - Frontend build: lulus.
 - Backend build: lulus.
 - Backend ownership test: lulus 7/7.
-- File source >200 baris: 3 file backend.
+- File source >200 baris: 1 file backend.
 - Function-length advisory: 145 kandidat.
 
 ## Deployment
@@ -262,4 +264,4 @@ Frontend dideploy sebagai Vite app. Backend berjalan sebagai Express API dengan 
 
 ## Catatan Final
 
-Project sudah lebih stabil dibanding audit 15 Juni 2026: P0 transaction timeout, double booking guard, password resolver, deadline payment, type-safety residue, dan script logging residue sudah ditangani. Status tetap memerlukan QA manual concurrency/payment window sebelum final demo, cleanup 3 file backend >200 baris, review lanjutan untuk PII minimization, dan cleanup legacy migration yang bersifat destructive.
+Project sudah lebih stabil dibanding audit 15 Juni 2026: P0 transaction timeout, double booking guard, password resolver, deadline payment, type-safety residue, script logging residue, dan FREE_NIGHTS pricing sudah ditangani. Status tetap memerlukan QA manual concurrency/payment window sebelum final demo, cleanup `orderService.ts` >200 baris, review lanjutan untuk PII minimization, dan cleanup legacy migration yang bersifat destructive.

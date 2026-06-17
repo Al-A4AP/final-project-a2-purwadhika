@@ -8,6 +8,12 @@ import prisma from '../config/prisma';
 import { AppError } from '../middlewares/errorHandler';
 import type { AuthJwtPayload } from '../types/authJwt';
 import { sendPasswordResetEmail, sendVerificationEmail } from '../utils/emailService';
+import {
+  assertLoginNotLocked,
+  normalizeLoginEmail,
+  rejectFailedLogin,
+  resetFailedLogin,
+} from './loginAttemptGuard';
 
 const JWT_SECRET = env.JWT_SECRET;
 const JWT_EXPIRES = env.JWT_EXPIRES_IN;
@@ -22,9 +28,13 @@ export const registerUser = async (data: RegisterUserData) => {
 };
 
 export const loginUser = async (email: string, password: string) => {
-  const user = await findLoginUserOrThrow(email);
-  await assertValidPassword(password, user.password_hash);
+  const loginEmail = normalizeLoginEmail(email);
+  assertLoginNotLocked(loginEmail);
+  const user = await findLoginUser(loginEmail);
+  if (!user) await rejectFailedLogin(loginEmail);
+  await assertValidPasswordOrReject(password, user);
   assertVerifiedUser(user);
+  resetFailedLogin(loginEmail);
   const token = generateToken({ id: user.id, email: user.email, role: user.role });
   return { user: sanitizeUser(user), token };
 };
@@ -85,15 +95,12 @@ const createPendingEmailUser = async (data: RegisterUserData) =>
     data: { name: data.name, email: data.email, password_hash: await createDummyPasswordHash(), auth_provider: 'EMAIL', role: data.role || 'USER', verified_at: null },
   });
 
-const findLoginUserOrThrow = async (email: string) => {
-  const user = await prisma.user.findUnique({ where: { email, deleted_at: null } });
-  if (!user) throw new AppError('Email atau password salah', 401);
-  return user;
-};
+const findLoginUser = (email: string) =>
+  prisma.user.findUnique({ where: { email, deleted_at: null } });
 
-const assertValidPassword = async (password: string, hash: string) => {
-  const valid = await bcryptjs.compare(password, hash);
-  if (!valid) throw new AppError('Email atau password salah', 401);
+const assertValidPasswordOrReject = async (password: string, user: User) => {
+  const valid = await bcryptjs.compare(password, user.password_hash);
+  if (!valid) await rejectFailedLogin(user.email, user);
 };
 
 const assertVerifiedUser = (user: User) => {

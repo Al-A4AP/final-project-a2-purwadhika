@@ -33,7 +33,7 @@ README di folder `frontend` dan `backend` tidak dibuat ulang.
 | Frontend build | Lulus |
 | Backend build | Lulus |
 | Ownership test | Lulus, 7/7 |
-| File source >200 baris | 3 file backend: `orderService.ts`, `voucherService.ts`, `emailContent.ts` |
+| File source >200 baris | 1 file backend: `backend/src/services/orderService.ts` (343 baris) |
 | Function length audit | 145 kandidat manual review; advisory only |
 | `any/as any/as unknown` | Tidak ditemukan pada scan `backend/src` dan `frontend/src` |
 | `console.*` | Tidak ditemukan pada scan `backend/src` dan `frontend/src` |
@@ -66,15 +66,25 @@ Catatan:
 - Order dibuat saat klik `Lanjut ke Pembayaran`.
 - `WAITING_PAYMENT` berlaku 1 jam.
 - Jika tidak dibayar/upload bukti dalam 1 jam, order auto-cancel dan inventory release.
+- CTA pembayaran/retry hanya aktif untuk `WAITING_PAYMENT` yang belum expired.
 - Manual payment setelah upload bukti menjadi `WAITING_CONFIRMATION`.
 - `WAITING_CONFIRMATION` berlaku maksimal 2 jam.
 - Jika tenant tidak konfirmasi dalam 2 jam, sistem auto-cancel.
+
+## Voucher Flow Aktual
+
+- Voucher aktif hanya `PERCENTAGE` dan `FREE_NIGHTS`.
+- Voucher `NOMINAL` tidak tersedia pada form/flow aktif; enum/data legacy hanya boleh dibersihkan lewat migration setelah konfirmasi.
+- `FREE_NIGHTS` memakai `discountedNights = min(freeNights, stayNights)`.
+- Jika nightly breakdown tersedia, diskon diterapkan pada malam termurah terlebih dahulu.
+- Jika total menjadi Rp0, order langsung `PROCESSED` dan tidak membuat transaksi Midtrans.
 
 ## Catatan Clean Code
 
 - `npm run audit:functions` adalah alat bantu audit, bukan hard rule build.
 - Banyak kandidat frontend berupa JSX presentasional panjang; refactor tetap perlu penilaian manual.
-- File >200 baris sudah 0 setelah refactor batch 1.
+- File >200 baris tersisa 1 file backend, yaitu `backend/src/services/orderService.ts`.
+- `voucherService.ts` dan `emailContent.ts` sudah berada di bawah 200 baris setelah refactor/helper split terbaru.
 - Refactor batch 1-4 sudah memecah:
   - `backend/src/utils/emailService.ts`
   - `frontend/src/pages/tenant/properties-list/PropertiesListView.tsx`

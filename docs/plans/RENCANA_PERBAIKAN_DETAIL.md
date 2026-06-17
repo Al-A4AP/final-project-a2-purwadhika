@@ -15,7 +15,7 @@ Status verifikasi terakhir:
 | Frontend build | Lulus |
 | Backend build | Lulus |
 | Backend ownership test | Lulus, 7/7 |
-| File source >200 baris | 3 file backend |
+| File source >200 baris | 1 file backend |
 | Function length audit | 145 kandidat advisory |
 | `any` / cast residue | Tidak ditemukan pada scan source |
 | `console.*` | Tidak ditemukan pada scan source |
@@ -33,6 +33,7 @@ Status: selesai, perlu manual QA concurrency.
 - Jika melewati 1 jam, sistem auto cancel dan inventory release.
 - Manual payment `WAITING_CONFIRMATION` berlaku maksimal 2 jam.
 - Jika tenant tidak konfirmasi dalam 2 jam, sistem auto cancel.
+- CTA pembayaran/retry hanya aktif untuk `WAITING_PAYMENT` yang belum expired.
 - Voucher transaction timeout sudah diperbaiki dengan scope transaction yang lebih pendek.
 - Double booking protection sudah memakai advisory lock, availability recheck, dan atomic voucher update.
 
@@ -93,6 +94,12 @@ Voucher yang dihapus dari flow aktif:
 
 Free nights ditampilkan sebagai `Gratis X Malam`, bukan `X Rp`.
 
+Aturan pricing `FREE_NIGHTS` saat ini:
+
+- `discountedNights = min(freeNights, stayNights)`.
+- Jika nightly breakdown tersedia, diskon diterapkan pada malam termurah terlebih dahulu.
+- Jika total pembayaran menjadi Rp0, order langsung `PROCESSED` dan tidak membuat transaksi Midtrans.
+
 ### Room Rules
 
 Status: selesai.
@@ -125,7 +132,7 @@ Checklist:
 3. Pastikan transaksi lain menerima pesan availability tidak cukup.
 4. Uji `WAITING_PAYMENT` melewati 1 jam.
 5. Uji manual payment `WAITING_CONFIRMATION` melewati 2 jam.
-6. Uji voucher percentage dan free nights pada checkout.
+6. Uji voucher percentage dan free nights pada checkout, termasuk kasus malam termurah dan total Rp0.
 7. Uji voucher quota habis dan voucher tidak valid.
 
 ### Tahap 2 - PII/Data Minimization
@@ -154,15 +161,18 @@ Prioritas: P1
 
 Sisa temuan file >200:
 
-- `backend/src/services/orderService.ts`: 219 baris
-- `backend/src/services/voucherService.ts`: 216 baris
-- `backend/src/utils/emailContent.ts`: 207 baris
+- `backend/src/services/orderService.ts`: 343 baris
+
+Selesai pada refactor terbaru:
+
+- `backend/src/services/voucherService.ts`: sudah turun menjadi 173 baris.
+- `backend/src/utils/emailContent.ts`: sudah turun menjadi 178 baris.
 
 Rencana:
 
 1. Refactor per file, jangan sekaligus.
 2. Pecah helper murni dan formatter terlebih dahulu.
-3. Jangan ubah business logic booking, voucher, payment, atau email output.
+3. Jangan ubah business logic booking, payment, availability, voucher, atau cron.
 4. Jalankan backend build dan ownership test setelah batch backend.
 
 ### Tahap 4 - Function Length Advisory
@@ -215,7 +225,7 @@ Rencana:
 
 1. Manual QA concurrency dan payment expiry.
 2. PII/data minimization.
-3. File >200 cleanup backend.
+3. File >200 cleanup backend: fokus `orderService.ts`.
 4. Function length batch kecil.
 5. Legacy schema migration jika user setuju.
 6. REST legacy alias cleanup.

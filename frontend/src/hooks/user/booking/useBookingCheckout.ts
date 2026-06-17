@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useRef, useState, type MutableRefObject } from "react";
 import type { NavigateFunction } from "react-router-dom";
 import { toast } from "react-hot-toast";
 import { getApiErrorMessage } from "@/lib/errorMessage";
@@ -16,15 +16,32 @@ export const useBookingCheckout = (params: {
   voucherCode: string;
 }) => {
   const [processing, setProcessing] = useState(false);
+  const processingRef = useRef(false);
   const [createdOrder, setCreatedOrder] = useState<Order | null>(null);
   const [snapToken, setSnapToken] = useState<string | null>(null);
   const orderState = { createdOrder, setCreatedOrder, setSnapToken, snapToken };
-  const createPendingOrder = () => reserveOrder(params, orderState, setProcessing);
-  const handleCheckout = async (paymentProofFile?: File | null) => { await checkout(params, orderState, setProcessing, paymentProofFile); };
+  const setBusy = useBusySetter(processingRef, setProcessing);
+  const createPendingOrder = () => reserveOrder(params, orderState, setBusy, processingRef);
+  const handleCheckout = async (paymentProofFile?: File | null) => { await checkout(params, orderState, setBusy, processingRef, paymentProofFile); };
   return { processing, createdOrder, createPendingOrder, handleCheckout };
 };
 
-const checkout = async (params: CheckoutParams, state: CheckoutOrderState, setProcessing: (processing: boolean) => void, paymentProofFile?: File | null) => {
+const useBusySetter = (
+  ref: MutableRefObject<boolean>,
+  setProcessing: (processing: boolean) => void,
+) => (value: boolean) => {
+  ref.current = value;
+  setProcessing(value);
+};
+
+const checkout = async (
+  params: CheckoutParams,
+  state: CheckoutOrderState,
+  setProcessing: BusySetter,
+  processingRef: MutableRefObject<boolean>,
+  paymentProofFile?: File | null,
+) => {
+  if (processingRef.current) return;
   if (!params.property || !params.room) return;
   if (!validateCheckout(params)) return;
   setProcessing(true);
@@ -36,8 +53,10 @@ const checkout = async (params: CheckoutParams, state: CheckoutOrderState, setPr
 const reserveOrder = async (
   params: CheckoutParams,
   state: CheckoutOrderState,
-  setProcessing: (processing: boolean) => void,
+  setProcessing: BusySetter,
+  processingRef: MutableRefObject<boolean>,
 ) => {
+  if (processingRef.current) return false;
   if (state.createdOrder) return true;
   if (!params.property || !params.room) return false;
   if (!validateCheckout(params)) return false;
@@ -114,3 +133,5 @@ type CheckoutOrderState = {
   setSnapToken: (token: string | null) => void;
   snapToken: string | null;
 };
+
+type BusySetter = (processing: boolean) => void;

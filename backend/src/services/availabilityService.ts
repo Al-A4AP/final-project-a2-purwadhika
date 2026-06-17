@@ -35,8 +35,11 @@ const resolveAvailability = (context: AvailabilityContext) => {
 };
 
 const resolveBookingAvailability = (context: AvailabilityContext) => {
-  const fullNight = findFullyBookedNight(context.nights, context.orders, context.room.quantity);
+  const fullNight = findFullyBookedNight(context.nights, context.orders, getEffectiveQuantity(context.room));
   return fullNight ? fullResult(fullNight) : availableResult();
 };
+
+const getEffectiveQuantity = (room: RoomWithPropertyContext) =>
+  room.property.rental_type === 'WHOLE_PROPERTY' ? 1 : room.quantity;
 
 type AvailabilityContext = Awaited<ReturnType<typeof buildAvailabilityContext>>;

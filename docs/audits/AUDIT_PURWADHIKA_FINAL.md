@@ -6,7 +6,7 @@ Acuan: `docs/guidelines/PURWADHIKA.md`
 
 ## Ringkasan Eksekutif
 
-Project PURWALOKA sudah memiliki cakupan fitur utama yang luas dan semakin mendekati final-ready. Audit final hardening 16 Juni 2026 menunjukkan lint/build/test utama lulus, tidak ada file source di atas 200 baris, dan beberapa risiko besar sebelumnya sudah ditangani pada flow aktif.
+Project PURWALOKA sudah memiliki cakupan fitur utama yang luas dan semakin mendekati final-ready. Audit final hardening 16 Juni 2026 menunjukkan lint/build/test utama lulus dan beberapa risiko besar sebelumnya sudah ditangani pada flow aktif.
 
 Perubahan penting yang sudah tercermin pada kondisi project:
 
@@ -16,7 +16,8 @@ Perubahan penting yang sudah tercermin pada kondisi project:
 - Persistent token blacklist sudah database-backed dengan SHA256 hash dan cron cleanup.
 - Referral sudah dihapus dari booking, voucher, dashboard, dan reward active flow.
 - Voucher nominal sudah dihapus dari active flow; voucher aktif hanya `PERCENTAGE` dan `FREE_NIGHTS`.
-- Free nights voucher tampil sebagai `Gratis X Malam`.
+- Free nights voucher memakai `discountedNights = min(freeNights, stayNights)`, menggratiskan malam termurah terlebih dahulu jika nightly breakdown tersedia, dan tampil sebagai `Gratis X Malam`.
+- Zero-payment dari voucher langsung menjadi `PROCESSED` tanpa transaksi Midtrans.
 - `domicile_address` sudah tidak ditemukan pada source aktif.
 - Rule maksimal 5 jenis kamar dan stock maksimal 20 sudah diterapkan.
 - Double booking protection sudah memakai advisory lock, availability recheck, dan atomic voucher update.
@@ -31,7 +32,7 @@ Catatan utama: perlindungan double booking tetap membutuhkan manual concurrency 
 | Frontend build | Lulus |
 | Backend build | Lulus |
 | Backend ownership test | Lulus, 7/7 |
-| File source >200 baris | 3 file backend |
+| File source >200 baris | 1 file backend: `backend/src/services/orderService.ts` |
 | Function length audit advisory | 145 kandidat manual review |
 | `any` / cast residue | Tidak ditemukan pada scan source |
 | `console.*` | Tidak ditemukan pada scan source |
@@ -174,11 +175,14 @@ File terkait:
 - `backend/src/services/orderService.ts`
 - `backend/src/services/order/bookingLocks.ts`
 - `backend/src/services/voucherService.ts`
+- `backend/src/services/voucher/voucherDiscount.ts`
+- `backend/src/services/voucher/voucherPreviewPricing.ts`
 - `frontend/src/pages/user/BookingPage.tsx`
 
 Catatan:
 
 - `WAITING_PAYMENT` berlaku 1 jam.
+- CTA pembayaran/retry hanya aktif untuk `WAITING_PAYMENT` yang belum expired.
 - Inventory release saat auto cancel.
 - Voucher transaction timeout sudah diperbaiki.
 - Double booking guard sudah implemented, tetapi manual concurrency QA masih wajib.
@@ -215,6 +219,9 @@ Removed from active flow:
 Catatan:
 
 - Free nights harus tampil `Gratis X Malam`.
+- Free nights memakai `discountedNights = min(freeNights, stayNights)`.
+- Jika nightly breakdown tersedia, diskon diterapkan pada malam termurah terlebih dahulu.
+- Jika total pembayaran menjadi Rp0, sistem tidak membuat transaksi Midtrans dan order langsung `PROCESSED`.
 - Migration destructive untuk legacy enum/data hanya boleh dilakukan setelah konfirmasi.
 
 ### Review
@@ -285,7 +292,7 @@ Status: buildable dan ownership test lulus.
 
 Catatan:
 
-- Tidak ada file >200 baris.
+- Masih ada 1 file >200 baris: `backend/src/services/orderService.ts`.
 - 14 kandidat function backend masih menjadi advisory manual review.
 - Sisa file >200 baris perlu dibersihkan bertahap.
 
@@ -295,7 +302,7 @@ Status: membaik pada type/log residue, masih perlu file-size cleanup.
 
 Temuan tersisa:
 
-- 3 file backend >200 baris: `orderService.ts`, `voucherService.ts`, `emailContent.ts`.
+- 1 file backend >200 baris: `backend/src/services/orderService.ts` (343 baris).
 - 145 function-length advisory candidates.
 - Tidak ditemukan `as any`, `as unknown as`, `console.*`, atau `debugger` pada scan source.
 
@@ -305,7 +312,7 @@ Temuan tersisa:
 | --- | --- | --- |
 | P0/P1 | Manual QA concurrency untuk double booking dan payment expiry | Sedang |
 | P1 | PII/data minimization pada order/report list | Sedang |
-| P1 | Cleanup 3 file backend >200 baris | Sedang |
+| P1 | Cleanup `backend/src/services/orderService.ts` >200 baris | Sedang |
 | P1 | Audit legacy referral/voucher schema sebelum migration | Tinggi jika destructive |
 | P2 | Function-length batch kecil | Rendah-sedang |
 | P2 | REST legacy alias cleanup | Sedang |

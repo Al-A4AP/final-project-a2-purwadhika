@@ -36,6 +36,14 @@ export const buildPasswordResetBody = (url: string) => `
     <p><strong>Catatan:</strong> Tautan ini hanya berlaku selama 1 jam.</p>
   `;
 
+export const buildFailedLoginWarningBody = () => `
+    <h2>Percobaan Login Gagal</h2>
+    <p>Halo,</p>
+    <p>Ada beberapa percobaan masuk yang gagal pada akun PURWALOKA Anda.</p>
+    <p>Jika ini bukan Anda, abaikan email ini dan pertimbangkan untuk mengganti password melalui fitur lupa password.</p>
+    <p>Kami tidak pernah meminta password, kode OTP, atau token melalui email.</p>
+  `;
+
 const buildCenteredLink = (url: string, label: string) =>
   `<p style="text-align: center;"><a href="${url}" class="btn" style="color: #ffffff;">${label}</a></p>`;
 

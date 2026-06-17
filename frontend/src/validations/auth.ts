@@ -17,7 +17,7 @@ const fullNameSchema = z
   });
 
 export const loginSchema = z.object({
-  email: z.string().email('Email tidak valid'),
+  email: z.string().trim().min(1, 'Email wajib diisi').email('Email tidak valid'),
   password: z.string().min(1, 'Password wajib diisi'),
 });
 

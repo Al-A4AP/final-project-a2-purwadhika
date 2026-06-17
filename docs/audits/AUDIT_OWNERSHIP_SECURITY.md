@@ -12,6 +12,7 @@ Risiko besar yang sebelumnya aktif sudah diturunkan:
 
 - Double booking sudah diberi advisory lock, availability recheck, dan atomic voucher update.
 - Transaction timeout saat voucher digunakan sudah diperbaiki dengan scope transaction yang lebih pendek.
+- Free nights voucher sudah memakai pricing backend terbaru: `discountedNights = min(freeNights, stayNights)` dan malam termurah digratiskan lebih dulu jika breakdown tersedia.
 - Referral sudah dihapus dari active flow.
 - Voucher nominal sudah dihapus dari active flow.
 - `domicile_address` tidak ditemukan pada source aktif.
@@ -108,6 +109,8 @@ Kontrol yang ada:
 - Availability recheck sebelum final write.
 - Atomic voucher update untuk mencegah quota race.
 - Inventory lock terjadi saat order dibuat pada tahap `Lanjut ke Pembayaran`.
+- CTA pembayaran/retry hanya aktif untuk order `WAITING_PAYMENT` yang belum expired.
+- Jika voucher membuat total pembayaran Rp0, sistem tidak membuat transaksi Midtrans dan order langsung `PROCESSED`.
 
 File:
 
@@ -115,6 +118,8 @@ File:
 - `backend/src/services/order/bookingLocks.ts`
 - `backend/src/services/availabilityService.ts`
 - `backend/src/services/voucherService.ts`
+- `backend/src/services/voucher/voucherDiscount.ts`
+- `backend/src/services/voucher/voucherPreviewPricing.ts`
 
 Risk tersisa:
 
@@ -189,6 +194,8 @@ Status:
 
 - Active flow hanya mendukung `PERCENTAGE` dan `FREE_NIGHTS`.
 - `NOMINAL` sudah tidak tersedia pada form dan ditolak service aktif.
+- `FREE_NIGHTS` menggunakan jumlah malam gratis maksimal sesuai durasi inap dan mengutamakan malam termurah jika nightly breakdown tersedia.
+- Zero-payment dari voucher langsung masuk `PROCESSED` tanpa membuat transaksi Midtrans.
 
 Recommended fix:
 

@@ -5,6 +5,7 @@ import {
   buildCancellationBody,
   buildContactMessageBody,
   buildEmailChangeVerificationBody,
+  buildFailedLoginWarningBody,
   buildManualRefundTenantBody,
   buildOrderConfirmationBody,
   buildPasswordResetBody,
@@ -55,6 +56,14 @@ export const sendPasswordResetEmail = async (email: string, token: string) => {
     buildPasswordResetBody(url),
   );
   await sendMail(email, "Reset Password - PURWALOKA", html);
+};
+
+export const sendFailedLoginWarningEmail = async (email: string) => {
+  const html = getEmailWrapper(
+    "Percobaan Login Gagal - PURWALOKA",
+    buildFailedLoginWarningBody(),
+  );
+  await sendMail(email, "Peringatan Percobaan Login Gagal - PURWALOKA", html);
 };
 
 export const sendOrderConfirmationEmail = async (email: string, orderNumber: string, propertyName: string, roomType: string, checkIn: Date, checkOut: Date, totalPrice: number) => {
