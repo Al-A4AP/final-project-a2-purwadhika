@@ -16,9 +16,7 @@ export const TenantReviewCard: FC<{ review: Review; state: TenantReviewsState }>
         <ReviewCardActions review={review} state={state} />
       </div>
     </div>
-    <blockquote className="text-sm leading-relaxed text-slate-700 dark:text-slate-300 italic">
-      "{review.comment}"
-    </blockquote>
+    <blockquote className="text-sm leading-relaxed text-slate-700 dark:text-slate-300 italic">"{review.comment}"</blockquote>
     {review.replies?.length
       ? <ReviewReplyList replies={review.replies} />
       : <ReviewReplyForm reviewId={review.id} state={state} />
