@@ -2,8 +2,9 @@ import { useEffect, useMemo, useState } from "react";
 import { useForm, useWatch, type UseFormReturn } from "react-hook-form";
 import { useNavigate, type NavigateFunction } from "react-router-dom";
 import { zodResolver } from "@hookform/resolvers/zod";
+import { buildExploreUrl } from "@/hooks/user/explore/exploreQueryUrl";
 import { formatDateForInput } from "@/lib/formatters";
-import { useFilterStore, type FilterValues } from "@/stores/filterStore";
+import { useFilterStore } from "@/stores/filterStore";
 import { searchFormSchema, type SearchFormInput } from "@/validations/search";
 
 type FilterStoreState = ReturnType<typeof useFilterStore.getState>;
@@ -115,23 +116,6 @@ const applySearchValues = (data: SearchFormInput, filters: FilterStoreState, tot
   filters.setChildren(filters.children);
   filters.setBabies(filters.babies);
   filters.setCapacity(totalGuests || 1);
-};
-
-const buildExploreUrl = (values: FilterValues) => {
-  const query = new URLSearchParams();
-  appendQuery(query, "city", values.city);
-  appendQuery(query, "check_in_date", values.check_in_date);
-  appendQuery(query, "check_out_date", values.check_out_date);
-  appendQuery(query, "adults", values.adults);
-  appendQuery(query, "children", values.children);
-  appendQuery(query, "babies", values.babies);
-  appendQuery(query, "capacity", values.capacity);
-  return `/explore${query.toString() ? `?${query}` : ""}`;
-};
-
-const appendQuery = (query: URLSearchParams, key: string, value?: number | string) => {
-  if (value === undefined || value === "") return;
-  query.set(key, String(value));
 };
 
 interface SubmitSearchOptions {
