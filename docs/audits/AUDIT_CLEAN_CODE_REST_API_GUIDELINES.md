@@ -1,6 +1,6 @@
 # Audit Clean Code dan REST API Guidelines
 
-Tanggal audit: 16 Juni 2026  
+Tanggal audit: 17 Juni 2026  
 Project: PURWALOKA - Property Renting Web App  
 Acuan: `docs/guidelines/PURWADHIKA.md`, `docs/guidelines/REST_API_GUIDELINES.md`, `docs/guidelines/CODE_LINE_CHECK_GUIDELINES.md`, `docs/guidelines/TOOLS_GUIDELINE.md`
 
@@ -8,7 +8,7 @@ Acuan: `docs/guidelines/PURWADHIKA.md`, `docs/guidelines/REST_API_GUIDELINES.md`
 
 Audit final hardening menunjukkan type-safety dan script logging residue sudah dibersihkan. Frontend lint, frontend build, backend build, dan ownership test lulus.
 
-Namun scan terbaru menemukan 1 file backend masih melewati 200 baris. Function-length audit tetap dipakai sebagai alat bantu, bukan hard rule otomatis. Hasil terbaru menemukan 145 kandidat function/component yang perlu dinilai manual.
+Namun scan terbaru menemukan 1 file backend masih melewati 200 baris. Function-length audit tetap dipakai sebagai alat bantu, bukan hard rule otomatis. Hasil terbaru menemukan 152 kandidat function/component yang perlu dinilai manual.
 
 REST API jalur utama tetap resource-oriented. Beberapa legacy alias masih ada untuk backward compatibility dan dapat dibersihkan setelah regression test aman.
 
@@ -23,7 +23,7 @@ REST API jalur utama tetap resource-oriented. Beberapa legacy alias masih ada un
 | Scan file source >200 baris | 1 file backend |
 | Scan `console.*` dan `debugger` | Tidak ditemukan |
 | Scan `any`, `as any`, `as unknown as` | Tidak ditemukan |
-| `npm run audit:functions` | 145 kandidat manual review, advisory only |
+| `npm run audit:functions` | 152 kandidat manual review, advisory only |
 
 ## File Source >200 Baris
 
@@ -33,14 +33,15 @@ Hasil:
 
 | Lines | File |
 | ---: | --- |
-| 343 | `backend/src/services/orderService.ts` |
+| 203 | `backend/src/services/authService.ts` |
 
 Catatan:
 
 - File dokumentasi, generated file, dependency, dan migration tidak dihitung sebagai target clean code utama.
 - Batas ini harus dipantau setelah refactor booking, voucher, report, atau UI besar berikutnya.
-- `backend/src/services/voucherService.ts` sudah turun menjadi 173 baris setelah helper voucher dipisah.
-- `backend/src/utils/emailContent.ts` sudah turun menjadi 178 baris.
+- `backend/src/services/orderService.ts` sudah turun dari sekitar 377 baris menjadi 184 baris.
+- `backend/src/services/voucherService.ts` sudah turun dari 203 baris menjadi 116 baris setelah helper voucher dipisah.
+- `backend/src/utils/emailContent.ts` sudah dipecah per domain dan file utama menjadi re-export kecil.
 
 ## Function-Length Advisory
 
@@ -48,20 +49,20 @@ Status: dipantau, bukan hard rule mekanis.
 
 Hasil `npm run audit:functions`:
 
-- Total kandidat: 145.
-- `frontend/src`: 131 kandidat.
-- `backend/src`: 14 kandidat.
+- Total kandidat: 152.
+- `frontend/src`: 137 kandidat.
+- `backend/src`: 15 kandidat.
 
 Top kandidat terbaru:
 
 | No | File | Line | Function/Component | Lines |
 | ---: | --- | ---: | --- | ---: |
-| 1 | `frontend/src/pages/user/dashboard/DashboardUpcomingStay.tsx` | 11 | `DashboardUpcomingStay` | 113 |
-| 2 | `frontend/src/pages/user/UserReviewsPage.tsx` | 13 | `UserReviewsPage` | 110 |
-| 3 | `frontend/src/pages/tenant/tenant-dashboard/TenantRecentReservations.tsx` | 12 | `TenantRecentReservations` | 106 |
-| 4 | `frontend/src/pages/tenant/property-form/PropertyImageField.tsx` | 6 | `PropertyImageField` | 104 |
-| 5 | `frontend/src/hooks/tenant/room-form/useRoomImageField.ts` | 21 | `useRoomImageField` | 100 |
-| 6 | `frontend/src/pages/tenant/categories/CategoryFormModal.tsx` | 15 | `CategoryFormModal` | 91 |
+| 1 | `frontend/src/pages/tenant/categories/CategoryFormModal.tsx` | 20 | `CategoryFormModal` | 119 |
+| 2 | `frontend/src/pages/user/dashboard/DashboardUpcomingStay.tsx` | 11 | `DashboardUpcomingStay` | 113 |
+| 3 | `frontend/src/pages/user/UserReviewsPage.tsx` | 13 | `UserReviewsPage` | 110 |
+| 4 | `frontend/src/pages/tenant/tenant-dashboard/TenantRecentReservations.tsx` | 12 | `TenantRecentReservations` | 106 |
+| 5 | `frontend/src/pages/tenant/property-form/PropertyImageField.tsx` | 6 | `PropertyImageField` | 104 |
+| 6 | `frontend/src/hooks/tenant/room-form/useRoomImageField.ts` | 21 | `useRoomImageField` | 100 |
 | 7 | `frontend/src/pages/user/BookingDetailPage.tsx` | 12 | `BookingDetailPage` | 89 |
 | 8 | `frontend/src/components/common/ImageCropperModal.tsx` | 44 | `ImageCropperModal` | 88 |
 | 9 | `frontend/src/pages/user/orders/UserOrdersContent.tsx` | 16 | `UserOrdersContent` | 82 |
@@ -96,7 +97,7 @@ Perubahan:
 | Area | Status |
 | --- | --- |
 | File maksimal 200 baris | Belum sesuai, 1 file backend >200 |
-| Function maksimal 15 baris | Belum sepenuhnya, 145 kandidat advisory |
+| Function maksimal 15 baris | Belum sepenuhnya, 152 kandidat advisory |
 | Unused code/import | Frontend lint lulus |
 | `console.*` production source | Tidak ditemukan pada scan source |
 | `any` / unsafe cast | Tidak ditemukan pada scan source |
@@ -152,10 +153,12 @@ Status: masih aktif, bukan blocker runtime.
 | Domicile removal | Tidak ditemukan pada source aktif |
 | Room max 5 dan stock max 20 | Backend menjadi source of truth, frontend hanya UX guard |
 | Persistent token blacklist | Tidak mengubah public REST contract |
+| Login attempt guard | Tidak mengubah public REST contract |
+| Explore search query consistency | Frontend memakai helper query Explore yang sama; backend endpoint tetap `GET /api/properties` |
 
 ## Rekomendasi
 
-1. Refactor `backend/src/services/orderService.ts` >200 baris per batch kecil.
+1. Refactor `backend/src/services/authService.ts` >200 baris per batch kecil.
 2. Lanjutkan function-length refactor per batch kecil, mulai dari area presentasional.
 3. Pertahankan typed adapter cropper sebagai workaround React 19/library typing.
 4. Pertahankan logger lokal script tanpa output langsung dari console.
@@ -164,4 +167,4 @@ Status: masih aktif, bukan blocker runtime.
 
 ## Kesimpulan
 
-Clean code sudah membaik pada sisi type-safety dan logging residue: scan target tidak lagi menemukan `any`, `as any`, `as unknown as`, `console.*`, atau `debugger`. Pekerjaan lanjutan utama adalah `orderService.ts` >200 baris, function-length advisory, dan REST legacy alias.
+Clean code sudah membaik pada sisi type-safety dan logging residue: scan target tidak lagi menemukan `any`, `as any`, `as unknown as`, `console.*`, atau `debugger`. `orderService.ts`, `voucherService.ts`, dan `emailContent.ts` sudah direfactor. Pekerjaan lanjutan utama adalah `authService.ts` >200 baris, function-length advisory, dan REST legacy alias.

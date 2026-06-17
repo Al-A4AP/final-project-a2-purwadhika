@@ -1,12 +1,12 @@
 # Audit Ownership dan Keamanan
 
-Tanggal audit: 16 Juni 2026  
+Tanggal audit: 17 Juni 2026  
 Project: PURWALOKA - Property Renting Web App  
 Acuan: ownership data, authorization, browser storage, PII, transaksi, dan hardening backend.
 
 ## Ringkasan
 
-Ownership dasar berada pada kondisi baik. Regression test ownership lulus 7/7. Auth token memakai HTTP-only cookie, bukan localStorage. Persistent token blacklist sudah database-backed, sehingga lebih aman untuk deployment multi-instance dibanding blacklist in-memory.
+Ownership dasar berada pada kondisi baik. Regression test ownership lulus 7/7. Auth token memakai HTTP-only cookie, bukan localStorage. Persistent token blacklist sudah database-backed dan bukan in-memory, sehingga aman untuk deployment multi-instance.
 
 Risiko besar yang sebelumnya aktif sudah diturunkan:
 
@@ -16,6 +16,7 @@ Risiko besar yang sebelumnya aktif sudah diturunkan:
 - Referral sudah dihapus dari active flow.
 - Voucher nominal sudah dihapus dari active flow.
 - `domicile_address` tidak ditemukan pada source aktif.
+- Login attempt guard sudah aktif: 5 gagal login -> lock sementara 15 menit.
 
 Risiko yang masih perlu ditindaklanjuti:
 
@@ -89,11 +90,13 @@ Persistent token blacklist:
 - Token disimpan sebagai SHA256 hash.
 - Multi-instance safe.
 - Cleanup expired token dilakukan melalui cron.
+- Login attempt guard mencegah brute-force sederhana melalui lock sementara setelah 5 kegagalan login.
 
 File:
 
 - `backend/src/config/authCookie.ts`
 - `backend/src/services/tokenBlacklistService.ts`
+- `backend/src/services/authService.ts`
 - `backend/src/middlewares/authMiddleware.ts`
 - `backend/src/cron/cronTasks.ts`
 
@@ -202,6 +205,20 @@ Recommended fix:
 - Audit voucher nominal existing.
 - Soft-delete atau convert data legacy sebelum enum migration.
 - Migration enum hanya setelah data aman dan user konfirmasi.
+
+### Explore Search Query Consistency
+
+Severity: resolved UX/performance issue.
+
+Status:
+
+- Tombol `Cari` dan `Terapkan Filter` di Explore memakai helper query yang sama.
+- Jika city kosong, query tidak mengirim city dan tidak memicu geolocation.
+- Backend property listing tetap menjadi source of truth.
+
+Risk tersisa:
+
+- Query tanggal tanpa city tetap lebih berat secara natural karena backend perlu mengevaluasi availability pada cakupan properti yang lebih luas.
 
 ## Browser Storage
 

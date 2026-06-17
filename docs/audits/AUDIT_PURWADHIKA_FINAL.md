@@ -1,12 +1,12 @@
 # Audit Keseluruhan PURWADHIKA
 
-Tanggal audit: 16 Juni 2026  
+Tanggal audit: 17 Juni 2026  
 Project: PURWALOKA - Property Renting Web App  
 Acuan: `docs/guidelines/PURWADHIKA.md`
 
 ## Ringkasan Eksekutif
 
-Project PURWALOKA sudah memiliki cakupan fitur utama yang luas dan semakin mendekati final-ready. Audit final hardening 16 Juni 2026 menunjukkan lint/build/test utama lulus dan beberapa risiko besar sebelumnya sudah ditangani pada flow aktif.
+Project PURWALOKA sudah memiliki cakupan fitur utama yang luas dan semakin mendekati final-ready. Audit final hardening 17 Juni 2026 menunjukkan lint/build/test utama lulus dan beberapa risiko besar sebelumnya sudah ditangani pada flow aktif.
 
 Perubahan penting yang sudah tercermin pada kondisi project:
 
@@ -14,6 +14,7 @@ Perubahan penting yang sudah tercermin pada kondisi project:
 - `WAITING_PAYMENT` berlaku 1 jam dan otomatis dibatalkan jika lewat.
 - Manual payment `WAITING_CONFIRMATION` berlaku maksimal 2 jam dan otomatis dibatalkan jika tidak dikonfirmasi tenant.
 - Persistent token blacklist sudah database-backed dengan SHA256 hash dan cron cleanup.
+- Login attempt guard sudah aktif: 5 gagal login -> lock 15 menit.
 - Referral sudah dihapus dari booking, voucher, dashboard, dan reward active flow.
 - Voucher nominal sudah dihapus dari active flow; voucher aktif hanya `PERCENTAGE` dan `FREE_NIGHTS`.
 - Free nights voucher memakai `discountedNights = min(freeNights, stayNights)`, menggratiskan malam termurah terlebih dahulu jika nightly breakdown tersedia, dan tampil sebagai `Gratis X Malam`.
@@ -21,8 +22,24 @@ Perubahan penting yang sudah tercermin pada kondisi project:
 - `domicile_address` sudah tidak ditemukan pada source aktif.
 - Rule maksimal 5 jenis kamar dan stock maksimal 20 sudah diterapkan.
 - Double booking protection sudah memakai advisory lock, availability recheck, dan atomic voucher update.
+- Explore search query inconsistency sudah diselesaikan: tombol `Cari` dan `Terapkan Filter` memakai helper query Explore yang sama.
 
 Catatan utama: perlindungan double booking tetap membutuhkan manual concurrency QA sebelum dinyatakan selesai secara operasional.
+
+## Resolved Items
+
+Item berikut sudah dipindahkan ke resolved pada source flow aktif:
+
+- Voucher nominal removed dari active flow.
+- Referral system removed dari active flow.
+- Login empty form stuck.
+- Profile resolver bug.
+- Free nights voucher bug.
+- Upload payment proof flow.
+- Whole property availability bug.
+- Explore search query inconsistency.
+- Persistent token blacklist.
+- Login lock protection.
 
 ## Verifikasi Terbaru
 
@@ -32,8 +49,8 @@ Catatan utama: perlindungan double booking tetap membutuhkan manual concurrency 
 | Frontend build | Lulus |
 | Backend build | Lulus |
 | Backend ownership test | Lulus, 7/7 |
-| File source >200 baris | 1 file backend: `backend/src/services/orderService.ts` |
-| Function length audit advisory | 145 kandidat manual review |
+| File source >200 baris | 1 file backend: `backend/src/services/authService.ts` (203 baris) |
+| Function length audit advisory | 152 kandidat manual review |
 | `any` / cast residue | Tidak ditemukan pada scan source |
 | `console.*` | Tidak ditemukan pada scan source |
 | `debugger` | Tidak ditemukan |
@@ -74,6 +91,7 @@ Catatan:
 
 - Referral promo sudah tidak menjadi bagian flow aktif.
 - Search/filter diarahkan ke browse/explore flow.
+- Tombol `Cari` dan `Terapkan Filter` pada Explore sudah memakai helper query yang sama agar query tidak divergen.
 
 ### User / Tenant Authentication and Profiles
 
@@ -94,6 +112,7 @@ Catatan:
 
 - Password form resolver sudah diperbaiki agar empty submit tidak stuck loading.
 - Persistent token blacklist sudah implemented.
+- Login attempt guard sudah implemented.
 - Customer profile: User Name, KTP Number, KTP Name, KTP Address, Phone.
 - Tenant profile: User Name, Phone, Operational Address.
 - `domicile_address` removed dari source aktif.
@@ -267,6 +286,8 @@ Status: baik dengan cleanup lanjutan.
 - Voucher validation hanya menerima `PERCENTAGE` dan `FREE_NIGHTS`.
 - Room max 5 dan stock max 20 sudah divalidasi.
 - `domicile_address` sudah tidak ditemukan pada source aktif.
+- Category description, property description, dan review comment memiliki batas maksimal 100 karakter.
+- Phone regex single source of truth: `^+?[0-9]{8,15}$`.
 
 ### Pagination, Filtering, Sorting
 
@@ -284,7 +305,7 @@ Status: buildable dan lint lulus.
 Catatan:
 
 - Tidak ada file >200 baris.
-- 130 kandidat function/component frontend masih menjadi advisory manual review.
+- 137 kandidat function/component frontend masih menjadi advisory manual review.
 
 ### Backend
 
@@ -292,8 +313,8 @@ Status: buildable dan ownership test lulus.
 
 Catatan:
 
-- Masih ada 1 file >200 baris: `backend/src/services/orderService.ts`.
-- 14 kandidat function backend masih menjadi advisory manual review.
+- Masih ada 1 file >200 baris: `backend/src/services/authService.ts` sekitar 203 baris.
+- 15 kandidat function backend masih menjadi advisory manual review.
 - Sisa file >200 baris perlu dibersihkan bertahap.
 
 ### Clean Code
@@ -302,9 +323,12 @@ Status: membaik pada type/log residue, masih perlu file-size cleanup.
 
 Temuan tersisa:
 
-- 1 file backend >200 baris: `backend/src/services/orderService.ts` (343 baris).
-- 145 function-length advisory candidates.
+- 1 file backend >200 baris: `backend/src/services/authService.ts` (203 baris).
+- 152 function-length advisory candidates.
 - Tidak ditemukan `as any`, `as unknown as`, `console.*`, atau `debugger` pada scan source.
+- `orderService.ts` sudah turun dari sekitar 377 baris menjadi 184 baris.
+- `voucherService.ts` sudah turun dari 203 baris menjadi 116 baris.
+- `emailContent.ts` sudah dipecah per domain.
 
 ## Rekomendasi Lanjutan
 
@@ -312,11 +336,11 @@ Temuan tersisa:
 | --- | --- | --- |
 | P0/P1 | Manual QA concurrency untuk double booking dan payment expiry | Sedang |
 | P1 | PII/data minimization pada order/report list | Sedang |
-| P1 | Cleanup `backend/src/services/orderService.ts` >200 baris | Sedang |
+| P1 | Cleanup `backend/src/services/authService.ts` >200 baris | Sedang |
 | P1 | Audit legacy referral/voucher schema sebelum migration | Tinggi jika destructive |
 | P2 | Function-length batch kecil | Rendah-sedang |
 | P2 | REST legacy alias cleanup | Sedang |
 
 ## Kesimpulan
 
-Project sudah jauh lebih stabil dibanding audit sebelumnya. Status 16 Juni 2026 adalah **mendekati final-ready**, dengan catatan manual QA concurrency/payment expiry dan privacy minimization masih perlu diselesaikan sebelum klaim final produksi.
+Project sudah jauh lebih stabil dibanding audit sebelumnya. Status 17 Juni 2026 adalah **mendekati final-ready**, dengan catatan manual QA concurrency/payment expiry dan privacy minimization masih perlu diselesaikan sebelum klaim final produksi.

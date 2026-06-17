@@ -2,7 +2,7 @@
 
 Folder ini menyimpan dokumentasi pendukung final project agar root project tetap ringkas dan mudah diperiksa.
 
-Tanggal audit dokumentasi terbaru: 16 Juni 2026.
+Tanggal audit dokumentasi terbaru: 17 Juni 2026.
 
 ## Struktur
 
@@ -33,8 +33,8 @@ README di folder `frontend` dan `backend` tidak dibuat ulang.
 | Frontend build | Lulus |
 | Backend build | Lulus |
 | Ownership test | Lulus, 7/7 |
-| File source >200 baris | 1 file backend: `backend/src/services/orderService.ts` (343 baris) |
-| Function length audit | 145 kandidat manual review; advisory only |
+| File source >200 baris | 1 file backend: `backend/src/services/authService.ts` (203 baris) |
+| Function length audit | 152 kandidat manual review; advisory only |
 | `any/as any/as unknown` | Tidak ditemukan pada scan `backend/src` dan `frontend/src` |
 | `console.*` | Tidak ditemukan pada scan `backend/src` dan `frontend/src` |
 | `debugger` | Tidak ditemukan |
@@ -46,6 +46,8 @@ README di folder `frontend` dan `backend` tidak dibuat ulang.
 | Voucher nominal | Tidak tersedia pada source flow aktif; enum/data legacy masih menunggu migration konfirmasi |
 | `domicile_address` | Removed dari active source/schema |
 | Room rules | Max 5 room type/property dan stock max 20 |
+| Login lock | 5 gagal login -> lock 15 menit |
+| Explore search query | `Cari` dan `Terapkan Filter` memakai helper query yang sama |
 
 ## Booking dan Payment Flow Aktual
 
@@ -79,17 +81,57 @@ Catatan:
 - Jika nightly breakdown tersedia, diskon diterapkan pada malam termurah terlebih dahulu.
 - Jika total menjadi Rp0, order langsung `PROCESSED` dan tidak membuat transaksi Midtrans.
 
+## Business Rules Aktif
+
+Auth:
+
+- JWT auth dengan HTTP-only cookie.
+- Email verification, forgot password, change password, dan email change tersedia.
+- Login attempt guard: 5 gagal login mengunci sementara selama 15 menit.
+- Persistent token blacklist database-backed memakai SHA256 hash.
+
+Property:
+
+- Tenant maksimal 30 properti.
+- Nama properti unik per tenant.
+- Description maksimal 100 karakter.
+- Address 20-300 karakter.
+- City 3-50 karakter.
+- Province 3-50 karakter.
+
+Room:
+
+- Maksimal 5 jenis kamar per properti.
+- Stok maksimal 20.
+- Nama kamar unik dalam properti yang sama.
+
+Review dan category:
+
+- Review rating wajib.
+- Review comment optional, maksimal 100 karakter.
+- Category description optional, maksimal 100 karakter.
+
+## Source of Truth Arsitektur
+
+Backend adalah source of truth untuk auth, booking, availability, payment, voucher, review, property, ownership, validation final, dan status order. Frontend adalah layer presentation/orchestration untuk UI, forms, hooks, routing, modal, toast, dan client-side UX guard. Jangan memindahkan keputusan ownership, harga final, voucher final, inventory lock, atau status pembayaran ke frontend.
+
 ## Catatan Clean Code
 
 - `npm run audit:functions` adalah alat bantu audit, bukan hard rule build.
 - Banyak kandidat frontend berupa JSX presentasional panjang; refactor tetap perlu penilaian manual.
-- File >200 baris tersisa 1 file backend, yaitu `backend/src/services/orderService.ts`.
+- File >200 baris tersisa 1 file backend, yaitu `backend/src/services/authService.ts` sekitar 203 baris.
 - `voucherService.ts` dan `emailContent.ts` sudah berada di bawah 200 baris setelah refactor/helper split terbaru.
+- `orderService.ts` sudah turun dari sekitar 377 baris menjadi 184 baris.
+- `voucherService.ts` sudah turun dari 203 baris menjadi 116 baris.
+- `emailContent.ts` sudah dipecah per domain dan kini hanya menjadi re-export kecil.
 - Refactor batch 1-4 sudah memecah:
   - `backend/src/utils/emailService.ts`
   - `frontend/src/pages/tenant/properties-list/PropertiesListView.tsx`
   - `frontend/src/pages/tenant/rooms-page/RoomsListView.tsx`
   - `frontend/src/components/user/OrderCard.tsx`
+  - `backend/src/services/orderService.ts`
+  - `backend/src/services/voucherService.ts`
+  - `backend/src/utils/emailContent.ts`
 
 ## Catatan REST API
 
@@ -129,9 +171,28 @@ npm run build
 npm run test:ownership
 ```
 
-Status terakhir 16 Juni 2026:
+Status terakhir 17 Juni 2026:
 
 - `frontend npm run lint`: lulus.
 - `frontend npm run build`: lulus.
 - `backend npm run build`: lulus.
 - `backend npm run test:ownership`: lulus 7/7.
+
+## For Future AI Agents
+
+Sebelum melakukan perubahan:
+
+1. Baca `README.md`.
+2. Baca `docs/HANDOVER.local.md`.
+3. Baca `docs/audits/AUDIT_PURWADHIKA_FINAL.md`.
+4. Baca `docs/guidelines/REST_API_GUIDELINES.md`.
+5. Baca `docs/guidelines/PURWADHIKA.md`.
+
+Wajib:
+
+- Audit dulu.
+- Jangan langsung implementasi.
+- Reuse hooks, modal, UI component, service, resolver, toast, dan helper existing.
+- Jangan membuat duplicate abstraction.
+- Jangan membuat migration tanpa persetujuan.
+- Jangan mengubah API contract tanpa audit.

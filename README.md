@@ -14,7 +14,7 @@ Final Project Purwadhika JCWDBGPM-11, Group 1:
 
 ## Status Audit Terakhir
 
-Tanggal audit dokumentasi: 16 Juni 2026.
+Tanggal audit dokumentasi: 17 Juni 2026.
 
 Acuan:
 
@@ -29,8 +29,8 @@ Acuan:
 | Frontend build | Lulus |
 | Backend build | Lulus |
 | Backend ownership test | Lulus, 7/7 |
-| File source >200 baris | 1 file backend: `backend/src/services/orderService.ts` (343 baris) |
-| Function-length advisory | 145 kandidat manual review: 131 frontend, 14 backend |
+| File source >200 baris | 1 file backend: `backend/src/services/authService.ts` (203 baris) |
+| Function-length advisory | 152 kandidat manual review: 137 frontend, 15 backend |
 | `any/as any/as unknown` | Tidak ditemukan pada scan `backend/src` dan `frontend/src` |
 | `console.*` | Tidak ditemukan pada scan `backend/src` dan `frontend/src` |
 | `debugger` | Tidak ditemukan |
@@ -51,6 +51,7 @@ Perubahan terakhir yang sudah tercermin di source:
 - Voucher quota update dibuat atomic untuk mengurangi race condition.
 - Transaction checkout dipersingkat agar voucher tidak membuat interactive transaction timeout.
 - Password change form memakai resolver custom, bukan `zodResolver` langsung.
+- Login attempt guard aktif: 5 kali gagal login mengunci akun sementara selama 15 menit.
 - Persistent token blacklist sudah database-backed (`RevokedToken`), memakai SHA256 token hash, aman untuk multi-instance, dan punya cleanup cron.
 - `domicile_address` sudah tidak digunakan di source/schema aktif.
 - Referral system sudah tidak digunakan pada booking, voucher, dashboard, reward flow aktif. Schema/data legacy referral masih ada dan hanya boleh dihapus lewat migration setelah konfirmasi.
@@ -58,7 +59,69 @@ Perubahan terakhir yang sudah tercermin di source:
 - Free nights voucher memakai `discountedNights = min(freeNights, stayNights)`. Jika nightly breakdown tersedia, malam termurah digratiskan terlebih dahulu.
 - Free nights voucher tampil sebagai `Gratis X Malam`, bukan `X Rp`. Jika total pembayaran menjadi Rp0, sistem tidak membuat transaksi Midtrans dan order langsung masuk `PROCESSED`.
 - Rule kamar: maksimal 5 jenis kamar per properti dan stok kamar maksimal 20.
-- Refactor batch 1-4 selesai: email service, tenant properties list, tenant rooms list, dan user order card.
+- Explore search query inconsistency sudah diselesaikan: tombol `Cari` dan `Terapkan Filter` memakai helper query Explore yang sama.
+- Refactor batch selesai: `orderService`, `voucherService`, `emailContent`, tenant properties list, tenant rooms list, dan user order card.
+
+## Status Project Saat Ini
+
+AUTH:
+
+- JWT Auth.
+- Email Verification.
+- Forgot Password.
+- Change Password.
+- Email Change.
+- Login Attempt Guard: 5 gagal login -> lock 15 menit.
+- Persistent Token Blacklist.
+
+BOOKING:
+
+- Reservation First -> Payment Later.
+- `WAITING_PAYMENT`: 1 jam.
+- `WAITING_CONFIRMATION`: 2 jam.
+- Auto cancel via cron.
+- Double booking protection.
+- Advisory lock booking.
+- Whole property availability.
+
+PAYMENT:
+
+- Midtrans.
+- Manual transfer.
+- Upload payment proof.
+- Auto expiry.
+- Retry Midtrans untuk order yang masih valid.
+
+VOUCHER:
+
+- Percentage.
+- Free Nights.
+- Nominal voucher removed dari active flow.
+- Referral removed dari active flow.
+
+PROFILE:
+
+- Role based profile.
+- KTP prefill.
+- Smart profile sync.
+- Custom resolver.
+
+VALIDATION:
+
+- Phone regex single source of truth: `^+?[0-9]{8,15}$`.
+- KTP wajib 16 digit.
+- Duplicate property prevention.
+- Duplicate room prevention.
+- Property limit 30.
+- Room type limit 5.
+- Room stock limit 20.
+
+SECURITY:
+
+- Ownership guards.
+- Persistent token blacklist.
+- Login lock protection.
+- PII minimization menjadi rekomendasi lanjutan untuk response list/report.
 
 ## Dokumen Audit
 
@@ -80,17 +143,8 @@ P1:
 1. PII response minimization pada tenant order/report list.
 2. Cleanup legacy REST alias setelah regression test.
 3. Migration legacy referral/voucher nominal hanya jika user menyetujui.
-4. Refactor `backend/src/services/orderService.ts` yang masih melewati 200 baris tanpa mengubah business logic.
+4. Refactor `backend/src/services/authService.ts` yang masih sedikit melewati 200 baris tanpa mengubah business logic.
 5. Review function-length advisory bertahap tanpa memecah JSX secara mekanis.
-
-## Kebijakan Dokumentasi
-
-README hanya dipertahankan di:
-
-- `README.md` pada root project.
-- `docs/README.md` pada folder dokumentasi.
-
-README di folder `frontend` dan `backend` tidak dibuat ulang.
 
 ## Eksternal API yang Digunakan
 
@@ -146,6 +200,51 @@ Tenant:
 - Operational Address
 
 `domicile_address`: removed from active source/schema.
+
+## Source of Truth Arsitektur
+
+Backend adalah source of truth untuk auth, booking, availability, payment, voucher, review, property, ownership, validation final, dan status order. Frontend bertugas sebagai presentation/orchestration layer: UI, forms, hooks, routing, toast, modal, dan client-side guard untuk UX. Semua keputusan ownership, role access, harga final, inventory lock, voucher final, dan payment status harus tetap divalidasi backend.
+
+## Business Rules Aktif
+
+Booking:
+
+- Order dibuat saat user klik `Lanjut ke Pembayaran`.
+- `WAITING_PAYMENT` berlaku 1 jam.
+- `WAITING_CONFIRMATION` berlaku 2 jam.
+- Auto cancel melepaskan inventory.
+
+Voucher:
+
+- Supported: `PERCENTAGE`, `FREE_NIGHTS`.
+- Removed: `NOMINAL`.
+- Referral removed.
+
+Property:
+
+- Maksimal 30 properti per tenant.
+- Nama properti unik per tenant.
+- Description maksimal 100 karakter.
+- Address 20-300 karakter.
+- City 3-50 karakter.
+- Province 3-50 karakter.
+
+Room:
+
+- Maksimal 5 jenis kamar per properti.
+- Stok maksimal 20.
+- Nama kamar unik dalam properti yang sama.
+
+Review:
+
+- Rating wajib.
+- Comment optional.
+- Comment maksimal 100 karakter.
+
+Category:
+
+- Description optional.
+- Description maksimal 100 karakter.
 
 ## Struktur Project
 
@@ -249,14 +348,14 @@ npm run build
 npm run test:ownership
 ```
 
-Status 16 Juni 2026:
+Status 17 Juni 2026:
 
 - Frontend lint: lulus.
 - Frontend build: lulus.
 - Backend build: lulus.
 - Backend ownership test: lulus 7/7.
-- File source >200 baris: 1 file backend.
-- Function-length advisory: 145 kandidat.
+- File source >200 baris: 1 file backend (`backend/src/services/authService.ts`, 203 baris).
+- Function-length advisory: 152 kandidat.
 
 ## Deployment
 
@@ -264,4 +363,4 @@ Frontend dideploy sebagai Vite app. Backend berjalan sebagai Express API dengan 
 
 ## Catatan Final
 
-Project sudah lebih stabil dibanding audit 15 Juni 2026: P0 transaction timeout, double booking guard, password resolver, deadline payment, type-safety residue, script logging residue, dan FREE_NIGHTS pricing sudah ditangani. Status tetap memerlukan QA manual concurrency/payment window sebelum final demo, cleanup `orderService.ts` >200 baris, review lanjutan untuk PII minimization, dan cleanup legacy migration yang bersifat destructive.
+Project sudah lebih stabil dibanding audit 15 Juni 2026: P0 transaction timeout, double booking guard, password resolver, deadline payment, type-safety residue, script logging residue, FREE_NIGHTS pricing, login lock protection, persistent token blacklist, dan Explore search query inconsistency sudah ditangani. Status tetap memerlukan QA manual concurrency/payment window sebelum final demo, cleanup `authService.ts` >200 baris, review lanjutan untuk PII minimization, dan cleanup legacy migration yang bersifat destructive.

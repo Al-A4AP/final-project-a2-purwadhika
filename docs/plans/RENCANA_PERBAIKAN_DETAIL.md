@@ -1,6 +1,6 @@
 # Rencana Perbaikan Detail
 
-Tanggal update: 16 Juni 2026  
+Tanggal update: 17 Juni 2026  
 Acuan: audit final hardening, clean code, REST API guidelines, ownership, security, dan PURWADHIKA.
 
 ## Ringkasan
@@ -16,7 +16,7 @@ Status verifikasi terakhir:
 | Backend build | Lulus |
 | Backend ownership test | Lulus, 7/7 |
 | File source >200 baris | 1 file backend |
-| Function length audit | 145 kandidat advisory |
+| Function length audit | 152 kandidat advisory |
 | `any` / cast residue | Tidak ditemukan pada scan source |
 | `console.*` | Tidak ditemukan pada scan source |
 | `debugger` | Tidak ditemukan |
@@ -115,8 +115,13 @@ Status: selesai.
 - Refactor Batch 2: `PropertiesListView`.
 - Refactor Batch 3: `RoomsListView`.
 - Refactor Batch 4: `OrderCard`.
+- Refactor backend order: `orderService.ts` turun dari sekitar 377 baris menjadi 184 baris.
+- Refactor backend voucher: `voucherService.ts` turun dari 203 baris menjadi 116 baris.
+- Refactor email content: `emailContent.ts` dipecah per domain dan file utama menjadi re-export kecil.
 - Type-safety cleanup: property detail, room status, cropper adapter.
 - Script log cleanup: `backend/src/scripts/backfill.ts`.
+- Explore search query consistency: tombol `Cari` dan `Terapkan Filter` memakai helper query Explore yang sama.
+- Login attempt guard: 5 gagal login -> lock 15 menit.
 
 ## Tahap Berikutnya
 
@@ -161,12 +166,13 @@ Prioritas: P1
 
 Sisa temuan file >200:
 
-- `backend/src/services/orderService.ts`: 343 baris
+- `backend/src/services/authService.ts`: 203 baris
 
 Selesai pada refactor terbaru:
 
-- `backend/src/services/voucherService.ts`: sudah turun menjadi 173 baris.
-- `backend/src/utils/emailContent.ts`: sudah turun menjadi 178 baris.
+- `backend/src/services/orderService.ts`: sudah turun menjadi 184 baris.
+- `backend/src/services/voucherService.ts`: sudah turun menjadi 116 baris.
+- `backend/src/utils/emailContent.ts`: sudah dipecah per domain dan file utama menjadi re-export kecil.
 
 Rencana:
 
@@ -182,7 +188,7 @@ Prioritas: P2
 
 Status:
 
-- 145 kandidat function/component >15 baris.
+- 152 kandidat function/component >15 baris.
 - Ini alat bantu audit, bukan hard rule otomatis.
 
 Rencana:
@@ -225,7 +231,7 @@ Rencana:
 
 1. Manual QA concurrency dan payment expiry.
 2. PII/data minimization.
-3. File >200 cleanup backend: fokus `orderService.ts`.
+3. File >200 cleanup backend: fokus `authService.ts`.
 4. Function length batch kecil.
 5. Legacy schema migration jika user setuju.
 6. REST legacy alias cleanup.
