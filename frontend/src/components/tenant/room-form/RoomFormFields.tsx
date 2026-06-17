@@ -6,7 +6,7 @@ import { RoomImageField } from "./RoomImageField";
 import { RoomTextField } from "./RoomTextField";
 import type { RoomFormProps } from "./types";
 
-type RoomFormFieldsProps = Omit<RoomFormProps, "onSubmit">;
+type RoomFormFieldsProps = Omit<RoomFormProps, "isSubmitting" | "onSubmit">;
 
 const QuantityField: FC<Pick<RoomFormFieldsProps, "form" | "isWholeUnit" | "onChange">> = ({ form, isWholeUnit, onChange }) => (
   isWholeUnit ? null : (

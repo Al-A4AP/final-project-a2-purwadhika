@@ -40,6 +40,7 @@ const RoomsPageLayout: FC<RoomsPageLayoutProps> = ({ deleteActions, handleToggle
         isWholeUnit={isWholeUnit} 
         form={state.form} 
         editingRoom={state.editingRoom} 
+        isSavingRoom={state.isSavingRoom}
         setForm={state.setForm} 
         handleSubmit={state.handleSubmit} 
         fetchRooms={state.fetchRooms} 

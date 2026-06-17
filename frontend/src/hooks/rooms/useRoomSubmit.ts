@@ -1,4 +1,4 @@
-import { useCallback } from "react";
+import { useCallback, useRef, useState } from "react";
 import type { FormEvent } from "react";
 import { toast } from "react-hot-toast";
 import { getApiErrorMessage } from "@/lib/errorMessage";
@@ -10,12 +10,17 @@ export const useRoomSubmit = (
   formState: RoomFormState,
   fetchRooms: () => void,
 ) => {
+  const savingRef = useRef(false);
+  const [isSavingRoom, setIsSavingRoom] = useState(false);
   const handleSubmit = useCallback(async (event: FormEvent) => {
     event.preventDefault();
-    if (!propertyId) return;
-    await saveRoom(propertyId, formState, fetchRooms);
+    if (!propertyId || savingRef.current) return;
+    savingRef.current = true;
+    setIsSavingRoom(true);
+    try { await saveRoom(propertyId, formState, fetchRooms); }
+    finally { savingRef.current = false; setIsSavingRoom(false); }
   }, [fetchRooms, formState, propertyId]);
-  return { handleSubmit };
+  return { handleSubmit, isSavingRoom };
 };
 
 const saveRoom = async (propertyId: string, state: RoomFormState, fetchRooms: () => void) => {

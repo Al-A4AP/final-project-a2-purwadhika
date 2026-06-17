@@ -1,16 +1,6 @@
 import type { FC } from "react";
 import { Link } from "react-router-dom";
 import { AlertCircle, ChevronRight } from "lucide-react";
-import type { BookingPageState } from "@/hooks/user/booking/bookingTypes";
-
-export const isProfileIncomplete = (
-  identity: BookingPageState["guestIdentity"],
-) =>
-  identity.bookingForSelf &&
-  (!identity.legalName ||
-    !identity.ktpNumber ||
-    !identity.ktpAddress ||
-    !identity.phone);
 
 export const IncompleteProfileNotice: FC = () => (
   <div className="flex flex-col items-start gap-4 rounded-2xl border border-red-200 bg-red-50 p-5 sm:flex-row sm:items-center sm:justify-between dark:border-red-900/50 dark:bg-red-900/10">

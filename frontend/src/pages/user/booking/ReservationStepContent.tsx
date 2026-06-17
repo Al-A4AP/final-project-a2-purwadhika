@@ -10,8 +10,8 @@ import { ManualProofUpload, StepIntro } from "./ManualProofUpload";
 import { VoucherCodeBox } from "./VoucherCodeBox";
 import {
   IncompleteProfileNotice,
-  isProfileIncomplete,
 } from "@/components/user/booking-summary/IncompleteProfileNotice";
+import { isProfileIncomplete } from "@/components/user/booking-summary/profileCompleteness";
 
 interface ReservationStepContentProps {
   currentStep: number;

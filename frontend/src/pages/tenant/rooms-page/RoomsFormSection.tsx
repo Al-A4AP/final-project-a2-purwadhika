@@ -7,6 +7,7 @@ interface RoomsFormSectionProps {
   form: RoomFormInput;
   editingRoom: RoomWithPeakRates | null;
   handleSubmit: (event: React.FormEvent) => void;
+  isSavingRoom: boolean;
   isWholeUnit: boolean;
   setForm: (form: RoomFormInput) => void;
   showForm: boolean;
@@ -19,6 +20,7 @@ export const RoomsFormSection: FC<RoomsFormSectionProps> = ({
   form,
   editingRoom,
   handleSubmit,
+  isSavingRoom,
   isWholeUnit,
   setForm,
   showForm,
@@ -36,6 +38,7 @@ export const RoomsFormSection: FC<RoomsFormSectionProps> = ({
       <RoomForm
         isEditing={form.room_type !== "" || Boolean(editingRoom)}
         isWholeUnit={isWholeUnit}
+        isSubmitting={isSavingRoom}
         form={form}
         editingRoom={editingRoom}
         onChange={setForm}

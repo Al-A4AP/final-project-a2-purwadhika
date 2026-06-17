@@ -1,5 +1,5 @@
-import { useCallback, useState } from "react";
-import type { FormEvent } from "react";
+import { useCallback, useRef, useState } from "react";
+import type { FormEvent, MutableRefObject } from "react";
 import { toast } from "react-hot-toast";
 import { getApiErrorMessage } from "@/lib/errorMessage";
 import { tenantService } from "@/services/tenantService";
@@ -10,6 +10,7 @@ import { createEditPeakForm, createEmptyPeakForm } from "@/hooks/rooms/roomFormD
 import type { PeakSeasonRateModalState } from "./peakSeasonTypes";
 
 export const usePeakSeasonRateModal = (refreshRooms: (propertyId: string) => Promise<void>): PeakSeasonRateModalState => {
+  const savingRef = useRef(false);
   const [editingRateId, setEditingRateId] = useState<string | null>(null);
   const [peakForm, setPeakForm] = useState<PeakRateFormData>(createEmptyPeakForm);
   const [peakRates, setPeakRates] = useState<PeakSeasonRate[]>([]);
@@ -21,7 +22,7 @@ export const usePeakSeasonRateModal = (refreshRooms: (propertyId: string) => Pro
   const close = useCallback(() => { setSelection(null); setPendingDeleteId(null); }, []);
   const onEditRate = useCallback((rate: PeakSeasonRate) => { setEditingRateId(rate.id); setPeakForm(createEditPeakForm(rate)); }, []);
   const onCancelEdit = useCallback(() => { setEditingRateId(null); setPeakForm(createEmptyPeakForm()); }, []);
-  const onSaveRate = useSaveRate({ editingRateId, peakForm, peakRates, refreshRooms, selection, setEditingRateId, setPeakForm, setPeakRates, setIsSaving });
+  const onSaveRate = useSaveRate({ editingRateId, peakForm, peakRates, refreshRooms, savingRef, selection, setEditingRateId, setPeakForm, setPeakRates, setIsSaving });
   const confirmDelete = useDeleteRate({ pendingDeleteId, refreshRooms, selection, setPeakRates, setPendingDeleteId });
   return { basePrice: selection?.room.base_price || 0, close, confirmDelete, editingRateId, isOpen: Boolean(selection), isSaving, onCancelEdit, onDeleteRate: setPendingDeleteId, onEditRate, onFormChange: setPeakForm, onSaveRate, open, peakForm, peakRates, pendingDeleteId, roomLabel: selection?.room.room_type || "", selectedRoomId: selection?.room.id || null };
 };
@@ -40,12 +41,15 @@ const useOpenRateModal = (
 
 const useSaveRate = (params: SaveRateParams) => useCallback(async (event: FormEvent) => {
   event.preventDefault();
+  const savingRef = params.savingRef;
   if (!params.selection) return toast.error("Kamar belum dipilih.");
+  if (savingRef.current) return;
   if (hasPeakRateConflict(params.peakRates, params.peakForm, params.editingRateId)) return showConflict();
   
+  savingRef.current = true;
   params.setIsSaving(true);
-  await saveRate(params);
-  params.setIsSaving(false);
+  try { await saveRate(params); }
+  finally { savingRef.current = false; params.setIsSaving(false); }
 }, [params]);
 
 const saveRate = async (params: SaveRateParams) => {
@@ -101,6 +105,7 @@ interface SaveRateParams {
   peakForm: PeakRateFormData;
   peakRates: PeakSeasonRate[];
   refreshRooms: (propertyId: string) => Promise<void>;
+  savingRef: MutableRefObject<boolean>;
   selection: PeakSelection | null;
   setEditingRateId: (id: string | null) => void;
   setPeakForm: (form: PeakRateFormData) => void;

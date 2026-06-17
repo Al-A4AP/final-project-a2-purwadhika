@@ -55,8 +55,8 @@ export const peakRateSchema = z.object({
   if (new Date(data.start_date) < today) {
     ctx.addIssue({ code: 'custom', message: 'Tanggal mulai tidak boleh di masa lalu', path: ['start_date'] });
   }
-  if (new Date(data.end_date) <= new Date(data.start_date)) {
-    ctx.addIssue({ code: 'custom', message: 'Tanggal selesai harus setelah tanggal mulai', path: ['end_date'] });
+  if (new Date(data.end_date) < new Date(data.start_date)) {
+    ctx.addIssue({ code: 'custom', message: 'Tanggal selesai tidak boleh sebelum tanggal mulai', path: ['end_date'] });
   }
 });
 

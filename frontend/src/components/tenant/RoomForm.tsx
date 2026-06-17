@@ -16,6 +16,6 @@ export const RoomForm: FC<RoomFormProps> = (props) => (
       fetchRooms={props.fetchRooms}
       setEditingRoom={props.setEditingRoom}
     />
-    <RoomSubmitButton />
+    <RoomSubmitButton isSubmitting={props.isSubmitting} />
   </form>
 );
