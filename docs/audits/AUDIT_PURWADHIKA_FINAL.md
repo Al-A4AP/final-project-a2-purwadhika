@@ -49,8 +49,10 @@ Item berikut sudah dipindahkan ke resolved pada source flow aktif:
 | Frontend build | Lulus |
 | Backend build | Lulus |
 | Backend ownership test | Lulus, 7/7 |
-| File source >200 baris | 1 file backend: `backend/src/services/authService.ts` (203 baris) |
-| Function length audit advisory | 152 kandidat manual review |
+| File source >200 baris | Tidak ditemukan pada `frontend/src` dan `backend/src` |
+| Function length audit advisory | 137 kandidat manual review |
+| Frontend function advisory | 122 kandidat |
+| Backend function advisory | 15 kandidat |
 | `any` / cast residue | Tidak ditemukan pada scan source |
 | `console.*` | Tidak ditemukan pada scan source |
 | `debugger` | Tidak ditemukan |
@@ -270,7 +272,8 @@ File terkait:
 - `backend/src/services/tenantReport/`
 - `frontend/src/pages/tenant/ReportsPage.tsx`
 - `frontend/src/pages/tenant/PropertyReportPage.tsx`
-- `frontend/src/pages/tenant/OccupancyPage.tsx`
+- `frontend/src/pages/tenant/PropertyReportPage.tsx`
+- `frontend/src/components/tenant/OccupancyCalendar.tsx`
 
 Catatan:
 
@@ -305,7 +308,7 @@ Status: buildable dan lint lulus.
 Catatan:
 
 - Tidak ada file >200 baris.
-- 137 kandidat function/component frontend masih menjadi advisory manual review.
+- 122 kandidat function/component frontend masih menjadi advisory manual review.
 
 ### Backend
 
@@ -313,7 +316,7 @@ Status: buildable dan ownership test lulus.
 
 Catatan:
 
-- Masih ada 1 file >200 baris: `backend/src/services/authService.ts` sekitar 203 baris.
+- Tidak ditemukan file source aktif >200 baris pada `frontend/src` dan `backend/src`.
 - 15 kandidat function backend masih menjadi advisory manual review.
 - Sisa file >200 baris perlu dibersihkan bertahap.
 
@@ -323,8 +326,8 @@ Status: membaik pada type/log residue, masih perlu file-size cleanup.
 
 Temuan tersisa:
 
-- 1 file backend >200 baris: `backend/src/services/authService.ts` (203 baris).
-- 152 function-length advisory candidates.
+- Tidak ditemukan file source aktif >200 baris pada `frontend/src` dan `backend/src`.
+- 137 function-length advisory candidates.
 - Tidak ditemukan `as any`, `as unknown as`, `console.*`, atau `debugger` pada scan source.
 - `orderService.ts` sudah turun dari sekitar 377 baris menjadi 184 baris.
 - `voucherService.ts` sudah turun dari 203 baris menjadi 116 baris.
@@ -336,9 +339,9 @@ Temuan tersisa:
 | --- | --- | --- |
 | P0/P1 | Manual QA concurrency untuk double booking dan payment expiry | Sedang |
 | P1 | PII/data minimization pada order/report list | Sedang |
-| P1 | Cleanup `backend/src/services/authService.ts` >200 baris | Sedang |
 | P1 | Audit legacy referral/voucher schema sebelum migration | Tinggi jika destructive |
 | P2 | Function-length batch kecil | Rendah-sedang |
+| P2 | Cleanup folder occupancy kosong | Rendah |
 | P2 | REST legacy alias cleanup | Sedang |
 
 ## Kesimpulan

@@ -2,106 +2,234 @@
 
 Tanggal audit: 17 Juni 2026  
 Project: PURWALOKA - Property Renting Web App  
-Acuan: `docs/guidelines/PURWADHIKA.md`, `docs/guidelines/REST_API_GUIDELINES.md`, `docs/guidelines/CODE_LINE_CHECK_GUIDELINES.md`, `docs/guidelines/TOOLS_GUIDELINE.md`
+Acuan: `docs/guidelines/PURWADHIKA.md`, `docs/guidelines/REST_API_GUIDELINES.md`, `docs/guidelines/CODE_LINE_CHECK_GUIDELINES.md`
 
 ## Ringkasan
 
-Audit final hardening menunjukkan type-safety dan script logging residue sudah dibersihkan. Frontend lint, frontend build, backend build, dan ownership test lulus.
+Dokumen ini sudah disinkronkan dengan kondisi repository setelah refactor batch terbaru. Root README dibuat ringkas, sementara detail audit internal berada di folder `docs`.
 
-Namun scan terbaru menemukan 1 file backend masih melewati 200 baris. Function-length audit tetap dipakai sebagai alat bantu, bukan hard rule otomatis. Hasil terbaru menemukan 152 kandidat function/component yang perlu dinilai manual.
+Hasil audit aktual:
 
-REST API jalur utama tetap resource-oriented. Beberapa legacy alias masih ada untuk backward compatibility dan dapat dibersihkan setelah regression test aman.
+- File source >200 baris pada `frontend/src` dan `backend/src`: tidak ditemukan.
+- Function-length advisory: 137 kandidat.
+- Frontend function advisory: 122 kandidat.
+- Backend function advisory: 15 kandidat.
+- Scan `any`, `as any`, `as unknown as`, `console.log`, dan `debugger`: tidak ditemukan pada `frontend/src` dan `backend/src`.
+- REST API jalur utama resource-oriented; beberapa legacy alias masih aktif untuk backward compatibility.
 
 ## Verifikasi yang Dijalankan
 
 | Pemeriksaan | Hasil |
 | --- | --- |
-| `frontend npm run lint` | Lulus |
-| `frontend npm run build` | Lulus |
-| `backend npm run build` | Lulus |
-| `backend npm run test:ownership` | Lulus, 7/7 |
-| Scan file source >200 baris | 1 file backend |
-| Scan `console.*` dan `debugger` | Tidak ditemukan |
-| Scan `any`, `as any`, `as unknown as` | Tidak ditemukan |
-| `npm run audit:functions` | 152 kandidat manual review, advisory only |
+| Scan file source >200 baris | Tidak ditemukan |
+| `npm run audit:functions` | 137 kandidat manual review, advisory only |
+| Frontend function advisory | 122 kandidat |
+| Backend function advisory | 15 kandidat |
+| Scan `any` | Tidak ditemukan |
+| Scan `as any` | Tidak ditemukan |
+| Scan `as unknown as` | Tidak ditemukan |
+| Scan `console.log` | Tidak ditemukan |
+| Scan `debugger` | Tidak ditemukan |
 
-## File Source >200 Baris
+## Files Over 200 Lines
 
-Status: belum sesuai batas file clean code.
+Tidak ditemukan file source aktif di `frontend/src` atau `backend/src` yang melewati 200 baris.
 
-Hasil:
+| File | Lines |
+| --- | ---: |
+| _Tidak ada_ | 0 |
 
-| Lines | File |
-| ---: | --- |
-| 203 | `backend/src/services/authService.ts` |
+## Residue Scan
+
+| Pattern | Result |
+| --- | --- |
+| `any` | Tidak ditemukan |
+| `as any` | Tidak ditemukan |
+| `as unknown as` | Tidak ditemukan |
+| `console.log` | Tidak ditemukan |
+| `debugger` | Tidak ditemukan |
 
 Catatan:
 
-- File dokumentasi, generated file, dependency, dan migration tidak dihitung sebagai target clean code utama.
-- Batas ini harus dipantau setelah refactor booking, voucher, report, atau UI besar berikutnya.
-- `backend/src/services/orderService.ts` sudah turun dari sekitar 377 baris menjadi 184 baris.
-- `backend/src/services/voucherService.ts` sudah turun dari 203 baris menjadi 116 baris setelah helper voucher dipisah.
-- `backend/src/utils/emailContent.ts` sudah dipecah per domain dan file utama menjadi re-export kecil.
+- Scan dilakukan pada `frontend/src` dan `backend/src`.
+- Script, docs, migration, dan dependency tidak dihitung sebagai source production utama kecuali disebut eksplisit.
 
 ## Function-Length Advisory
 
-Status: dipantau, bukan hard rule mekanis.
+`npm run audit:functions` adalah alat bantu audit, bukan hard rule build. Kandidat berikut perlu dinilai manual. Refactor hanya disarankan jika meningkatkan maintainability, readability, atau pemisahan tanggung jawab.
 
-Hasil `npm run audit:functions`:
+Ringkasan:
 
-- Total kandidat: 152.
-- `frontend/src`: 137 kandidat.
-- `backend/src`: 15 kandidat.
+- Total kandidat: 137.
+- Frontend kandidat: 122.
+- Backend kandidat: 15.
 
-Top kandidat terbaru:
+| File | Function | Lines | Domain |
+| --- | --- | ---: | --- |
+| `frontend/src/pages/tenant/categories/CategoryFormModal.tsx:20` | `CategoryFormModal` | 119 | frontend |
+| `frontend/src/pages/tenant/property-form/PropertyImageField.tsx:6` | `PropertyImageField` | 104 | frontend |
+| `frontend/src/hooks/tenant/room-form/useRoomImageField.ts:21` | `useRoomImageField` | 100 | frontend |
+| `frontend/src/pages/user/BookingDetailPage.tsx:12` | `BookingDetailPage` | 89 | frontend |
+| `frontend/src/components/common/ImageCropperModal.tsx:44` | `ImageCropperModal` | 88 | frontend |
+| `frontend/src/pages/user/orders/UserOrdersContent.tsx:16` | `UserOrdersContent` | 82 | frontend |
+| `frontend/src/components/property/ReservationPanel.tsx:13` | `ReservationPanel` | 73 | frontend |
+| `frontend/src/pages/tenant/vouchers/AssignVoucherModal.tsx:14` | `AssignVoucherModal` | 70 | frontend |
+| `frontend/src/components/tenant/room-form/RoomFormFields.tsx:28` | `RoomFormFields` | 69 | frontend |
+| `frontend/src/pages/tenant/categories/CategoryListView.tsx:65` | `CategoryListView` | 65 | frontend |
+| `frontend/src/pages/user/PropertyDetailPage.tsx:26` | `PropertyDetailView` | 60 | frontend |
+| `frontend/src/pages/user/saved-properties/SavedPropertyCard.tsx:14` | `SavedPropertyCard` | 60 | frontend |
+| `frontend/src/pages/user/orders/BookingPropertySummary.tsx:6` | `BookingPropertySummary` | 59 | frontend |
+| `frontend/src/pages/user/orders/BookingPaymentPanel.tsx:7` | `BookingPaymentPanel` | 58 | frontend |
+| `frontend/src/pages/tenant/property-form/PropertyBasicFields.tsx:119` | `RentalTypeField` | 55 | frontend |
+| `frontend/src/pages/tenant/rooms-page/RoomsSummary.tsx:10` | `RoomsSummary` | 55 | frontend |
+| `frontend/src/hooks/user/reviews/useUserReviewsState.ts:36` | `useReviewOrders` | 54 | frontend |
+| `frontend/src/pages/tenant/property-form/PropertyBasicFields.tsx:65` | `CategoryField` | 53 | frontend |
+| `frontend/src/pages/user/PaymentSuccessPage.tsx:6` | `PaymentSuccessPage` | 52 | frontend |
+| `frontend/src/pages/user/orders/BookingStatusTimeline.tsx:5` | `BookingStatusTimeline` | 50 | frontend |
+| `frontend/src/pages/tenant/vouchers/TenantVoucherList.tsx:14` | `TenantVoucherList` | 48 | frontend |
+| `frontend/src/components/property/PropertyGallery.tsx:11` | `PropertyGallery` | 47 | frontend |
+| `frontend/src/pages/tenant/property-form/PropertyLocationFields.tsx:7` | `PropertyLocationFields` | 47 | frontend |
+| `frontend/src/pages/user/property-detail/PropertyRoomsSection.tsx:35` | `RoomList` | 47 | frontend |
+| `frontend/src/components/tenant/room-form/RoomImageField.tsx:19` | `RoomImageField` | 46 | frontend |
+| `frontend/src/components/user/profile/ProfileInfoFields.tsx:20` | `CustomerFields` | 46 | frontend |
+| `frontend/src/pages/tenant/PropertiesListPage.tsx:14` | `PropertiesListPage` | 46 | frontend |
+| `frontend/src/pages/tenant/property-form/PropertyBasicFields.tsx:15` | `PropertyBasicFields` | 46 | frontend |
+| `backend/src/scripts/backfill.ts:11` | `backfill` | 44 | backend |
+| `frontend/src/hooks/useSavedProperties.ts:54` | `useSavedPropertyActions` | 43 | frontend |
+| `frontend/src/pages/tenant/RoomsPage.tsx:14` | `RoomsPageLayout` | 41 | frontend |
+| `frontend/src/hooks/user/orders/useUserOrders.ts:43` | `useUserOrderFilters` | 40 | frontend |
+| `frontend/src/hooks/tenant/orders/useTenantOrderActions.ts:14` | `useTenantOrderActions` | 38 | frontend |
+| `frontend/src/pages/user/booking/ReservationStepper.tsx:13` | `ReservationStepper` | 38 | frontend |
+| `frontend/src/components/tenant/orders-table/OrdersTableCells.tsx:48` | `OrderStatusCell` | 36 | frontend |
+| `frontend/src/pages/user/booking/ManualProofUpload.tsx:11` | `ManualProofUpload` | 36 | frontend |
+| `backend/src/services/tenantProperty/dashboardStats.ts:35` | `buildRevenueTrend` | 35 | backend |
+| `frontend/src/pages/tenant/rooms-page/RoomsPageHeader.tsx:12` | `RoomsPageHeader` | 35 | frontend |
+| `frontend/src/pages/user/UserDashboardPage.tsx:13` | `UserDashboardPage` | 35 | frontend |
+| `frontend/src/components/tenant/occupancy-calendar/OccupancyCell.tsx:32` | `OccupancyCell` | 34 | frontend |
+| `frontend/src/hooks/tenant/orders/useTenantOrders.ts:9` | `useTenantOrders` | 34 | frontend |
+| `backend/src/services/order/tenantRefundCompletion.ts:5` | `markRefundComplete` | 33 | backend |
+| `frontend/src/pages/tenant/rooms-page/RoomsFormSection.tsx:19` | `RoomsFormSection` | 33 | frontend |
+| `frontend/src/pages/tenant/tenant-dashboard/TenantRevenuePanel.tsx:14` | `TenantRevenuePanel` | 33 | frontend |
+| `frontend/src/hooks/user/orders/useUserOrders.ts:11` | `useUserOrders` | 31 | frontend |
+| `frontend/src/pages/user/HomePage.tsx:149` | `PromosCta` | 31 | frontend |
+| `frontend/src/hooks/tenant/categories/useCategoryForm.ts:10` | `useCategoryForm` | 30 | frontend |
+| `frontend/src/hooks/tenant/orders/useTenantOrders.ts:62` | `useFetchTenantOrders` | 30 | frontend |
+| `frontend/src/hooks/user/orders/useUserOrders.ts:84` | `useFetchUserOrders` | 30 | frontend |
+| `backend/src/services/order/userCancelOrder.ts:6` | `cancelUserOrder` | 29 | backend |
+| `frontend/src/components/tenant/peak-rates/PeakRatePreview.tsx:10` | `PeakRatePreview` | 29 | frontend |
+| `frontend/src/components/user/profile/ProfileInfoFields.tsx:67` | `TenantFields` | 29 | frontend |
+| `frontend/src/lib/cropImage.ts:17` | `getCroppedImg` | 29 | frontend |
+| `frontend/src/pages/user/orders/BookingDetailHeader.tsx:8` | `BookingDetailHeader` | 29 | frontend |
+| `backend/src/services/orderService.ts:38` | `executeOrderTransaction` | 28 | backend |
+| `backend/src/services/tenantReport/occupancyQuery.ts:6` | `findOccupancyCalendar` | 28 | backend |
+| `frontend/src/components/common/navbar/ProfileDropdown.tsx:20` | `ProfileDropdownLinks` | 28 | frontend |
+| `frontend/src/hooks/user/reviews/useUserReviewsState.ts:8` | `useUserReviewsState` | 27 | frontend |
+| `frontend/src/pages/tenant/property-form/FormFields.tsx:44` | `TextAreaField` | 27 | frontend |
+| `frontend/src/components/user/order-card/MidtransPaymentActions.tsx:17` | `MidtransPaymentActions` | 26 | frontend |
+| `frontend/src/hooks/contact/useContactForm.ts:10` | `useContactForm` | 26 | frontend |
+| `frontend/src/pages/tenant/CategoriesPage.tsx:17` | `CategoryPageView` | 26 | frontend |
+| `backend/src/services/propertyDetail/roomStatus.ts:39` | `buildRoomStatus` | 25 | backend |
+| `frontend/src/hooks/tenant/vouchers/useTenantVouchersPage.ts:7` | `useTenantVouchersPage` | 25 | frontend |
+| `frontend/src/pages/tenant/property-form/FormFields.tsx:18` | `TextField` | 25 | frontend |
+| `backend/src/services/tenantProperty/tenantPropertyFilters.ts:22` | `buildPropertyCreateData` | 24 | backend |
+| `frontend/src/components/user/booking-summary/IncompleteProfileNotice.tsx:5` | `IncompleteProfileNotice` | 24 | frontend |
+| `frontend/src/hooks/user/booking/useBookingCheckout.ts:53` | `reserveOrder` | 24 | frontend |
+| `frontend/src/components/tenant/OrderMobileCard.tsx:23` | `OrderMobileHeader` | 23 | frontend |
+| `frontend/src/components/tenant/orders-table/OrdersTableRow.tsx:13` | `OrdersTableRow` | 23 | frontend |
+| `frontend/src/components/user/search/CityField.tsx:15` | `CityField` | 23 | frontend |
+| `frontend/src/pages/tenant/DashboardPage.tsx:10` | `DashboardPage` | 23 | frontend |
+| `frontend/src/components/property/InlineAvailabilitySection.tsx:21` | `InlineAvailabilitySection` | 22 | frontend |
+| `frontend/src/components/tenant/peak-rates/PeakRateValueInput.tsx:9` | `PeakRateValueInput` | 22 | frontend |
+| `frontend/src/pages/tenant/categories/CategoriesHeader.tsx:8` | `CategoriesHeader` | 22 | frontend |
+| `frontend/src/pages/tenant/reviews/ReviewsSkeleton.tsx:3` | `ReviewsSkeleton` | 22 | frontend |
+| `frontend/src/pages/tenant/reviews/TenantReviewsContent.tsx:11` | `TenantReviewsContent` | 22 | frontend |
+| `frontend/src/pages/user/profile/ProfileContent.tsx:12` | `ProfileContent` | 22 | frontend |
+| `backend/src/services/categoryService.ts:64` | `listCategories` | 21 | backend |
+| `frontend/src/hooks/tenant/property-form/usePropertyFormState.ts:67` | `usePropertyFormLoader` | 21 | frontend |
+| `frontend/src/pages/tenant/orders/TenantOrdersContent.tsx:13` | `TenantOrdersContent` | 21 | frontend |
+| `frontend/src/pages/tenant/reports/ReportsContent.tsx:6` | `ReportsContent` | 21 | frontend |
+| `frontend/src/pages/tenant/vouchers/TenantVoucherForm.tsx:43` | `VoucherDiscountFields` | 21 | frontend |
+| `frontend/src/pages/user/orders/UserCancelOrderModal.tsx:5` | `UserCancelOrderModal` | 21 | frontend |
+| `frontend/src/pages/user/orders/UserOrdersFilter.tsx:123` | `FilterButtons` | 21 | frontend |
+| `frontend/src/pages/user/property-detail/PropertyRoomsSection.tsx:83` | `WholeUnit` | 21 | frontend |
+| `backend/src/services/orderService.ts:141` | `buildOrderCreateData` | 20 | backend |
+| `backend/src/services/tenantReport/occupancyQuery.ts:35` | `mergeAvailabilityToRanges` | 20 | backend |
+| `backend/src/validations/voucherValidation.ts:27` | `validateVoucherRules` | 20 | backend |
+| `frontend/src/hooks/auth/login/useLoginPageState.ts:109` | `handleGoogleSuccess` | 20 | frontend |
+| `frontend/src/pages/tenant/properties-list/PropertiesHeader.tsx:6` | `PropertiesHeader` | 20 | frontend |
+| `frontend/src/pages/tenant/reports/ReportOrderItem.tsx:6` | `ReportOrderItem` | 20 | frontend |
+| `frontend/src/pages/tenant/rooms-page/RoomsListSection.tsx:16` | `RoomsListSection` | 20 | frontend |
+| `frontend/src/pages/user/orders/UserOrdersFilter.tsx:39` | `FilterFields` | 20 | frontend |
+| `backend/src/services/orderService.ts:67` | `syncUserProfileFromBooking` | 19 | backend |
+| `frontend/src/components/user/order-card/OrderPaymentInfo.tsx:7` | `OrderPaymentInfo` | 19 | frontend |
+| `frontend/src/pages/tenant/property-form/PropertyFormHeader.tsx:5` | `PropertyFormHeader` | 19 | frontend |
+| `frontend/src/pages/tenant/reports/KPICard.tsx:10` | `KPICard` | 19 | frontend |
+| `frontend/src/pages/tenant/reports/ReportOrdersCard.tsx:7` | `ReportOrdersCard` | 19 | frontend |
+| `frontend/src/pages/user/booking/ReservationStepperActions.tsx:35` | `NextButton` | 19 | frontend |
+| `backend/src/services/categoryService.ts:98` | `updateCategory` | 18 | backend |
+| `backend/src/services/tenantPropertyService.ts:86` | `updateProperty` | 18 | backend |
+| `frontend/src/components/tenant/occupancy-calendar/OccupancyCell.tsx:13` | `getCellAppearance` | 18 | frontend |
+| `frontend/src/hooks/user/property-detail/usePropertyDetailPageState.ts:35` | `usePropertyDetailAuth` | 18 | frontend |
+| `frontend/src/pages/tenant/categories/CategoryListView.tsx:16` | `DefaultBadge` | 18 | frontend |
+| `frontend/src/pages/tenant/reports/ReportsFilterPanel.tsx:23` | `ReportsFilterPanel` | 18 | frontend |
+| `frontend/src/pages/user/booking/ManualProofUpload.tsx:80` | `ProofPreview` | 18 | frontend |
+| `frontend/src/components/common/ConfirmModal.tsx:34` | `ConfirmModalBody` | 17 | frontend |
+| `frontend/src/components/tenant/room-form/RoomImageDropzone.tsx:10` | `RoomImageDropzone` | 17 | frontend |
+| `frontend/src/hooks/rooms/useRoomSubmit.ts:8` | `useRoomSubmit` | 17 | frontend |
+| `frontend/src/hooks/tenant/peak-season/usePeakSeasonRateModal.ts:12` | `usePeakSeasonRateModal` | 17 | frontend |
+| `frontend/src/hooks/user/profile/useAvatarUpload.ts:23` | `useAvatarCropActions` | 17 | frontend |
+| `frontend/src/pages/auth/register/RegisterForm.tsx:8` | `RegisterForm` | 17 | frontend |
+| `frontend/src/pages/tenant/property-form/PropertySubmitButton.tsx:4` | `PropertySubmitButton` | 17 | frontend |
+| `frontend/src/pages/user/booking/ReservationStepContent.tsx:86` | `SummaryStep` | 17 | frontend |
+| `frontend/src/pages/user/orders/UserOrdersFilter.tsx:21` | `UserOrdersFilter` | 17 | frontend |
+| `frontend/src/pages/user/profile/AvatarUploadSection.tsx:8` | `AvatarUploadSection` | 17 | frontend |
+| `frontend/src/components/common/ImageCropperModal.tsx:27` | `EasyCropper` | 16 | frontend |
+| `frontend/src/components/property/InlineDatePicker.tsx:17` | `InlineDatePicker` | 16 | frontend |
+| `frontend/src/components/tenant/peak-rates/PeakRateForm.tsx:9` | `PeakRateForm` | 16 | frontend |
+| `frontend/src/components/tenant/room-form/RoomFormFields.tsx:11` | `QuantityField` | 16 | frontend |
+| `frontend/src/components/tenant/room-form/RoomGalleryGrid.tsx:14` | `RoomGalleryGrid` | 16 | frontend |
+| `frontend/src/components/tenant/room-form/RoomGalleryGrid.tsx:74` | `GalleryIconButton` | 16 | frontend |
+| `frontend/src/components/ui/Button.tsx:28` | `Button` | 16 | frontend |
+| `frontend/src/hooks/auth/reset-password/resetPasswordActions.ts:14` | `resetPasswordAction` | 16 | frontend |
+| `frontend/src/hooks/tenant/orders/useTenantOrderActions.ts:22` | `confirmRefundComplete` | 16 | frontend |
+| `frontend/src/hooks/user/property-detail/propertyDetailAccess.ts:21` | `isSelectedRangeUnavailable` | 16 | frontend |
+| `frontend/src/pages/auth/reset-password/ResetPasswordField.tsx:14` | `ResetPasswordField` | 16 | frontend |
+| `frontend/src/pages/tenant/peak-season/PeakSeasonModalLayer.tsx:13` | `PeakRateModal` | 16 | frontend |
+| `frontend/src/pages/tenant/reports/ReportOrdersCard.tsx:27` | `ReportOrdersList` | 16 | frontend |
+| `frontend/src/pages/tenant/reviews/ReviewsHeader.tsx:4` | `ReviewsHeader` | 16 | frontend |
+| `frontend/src/pages/tenant/reviews/TenantReviewCard.tsx:10` | `TenantReviewCard` | 16 | frontend |
+| `frontend/src/pages/tenant/tenant-dashboard/RevenueTrendChart.tsx:22` | `RevenueTrendCanvas` | 16 | frontend |
+| `frontend/src/pages/tenant/tenant-dashboard/TenantDashboardHeader.tsx:4` | `TenantDashboardHeader` | 16 | frontend |
+| `frontend/src/pages/user/booking/GuestIdentityForm.tsx:39` | `GuestIdentityField` | 16 | frontend |
+| `frontend/src/pages/user/orders/UserOrdersFilter.tsx:91` | `StatusField` | 16 | frontend |
+| `frontend/src/pages/user/UserReviewsPage.tsx:14` | `UserReviewsPage` | 16 | frontend |
 
-| No | File | Line | Function/Component | Lines |
-| ---: | --- | ---: | --- | ---: |
-| 1 | `frontend/src/pages/tenant/categories/CategoryFormModal.tsx` | 20 | `CategoryFormModal` | 119 |
-| 2 | `frontend/src/pages/user/dashboard/DashboardUpcomingStay.tsx` | 11 | `DashboardUpcomingStay` | 113 |
-| 3 | `frontend/src/pages/user/UserReviewsPage.tsx` | 13 | `UserReviewsPage` | 110 |
-| 4 | `frontend/src/pages/tenant/tenant-dashboard/TenantRecentReservations.tsx` | 12 | `TenantRecentReservations` | 106 |
-| 5 | `frontend/src/pages/tenant/property-form/PropertyImageField.tsx` | 6 | `PropertyImageField` | 104 |
-| 6 | `frontend/src/hooks/tenant/room-form/useRoomImageField.ts` | 21 | `useRoomImageField` | 100 |
-| 7 | `frontend/src/pages/user/BookingDetailPage.tsx` | 12 | `BookingDetailPage` | 89 |
-| 8 | `frontend/src/components/common/ImageCropperModal.tsx` | 44 | `ImageCropperModal` | 88 |
-| 9 | `frontend/src/pages/user/orders/UserOrdersContent.tsx` | 16 | `UserOrdersContent` | 82 |
-| 10 | `frontend/src/pages/user/SavedPropertiesPage.tsx` | 10 | `SavedPropertiesPage` | 78 |
-| 11 | `frontend/src/components/property/ReservationPanel.tsx` | 13 | `ReservationPanel` | 73 |
-| 12 | `frontend/src/pages/tenant/vouchers/AssignVoucherModal.tsx` | 14 | `AssignVoucherModal` | 70 |
-| 13 | `frontend/src/components/tenant/room-form/RoomFormFields.tsx` | 28 | `RoomFormFields` | 69 |
-| 14 | `frontend/src/pages/tenant/property-report/PropertyReportContent.tsx` | 95 | `ReportBody` | 69 |
-| 15 | `frontend/src/pages/tenant/tenant-dashboard/RevenueTrendChart.tsx` | 9 | `RevenueTrendChart` | 67 |
+## Legacy Folder Cleanup Audit
 
-Catatan:
+| Folder | Used? | Import Found? | Recommendation |
+| --- | --- | --- | --- |
+| `frontend/src/hooks/tenant/occupancy` | Tidak, folder kosong | Tidak | SAFE TO DELETE folder kosong |
+| `frontend/src/pages/tenant/occupancy` | Tidak, folder kosong | Tidak | SAFE TO DELETE folder kosong |
+| `frontend/src/components/tenant/occupancy-calendar` | Ya | Ya | DO NOT DELETE |
+| `/tenant/occupancy` route | Ya, redirect ke `/tenant/property-report` | Ya | DO NOT DELETE tanpa keputusan UX |
 
-- `PropertiesListView`, `RoomsListView`, dan `OrderCard` sudah turun dari top kandidat setelah refactor batch 2-4.
-- Banyak kandidat berupa JSX presentasional panjang.
-- Refactor hanya disarankan jika meningkatkan keterbacaan, reuse, atau pemisahan logic.
-- Jangan memecah komponen secara mekanis jika hasilnya lebih sulit dirawat.
+## Legacy / Orphan Classification
 
-## Type Safety dan Debug Residue
+### SAFE TO DELETE
 
-Status: residue target sudah selesai.
+- `frontend/src/hooks/tenant/occupancy`: folder kosong.
+- `frontend/src/pages/tenant/occupancy`: folder kosong.
 
-Perubahan:
+### MAYBE DELETE
 
-- Cast property detail di `propertyDetailService.ts` diganti dengan tipe domain property detail.
-- `as any` di `roomStatus.ts` diganti dengan `RoomAvailabilityContext`.
-- `ImageCropperModal.tsx` memakai typed adapter untuk `react-easy-crop`.
-- `backend/src/scripts/backfill.ts` memakai logger lokal berbasis stdout/stderr.
-- Scan `any`, `as any`, `as unknown as`, `console.*`, dan `debugger` pada `backend/src` dan `frontend/src` tidak menemukan residue.
+- Legacy REST alias setelah regression test menyeluruh.
+- Legacy referral/voucher nominal schema/data hanya setelah audit database dan konfirmasi migration.
 
-## Clean Code Status
+### DO NOT DELETE
 
-| Area | Status |
-| --- | --- |
-| File maksimal 200 baris | Belum sesuai, 1 file backend >200 |
-| Function maksimal 15 baris | Belum sepenuhnya, 152 kandidat advisory |
-| Unused code/import | Frontend lint lulus |
-| `console.*` production source | Tidak ditemukan pada scan source |
-| `any` / unsafe cast | Tidak ditemukan pada scan source |
-| Refactor batch 1-4 | Selesai |
+- `frontend/src/components/tenant/occupancy-calendar`: masih dipakai pada property report.
+- `backend/src/services/tenantReport/occupancyQuery.ts`: masih dipakai oleh report service.
+- Route `/tenant/occupancy`: masih menjadi redirect/backward-compatible path.
 
 ## REST API Guidelines
 
@@ -158,13 +286,13 @@ Status: masih aktif, bukan blocker runtime.
 
 ## Rekomendasi
 
-1. Refactor `backend/src/services/authService.ts` >200 baris per batch kecil.
-2. Lanjutkan function-length refactor per batch kecil, mulai dari area presentasional.
-3. Pertahankan typed adapter cropper sebagai workaround React 19/library typing.
-4. Pertahankan logger lokal script tanpa output langsung dari console.
+1. Lanjutkan function-length refactor per batch kecil, mulai dari presentational UI yang aman.
+2. Jangan memecah function hanya demi angka jika readability memburuk.
+3. Cleanup dua folder occupancy kosong dapat dilakukan terpisah karena tidak berisi file.
+4. Jangan hapus route `/tenant/occupancy` sebelum keputusan UX/compatibility jelas.
 5. Jangan hapus legacy REST alias sebelum frontend dan QA benar-benar aman.
-6. Jalankan lint/build/test setiap batch.
+6. PII/data minimization pada list order/report tetap menjadi prioritas P1.
 
 ## Kesimpulan
 
-Clean code sudah membaik pada sisi type-safety dan logging residue: scan target tidak lagi menemukan `any`, `as any`, `as unknown as`, `console.*`, atau `debugger`. `orderService.ts`, `voucherService.ts`, dan `emailContent.ts` sudah direfactor. Pekerjaan lanjutan utama adalah `authService.ts` >200 baris, function-length advisory, dan REST legacy alias.
+Clean code membaik: tidak ada file source aktif >200 baris, residue type/log/debug bersih, dan function advisory turun menjadi 137 kandidat. Pekerjaan lanjutan utama adalah refactor kandidat function secara selektif, cleanup folder kosong, PII minimization, dan REST legacy alias cleanup setelah regression test.

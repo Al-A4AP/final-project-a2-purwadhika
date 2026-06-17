@@ -15,8 +15,10 @@ Status verifikasi terakhir:
 | Frontend build | Lulus |
 | Backend build | Lulus |
 | Backend ownership test | Lulus, 7/7 |
-| File source >200 baris | 1 file backend |
-| Function length audit | 152 kandidat advisory |
+| File source >200 baris | Tidak ditemukan pada `frontend/src` dan `backend/src` |
+| Function length audit | 137 kandidat advisory |
+| Frontend advisory | 122 kandidat |
+| Backend advisory | 15 kandidat |
 | `any` / cast residue | Tidak ditemukan pada scan source |
 | `console.*` | Tidak ditemukan pada scan source |
 | `debugger` | Tidak ditemukan |
@@ -122,6 +124,7 @@ Status: selesai.
 - Script log cleanup: `backend/src/scripts/backfill.ts`.
 - Explore search query consistency: tombol `Cari` dan `Terapkan Filter` memakai helper query Explore yang sama.
 - Login attempt guard: 5 gagal login -> lock 15 menit.
+- Function advisory reduction batch terbaru: dashboard UI, review UI, saved properties, dan property report presentational parts.
 
 ## Tahap Berikutnya
 
@@ -159,27 +162,28 @@ Rencana:
 3. Pisahkan response summary dan detail.
 4. Pastikan frontend tidak bergantung pada field sensitif di list.
 
-### Tahap 3 - File >200 Cleanup
+### Tahap 3 - File >200 Monitoring
 
-Risiko: sedang  
-Prioritas: P1
+Risiko: rendah  
+Prioritas: P2
 
-Sisa temuan file >200:
+Status audit terbaru:
 
-- `backend/src/services/authService.ts`: 203 baris
+- Tidak ditemukan file source aktif >200 baris pada `frontend/src` dan `backend/src`.
 
 Selesai pada refactor terbaru:
 
 - `backend/src/services/orderService.ts`: sudah turun menjadi 184 baris.
 - `backend/src/services/voucherService.ts`: sudah turun menjadi 116 baris.
 - `backend/src/utils/emailContent.ts`: sudah dipecah per domain dan file utama menjadi re-export kecil.
+- `backend/src/services/authService.ts`: tidak lagi muncul sebagai file >200 pada audit source aktif terbaru.
 
 Rencana:
 
-1. Refactor per file, jangan sekaligus.
-2. Pecah helper murni dan formatter terlebih dahulu.
-3. Jangan ubah business logic booking, payment, availability, voucher, atau cron.
-4. Jalankan backend build dan ownership test setelah batch backend.
+1. Jalankan scan file >200 setelah setiap refactor besar.
+2. Jika muncul file >200 baru, refactor per file dan per domain.
+3. Jangan ubah business logic booking, payment, availability, voucher, atau cron hanya demi menurunkan angka.
+4. Jalankan build/test sesuai area yang tersentuh.
 
 ### Tahap 4 - Function Length Advisory
 
@@ -188,7 +192,9 @@ Prioritas: P2
 
 Status:
 
-- 152 kandidat function/component >15 baris.
+- 137 kandidat function/component >15 baris.
+- 122 kandidat di `frontend/src`.
+- 15 kandidat di `backend/src`.
 - Ini alat bantu audit, bukan hard rule otomatis.
 
 Rencana:
@@ -227,12 +233,28 @@ Rencana:
 3. Hapus alias hanya setelah regression test aman.
 4. Jangan ubah public contract mendadak.
 
+### Tahap 7 - Legacy Empty Folder Cleanup
+
+Risiko: rendah  
+Prioritas: P2
+
+Temuan:
+
+- `frontend/src/hooks/tenant/occupancy` kosong.
+- `frontend/src/pages/tenant/occupancy` kosong.
+
+Catatan:
+
+- Folder kosong aman dihapus.
+- Jangan hapus route `/tenant/occupancy` tanpa keputusan UX, karena route masih dipakai sebagai redirect ke `/tenant/property-report`.
+- Jangan hapus `frontend/src/components/tenant/occupancy-calendar`, karena komponen masih dipakai pada property report.
+
 ## Recommended Execution Order
 
 1. Manual QA concurrency dan payment expiry.
 2. PII/data minimization.
-3. File >200 cleanup backend: fokus `authService.ts`.
-4. Function length batch kecil.
+3. Function length batch kecil.
+4. Legacy empty folder cleanup.
 5. Legacy schema migration jika user setuju.
 6. REST legacy alias cleanup.
 

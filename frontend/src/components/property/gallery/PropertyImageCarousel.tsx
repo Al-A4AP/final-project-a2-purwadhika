@@ -24,7 +24,7 @@ export const PropertyImageCarousel: FC<PropertyImageCarouselProps> = (props) => 
 };
 
 const CarouselImage: FC<{ image: CarouselImage }> = ({ image }) => (
-  <img src={image.src} alt={image.alt} className="h-80 w-full object-cover md:h-[28rem]" />
+  <img src={image.src} alt={image.alt} className="h-80 w-full object-cover md:h-112" />
 );
 
 const CarouselControls: FC<{ activeIndex: number; count: number; setActiveIndex: (value: number) => void }> = (props) => (

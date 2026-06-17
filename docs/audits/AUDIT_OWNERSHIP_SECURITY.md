@@ -34,6 +34,9 @@ Risiko yang masih perlu ditindaklanjuti:
 | `frontend npm run build` | Lulus |
 | `frontend npm run lint` | Lulus |
 | Scan browser storage | Tidak ditemukan auth token aktif di localStorage |
+| File source >200 baris | Tidak ditemukan pada `frontend/src` dan `backend/src` |
+| Function-length advisory | 137 kandidat: 122 frontend, 15 backend |
+| Unsafe type/log residue | Tidak ditemukan `any`, `as any`, `as unknown as`, `console.log`, atau `debugger` pada scan source |
 
 ## Ownership
 
@@ -246,3 +249,12 @@ Catatan:
 ## Kesimpulan
 
 Ownership dasar baik dan test lulus. Risiko utama yang tersisa bukan cross-tenant access, melainkan QA operasional dan privacy: concurrency/payment expiry perlu diuji manual, dan response list/report perlu data minimization. Legacy referral/voucher nominal sebaiknya diperlakukan sebagai pekerjaan migration terpisah dengan konfirmasi eksplisit.
+
+## Legacy Folder Note
+
+Audit dokumentasi 17 Juni 2026 menemukan dua folder kosong:
+
+- `frontend/src/hooks/tenant/occupancy`
+- `frontend/src/pages/tenant/occupancy`
+
+Folder kosong tersebut aman dihapus pada cleanup terpisah. Route `/tenant/occupancy` tidak boleh langsung dihapus karena masih digunakan sebagai redirect ke `/tenant/property-report`, dan komponen `frontend/src/components/tenant/occupancy-calendar` masih aktif dipakai pada laporan properti.

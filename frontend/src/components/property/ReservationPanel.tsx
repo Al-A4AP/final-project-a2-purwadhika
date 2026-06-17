@@ -60,7 +60,7 @@ export const ReservationPanel: FC<ReservationPanelProps> = ({ page, property, is
         </div>
         <div className="flex justify-between text-sm">
           <span className="font-medium text-slate-600 dark:text-slate-400">Kamar Terpilih</span>
-          <span className="font-semibold text-slate-900 dark:text-white max-w-[120px] truncate" title={selectedRoom?.room_type}>{selectedRoom?.room_type || 'Belum dipilih'}</span>
+          <span className="font-semibold text-slate-900 dark:text-white max-w-30 truncate" title={selectedRoom?.room_type}>{selectedRoom?.room_type || 'Belum dipilih'}</span>
         </div>
         {duration > 0 && (
           <div className="mt-3 flex justify-between border-t border-slate-200 pt-3 text-sm font-bold text-slate-900 dark:border-slate-700 dark:text-white">

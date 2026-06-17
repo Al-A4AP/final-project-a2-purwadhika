@@ -1,6 +1,6 @@
 # PURWALOKA - Property Renting Web App
 
-PURWALOKA adalah aplikasi web penyewaan properti untuk menghubungkan penyewa (`USER`) dan pemilik properti (`TENANT`). Aplikasi mencakup pencarian properti, detail harga dan ketersediaan kamar, booking, pembayaran manual/Midtrans, dashboard tenant, laporan penjualan, laporan properti, okupasi kamar, voucher, serta review setelah masa inap.
+PURWALOKA adalah aplikasi web penyewaan properti untuk menghubungkan penyewa (`USER`) dan pemilik properti (`TENANT`). Aplikasi mendukung pencarian properti, pengecekan harga dan ketersediaan kamar, booking, pembayaran manual/Midtrans, dashboard tenant, laporan penjualan, laporan properti, voucher, serta review setelah masa inap.
 
 Final Project Purwadhika JCWDBGPM-11, Group 1:
 
@@ -12,241 +12,104 @@ Final Project Purwadhika JCWDBGPM-11, Group 1:
 - Frontend: [https://final-project-a2-purwadhika-fronten.vercel.app](https://final-project-a2-purwadhika-fronten.vercel.app)
 - Backend API: [https://final-project-a2-purwadhika-backend.vercel.app](https://final-project-a2-purwadhika-backend.vercel.app)
 
-## Status Audit Terakhir
+## Features
 
-Tanggal audit dokumentasi: 17 Juni 2026.
+### User
 
-Acuan:
+- Registrasi, verifikasi email, login, logout, reset password, dan login Google.
+- Pencarian properti berdasarkan kota, tanggal, jumlah tamu, kategori, fasilitas, harga, dan sorting.
+- Detail properti dengan galeri, peta lokasi, fasilitas, kamar, harga, availability, dan review.
+- Booking dibuat saat user menekan `Lanjut ke Pembayaran` pada tahap tinjauan.
+- Pembayaran via Midtrans atau transfer manual.
+- Voucher aktif: `PERCENTAGE` dan `FREE_NIGHTS`.
+- Riwayat reservasi, properti tersimpan, profile, dan review setelah checkout.
 
-- `docs/guidelines/PURWADHIKA.md`
-- `docs/guidelines/REST_API_GUIDELINES.md`
-- `docs/guidelines/CODE_LINE_CHECK_GUIDELINES.md`
-- `docs/guidelines/TOOLS_GUIDELINE.md`
+### Tenant
 
-| Area | Status aktual |
-| --- | --- |
-| Frontend lint | Lulus |
-| Frontend build | Lulus |
-| Backend build | Lulus |
-| Backend ownership test | Lulus, 7/7 |
-| File source >200 baris | 1 file backend: `backend/src/services/authService.ts` (203 baris) |
-| Function-length advisory | 152 kandidat manual review: 137 frontend, 15 backend |
-| `any/as any/as unknown` | Tidak ditemukan pada scan `backend/src` dan `frontend/src` |
-| `console.*` | Tidak ditemukan pada scan `backend/src` dan `frontend/src` |
-| `debugger` | Tidak ditemukan |
-| REST API | Jalur utama resource-oriented; beberapa legacy alias masih aktif |
-| Ownership/security | Ownership test lulus; PII response minimization tetap perlu review |
+- Dashboard tenant dengan ringkasan operasional.
+- CRUD kategori, properti, kamar, ketersediaan, dan peak season.
+- Manajemen voucher tenant.
+- Manajemen reservasi dan konfirmasi pembayaran manual.
+- Laporan pendapatan, laporan properti, dan kalender ketersediaan.
+- Review tamu, balasan review, dan penghapusan review sesuai ownership.
 
-## Final Hardening Update
+## Feature Status PURWADHIKA
 
-Perubahan terakhir yang sudah tercermin di source:
+### Fitur 1 - Property Renting Core
 
-- Booking order dibuat saat user klik `Lanjut ke Pembayaran` pada tahap `Tinjauan & Persetujuan`, bukan saat klik `Reservasi`.
-- Flow booking terbaru: Property Detail -> Reservasi -> Form Booking -> Tinjauan & Persetujuan -> Lanjut ke Pembayaran -> order dibuat (`WAITING_PAYMENT`) -> inventory dikunci.
-- `WAITING_PAYMENT` berlaku 1 jam. Jika lewat, order auto-cancel dan inventory dilepas.
-- Upload bukti bayar manual mengubah status menjadi `WAITING_CONFIRMATION`.
-- `WAITING_CONFIRMATION` maksimal 2 jam. Jika tenant tidak konfirmasi, sistem auto-cancel.
-- CTA pembayaran/retry hanya aktif untuk order `WAITING_PAYMENT` yang belum expired.
-- Double booking protection sudah memakai Postgres advisory lock + availability recheck di transaction.
-- Voucher quota update dibuat atomic untuk mengurangi race condition.
-- Transaction checkout dipersingkat agar voucher tidak membuat interactive transaction timeout.
-- Password change form memakai resolver custom, bukan `zodResolver` langsung.
-- Login attempt guard aktif: 5 kali gagal login mengunci akun sementara selama 15 menit.
-- Persistent token blacklist sudah database-backed (`RevokedToken`), memakai SHA256 token hash, aman untuk multi-instance, dan punya cleanup cron.
-- `domicile_address` sudah tidak digunakan di source/schema aktif.
-- Referral system sudah tidak digunakan pada booking, voucher, dashboard, reward flow aktif. Schema/data legacy referral masih ada dan hanya boleh dihapus lewat migration setelah konfirmasi.
-- Voucher aktif mendukung `PERCENTAGE` dan `FREE_NIGHTS`. Voucher `NOMINAL` tidak tersedia di form dan ditolak oleh service aktif; enum/data legacy masih menunggu migration jika disetujui.
-- Free nights voucher memakai `discountedNights = min(freeNights, stayNights)`. Jika nightly breakdown tersedia, malam termurah digratiskan terlebih dahulu.
-- Free nights voucher tampil sebagai `Gratis X Malam`, bukan `X Rp`. Jika total pembayaran menjadi Rp0, sistem tidak membuat transaksi Midtrans dan order langsung masuk `PROCESSED`.
-- Rule kamar: maksimal 5 jenis kamar per properti dan stok kamar maksimal 20.
-- Explore search query inconsistency sudah diselesaikan: tombol `Cari` dan `Terapkan Filter` memakai helper query Explore yang sama.
-- Refactor batch selesai: `orderService`, `voucherService`, `emailContent`, tenant properties list, tenant rooms list, dan user order card.
-
-## Status Project Saat Ini
-
-AUTH:
-
-- JWT Auth.
-- Email Verification.
-- Forgot Password.
-- Change Password.
-- Email Change.
-- Login Attempt Guard: 5 gagal login -> lock 15 menit.
-- Persistent Token Blacklist.
-
-BOOKING:
-
-- Reservation First -> Payment Later.
-- `WAITING_PAYMENT`: 1 jam.
-- `WAITING_CONFIRMATION`: 2 jam.
-- Auto cancel via cron.
-- Double booking protection.
-- Advisory lock booking.
-- Whole property availability.
-
-PAYMENT:
-
-- Midtrans.
-- Manual transfer.
-- Upload payment proof.
-- Auto expiry.
-- Retry Midtrans untuk order yang masih valid.
-
-VOUCHER:
-
-- Percentage.
-- Free Nights.
-- Nominal voucher removed dari active flow.
-- Referral removed dari active flow.
-
-PROFILE:
-
-- Role based profile.
-- KTP prefill.
-- Smart profile sync.
-- Custom resolver.
-
-VALIDATION:
-
-- Phone regex single source of truth: `^+?[0-9]{8,15}$`.
-- KTP wajib 16 digit.
-- Duplicate property prevention.
-- Duplicate room prevention.
-- Property limit 30.
-- Room type limit 5.
-- Room stock limit 20.
-
-SECURITY:
-
-- Ownership guards.
-- Persistent token blacklist.
-- Login lock protection.
-- PII minimization menjadi rekomendasi lanjutan untuk response list/report.
-
-## Dokumen Audit
-
-- [`docs/audits/AUDIT_PURWADHIKA_FINAL.md`](./docs/audits/AUDIT_PURWADHIKA_FINAL.md)
-- [`docs/audits/AUDIT_CLEAN_CODE_REST_API_GUIDELINES.md`](./docs/audits/AUDIT_CLEAN_CODE_REST_API_GUIDELINES.md)
-- [`docs/audits/AUDIT_OWNERSHIP_SECURITY.md`](./docs/audits/AUDIT_OWNERSHIP_SECURITY.md)
-- [`docs/audits/AUDIT_ZOD_RESOLVER_BUG.md`](./docs/audits/AUDIT_ZOD_RESOLVER_BUG.md)
-- [`docs/plans/RENCANA_PERBAIKAN_DETAIL.md`](./docs/plans/RENCANA_PERBAIKAN_DETAIL.md)
-
-## Prioritas Perbaikan Aktif
-
-P0 saat ini tidak ditemukan dari verifikasi build/lint/ownership, tetapi ada QA manual penting:
-
-1. Uji concurrency booking paralel di Supabase untuk memastikan advisory lock menolak double booking.
-2. Uji end-to-end manual payment: `WAITING_PAYMENT` 1 jam dan `WAITING_CONFIRMATION` 2 jam.
-
-P1:
-
-1. PII response minimization pada tenant order/report list.
-2. Cleanup legacy REST alias setelah regression test.
-3. Migration legacy referral/voucher nominal hanya jika user menyetujui.
-4. Refactor `backend/src/services/authService.ts` yang masih sedikit melewati 200 baris tanpa mengubah business logic.
-5. Review function-length advisory bertahap tanpa memecah JSX secara mekanis.
-
-## Eksternal API yang Digunakan
-
-1. LocationIQ API: geocoding dan reverse geocoding melalui backend proxy.
-2. Midtrans API: payment gateway dan webhook status pembayaran.
-3. Cloudinary API: penyimpanan gambar profil, properti, kamar, dan bukti transfer.
-4. Supabase PostgreSQL: database utama melalui Prisma ORM.
-5. Google OAuth API: social sign-in/sign-up.
-6. SMTP Nodemailer: email verifikasi, reset password, perubahan email, reminder, dan notifikasi transaksi.
-
-## Fitur 1 - Property Renting Core
-
-| Requirement | Status | Folder/file terkait |
+| Requirement | Status | Folder/file utama |
 | --- | --- | --- |
-| Homepage/landing page | Tersedia | `frontend/src/pages/user/HomePage.tsx`, `frontend/src/components/user/HeroSection.tsx`, `frontend/src/components/user/SearchForm.tsx` |
-| Explore property list | Tersedia | `frontend/src/pages/user/ExplorePage.tsx`, `backend/src/services/propertyList/` |
-| Auth/register/verify/login/logout | Tersedia | `frontend/src/pages/auth/`, `frontend/src/hooks/auth/`, `backend/src/routes/authRoutes.ts` |
-| Profile USER/TENANT | Tersedia | `frontend/src/pages/user/ProfilePage.tsx`, `frontend/src/components/user/profile/`, `backend/src/services/userService.ts` |
-| Property detail | Tersedia | `frontend/src/pages/user/PropertyDetailPage.tsx`, `frontend/src/components/property/`, `backend/src/services/propertyDetailService.ts` |
+| Homepage / landing page | Tersedia | `frontend/src/pages/user/HomePage.tsx`, `frontend/src/components/user/` |
+| Navbar, hero carousel, property list, footer | Tersedia | `frontend/src/components/layout/`, `frontend/src/components/user/`, `frontend/src/pages/user/home/` |
+| Search kota, tanggal, durasi/tamu | Tersedia | `frontend/src/components/user/search/`, `frontend/src/hooks/user/explore/` |
+| Explore property list dengan pagination/filter/sort | Tersedia | `frontend/src/pages/user/ExplorePage.tsx`, `backend/src/services/propertyList/` |
+| Auth user dan tenant | Tersedia | `frontend/src/pages/auth/`, `frontend/src/hooks/auth/`, `backend/src/routes/authRoutes.ts` |
+| Email verification dan set password | Tersedia | `frontend/src/pages/auth/VerifyEmailPage.tsx`, `backend/src/services/authService.ts` |
+| Login, logout, reset password, Google auth | Tersedia | `frontend/src/pages/auth/`, `backend/src/controllers/authController.ts` |
+| Profile user dan tenant | Tersedia | `frontend/src/pages/user/ProfilePage.tsx`, `frontend/src/components/user/profile/`, `backend/src/services/userService.ts` |
+| Property detail, kamar, harga, availability, review | Tersedia | `frontend/src/pages/user/PropertyDetailPage.tsx`, `frontend/src/components/property/`, `backend/src/services/propertyDetailService.ts` |
+| Tenant category CRUD | Tersedia | `frontend/src/pages/tenant/CategoriesPage.tsx`, `backend/src/services/categoryService.ts` |
 | Tenant property CRUD | Tersedia | `frontend/src/pages/tenant/PropertiesListPage.tsx`, `frontend/src/pages/tenant/PropertyFormPage.tsx`, `backend/src/services/tenantPropertyService.ts` |
 | Tenant room CRUD | Tersedia | `frontend/src/pages/tenant/RoomsPage.tsx`, `backend/src/services/tenantRoomService.ts` |
-| Tenant category management | Tersedia | `frontend/src/pages/tenant/CategoriesPage.tsx`, `backend/src/services/categoryService.ts` |
-| Peak season management | Tersedia | `frontend/src/pages/tenant/PeakSeasonPage.tsx`, `backend/src/services/tenantRoom/` |
+| Room availability management | Tersedia | `frontend/src/components/tenant/OccupancyCalendar.tsx`, `backend/src/services/availabilityService.ts` |
+| Peak season rate management | Tersedia | `frontend/src/pages/tenant/PeakSeasonPage.tsx`, `backend/src/services/tenantRoom/` |
+| Tenant sales report | Tersedia | `frontend/src/pages/tenant/ReportsPage.tsx`, `backend/src/services/tenantReportService.ts` |
 
-## Fitur 2 - Transaction, Review, Report
+### Fitur 2 - Transaction, Review, Report
 
-| Requirement | Status | Folder/file terkait |
+| Requirement | Status | Folder/file utama |
 | --- | --- | --- |
-| User booking flow | Tersedia dan sudah di-hardening | `frontend/src/pages/user/BookingPage.tsx`, `frontend/src/hooks/user/booking/`, `backend/src/services/orderService.ts` |
-| Manual payment dan Midtrans | Tersedia | `frontend/src/lib/midtransSnap.ts`, `backend/src/services/midtransService.ts` |
-| Payment proof deadline | 1 jam | `backend/src/constants/orderConstants.ts`, `backend/src/cron/` |
-| Tenant manual confirmation deadline | 2 jam | `backend/src/cron/cronTasks.ts`, `backend/src/cron/cronQueries.ts` |
-| Tenant transaction management | Tersedia | `frontend/src/pages/tenant/OrdersPage.tsx`, `backend/src/services/order/tenantOrderStatus.ts` |
-| Auto-cancel unpaid/manual-confirmation reservations | Tersedia | `backend/src/cron/cronTasks.ts`, `backend/src/routes/webhookRoutes.ts` |
-| Review setelah menginap | Tersedia | `frontend/src/pages/user/UserReviewsPage.tsx`, `backend/src/services/reviewService.ts` |
+| Room reservation | Tersedia | `frontend/src/pages/user/BookingPage.tsx`, `backend/src/services/orderService.ts` |
+| Inventory lock dan double booking guard | Tersedia, perlu QA concurrency manual | `backend/src/services/order/bookingLocks.ts`, `backend/src/services/availabilityService.ts` |
+| Manual payment proof upload | Tersedia | `frontend/src/pages/user/booking/ManualProofUpload.tsx`, `backend/src/services/orderService.ts` |
+| Midtrans payment | Tersedia | `frontend/src/lib/midtransSnap.ts`, `backend/src/services/midtransService.ts` |
+| User order list dan detail | Tersedia | `frontend/src/pages/user/OrdersPage.tsx`, `frontend/src/pages/user/BookingDetailPage.tsx` |
+| User cancel unpaid order | Tersedia | `backend/src/services/order/userCancelOrder.ts`, `frontend/src/pages/user/orders/` |
+| Auto cancel unpaid order | Tersedia | `backend/src/cron/cronTasks.ts`, `backend/src/cron/cronQueries.ts` |
+| Tenant order list | Tersedia | `frontend/src/pages/tenant/OrdersPage.tsx`, `backend/src/services/order/tenantOrderList.ts` |
+| Tenant confirm/reject manual payment | Tersedia | `backend/src/services/order/tenantOrderStatus.ts`, `frontend/src/hooks/tenant/orders/` |
+| Order reminder/email notification | Tersedia | `backend/src/utils/emailService.ts`, `backend/src/utils/emailContent/` |
+| Review setelah checkout | Tersedia | `frontend/src/pages/user/UserReviewsPage.tsx`, `backend/src/services/reviewService.ts` |
 | Tenant reply/delete review | Tersedia | `frontend/src/pages/tenant/ReviewsPage.tsx`, `backend/src/services/tenantReviewService.ts` |
-| Laporan pendapatan/properti/okupasi | Tersedia | `frontend/src/pages/tenant/ReportsPage.tsx`, `frontend/src/pages/tenant/PropertyReportPage.tsx`, `frontend/src/pages/tenant/OccupancyPage.tsx` |
+| Sales report | Tersedia | `frontend/src/pages/tenant/ReportsPage.tsx`, `backend/src/services/tenantReport/` |
+| Property report / occupancy calendar | Tersedia | `frontend/src/pages/tenant/PropertyReportPage.tsx`, `frontend/src/components/tenant/occupancy-calendar/` |
 
-## Profile Data
+## Tech Stack
 
-Customer:
+Frontend:
 
-- User Name
-- KTP Number
-- KTP Name
-- KTP Address
-- Phone
+- React 19
+- Vite
+- TypeScript
+- Tailwind CSS
+- React Router
+- React Hook Form
+- Zod
+- Zustand
+- Recharts
+- Leaflet / React Leaflet
+- Axios
 
-Tenant:
+Backend:
 
-- User Name
-- Phone
-- Operational Address
+- Node.js
+- Express.js
+- TypeScript
+- Prisma ORM
+- Supabase PostgreSQL
+- Cloudinary
+- Midtrans
+- Nodemailer
+- Zod
+- Cookie-based JWT auth
 
-`domicile_address`: removed from active source/schema.
+## Architecture Summary
 
-## Source of Truth Arsitektur
+Backend adalah source of truth untuk auth, role access, ownership, booking, availability, payment, voucher, review, status order, dan validasi final. Frontend bertanggung jawab sebagai presentation dan orchestration layer untuk UI, form, route guard, modal, toast, dan client-side UX guard.
 
-Backend adalah source of truth untuk auth, booking, availability, payment, voucher, review, property, ownership, validation final, dan status order. Frontend bertugas sebagai presentation/orchestration layer: UI, forms, hooks, routing, toast, modal, dan client-side guard untuk UX. Semua keputusan ownership, role access, harga final, inventory lock, voucher final, dan payment status harus tetap divalidasi backend.
+Order dibuat pada tahap `Lanjut ke Pembayaran`, kemudian status awal menjadi `WAITING_PAYMENT` dan inventory dikunci. `WAITING_PAYMENT` berlaku 1 jam. Transfer manual yang sudah upload bukti menjadi `WAITING_CONFIRMATION` dan wajib dikonfirmasi tenant maksimal 2 jam. Sistem memiliki auto-cancel via cron, advisory lock untuk mengurangi risiko double booking, dan persistent token blacklist untuk logout multi-instance.
 
-## Business Rules Aktif
-
-Booking:
-
-- Order dibuat saat user klik `Lanjut ke Pembayaran`.
-- `WAITING_PAYMENT` berlaku 1 jam.
-- `WAITING_CONFIRMATION` berlaku 2 jam.
-- Auto cancel melepaskan inventory.
-
-Voucher:
-
-- Supported: `PERCENTAGE`, `FREE_NIGHTS`.
-- Removed: `NOMINAL`.
-- Referral removed.
-
-Property:
-
-- Maksimal 30 properti per tenant.
-- Nama properti unik per tenant.
-- Description maksimal 100 karakter.
-- Address 20-300 karakter.
-- City 3-50 karakter.
-- Province 3-50 karakter.
-
-Room:
-
-- Maksimal 5 jenis kamar per properti.
-- Stok maksimal 20.
-- Nama kamar unik dalam properti yang sama.
-
-Review:
-
-- Rating wajib.
-- Comment optional.
-- Comment maksimal 100 karakter.
-
-Category:
-
-- Description optional.
-- Description maksimal 100 karakter.
-
-## Struktur Project
+## Folder Structure
 
 ```text
 final-pro-a2/
@@ -271,6 +134,7 @@ final-pro-a2/
   frontend/
     src/
       components/
+      constants/
       hooks/
       lib/
       pages/
@@ -282,9 +146,9 @@ final-pro-a2/
   tools/
 ```
 
-## Setup Local
+## Installation
 
-Install dependency dari root workspace:
+Install dependencies dari root workspace:
 
 ```bash
 npm install
@@ -311,7 +175,7 @@ Default local URL:
 - Frontend: `http://localhost:5173`
 - Backend API: `http://localhost:5000/api`
 
-## Environment Penting
+## Environment Variables
 
 Backend:
 
@@ -336,31 +200,36 @@ Frontend:
 - `VITE_GOOGLE_CLIENT_ID`
 - `VITE_MIDTRANS_CLIENT_KEY`
 
-## Verifikasi
+## Build and Test Commands
+
+Root:
 
 ```bash
 npm run audit:functions
+```
+
+Frontend:
+
+```bash
 cd frontend
 npm run lint
 npm run build
-cd ../backend
+```
+
+Backend:
+
+```bash
+cd backend
 npm run build
 npm run test:ownership
 ```
 
-Status 17 Juni 2026:
+## Current Project Status
 
-- Frontend lint: lulus.
-- Frontend build: lulus.
-- Backend build: lulus.
-- Backend ownership test: lulus 7/7.
-- File source >200 baris: 1 file backend (`backend/src/services/authService.ts`, 203 baris).
-- Function-length advisory: 152 kandidat.
+Status dokumentasi terakhir: 17 Juni 2026.
 
-## Deployment
-
-Frontend dideploy sebagai Vite app. Backend berjalan sebagai Express API dengan Prisma, Supabase PostgreSQL, Cloudinary, Midtrans, dan webhook cron. Untuk deployment yang memakai cookie auth lintas domain, pastikan konfigurasi proxy/CORS/cookie sama dengan konfigurasi production yang diuji.
-
-## Catatan Final
-
-Project sudah lebih stabil dibanding audit 15 Juni 2026: P0 transaction timeout, double booking guard, password resolver, deadline payment, type-safety residue, script logging residue, FREE_NIGHTS pricing, login lock protection, persistent token blacklist, dan Explore search query inconsistency sudah ditangani. Status tetap memerlukan QA manual concurrency/payment window sebelum final demo, cleanup `authService.ts` >200 baris, review lanjutan untuk PII minimization, dan cleanup legacy migration yang bersifat destructive.
+- Frontend lint dan build terakhir lulus.
+- Backend build dan ownership test terakhir lulus.
+- File source aktif `frontend/src` dan `backend/src` saat ini tidak melewati 200 baris.
+- Function-length audit adalah alat bantu advisory, bukan blocker build.
+- Dokumentasi audit, rencana perbaikan, dan handover tersedia di folder [`docs`](./docs/README.md).

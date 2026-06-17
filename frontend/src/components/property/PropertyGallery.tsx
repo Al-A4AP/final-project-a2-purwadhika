@@ -34,7 +34,7 @@ export const PropertyGallery: FC<PropertyGalleryProps> = ({ featuredImageUrl, im
       </div>
 
       {/* Desktop: Grid Layout */}
-      <div className="hidden h-[400px] gap-2 sm:grid sm:grid-cols-4 md:h-[480px]">
+      <div className="hidden h-100 gap-2 sm:grid sm:grid-cols-4 md:h-120">
         {/* Main large image */}
         <div className={`relative h-full ${displayImages.length === 1 ? 'col-span-4' : displayImages.length === 2 ? 'col-span-2' : 'col-span-2 row-span-2'}`}>
           <img src={displayImages[0]} alt={name} className="h-full w-full object-cover transition-transform duration-500 hover:scale-105" />
