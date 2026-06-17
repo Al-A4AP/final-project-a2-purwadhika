@@ -1,23 +1,22 @@
 import bcryptjs from 'bcryptjs';
-import jwt, { type SignOptions } from 'jsonwebtoken';
-import crypto from 'crypto';
 import type { User } from '@prisma/client';
 import { EmailVerificationPurpose } from '@prisma/client';
-import { env } from '../config/env';
 import prisma from '../config/prisma';
 import { AppError } from '../middlewares/errorHandler';
-import type { AuthJwtPayload } from '../types/authJwt';
 import { sendPasswordResetEmail, sendVerificationEmail } from '../utils/emailService';
+import {
+  createDummyPasswordHash,
+  createRawToken,
+  generateToken,
+  hashToken,
+  oneHourFromNow,
+} from './auth/authTokens';
 import {
   assertLoginNotLocked,
   normalizeLoginEmail,
   rejectFailedLogin,
   resetFailedLogin,
 } from './loginAttemptGuard';
-
-const JWT_SECRET = env.JWT_SECRET;
-const JWT_EXPIRES = env.JWT_EXPIRES_IN;
-const ONE_HOUR = 60 * 60 * 1000;
 
 export const registerUser = async (data: RegisterUserData) => {
   await assertEmailAvailable(data.email, data.role || 'USER');
@@ -170,23 +169,8 @@ const markPasswordResetUsed = (id: string) =>
 const updatePassword = async (userId: string, newPassword: string) =>
   prisma.user.update({ where: { id: userId }, data: { password_hash: await bcryptjs.hash(newPassword, 10), password_set_at: new Date() } });
 
-const createDummyPasswordHash = async () =>
-  bcryptjs.hash(crypto.randomBytes(16).toString('hex'), 10);
-
 const canUsePasswordReset = (user: Pick<User, 'auth_provider' | 'password_set_at'>) =>
   user.auth_provider === 'EMAIL' && !!user.password_set_at;
-
-const generateToken = (payload: AuthTokenPayload) =>
-  jwt.sign(payload, JWT_SECRET, { expiresIn: JWT_EXPIRES as SignOptions['expiresIn'] });
-
-const createRawToken = () =>
-  crypto.randomBytes(32).toString('hex');
-
-const hashToken = (token: string) =>
-  crypto.createHash('sha256').update(token).digest('hex');
-
-const oneHourFromNow = () =>
-  new Date(Date.now() + ONE_HOUR);
 
 const sanitizeUser = (user: User): SafeUser => {
   const { password_hash, ...safe } = user;
@@ -200,4 +184,3 @@ interface RegisterUserData {
 }
 
 type SafeUser = Omit<User, 'password_hash'>;
-type AuthTokenPayload = Pick<AuthJwtPayload, 'email' | 'id' | 'role'>;
