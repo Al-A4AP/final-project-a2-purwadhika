@@ -13,6 +13,9 @@ interface FieldProps {
   register: UseFormRegister<PropertyFormInput>;
   helperText?: string;
   maxLength?: number;
+  min?: string;
+  step?: string;
+  type?: "number" | "text";
 }
 
 export const TextField: FC<FieldProps> = ({
@@ -23,6 +26,9 @@ export const TextField: FC<FieldProps> = ({
   register,
   helperText,
   maxLength,
+  min,
+  step,
+  type = "text",
 }) => (
   <div>
     <FieldLabel label={label} />
@@ -30,6 +36,9 @@ export const TextField: FC<FieldProps> = ({
       {...register(name)}
       placeholder={placeholder}
       maxLength={maxLength}
+      min={min}
+      step={step}
+      type={type}
       className={`${PROPERTY_INPUT_CLASS} ${error ? "border-red-500 focus:border-red-500 focus:ring-red-500" : ""}`}
     />
     {helperText && !error && (

@@ -25,6 +25,8 @@ export interface NormalizedTenantPropertyOptions {
 export interface PropertyFormData {
   categoryId?: string;
   rental_type?: string;
+  whole_property_price?: string | number;
+  whole_property_capacity?: string | number;
   name?: string;
   description?: string;
   address?: string;

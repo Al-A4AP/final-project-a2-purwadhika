@@ -10,8 +10,10 @@ import {
 } from '../constants/validation';
 
 const propertyDescriptionSchema = z.string().trim().max(PROPERTY_DESCRIPTION_MAX_LENGTH, `Deskripsi maksimal ${PROPERTY_DESCRIPTION_MAX_LENGTH} karakter`);
+const positiveIntegerString = (label: string) =>
+  z.string().regex(/^[1-9]\d*$/, `${label} harus lebih dari 0`);
 
-export const createPropertySchema = z.object({
+const propertyFields = {
   name: z.string().trim().min(3, 'Nama minimal 3 karakter'),
   description: propertyDescriptionSchema.optional().default(''),
   address: z.string().trim().min(ADDRESS_MIN_LENGTH, `Alamat minimal ${ADDRESS_MIN_LENGTH} karakter`).max(ADDRESS_MAX_LENGTH, `Alamat maksimal ${ADDRESS_MAX_LENGTH} karakter`),
@@ -20,14 +22,32 @@ export const createPropertySchema = z.object({
   amenities: z.string().optional(),
   categoryId: z.string().min(1, 'Kategori wajib dipilih'),
   rental_type: z.enum(['PER_ROOM', 'WHOLE_PROPERTY']).default('PER_ROOM'),
+  whole_property_price: positiveIntegerString('Harga sewa').optional(),
+  whole_property_capacity: positiveIntegerString('Kapasitas').optional(),
   latitude: z.string().optional(),
   longitude: z.string().optional(),
-});
+};
 
-export const updatePropertySchema = createPropertySchema.partial().extend({
+const requireWholePropertyValues = (
+  data: { rental_type?: string; whole_property_capacity?: string; whole_property_price?: string },
+  ctx: z.RefinementCtx,
+) => {
+  if (data.rental_type !== 'WHOLE_PROPERTY') return;
+  if (!data.whole_property_price) {
+    ctx.addIssue({ code: 'custom', message: 'Harga sewa seluruh properti wajib diisi', path: ['whole_property_price'] });
+  }
+  if (!data.whole_property_capacity) {
+    ctx.addIssue({ code: 'custom', message: 'Kapasitas seluruh properti wajib diisi', path: ['whole_property_capacity'] });
+  }
+};
+
+export const createPropertySchema = z.object(propertyFields)
+  .superRefine(requireWholePropertyValues);
+
+export const updatePropertySchema = z.object(propertyFields).partial().extend({
   description: propertyDescriptionSchema.optional(),
   featured_image_url: z.string().optional(),
-});
+}).superRefine(requireWholePropertyValues);
 
 export const createRoomSchema = z.object({
   room_type: z.string().trim().min(3, 'Tipe kamar minimal 3 karakter'),

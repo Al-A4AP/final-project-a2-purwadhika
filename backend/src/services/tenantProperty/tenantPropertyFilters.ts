@@ -1,5 +1,6 @@
 import type { Prisma, Property, RentalType } from '@prisma/client';
 import type { GetTenantPropertiesOptions, NormalizedTenantPropertyOptions, PropertyFormData } from './tenantPropertyTypes';
+import { buildWholePropertyRoomData } from './wholePropertyRoom';
 
 const sortableColumns = new Set(['created_at', 'name', 'city', 'updated_at', 'min_price']);
 
@@ -31,17 +32,7 @@ export const buildPropertyCreateData = (tenantId: string, data: PropertyFormData
   amenities: parseAmenities(data.amenities),
   ...buildCoordinateData(data),
   featured_image_url: featuredImageUrl,
-  ...(data.rental_type === 'WHOLE_PROPERTY' ? {
-    rooms: {
-      create: {
-        room_type: 'Seluruh Properti',
-        description: 'Menyewakan seluruh area properti.',
-        base_price: 0,
-        quantity: 1,
-        capacity: 1,
-      }
-    }
-  } : {})
+  ...buildWholePropertyRooms(data),
 });
 
 export const buildPropertyUpdateData = (data: PropertyFormData, existing: Property, featuredImageUrl?: string) => ({
@@ -63,6 +54,10 @@ const parseAmenities = (value?: string | string[]) => {
   const values = Array.isArray(value) ? value : value.split(',');
   return values.map((item) => item.trim()).filter(Boolean);
 };
+const buildWholePropertyRooms = (data: PropertyFormData) =>
+  data.rental_type === 'WHOLE_PROPERTY'
+    ? { rooms: { create: buildWholePropertyRoomData(data) } }
+    : {};
 const toOptionalNumber = (value?: string | number | null) => value ? Number(value) : undefined;
 const buildCoordinateData = (data: PropertyFormData) => ({
   latitude: toOptionalNumber(data.latitude),

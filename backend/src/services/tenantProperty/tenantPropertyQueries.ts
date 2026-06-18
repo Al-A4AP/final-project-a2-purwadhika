@@ -1,6 +1,7 @@
 import type { Prisma } from '@prisma/client';
 import prisma from '../../config/prisma';
 import type { NormalizedTenantPropertyOptions } from './tenantPropertyTypes';
+import { upsertWholePropertyRoom, type WholePropertyRoomData } from './wholePropertyRoom';
 
 const propertyListInclude = {
   category: true,
@@ -77,5 +78,14 @@ export const findTenantPropertyDetail = (id: string, tenantId: string) =>
 export const createTenantProperty = (data: Prisma.PropertyCreateInput) => prisma.property.create({ data });
 export const updateTenantProperty = (id: string, data: Prisma.PropertyUncheckedUpdateInput) =>
   prisma.property.update({ where: { id }, data });
+export const updateTenantPropertyWithWholeRoom = (
+  id: string,
+  data: Prisma.PropertyUncheckedUpdateInput,
+  roomData: WholePropertyRoomData,
+) => prisma.$transaction(async (tx) => {
+  const property = await tx.property.update({ where: { id }, data });
+  await upsertWholePropertyRoom(tx, id, roomData);
+  return property;
+});
 export const softDeleteTenantProperty = (id: string) =>
   prisma.property.update({ where: { id }, data: { deleted_at: new Date() } });

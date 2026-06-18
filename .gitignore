@@ -10,3 +10,5 @@ docs/HANDOVER.local.md
 *.local.md
 test-lifecycle.ts
 test-super-refine.ts
+docs/plans
+docs/audits

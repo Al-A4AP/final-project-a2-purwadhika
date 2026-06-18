@@ -11,6 +11,7 @@ import {
 } from "./FormFields";
 import { Building2 } from "lucide-react";
 import { useAuthStore } from "@/stores/authStore";
+import { WholePropertyFields } from "./WholePropertyFields";
 
 export const PropertyBasicFields: FC<{ state: PropertyFormState }> = ({
   state,
@@ -45,6 +46,7 @@ export const PropertyBasicFields: FC<{ state: PropertyFormState }> = ({
         />
         <CategoryField categories={state.categories} state={state} />
         <RentalTypeField state={state} />
+        <WholePropertyFields state={state} />
         <TextAreaField
           label="Deskripsi"
           name="description"

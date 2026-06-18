@@ -22,14 +22,17 @@ import {
   findTenantPropertyNameConflict,
   softDeleteTenantProperty,
   updateTenantProperty,
+  updateTenantPropertyWithWholeRoom,
 } from "./tenantProperty/tenantPropertyQueries";
 import type {
   GetDashboardStatsOptions,
   GetTenantPropertiesOptions,
   PropertyFormData,
 } from "./tenantProperty/tenantPropertyTypes";
+import { buildWholePropertyRoomData } from "./tenantProperty/wholePropertyRoom";
 
 export type { GetTenantPropertiesOptions } from "./tenantProperty/tenantPropertyTypes";
+type PropertyUpdateFormData = PropertyFormData & { featured_image_url?: string };
 
 export const getTenantProperties = async (
   tenantId: string,
@@ -55,13 +58,9 @@ export const getTenantPropertyById = async (id: string, tenantId: string) => {
 
 const ensureCategoryAccessible = async (
   categoryId: string,
-  tenantId: string,
 ) => {
-  const category = await prisma.propertyCategory.findFirst({
-    where: {
-      id: categoryId,
-      OR: [{ tenantId: null }, { tenantId }],
-    },
+  const category = await prisma.propertyCategory.findUnique({
+    where: { id: categoryId },
   });
   if (!category)
     throw new AppError("Kategori tidak ditemukan atau tidak tersedia", 404);
@@ -76,30 +75,35 @@ export const createProperty = async (
   if (!file) throw new AppError("Foto utama properti wajib diupload", 400);
   await ensurePropertyLimit(tenantId);
   await ensurePropertyNameAvailable(tenantId, data.name);
-  await ensureCategoryAccessible(data.categoryId, tenantId);
+  await ensureCategoryAccessible(data.categoryId);
   const featuredImageUrl = await uploadFeaturedImage(file);
   return createTenantProperty(
     buildPropertyCreateData(tenantId, data, featuredImageUrl),
   );
 };
 
-export const updateProperty = async (
-  id: string,
-  tenantId: string,
-  data: PropertyFormData & { featured_image_url?: string },
-  file?: Express.Multer.File,
-) => {
+export const updateProperty = async (id: string, tenantId: string, data: PropertyUpdateFormData, file?: Express.Multer.File) => {
   const existing = await findTenantPropertyOrThrow(id, tenantId);
   await ensurePropertyNameAvailable(tenantId, data.name, id);
   if (data.categoryId)
-    await ensureCategoryAccessible(data.categoryId, tenantId);
-  const featuredImageUrl = file
-    ? await uploadFeaturedImage(file)
-    : data.featured_image_url || existing.featured_image_url;
-  return updateTenantProperty(
-    id,
-    buildPropertyUpdateData(data, existing, featuredImageUrl),
-  );
+    await ensureCategoryAccessible(data.categoryId);
+  const featuredImageUrl = await resolveFeaturedImageUrl(file, data.featured_image_url, existing.featured_image_url);
+  const updateData = buildPropertyUpdateData(data, existing, featuredImageUrl);
+  return persistPropertyUpdate(id, data, updateData);
+};
+
+const persistPropertyUpdate = (
+  id: string,
+  data: PropertyFormData,
+  updateData: Parameters<typeof updateTenantProperty>[1],
+) => {
+  return data.rental_type === "WHOLE_PROPERTY"
+    ? updateTenantPropertyWithWholeRoom(
+        id,
+        updateData,
+        buildWholePropertyRoomData(data),
+      )
+    : updateTenantProperty(id, updateData);
 };
 
 export const deleteProperty = async (id: string, tenantId: string) => {
@@ -138,6 +142,11 @@ const buildPagination = (page: number, limit: number, total: number) => ({
 });
 const uploadFeaturedImage = async (file?: Express.Multer.File) =>
   file ? (await uploadBuffer(file.buffer)).url : undefined;
+const resolveFeaturedImageUrl = (
+  file: Express.Multer.File | undefined,
+  submittedUrl: string | undefined,
+  existingUrl: string | null,
+) => file ? uploadFeaturedImage(file) : submittedUrl || existingUrl || undefined;
 
 const ensurePropertyLimit = async (tenantId: string) => {
   const total = await countTenantProperties({ tenantId, deleted_at: null });
