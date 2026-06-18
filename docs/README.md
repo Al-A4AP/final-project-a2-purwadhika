@@ -32,8 +32,8 @@ README di folder `frontend` dan `backend` tidak dibuat ulang.
 | --- | --- |
 | Tanggal audit | 18 Juni 2026 |
 | File source >200 baris | Tidak ditemukan pada `frontend/src` dan `backend/src` |
-| Function-length advisory | 122 kandidat |
-| Frontend advisory | 109 kandidat |
+| Function-length advisory | 117 kandidat |
+| Frontend advisory | 104 kandidat |
 | Backend advisory | 13 kandidat |
 | `any` / `as any` / `as unknown as` | Tidak ditemukan pada scan `frontend/src` dan `backend/src` |
 | `console.log` | Tidak ditemukan pada scan `frontend/src` dan `backend/src` |
@@ -48,7 +48,7 @@ README di folder `frontend` dan `backend` tidak dibuat ulang.
 | Requirement PURWADHIKA | Status | Catatan | Folder/file terkait |
 | --- | --- | --- | --- |
 | Homepage / landing page | Tersedia | Landing page menampilkan hero, search, property section, CTA tenant, dan footer | `frontend/src/pages/user/HomePage.tsx`, `frontend/src/pages/user/home/` |
-| Navigation bar | Tersedia | User/tenant layout dan route guard tersedia | `frontend/src/components/layout/`, `frontend/src/router/index.tsx` |
+| Navigation bar | Tersedia | Public navbar dan tenant sidebar brand PURWALOKA menuju home | `frontend/src/components/layout/`, `frontend/src/router/index.tsx` |
 | Hero carousel / promosi | Tersedia | Visual homepage tersedia; konten promo disesuaikan dengan flow aktif | `frontend/src/components/user/HeroSection.tsx` |
 | Property list pada homepage | Tersedia | Menampilkan properti dan mengarah ke explore/detail | `frontend/src/pages/user/HomePage.tsx`, `frontend/src/components/property/` |
 | Form kota, tanggal, durasi/tamu | Tersedia | Search bar dan explore query helper disatukan | `frontend/src/components/user/search/`, `frontend/src/hooks/user/explore/` |
@@ -61,6 +61,7 @@ README di folder `frontend` dan `backend` tidak dibuat ulang.
 | Reset password | Tersedia | Forgot/reset password memakai resolver custom | `frontend/src/pages/auth/`, `backend/src/services/authService.ts` |
 | Profile user/tenant | Tersedia | Customer: KTP/name/address/phone. Tenant: name/phone/operational address | `frontend/src/pages/user/ProfilePage.tsx`, `frontend/src/components/user/profile/` |
 | Property detail | Tersedia | Detail properti, kamar, gallery, map, availability, review | `frontend/src/pages/user/PropertyDetailPage.tsx`, `backend/src/services/propertyDetailService.ts` |
+| Saved property | Tersedia | USER-only controls; TENANT hidden/blocked; guest behavior lokal dipertahankan | `frontend/src/hooks/useSavedProperties.ts`, `frontend/src/components/user/property-card/SavePropertyButton.tsx` |
 | Property category management | Tersedia | Shared category, owner-only mutation, dan limit 5 kategori milik sendiri per tenant | `frontend/src/pages/tenant/CategoriesPage.tsx`, `backend/src/services/categoryService.ts` |
 | Tenant property CRUD | Tersedia | Property form/list dan ownership guard tersedia | `frontend/src/pages/tenant/PropertyFormPage.tsx`, `backend/src/services/tenantPropertyService.ts` |
 | Tenant room CRUD | Tersedia | Max 5 jenis kamar/property dan stock max 20 | `frontend/src/pages/tenant/RoomsPage.tsx`, `backend/src/services/tenantRoomService.ts` |
@@ -129,7 +130,7 @@ Property Detail
 ## Clean Code Notes
 
 - `npm run audit:functions` adalah alat bantu audit, bukan hard rule build.
-- Function-length advisory terbaru: 122 kandidat (109 frontend, 13 backend).
+- Function-length advisory terbaru: 117 kandidat (104 frontend, 13 backend).
 - File source aktif >200 baris: tidak ditemukan pada `frontend/src` dan `backend/src`.
 - Residue scan untuk `any`, unsafe cast, `console.log`, dan `debugger` bersih.
 - Refactor terakhir memecah beberapa komponen dashboard, review, saved properties, property report, serta presentational UI.

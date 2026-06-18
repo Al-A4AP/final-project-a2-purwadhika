@@ -7,6 +7,7 @@ import {
   type SetStateAction,
 } from "react";
 import type { Property } from "@/types";
+import { useAuthStore } from "@/stores/authStore";
 import {
   loadSavedProperties,
   removeSavedProperty,
@@ -43,28 +44,31 @@ const subscribeSavedProperties = (
 };
 
 export const useSavedProperties = () => {
+  const hydrated = useAuthStore((state) => state.hydrated);
+  const isTenant = useAuthStore((state) => state.user?.role === "TENANT");
   const [savedProperties, setSavedProperties] =
     useState<SavedProperty[]>(savedPropertiesStore);
 
   useEffect(() => subscribeSavedProperties(setSavedProperties), []);
 
-  return useSavedPropertyActions(savedProperties, setSavedProperties);
+  return useSavedPropertyActions(savedProperties, setSavedProperties, hydrated && !isTenant);
 };
 
 const useSavedPropertyActions = (
   savedProperties: SavedProperty[],
   setSavedProperties: Dispatch<SetStateAction<SavedProperty[]>>,
+  canManageSavedProperties: boolean,
 ) => {
   const isSaved = useCallback(
-    (id: string) => {
-      return savedProperties.some((p) => p.id === id);
-    },
-    [savedProperties],
+    (id: string) =>
+      canManageSavedProperties && savedProperties.some((property) => property.id === id),
+    [canManageSavedProperties, savedProperties],
   );
 
   const toggleSave = useCallback(
     (property: Property, event?: MouseEvent) => {
       stopSaveEvent(event);
+      if (!canManageSavedProperties) return;
       setSavedProperties((items) => {
         const next = toggleSavedProperty(items, property);
         savedPropertiesStore = next;
@@ -72,11 +76,12 @@ const useSavedPropertyActions = (
         return next;
       });
     },
-    [setSavedProperties],
+    [canManageSavedProperties, setSavedProperties],
   );
 
   const removeProperty = useCallback(
     (id: string) => {
+      if (!canManageSavedProperties) return;
       setSavedProperties((items) => {
         const next = removeSavedProperty(items, id);
         savedPropertiesStore = next;
@@ -84,11 +89,11 @@ const useSavedPropertyActions = (
         return next;
       });
     },
-    [setSavedProperties],
+    [canManageSavedProperties, setSavedProperties],
   );
 
   return {
-    savedProperties,
+    savedProperties: canManageSavedProperties ? savedProperties : [],
     isSaved,
     toggleSave,
     removeProperty,

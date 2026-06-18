@@ -2,6 +2,7 @@ import type { FC } from "react";
 import type { Property } from "@/types";
 import { Heart } from "lucide-react";
 import { useSavedProperties } from "@/hooks/useSavedProperties";
+import { useAuthStore } from "@/stores/authStore";
 
 interface SavePropertyButtonProps {
   property: Property;
@@ -10,19 +11,19 @@ interface SavePropertyButtonProps {
 }
 
 export const SavePropertyButton: FC<SavePropertyButtonProps> = ({ property, className = "", variant = "overlay" }) => {
+  const hydrated = useAuthStore((state) => state.hydrated);
+  const isTenant = useAuthStore((state) => state.user?.role === "TENANT");
   const { isSaved, toggleSave } = useSavedProperties();
   const saved = isSaved(property.id);
-  return (
-    <button
-      type="button"
-      onClick={(e) => toggleSave(property, e)}
-      className={getButtonClass(saved, className, variant)}
-      aria-label={saved ? "Hapus dari tersimpan" : "Simpan properti"}
-    >
-      <Heart size={variant === 'outline' ? 20 : 18} className={getHeartClass(saved, variant)} />
-    </button>
-  );
+  if (!hydrated || isTenant) return null;
+  return <SavePropertyControl className={className} property={property} saved={saved} toggleSave={toggleSave} variant={variant} />;
 };
+
+const SavePropertyControl: FC<SavePropertyButtonProps & { saved: boolean; toggleSave: ReturnType<typeof useSavedProperties>["toggleSave"] }> = ({ className = "", property, saved, toggleSave, variant = "overlay" }) => (
+  <button type="button" onClick={(event) => toggleSave(property, event)} className={getButtonClass(saved, className, variant)} aria-label={saved ? "Hapus dari tersimpan" : "Simpan properti"}>
+    <Heart size={variant === "outline" ? 20 : 18} className={getHeartClass(saved, variant)} />
+  </button>
+);
 
 const getButtonClass = (saved: boolean, className: string, variant: 'overlay' | 'outline') => {
   const base = "flex items-center justify-center rounded-full transition-all duration-300 hover:scale-110 active:scale-95";

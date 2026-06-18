@@ -15,15 +15,15 @@ interface TenantSidebarProps {
 
 const brandClass = 'text-lg text-slate-900 dark:text-white font-black';
 
-const TenantBrand: FC<{ collapsed: boolean }> = ({ collapsed }) => (
-  collapsed ? null : <span className={brandClass}><span className="text-rose-600">PURWA</span>LOKA</span>
+const TenantBrand: FC<{ collapsed: boolean; onNavigate?: () => void }> = ({ collapsed, onNavigate }) => (
+  collapsed ? null : <Link to="/" onClick={onNavigate} className={brandClass} aria-label="PURWALOKA - Beranda"><span className="text-rose-600">PURWA</span>LOKA</Link>
 );
 
-const SidebarHeader: FC<Pick<TenantSidebarProps, 'collapsed' | 'showCollapse' | 'onToggleCollapse'>> = ({
-  collapsed, showCollapse, onToggleCollapse,
+const SidebarHeader: FC<Pick<TenantSidebarProps, 'collapsed' | 'showCollapse' | 'onNavigate' | 'onToggleCollapse'>> = ({
+  collapsed, showCollapse, onNavigate, onToggleCollapse,
 }) => (
   <div className="flex items-center justify-between border-b p-4 dark:border-slate-700">
-    <TenantBrand collapsed={collapsed} />
+    <TenantBrand collapsed={collapsed} onNavigate={onNavigate} />
     {showCollapse && (
       <button onClick={onToggleCollapse} className="rounded-lg p-1.5 text-gray-500 hover:bg-gray-100 dark:hover:bg-slate-700">
         {collapsed ? <ChevronRight size={18} /> : <ChevronLeft size={18} />}
@@ -76,7 +76,7 @@ export const TenantSidebar: FC<TenantSidebarProps> = ({
   className = '', collapsed, showCollapse = true, userName, onNavigate, onLogout, onToggleCollapse,
 }) => (
   <aside className={`${collapsed ? 'w-16' : 'w-64'} flex shrink-0 flex-col border-r bg-white transition-all duration-300 dark:border-slate-700 dark:bg-slate-800 ${className}`}>
-    <SidebarHeader collapsed={collapsed} showCollapse={showCollapse} onToggleCollapse={onToggleCollapse} />
+    <SidebarHeader collapsed={collapsed} showCollapse={showCollapse} onNavigate={onNavigate} onToggleCollapse={onToggleCollapse} />
     <TenantNavLinks collapsed={collapsed} onNavigate={onNavigate} />
     <AccountActions collapsed={collapsed} userName={userName} onNavigate={onNavigate} onLogout={onLogout} />
   </aside>

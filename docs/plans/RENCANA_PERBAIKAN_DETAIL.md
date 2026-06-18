@@ -16,8 +16,8 @@ Status verifikasi terakhir:
 | Backend build | Lulus |
 | Backend ownership test | Lulus, 10/10 |
 | File source >200 baris | Tidak ditemukan pada `frontend/src` dan `backend/src` |
-| Function length audit | 122 kandidat advisory |
-| Frontend advisory | 109 kandidat |
+| Function length audit | 117 kandidat advisory |
+| Frontend advisory | 104 kandidat |
 | Backend advisory | 13 kandidat |
 | `any` / cast residue | Tidak ditemukan pada scan source |
 | `console.*` | Tidak ditemukan pada scan source |
@@ -127,6 +127,9 @@ Status: selesai.
 - Function advisory reduction batch terbaru: dashboard UI, review UI, saved properties, dan property report presentational parts.
 - Tenant category hardening: max 5 kategori milik sendiri, shared/global tidak dihitung, owner-only mutation tetap aktif.
 - Function advisory batch 18 Juni: 127 -> 122 melalui 5 kandidat presentasional kategori/report.
+- Saved property role guard: USER-only, TENANT hidden/blocked, guest behavior lokal tetap aktif.
+- PURWALOKA tenant sidebar brand sekarang menuju home pada desktop dan mobile drawer.
+- Function advisory batch terbaru: 122 -> 117 melalui 5 kandidat presentasional.
 
 ## Tahap Berikutnya
 
@@ -194,8 +197,8 @@ Prioritas: P2
 
 Status:
 
-- 122 kandidat function/component >15 baris.
-- 109 kandidat di `frontend/src`.
+- 117 kandidat function/component >15 baris.
+- 104 kandidat di `frontend/src`.
 - 13 kandidat di `backend/src`.
 - Ini alat bantu audit, bukan hard rule otomatis.
 

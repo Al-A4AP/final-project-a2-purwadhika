@@ -11,8 +11,8 @@ Dokumen ini sudah disinkronkan dengan kondisi repository setelah refactor batch 
 Hasil audit aktual:
 
 - File source >200 baris pada `frontend/src` dan `backend/src`: tidak ditemukan.
-- Function-length advisory: 122 kandidat.
-- Frontend function advisory: 109 kandidat.
+- Function-length advisory: 117 kandidat.
+- Frontend function advisory: 104 kandidat.
 - Backend function advisory: 13 kandidat.
 - Scan `any`, `as any`, `as unknown as`, `console.log`, dan `debugger`: tidak ditemukan pada `frontend/src` dan `backend/src`.
 - REST API jalur utama resource-oriented; beberapa legacy alias masih aktif untuk backward compatibility.
@@ -22,8 +22,8 @@ Hasil audit aktual:
 | Pemeriksaan | Hasil |
 | --- | --- |
 | Scan file source >200 baris | Tidak ditemukan |
-| `npm run audit:functions` | 122 kandidat manual review, advisory only |
-| Frontend function advisory | 109 kandidat |
+| `npm run audit:functions` | 117 kandidat manual review, advisory only |
+| Frontend function advisory | 104 kandidat |
 | Backend function advisory | 13 kandidat |
 | Scan `any` | Tidak ditemukan |
 | Scan `as any` | Tidak ditemukan |
@@ -60,10 +60,20 @@ Catatan:
 
 Ringkasan aktual:
 
-- Total kandidat: 122.
-- Frontend kandidat: 109.
+- Total kandidat: 117.
+- Frontend kandidat: 104.
 - Backend kandidat: 13.
-- Batch ini menurunkan baseline aktual 127 menjadi 122 melalui tepat 5 kandidat SAFE.
+- Batch terbaru menurunkan baseline 122 menjadi 117 melalui tepat 5 kandidat SAFE.
+
+Kandidat yang selesai pada batch saved-property/navigation:
+
+| File | Function | Before | Result |
+| --- | --- | ---: | --- |
+| `frontend/src/pages/tenant/properties-list/PropertiesHeader.tsx` | `PropertiesHeader` | 20 | Resolved |
+| `frontend/src/pages/tenant/rooms-page/RoomsListSection.tsx` | `RoomsListSection` | 20 | Resolved |
+| `frontend/src/pages/tenant/reports/ReportOrdersCard.tsx` | `ReportOrdersCard` | 19 | Resolved |
+| `frontend/src/pages/tenant/reviews/ReviewsHeader.tsx` | `ReviewsHeader` | 16 | Resolved |
+| `frontend/src/pages/tenant/reviews/TenantReviewCard.tsx` | `TenantReviewCard` | 16 | Resolved |
 
 Kandidat yang selesai pada batch 18 Juni 2026:
 
@@ -309,4 +319,4 @@ Status: masih aktif, bukan blocker runtime.
 
 ## Kesimpulan
 
-Clean code membaik: tidak ada file source aktif >200 baris, residue type/log/debug bersih, dan function advisory turun dari 127 menjadi 122 kandidat pada batch ini. Pekerjaan lanjutan utama adalah refactor kandidat function secara selektif, cleanup folder kosong, PII minimization, dan REST legacy alias cleanup setelah regression test.
+Clean code membaik: tidak ada file source aktif >200 baris, residue type/log/debug bersih, dan function advisory turun dari 122 menjadi 117 kandidat pada batch ini. Pekerjaan lanjutan utama adalah refactor kandidat function secara selektif, cleanup folder kosong, PII minimization, dan REST legacy alias cleanup setelah regression test.

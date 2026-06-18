@@ -6,23 +6,26 @@ import { MAX_PROPERTIES_PER_TENANT } from "@/constants/validation";
 export const PropertiesHeader: FC<{ total: number }> = ({ total }) => {
   const isLimitReached = total >= MAX_PROPERTIES_PER_TENANT;
   return (
-  <div className="flex flex-col gap-6 md:flex-row md:items-end md:justify-between mb-8">
-    <div>
-      <h1 className="text-3xl font-bold tracking-tight text-slate-900 dark:text-white sm:text-4xl">
-        Properti Anda
-      </h1>
-      <p className="mt-2 text-slate-600 dark:text-slate-400">
-        Kelola hotel, apartemen, kost, dan villa yang Anda sewakan.
-      </p>
+    <div className="mb-8 flex flex-col gap-6 md:flex-row md:items-end md:justify-between">
+      <PropertiesHeaderCopy />
+      <PropertyAddControl isLimitReached={isLimitReached} />
     </div>
-    
-    <div className="flex shrink-0 flex-col gap-2">
-      {isLimitReached ? <DisabledAddButton /> : <AddPropertyLink />}
-      {isLimitReached && <p className="max-w-xs text-xs font-medium text-amber-600 dark:text-amber-400">Batas {MAX_PROPERTIES_PER_TENANT} properti sudah tercapai.</p>}
-    </div>
-  </div>
   );
 };
+
+const PropertiesHeaderCopy = () => (
+  <div>
+    <h1 className="text-3xl font-bold tracking-tight text-slate-900 dark:text-white sm:text-4xl">Properti Anda</h1>
+    <p className="mt-2 text-slate-600 dark:text-slate-400">Kelola hotel, apartemen, kost, dan villa yang Anda sewakan.</p>
+  </div>
+);
+
+const PropertyAddControl: FC<{ isLimitReached: boolean }> = ({ isLimitReached }) => (
+  <div className="flex shrink-0 flex-col gap-2">
+    {isLimitReached ? <DisabledAddButton /> : <AddPropertyLink />}
+    {isLimitReached && <p className="max-w-xs text-xs font-medium text-amber-600 dark:text-amber-400">Batas {MAX_PROPERTIES_PER_TENANT} properti sudah tercapai.</p>}
+  </div>
+);
 
 const AddPropertyLink = () => (
   <Link 

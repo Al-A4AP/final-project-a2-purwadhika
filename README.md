@@ -23,6 +23,7 @@ Final Project Purwadhika JCWDBGPM-11, Group 1:
 - Pembayaran via Midtrans atau transfer manual.
 - Voucher aktif: `PERCENTAGE` dan `FREE_NIGHTS`.
 - Riwayat reservasi, properti tersimpan, profile, dan review setelah checkout.
+- Love/properti tersimpan tersedia untuk USER; guest mempertahankan wishlist lokal dan TENANT tidak menerima kontrol love.
 
 ### Tenant
 
@@ -32,6 +33,7 @@ Final Project Purwadhika JCWDBGPM-11, Group 1:
 - Manajemen reservasi dan konfirmasi pembayaran manual.
 - Laporan pendapatan, laporan properti, dan kalender ketersediaan.
 - Review tamu, balasan review, dan penghapusan review sesuai ownership.
+- Brand PURWALOKA pada sidebar tenant dapat diklik untuk kembali ke homepage.
 
 ## Feature Status PURWADHIKA
 
@@ -40,7 +42,7 @@ Final Project Purwadhika JCWDBGPM-11, Group 1:
 | Requirement | Status | Folder/file utama |
 | --- | --- | --- |
 | Homepage / landing page | Tersedia | `frontend/src/pages/user/HomePage.tsx`, `frontend/src/components/user/` |
-| Navbar, hero carousel, property list, footer | Tersedia | `frontend/src/components/layout/`, `frontend/src/components/user/`, `frontend/src/pages/user/home/` |
+| Navbar, hero carousel, property list, footer | Tersedia; brand PURWALOKA menuju home | `frontend/src/components/layout/`, `frontend/src/components/user/`, `frontend/src/pages/user/home/` |
 | Search kota, tanggal, durasi/tamu | Tersedia | `frontend/src/components/user/search/`, `frontend/src/hooks/user/explore/` |
 | Explore property list dengan pagination/filter/sort | Tersedia | `frontend/src/pages/user/ExplorePage.tsx`, `backend/src/services/propertyList/` |
 | Auth user dan tenant | Tersedia | `frontend/src/pages/auth/`, `frontend/src/hooks/auth/`, `backend/src/routes/authRoutes.ts` |
@@ -231,5 +233,5 @@ Status dokumentasi terakhir: 18 Juni 2026.
 - Frontend lint dan build terakhir lulus.
 - Backend build dan ownership test terakhir lulus (10/10).
 - File source aktif `frontend/src` dan `backend/src` saat ini tidak melewati 200 baris.
-- Function-length audit adalah alat bantu advisory, bukan blocker build; snapshot terbaru 122 kandidat.
+- Function-length audit adalah alat bantu advisory, bukan blocker build; snapshot terbaru 117 kandidat.
 - Dokumentasi audit, rencana perbaikan, dan handover tersedia di folder [`docs`](./docs/README.md).
