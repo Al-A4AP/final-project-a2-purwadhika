@@ -9,6 +9,12 @@ export interface PropertyCategory {
   updated_at?: string;
 }
 
+export interface CategoryQuota {
+  limit: number;
+  owned: number;
+  remaining: number;
+}
+
 export interface Property {
   id: string;
   tenantId: string;

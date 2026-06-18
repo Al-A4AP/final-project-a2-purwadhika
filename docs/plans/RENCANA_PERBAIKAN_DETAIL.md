@@ -1,6 +1,6 @@
 # Rencana Perbaikan Detail
 
-Tanggal update: 17 Juni 2026  
+Tanggal update: 18 Juni 2026
 Acuan: audit final hardening, clean code, REST API guidelines, ownership, security, dan PURWADHIKA.
 
 ## Ringkasan
@@ -14,11 +14,11 @@ Status verifikasi terakhir:
 | Frontend lint | Lulus |
 | Frontend build | Lulus |
 | Backend build | Lulus |
-| Backend ownership test | Lulus, 7/7 |
+| Backend ownership test | Lulus, 10/10 |
 | File source >200 baris | Tidak ditemukan pada `frontend/src` dan `backend/src` |
-| Function length audit | 137 kandidat advisory |
-| Frontend advisory | 122 kandidat |
-| Backend advisory | 15 kandidat |
+| Function length audit | 122 kandidat advisory |
+| Frontend advisory | 109 kandidat |
+| Backend advisory | 13 kandidat |
 | `any` / cast residue | Tidak ditemukan pada scan source |
 | `console.*` | Tidak ditemukan pada scan source |
 | `debugger` | Tidak ditemukan |
@@ -125,6 +125,8 @@ Status: selesai.
 - Explore search query consistency: tombol `Cari` dan `Terapkan Filter` memakai helper query Explore yang sama.
 - Login attempt guard: 5 gagal login -> lock 15 menit.
 - Function advisory reduction batch terbaru: dashboard UI, review UI, saved properties, dan property report presentational parts.
+- Tenant category hardening: max 5 kategori milik sendiri, shared/global tidak dihitung, owner-only mutation tetap aktif.
+- Function advisory batch 18 Juni: 127 -> 122 melalui 5 kandidat presentasional kategori/report.
 
 ## Tahap Berikutnya
 
@@ -192,9 +194,9 @@ Prioritas: P2
 
 Status:
 
-- 137 kandidat function/component >15 baris.
-- 122 kandidat di `frontend/src`.
-- 15 kandidat di `backend/src`.
+- 122 kandidat function/component >15 baris.
+- 109 kandidat di `frontend/src`.
+- 13 kandidat di `backend/src`.
 - Ini alat bantu audit, bukan hard rule otomatis.
 
 Rencana:

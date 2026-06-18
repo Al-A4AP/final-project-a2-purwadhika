@@ -17,8 +17,16 @@ const CategoriesPage: FC = () => {
 const CategoryPageView: FC<{ view: CategoryViewState }> = ({ view }) => (
   <div className="min-h-screen bg-slate-50 px-4 py-8 md:p-10 dark:bg-slate-900 pb-24">
     <div className="mx-auto max-w-7xl">
-      <CategoriesHeader onAdd={view.openAddModal} />
-      <CategoriesSummary total={view.data.pagination.total || 0} />
+      <CategoriesHeader
+        categoryLimit={view.data.categoryQuota.limit}
+        disabled={view.categoryLimitReached}
+        onAdd={view.openAddModal}
+      />
+      <CategoriesSummary
+        categoryLimit={view.data.categoryQuota.limit}
+        owned={view.data.categoryQuota.owned}
+        total={view.data.pagination.total || 0}
+      />
       <CategorySortPanel view={view} />
       
       <div className="mt-6">

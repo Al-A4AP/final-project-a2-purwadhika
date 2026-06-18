@@ -2,22 +2,26 @@ import { OrderStatus, PaymentMethod } from '@prisma/client';
 import prisma from '../../config/prisma';
 import { AppError } from '../../middlewares/errorHandler';
 import { sendCancellationEmail, sendManualRefundTenantEmail } from '../../utils/emailService';
+import { USER_CANCELLED_AFTER_PROOF_REASON } from '../../constants/orderConstants';
 
 export const cancelUserOrder = async (orderId: string, userId: string) => {
   const order = await findUserOrder(orderId, userId);
   assertCancelableOrder(order);
+  const isManualConfirmation = requiresManualRefund(order);
   
   const updatedOrder = await prisma.order.update({
     where: { id: order.id },
-    data: { status: OrderStatus.CANCELLED, canceled_at: new Date() },
+    data: {
+      status: OrderStatus.CANCELLED,
+      canceled_at: new Date(),
+      payment_rejection_reason: isManualConfirmation ? USER_CANCELLED_AFTER_PROOF_REASON : null,
+    },
     include: {
       user: { select: { email: true, name: true } },
       property: { select: { name: true, tenant: { select: { email: true, name: true } } } }
     }
   });
 
-  const isManualConfirmation = order.status === OrderStatus.WAITING_CONFIRMATION && order.payment_method === PaymentMethod.MANUAL && Boolean(order.payment_proof_url);
-  
   await sendCancellationEmail(updatedOrder.user.email, updatedOrder.order_number, "Dibatalkan oleh pengguna", isManualConfirmation).catch(() => {});
   
   if (isManualConfirmation) {
@@ -44,3 +48,8 @@ const assertCancelableOrder = (order: UserOrderRecord) => {
 };
 
 type UserOrderRecord = Awaited<ReturnType<typeof findUserOrder>>;
+
+const requiresManualRefund = (order: NonNullable<UserOrderRecord>) =>
+  order.status === OrderStatus.WAITING_CONFIRMATION
+  && order.payment_method === PaymentMethod.MANUAL
+  && Boolean(order.payment_proof_url);

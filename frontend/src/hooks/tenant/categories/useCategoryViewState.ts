@@ -38,6 +38,7 @@ const buildCategoryViewState = (
   handleDelete: () => Promise<void>,
 ): CategoryViewState => ({
   data,
+  categoryLimitReached: data.categoryQuota.remaining === 0,
   ...pickModalState(modal),
   ...buildCategoryActions(modal, handleSave, handleDelete),
   totalPages: getTotalPages(data),
@@ -90,6 +91,7 @@ type CategoryModalState = ReturnType<typeof useCategoryModalState>;
 type SetCategory = (category: PropertyCategory | null) => void;
 
 export interface CategoryViewState {
+  categoryLimitReached: boolean;
   closeModal: () => void;
   data: CategoryData;
   editing: PropertyCategory | null;

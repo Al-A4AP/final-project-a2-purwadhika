@@ -1,6 +1,7 @@
 import { OrderStatus, PaymentMethod } from '@prisma/client';
 import prisma from '../../config/prisma';
 import { AppError } from '../../middlewares/errorHandler';
+import { REFUND_REQUIRED_REASON_PREFIX } from '../../constants/orderConstants';
 
 export const markRefundComplete = async (orderId: string, tenantId: string) => {
   const order = await prisma.order.findFirst({
@@ -21,6 +22,10 @@ export const markRefundComplete = async (orderId: string, tenantId: string) => {
 
   if (!order.payment_proof_url) {
     throw new AppError('Pesanan tidak memiliki bukti pembayaran, tidak memerlukan refund.', 400);
+  }
+
+  if (!order.payment_rejection_reason?.startsWith(REFUND_REQUIRED_REASON_PREFIX)) {
+    throw new AppError('Pesanan ini tidak memiliki status refund yang valid.', 400);
   }
 
   if (order.refund_completed_at !== null) {

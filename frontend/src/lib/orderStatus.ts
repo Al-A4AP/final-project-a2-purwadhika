@@ -2,6 +2,8 @@ import type { Order } from '@/types';
 import type { OrderStatus } from '@/types';
 import { ORDER_STATUS_LABELS } from './constants';
 
+const REFUND_REQUIRED_REASON_PREFIX = "REFUND_REQUIRED:";
+
 export const isOrderStatus = (status: string): status is OrderStatus =>
   status in ORDER_STATUS_LABELS;
 
@@ -15,8 +17,12 @@ export const canReviewOrder = (order: Order) => {
 };
 
 export const getUserRefundStatus = (order: Order): "PENDING" | "COMPLETED" | null => {
-  if (order.status === "CANCELLED" && order.payment_method === "MANUAL" && order.payment_proof_url) {
-    return order.refund_completed_at ? "COMPLETED" : "PENDING";
-  }
-  return null;
+  if (!isManualRefundEligible(order)) return null;
+  return order.refund_completed_at ? "COMPLETED" : "PENDING";
 };
+
+export const isManualRefundEligible = (order: Order) =>
+  order.status === "CANCELLED"
+  && order.payment_method === "MANUAL"
+  && Boolean(order.payment_proof_url)
+  && Boolean(order.payment_rejection_reason?.startsWith(REFUND_REQUIRED_REASON_PREFIX));

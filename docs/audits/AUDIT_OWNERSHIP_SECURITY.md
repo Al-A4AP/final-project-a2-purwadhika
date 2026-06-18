@@ -1,12 +1,12 @@
 # Audit Ownership dan Keamanan
 
-Tanggal audit: 17 Juni 2026  
+Tanggal audit: 18 Juni 2026
 Project: PURWALOKA - Property Renting Web App  
 Acuan: ownership data, authorization, browser storage, PII, transaksi, dan hardening backend.
 
 ## Ringkasan
 
-Ownership dasar berada pada kondisi baik. Regression test ownership lulus 7/7. Auth token memakai HTTP-only cookie, bukan localStorage. Persistent token blacklist sudah database-backed dan bukan in-memory, sehingga aman untuk deployment multi-instance.
+Ownership dasar berada pada kondisi baik. Regression test ownership lulus 10/10, termasuk category owner scope dan category quota scope. Auth token memakai HTTP-only cookie, bukan localStorage. Persistent token blacklist sudah database-backed dan bukan in-memory, sehingga aman untuk deployment multi-instance.
 
 Risiko besar yang sebelumnya aktif sudah diturunkan:
 
@@ -29,13 +29,13 @@ Risiko yang masih perlu ditindaklanjuti:
 
 | Pemeriksaan | Hasil |
 | --- | --- |
-| `backend npm run test:ownership` | Lulus, 7/7 |
+| `backend npm run test:ownership` | Lulus, 10/10 |
 | `backend npm run build` | Lulus |
 | `frontend npm run build` | Lulus |
 | `frontend npm run lint` | Lulus |
 | Scan browser storage | Tidak ditemukan auth token aktif di localStorage |
 | File source >200 baris | Tidak ditemukan pada `frontend/src` dan `backend/src` |
-| Function-length advisory | 137 kandidat: 122 frontend, 15 backend |
+| Function-length advisory | 122 kandidat: 109 frontend, 13 backend |
 | Unsafe type/log residue | Tidak ditemukan `any`, `as any`, `as unknown as`, `console.log`, atau `debugger` pada scan source |
 
 ## Ownership
@@ -75,6 +75,20 @@ Kasus yang lulus:
 - Tenant tidak bisa akses peak rate tenant lain.
 - Tenant tidak bisa reply review property tenant lain.
 - Tenant tidak bisa delete review property tenant lain.
+- Tenant tidak bisa update kategori tenant lain.
+- Tenant tidak bisa membuat kategori milik sendiri ke-6.
+- Penghitungan limit kategori hanya memakai kategori milik tenant terautentikasi.
+
+### Category Ownership dan Quota
+
+Status: implemented.
+
+- Semua tenant dapat memilih kategori sistem/global dan kategori tenant lain.
+- Edit/delete hanya diperbolehkan untuk pemilik kategori.
+- Tenant maksimal membuat 5 kategori milik sendiri.
+- Kategori sistem/global dan kategori tenant lain tidak dihitung dalam kuota.
+- Create memakai transaction advisory lock per tenant untuk mencegah request paralel melewati limit.
+- Frontend disable tombol tambah adalah UX guard; backend tetap source of truth.
 
 ## Auth dan Session Security
 

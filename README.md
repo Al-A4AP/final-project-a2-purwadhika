@@ -27,7 +27,7 @@ Final Project Purwadhika JCWDBGPM-11, Group 1:
 ### Tenant
 
 - Dashboard tenant dengan ringkasan operasional.
-- CRUD kategori, properti, kamar, ketersediaan, dan peak season.
+- CRUD kategori, properti, kamar, ketersediaan, dan peak season; kategori shared dengan limit 5 kategori milik sendiri per tenant.
 - Manajemen voucher tenant.
 - Manajemen reservasi dan konfirmasi pembayaran manual.
 - Laporan pendapatan, laporan properti, dan kalender ketersediaan.
@@ -48,7 +48,7 @@ Final Project Purwadhika JCWDBGPM-11, Group 1:
 | Login, logout, reset password, Google auth | Tersedia | `frontend/src/pages/auth/`, `backend/src/controllers/authController.ts` |
 | Profile user dan tenant | Tersedia | `frontend/src/pages/user/ProfilePage.tsx`, `frontend/src/components/user/profile/`, `backend/src/services/userService.ts` |
 | Property detail, kamar, harga, availability, review | Tersedia | `frontend/src/pages/user/PropertyDetailPage.tsx`, `frontend/src/components/property/`, `backend/src/services/propertyDetailService.ts` |
-| Tenant category CRUD | Tersedia | `frontend/src/pages/tenant/CategoriesPage.tsx`, `backend/src/services/categoryService.ts` |
+| Tenant category CRUD | Tersedia; shared, owner-only mutation, max 5 kategori milik sendiri | `frontend/src/pages/tenant/CategoriesPage.tsx`, `backend/src/services/categoryService.ts` |
 | Tenant property CRUD | Tersedia | `frontend/src/pages/tenant/PropertiesListPage.tsx`, `frontend/src/pages/tenant/PropertyFormPage.tsx`, `backend/src/services/tenantPropertyService.ts` |
 | Tenant room CRUD | Tersedia | `frontend/src/pages/tenant/RoomsPage.tsx`, `backend/src/services/tenantRoomService.ts` |
 | Room availability management | Tersedia | `frontend/src/components/tenant/OccupancyCalendar.tsx`, `backend/src/services/availabilityService.ts` |
@@ -226,10 +226,10 @@ npm run test:ownership
 
 ## Current Project Status
 
-Status dokumentasi terakhir: 17 Juni 2026.
+Status dokumentasi terakhir: 18 Juni 2026.
 
 - Frontend lint dan build terakhir lulus.
-- Backend build dan ownership test terakhir lulus.
+- Backend build dan ownership test terakhir lulus (10/10).
 - File source aktif `frontend/src` dan `backend/src` saat ini tidak melewati 200 baris.
-- Function-length audit adalah alat bantu advisory, bukan blocker build.
+- Function-length audit adalah alat bantu advisory, bukan blocker build; snapshot terbaru 122 kandidat.
 - Dokumentasi audit, rencana perbaikan, dan handover tersedia di folder [`docs`](./docs/README.md).

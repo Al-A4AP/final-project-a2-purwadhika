@@ -3,6 +3,7 @@ import type { Order } from "@/types";
 import { formatDate, formatPrice } from "@/lib/formatters";
 import { OrderStatusBadge } from "../OrderStatusBadge";
 import { PaymentProofLink } from "./PaymentProofLink";
+import { getUserRefundStatus } from "@/lib/orderStatus";
 
 export const OrderGuestCell: FC<{ order: Order }> = ({ order }) => (
   <td className="px-6 py-4">
@@ -46,27 +47,18 @@ export const OrderPaymentCell: FC<{ order: Order }> = ({ order }) => (
 );
 
 export const OrderStatusCell: FC<{ order: Order }> = ({ order }) => {
-  const needsRefund =
-    order.status === "CANCELLED" &&
-    order.payment_method === "MANUAL" &&
-    order.payment_proof_url &&
-    !order.refund_completed_at;
-  const refundCompleted =
-    order.status === "CANCELLED" &&
-    order.payment_method === "MANUAL" &&
-    order.payment_proof_url &&
-    order.refund_completed_at;
+  const refundStatus = getUserRefundStatus(order);
 
   return (
     <td className="px-6 py-4">
       <div className="flex flex-col items-start gap-2">
         <OrderStatusBadge status={order.status} />
-        {needsRefund && (
+        {refundStatus === "PENDING" && (
           <span className="inline-flex items-center justify-center rounded-md px-2 py-1 text-center text-xs font-medium bg-orange-100 text-orange-800">
             Refund Diperlukan
           </span>
         )}
-        {refundCompleted && (
+        {refundStatus === "COMPLETED" && (
           <span className="inline-flex items-center justify-center rounded-md px-2 py-1 text-center text-xs font-medium bg-emerald-100 text-emerald-800">
             Refund Selesai
           </span>

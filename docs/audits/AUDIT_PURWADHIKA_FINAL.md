@@ -1,12 +1,12 @@
 # Audit Keseluruhan PURWADHIKA
 
-Tanggal audit: 17 Juni 2026  
+Tanggal audit: 18 Juni 2026
 Project: PURWALOKA - Property Renting Web App  
 Acuan: `docs/guidelines/PURWADHIKA.md`
 
 ## Ringkasan Eksekutif
 
-Project PURWALOKA sudah memiliki cakupan fitur utama yang luas dan semakin mendekati final-ready. Audit final hardening 17 Juni 2026 menunjukkan lint/build/test utama lulus dan beberapa risiko besar sebelumnya sudah ditangani pada flow aktif.
+Project PURWALOKA sudah memiliki cakupan fitur utama yang luas dan semakin mendekati final-ready. Audit lanjutan 18 Juni 2026 menunjukkan lint/build/test utama lulus, category ownership/limit diperkuat, dan function advisory turun secara aman.
 
 Perubahan penting yang sudah tercermin pada kondisi project:
 
@@ -23,6 +23,7 @@ Perubahan penting yang sudah tercermin pada kondisi project:
 - Rule maksimal 5 jenis kamar dan stock maksimal 20 sudah diterapkan.
 - Double booking protection sudah memakai advisory lock, availability recheck, dan atomic voucher update.
 - Explore search query inconsistency sudah diselesaikan: tombol `Cari` dan `Terapkan Filter` memakai helper query Explore yang sama.
+- Tenant category maksimal 5 milik sendiri; kategori global dan tenant lain tetap dapat dipakai serta tidak dihitung.
 
 Catatan utama: perlindungan double booking tetap membutuhkan manual concurrency QA sebelum dinyatakan selesai secara operasional.
 
@@ -48,11 +49,11 @@ Item berikut sudah dipindahkan ke resolved pada source flow aktif:
 | Frontend lint | Lulus |
 | Frontend build | Lulus |
 | Backend build | Lulus |
-| Backend ownership test | Lulus, 7/7 |
+| Backend ownership test | Lulus, 10/10 |
 | File source >200 baris | Tidak ditemukan pada `frontend/src` dan `backend/src` |
-| Function length audit advisory | 137 kandidat manual review |
-| Frontend function advisory | 122 kandidat |
-| Backend function advisory | 15 kandidat |
+| Function length audit advisory | 122 kandidat manual review |
+| Frontend function advisory | 109 kandidat |
+| Backend function advisory | 13 kandidat |
 | `any` / cast residue | Tidak ditemukan pada scan source |
 | `console.*` | Tidak ditemukan pada scan source |
 | `debugger` | Tidak ditemukan |
@@ -171,6 +172,9 @@ Catatan:
 
 - Rule maksimal 5 jenis kamar sudah diterapkan.
 - Rule stock maksimal 20 sudah diterapkan.
+- Rule maksimal 5 kategori milik sendiri per tenant sudah diterapkan di backend.
+- Kategori sistem/global dan kategori tenant lain tetap selectable dan tidak mengurangi kuota.
+- Edit/delete kategori tetap owner-only; tombol tambah dinonaktifkan saat kuota habis.
 - Whole-property/room quantity logic tetap harus memakai backend sebagai source of truth.
 
 ## Feature 2
@@ -308,7 +312,7 @@ Status: buildable dan lint lulus.
 Catatan:
 
 - Tidak ada file >200 baris.
-- 122 kandidat function/component frontend masih menjadi advisory manual review.
+- 109 kandidat function/component frontend masih menjadi advisory manual review.
 
 ### Backend
 
@@ -317,7 +321,7 @@ Status: buildable dan ownership test lulus.
 Catatan:
 
 - Tidak ditemukan file source aktif >200 baris pada `frontend/src` dan `backend/src`.
-- 15 kandidat function backend masih menjadi advisory manual review.
+- 13 kandidat function backend masih menjadi advisory manual review.
 - Sisa file >200 baris perlu dibersihkan bertahap.
 
 ### Clean Code
@@ -327,7 +331,7 @@ Status: membaik pada type/log residue, masih perlu file-size cleanup.
 Temuan tersisa:
 
 - Tidak ditemukan file source aktif >200 baris pada `frontend/src` dan `backend/src`.
-- 137 function-length advisory candidates.
+- 122 function-length advisory candidates.
 - Tidak ditemukan `as any`, `as unknown as`, `console.*`, atau `debugger` pada scan source.
 - `orderService.ts` sudah turun dari sekitar 377 baris menjadi 184 baris.
 - `voucherService.ts` sudah turun dari 203 baris menjadi 116 baris.
@@ -346,4 +350,4 @@ Temuan tersisa:
 
 ## Kesimpulan
 
-Project sudah jauh lebih stabil dibanding audit sebelumnya. Status 17 Juni 2026 adalah **mendekati final-ready**, dengan catatan manual QA concurrency/payment expiry dan privacy minimization masih perlu diselesaikan sebelum klaim final produksi.
+Project sudah jauh lebih stabil dibanding audit sebelumnya. Status 18 Juni 2026 adalah **mendekati final-ready**, dengan catatan manual QA concurrency/payment expiry dan privacy minimization masih perlu diselesaikan sebelum klaim final produksi.

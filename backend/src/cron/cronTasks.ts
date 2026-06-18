@@ -1,6 +1,6 @@
 import { sendBookingReminderEmail, sendCancellationEmail } from '../utils/emailService';
-import { getManualConfirmationCutoff } from '../constants/orderConstants';
-import { cancelOrder, completeOrder, findCheckInReminderOrders, findExpiredManualConfirmationOrders, findExpiredUnpaidOrders, findProcessedOrdersAfterCheckout, updateCheckInReminderSent } from './cronQueries';
+import { getManualConfirmationCutoff, MANUAL_CONFIRMATION_EXPIRED_REASON } from '../constants/orderConstants';
+import { cancelExpiredManualConfirmationOrder, cancelOrder, completeOrder, findCheckInReminderOrders, findExpiredManualConfirmationOrders, findExpiredUnpaidOrders, findProcessedOrdersAfterCheckout, updateCheckInReminderSent } from './cronQueries';
 import { getCheckInReminderRange } from './cronRanges';
 import type { ExpiredManualConfirmationOrder, ExpiredOrder, ProcessedOrder, ReminderOrder } from './cronQueries';
 
@@ -39,7 +39,7 @@ const cancelExpiredOrder = async (order: ExpiredOrder, now: Date) => {
   await sendCancellationEmail(order.user.email, order.order_number, 'Batas waktu pembayaran telah berakhir').catch(() => {});
 };
 const cancelExpiredManualConfirmation = async (order: ExpiredManualConfirmationOrder, now: Date) => {
-  await cancelOrder(order.id, now);
+  await cancelExpiredManualConfirmationOrder(order.id, now, MANUAL_CONFIRMATION_EXPIRED_REASON);
   await sendCancellationEmail(order.user.email, order.order_number, 'Batas waktu konfirmasi pembayaran telah berakhir').catch(() => {});
 };
 const completeProcessedOrder = (order: ProcessedOrder, now: Date) => completeOrder(order.id, now);

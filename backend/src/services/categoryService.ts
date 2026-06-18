@@ -1,11 +1,14 @@
 import type { Prisma } from "@prisma/client";
 import prisma from "../config/prisma";
+import { MAX_CATEGORIES_PER_TENANT } from "../constants/validation";
 import { AppError } from "../middlewares/errorHandler";
 import type {
   CategoryInput,
   CategoryQuery,
 } from "../validations/categoryValidation";
 import { isDefaultCategoryName } from "./category/defaultCategories";
+
+type CategoryTransaction = Prisma.TransactionClient;
 
 const normalizePagination = (page?: number, limit?: number) => ({
   page: Math.max(1, Number(page || 1)),
@@ -27,10 +30,10 @@ const buildOrderBy = (
 
 const ensureNameAvailable = async (
   name: string,
-  tenantId: string, // Kept for signature compatibility
+  database: Pick<CategoryTransaction, "propertyCategory"> = prisma,
   exceptId?: string,
 ) => {
-  const existing = await prisma.propertyCategory.findFirst({
+  const existing = await database.propertyCategory.findFirst({
     where: {
       name: { equals: name.trim(), mode: "insensitive" as const },
       ...(exceptId ? { id: { not: exceptId } } : {}),
@@ -61,6 +64,23 @@ const ensureNotUsed = async (categoryId: string) => {
     throw new AppError("Kategori tidak dapat diubah atau dihapus karena sudah digunakan oleh properti.", 409);
 };
 
+const findCategoryPage = (
+  where: Prisma.PropertyCategoryWhereInput,
+  orderBy: Prisma.PropertyCategoryOrderByWithRelationInput,
+  page: number,
+  limit: number,
+  tenantId: string,
+) => Promise.all([
+  prisma.propertyCategory.findMany({
+    where,
+    orderBy,
+    skip: (page - 1) * limit,
+    take: limit,
+  }),
+  prisma.propertyCategory.count({ where }),
+  prisma.propertyCategory.count({ where: { tenantId } }),
+]);
+
 export const listCategories = async (
   tenantId: string,
   query: CategoryQuery,
@@ -68,30 +88,27 @@ export const listCategories = async (
   const { page, limit } = normalizePagination(query.page, query.limit);
   const where = buildSearchWhere(query.search);
   const orderBy = buildOrderBy(query.sortBy, query.sortOrder);
-  const [categories, total] = await Promise.all([
-    prisma.propertyCategory.findMany({
-      where,
-      orderBy,
-      skip: (page - 1) * limit,
-      take: limit,
-    }),
-    prisma.propertyCategory.count({ where }),
-  ]);
+  const [categories, total, owned] = await findCategoryPage(where, orderBy, page, limit, tenantId);
   return {
     categories,
+    categoryQuota: buildCategoryQuota(owned),
     pagination: { total, page, limit, totalPages: Math.ceil(total / limit) },
   };
 };
 
 export const createCategory = async (tenantId: string, data: CategoryInput) => {
-  await ensureNameAvailable(data.name, tenantId);
-  return prisma.propertyCategory.create({
-    data: { 
-      name: data.name.trim(), 
-      description: data.description,
-      default_rental_type: data.default_rental_type,
-      tenantId 
-    },
+  return prisma.$transaction(async (tx) => {
+    await lockTenantCategoryCreate(tx, tenantId);
+    await ensureCategoryLimit(tx, tenantId);
+    await ensureNameAvailable(data.name, tx);
+    return tx.propertyCategory.create({
+      data: {
+        name: data.name.trim(),
+        description: data.description,
+        default_rental_type: data.default_rental_type,
+        tenantId,
+      },
+    });
   });
 };
 
@@ -103,7 +120,7 @@ export const updateCategory = async (
   const category = await findTenantCategory(id, tenantId);
   ensureCustomCategory(category.name, "diubah");
   await ensureNotUsed(id);
-  await ensureNameAvailable(data.name, tenantId, id);
+  await ensureNameAvailable(data.name, prisma, id);
   return prisma.propertyCategory.update({
     where: { id },
     data: { 
@@ -119,4 +136,27 @@ export const deleteCategory = async (id: string, tenantId: string) => {
   ensureCustomCategory(category.name, "dihapus");
   await ensureNotUsed(id);
   await prisma.propertyCategory.delete({ where: { id } });
+};
+
+const buildCategoryQuota = (owned: number) => ({
+  limit: MAX_CATEGORIES_PER_TENANT,
+  owned,
+  remaining: Math.max(0, MAX_CATEGORIES_PER_TENANT - owned),
+});
+
+const lockTenantCategoryCreate = (
+  tx: CategoryTransaction,
+  tenantId: string,
+) => tx.$executeRaw`
+  SELECT pg_advisory_xact_lock(hashtextextended(${"tenant-category:" + tenantId}, 0))
+`;
+
+const ensureCategoryLimit = async (
+  tx: CategoryTransaction,
+  tenantId: string,
+) => {
+  const owned = await tx.propertyCategory.count({ where: { tenantId } });
+  if (owned >= MAX_CATEGORIES_PER_TENANT) {
+    throw new AppError(`Maksimal ${MAX_CATEGORIES_PER_TENANT} kategori milik sendiri per tenant.`, 400);
+  }
 };

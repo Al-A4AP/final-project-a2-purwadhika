@@ -1,6 +1,6 @@
 import { api } from './api';
 import type {
-  ApiResponse, DashboardStats, TenantProperty, TenantPropertyDetail,
+  ApiResponse, CategoryQuota, DashboardStats, TenantProperty, TenantPropertyDetail,
   RoomWithPeakRates, PeakSeasonRate, RoomFormInput, PaginationMeta, PropertyCategory, DashboardRevenuePeriod,
   PropertyImage, Review, RoomImage, TenantReviewSummary
 } from '@/types';
@@ -61,8 +61,8 @@ export const tenantService = {
     sortOrder?: 'asc' | 'desc';
     page?: number;
     limit?: number;
-  }): Promise<{ categories: PropertyCategory[]; pagination: PaginationMeta }> {
-    const res = await api.get<ApiResponse<{ categories: PropertyCategory[]; pagination: PaginationMeta }>>(buildUrl('/tenants/me/categories', params));
+  }): Promise<{ categories: PropertyCategory[]; categoryQuota: CategoryQuota; pagination: PaginationMeta }> {
+    const res = await api.get<ApiResponse<{ categories: PropertyCategory[]; categoryQuota: CategoryQuota; pagination: PaginationMeta }>>(buildUrl('/tenants/me/categories', params));
     return res.data.data;
   },
   async createCategory(data: { name: string; description?: string; default_rental_type?: string }): Promise<PropertyCategory> {

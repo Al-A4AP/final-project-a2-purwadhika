@@ -16,6 +16,22 @@ export const cancelOrder = (orderId: string, now: Date) => prisma.order.update({
   data: { status: 'CANCELLED', canceled_at: now },
 });
 
+export const cancelExpiredManualConfirmationOrder = (
+  orderId: string,
+  now: Date,
+  reason: string,
+) => prisma.order.update({
+  where: { id: orderId },
+  data: {
+    status: 'CANCELLED',
+    canceled_at: now,
+    payment_proof_url: null,
+    payment_rejection_reason: reason,
+    refund_completed_at: null,
+    refund_completed_by: null,
+  },
+});
+
 export const findProcessedOrdersAfterCheckout = (now: Date) => prisma.order.findMany({
   where: { status: 'PROCESSED', check_out_date: { lt: now } },
 });

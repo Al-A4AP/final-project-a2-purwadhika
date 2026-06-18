@@ -22,10 +22,7 @@ interface ReportsFilterPanelProps {
 
 export const ReportsFilterPanel: FC<ReportsFilterPanelProps> = ({ actions, filters, properties }) => (
   <div className="rounded-2xl border border-slate-100 bg-white p-5 shadow-sm dark:border-slate-800 dark:bg-slate-900">
-    <div className="mb-4 flex items-center gap-2 border-b border-slate-100 pb-4 dark:border-slate-800">
-      <Filter className="h-5 w-5 text-slate-500" />
-      <h3 className="font-semibold text-slate-900 dark:text-white">Filter Laporan</h3>
-    </div>
+    <ReportsFilterHeader />
     <ReportsFilterGrid>
       <PropertyFilter properties={properties} filters={filters} actions={actions} />
       <RevenuePeriodFilter filters={filters} actions={actions} />
@@ -36,6 +33,13 @@ export const ReportsFilterPanel: FC<ReportsFilterPanelProps> = ({ actions, filte
       <SortFilter filters={filters} actions={actions} />
       <ResetButton onReset={actions.resetFilters} />
     </ReportsFilterGrid>
+  </div>
+);
+
+const ReportsFilterHeader = () => (
+  <div className="mb-4 flex items-center gap-2 border-b border-slate-100 pb-4 dark:border-slate-800">
+    <Filter className="h-5 w-5 text-slate-500" />
+    <h3 className="font-semibold text-slate-900 dark:text-white">Filter Laporan</h3>
   </div>
 );
 

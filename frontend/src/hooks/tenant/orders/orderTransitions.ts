@@ -2,14 +2,13 @@ import { getOrderStatusLabel } from "@/lib/orderStatus";
 import type { OrderStatus } from "@/types";
 
 export const ALLOWED_ORDER_TRANSITIONS: Partial<Record<OrderStatus, OrderStatus[]>> = {
-  WAITING_CONFIRMATION: ["PROCESSED", "CANCELLED", "WAITING_PAYMENT"],
+  WAITING_CONFIRMATION: ["PROCESSED", "CANCELLED"],
   WAITING_PAYMENT: ["CANCELLED"],
 };
 
 export const getConfirmMessage = (status: string) => {
   if (status === "PROCESSED") return "Terima pembayaran dan proses pesanan ini?";
-  if (status === "CANCELLED") return "Batalkan pesanan ini?";
-  if (status === "WAITING_PAYMENT") return "Tolak bukti pembayaran dan kembalikan ke status Menunggu Pembayaran?";
+  if (status === "CANCELLED") return "Batalkan pesanan ini? Pembayaran manual yang sudah memiliki bukti bayar akan ditandai memerlukan refund.";
   return `Ubah status pesanan menjadi ${getOrderStatusLabel(status)}?`;
 };
 

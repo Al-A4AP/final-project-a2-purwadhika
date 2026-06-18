@@ -1,9 +1,9 @@
 import { useCallback, useEffect, useReducer } from 'react';
 import { toast } from 'react-hot-toast';
-import { CATEGORY_DESCRIPTION_MAX_LENGTH } from '@/constants/validation';
+import { CATEGORY_DESCRIPTION_MAX_LENGTH, MAX_CATEGORIES_PER_TENANT } from '@/constants/validation';
 import { getApiErrorMessage } from '@/lib/errorMessage';
 import { tenantService } from '@/services/tenantService';
-import type { PaginationMeta, PropertyCategory } from '@/types';
+import type { CategoryQuota, PaginationMeta, PropertyCategory } from '@/types';
 
 type Patch = Partial<CategoryState>;
 type CategorySortBy = 'name' | 'updated_at';
@@ -11,6 +11,7 @@ type CategorySortOrder = 'asc' | 'desc';
 
 interface CategoryState {
   categories: PropertyCategory[];
+  categoryQuota: CategoryQuota;
   pagination: PaginationMeta;
   error: string | null;
   loading: boolean;
@@ -22,6 +23,7 @@ interface CategoryState {
 
 const initialState: CategoryState = {
   categories: [],
+  categoryQuota: { limit: MAX_CATEGORIES_PER_TENANT, owned: 0, remaining: MAX_CATEGORIES_PER_TENANT },
   pagination: { page: 1, limit: 10, total: 0, totalPages: 1 },
   error: null,
   loading: true,
@@ -43,7 +45,7 @@ const useCategoryLoad = (dispatch: React.Dispatch<{ patch: Patch }>, sortBy: Cat
     dispatch({ patch: { error: null, loading: true } });
     try {
       const data = await tenantService.getCategories({ sortBy, sortOrder, page, limit: 10 });
-      dispatch({ patch: { categories: data.categories, error: null, pagination: data.pagination } });
+      dispatch({ patch: { categories: data.categories, categoryQuota: data.categoryQuota, error: null, pagination: data.pagination } });
     } catch (err) { handleCategoryLoadError(err, dispatch); }
     finally { dispatch({ patch: { loading: false } }); }
   }, [dispatch, sortBy, sortOrder]);

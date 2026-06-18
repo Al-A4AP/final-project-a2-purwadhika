@@ -1,6 +1,6 @@
 # Audit Clean Code dan REST API Guidelines
 
-Tanggal audit: 17 Juni 2026  
+Tanggal audit: 18 Juni 2026
 Project: PURWALOKA - Property Renting Web App  
 Acuan: `docs/guidelines/PURWADHIKA.md`, `docs/guidelines/REST_API_GUIDELINES.md`, `docs/guidelines/CODE_LINE_CHECK_GUIDELINES.md`
 
@@ -11,9 +11,9 @@ Dokumen ini sudah disinkronkan dengan kondisi repository setelah refactor batch 
 Hasil audit aktual:
 
 - File source >200 baris pada `frontend/src` dan `backend/src`: tidak ditemukan.
-- Function-length advisory: 137 kandidat.
-- Frontend function advisory: 122 kandidat.
-- Backend function advisory: 15 kandidat.
+- Function-length advisory: 122 kandidat.
+- Frontend function advisory: 109 kandidat.
+- Backend function advisory: 13 kandidat.
 - Scan `any`, `as any`, `as unknown as`, `console.log`, dan `debugger`: tidak ditemukan pada `frontend/src` dan `backend/src`.
 - REST API jalur utama resource-oriented; beberapa legacy alias masih aktif untuk backward compatibility.
 
@@ -22,9 +22,9 @@ Hasil audit aktual:
 | Pemeriksaan | Hasil |
 | --- | --- |
 | Scan file source >200 baris | Tidak ditemukan |
-| `npm run audit:functions` | 137 kandidat manual review, advisory only |
-| Frontend function advisory | 122 kandidat |
-| Backend function advisory | 15 kandidat |
+| `npm run audit:functions` | 122 kandidat manual review, advisory only |
+| Frontend function advisory | 109 kandidat |
+| Backend function advisory | 13 kandidat |
 | Scan `any` | Tidak ditemukan |
 | Scan `as any` | Tidak ditemukan |
 | Scan `as unknown as` | Tidak ditemukan |
@@ -58,11 +58,24 @@ Catatan:
 
 `npm run audit:functions` adalah alat bantu audit, bukan hard rule build. Kandidat berikut perlu dinilai manual. Refactor hanya disarankan jika meningkatkan maintainability, readability, atau pemisahan tanggung jawab.
 
-Ringkasan:
+Ringkasan aktual:
 
-- Total kandidat: 137.
-- Frontend kandidat: 122.
-- Backend kandidat: 15.
+- Total kandidat: 122.
+- Frontend kandidat: 109.
+- Backend kandidat: 13.
+- Batch ini menurunkan baseline aktual 127 menjadi 122 melalui tepat 5 kandidat SAFE.
+
+Kandidat yang selesai pada batch 18 Juni 2026:
+
+| File | Function | Before | Result |
+| --- | --- | ---: | --- |
+| `frontend/src/pages/tenant/categories/CategoriesHeader.tsx` | `CategoriesHeader` | 22 | Resolved |
+| `frontend/src/pages/tenant/reports/ReportsContent.tsx` | `ReportsContent` | 21 | Resolved |
+| `frontend/src/pages/tenant/reports/ReportOrderItem.tsx` | `ReportOrderItem` | 20 | Resolved |
+| `frontend/src/pages/tenant/reports/KPICard.tsx` | `KPICard` | 19 | Resolved |
+| `frontend/src/pages/tenant/reports/ReportsFilterPanel.tsx` | `ReportsFilterPanel` | 18 | Resolved |
+
+Tabel rinci di bawah adalah snapshot kandidat historis 17 Juni 2026 untuk traceability, bukan daftar aktual. Daftar aktual authoritative selalu berasal dari `npm run audit:functions`.
 
 | File | Function | Lines | Domain |
 | --- | --- | ---: | --- |
@@ -280,6 +293,7 @@ Status: masih aktif, bukan blocker runtime.
 | Voucher free nights | Backend menghitung `discountedNights = min(freeNights, stayNights)`, menggratiskan malam termurah jika breakdown tersedia, dan zero-payment langsung `PROCESSED` |
 | Domicile removal | Tidak ditemukan pada source aktif |
 | Room max 5 dan stock max 20 | Backend menjadi source of truth, frontend hanya UX guard |
+| Tenant category max 5 | Backend menghitung hanya kategori milik tenant, mengunci create per tenant, dan mengirim metadata quota; frontend disable tombol tambah |
 | Persistent token blacklist | Tidak mengubah public REST contract |
 | Login attempt guard | Tidak mengubah public REST contract |
 | Explore search query consistency | Frontend memakai helper query Explore yang sama; backend endpoint tetap `GET /api/properties` |
@@ -295,4 +309,4 @@ Status: masih aktif, bukan blocker runtime.
 
 ## Kesimpulan
 
-Clean code membaik: tidak ada file source aktif >200 baris, residue type/log/debug bersih, dan function advisory turun menjadi 137 kandidat. Pekerjaan lanjutan utama adalah refactor kandidat function secara selektif, cleanup folder kosong, PII minimization, dan REST legacy alias cleanup setelah regression test.
+Clean code membaik: tidak ada file source aktif >200 baris, residue type/log/debug bersih, dan function advisory turun dari 127 menjadi 122 kandidat pada batch ini. Pekerjaan lanjutan utama adalah refactor kandidat function secara selektif, cleanup folder kosong, PII minimization, dan REST legacy alias cleanup setelah regression test.

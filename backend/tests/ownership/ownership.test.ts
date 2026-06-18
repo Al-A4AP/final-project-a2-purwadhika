@@ -9,12 +9,14 @@ type UserCancelOrderModule = typeof import('../../src/services/order/userCancelO
 type UserMidtransOrderModule = typeof import('../../src/services/order/userMidtransOrder');
 type RoomOwnershipModule = typeof import('../../src/services/tenantRoom/roomOwnership');
 type ReviewServiceModule = typeof import('../../src/services/reviewService');
+type CategoryServiceModule = typeof import('../../src/services/categoryService');
 
 const prisma = require('../../src/config/prisma').default as PrismaClientInstance;
 const { cancelUserOrder } = require('../../src/services/order/userCancelOrder') as UserCancelOrderModule;
 const { retryUserMidtransPayment } = require('../../src/services/order/userMidtransOrder') as UserMidtransOrderModule;
 const { ensureTenantProperty, verifyPeakRateOwner, verifyRoomOwner } = require('../../src/services/tenantRoom/roomOwnership') as RoomOwnershipModule;
 const { deleteTenantReview, replyReview } = require('../../src/services/reviewService') as ReviewServiceModule;
+const { createCategory, updateCategory } = require('../../src/services/categoryService') as CategoryServiceModule;
 const restoreFns: Array<() => void> = [];
 
 afterEach(() => restoreMocks());
@@ -84,6 +86,45 @@ describe('ownership regression', () => {
 
     assert.equal(transactionCalls, 0);
   });
+
+  it('rejects category update outside owner scope', async () => {
+    replaceMethod(prisma.propertyCategory, 'findUnique', async () => ({ id: 'category-1', name: 'Glamping', tenantId: 'tenant-2' }));
+
+    await expectRejected(
+      updateCategory('category-1', 'tenant-1', { name: 'Eco Glamping', default_rental_type: 'PER_ROOM' }),
+      'Anda tidak memiliki akses untuk mengubah kategori ini.',
+      403,
+    );
+  });
+
+  it('rejects category creation after five owned categories', async () => {
+    let createCalls = 0;
+    replaceTransactionWithPrisma();
+    replaceMethod(prisma, '$executeRaw', async () => 0);
+    replaceMethod(prisma.propertyCategory, 'count', async () => 5);
+    replaceMethod(prisma.propertyCategory, 'create', async () => { createCalls += 1; return { id: 'category-6' }; });
+
+    await expectRejected(
+      createCategory('tenant-1', { name: 'Cabin', default_rental_type: 'WHOLE_PROPERTY' }),
+      'Maksimal 5 kategori milik sendiri per tenant.',
+      400,
+    );
+
+    assert.equal(createCalls, 0);
+  });
+
+  it('counts only owned categories when enforcing category limit', async () => {
+    let countQuery: unknown;
+    replaceTransactionWithPrisma();
+    replaceMethod(prisma, '$executeRaw', async () => 0);
+    replaceMethod(prisma.propertyCategory, 'count', async (args: object) => { countQuery = args; return 4; });
+    replaceMethod(prisma.propertyCategory, 'findFirst', async () => null);
+    replaceMethod(prisma.propertyCategory, 'create', async () => ({ id: 'category-5', tenantId: 'tenant-1' }));
+
+    await createCategory('tenant-1', { name: 'Cabin', default_rental_type: 'WHOLE_PROPERTY' });
+
+    assert.deepEqual(getWhere(countQuery), { tenantId: 'tenant-1' });
+  });
 });
 
 const replaceMethod = (target: object, methodName: string, replacement: (...args: Array<unknown>) => unknown) => {
@@ -94,6 +135,13 @@ const replaceMethod = (target: object, methodName: string, replacement: (...args
 
 const restoreMocks = () => {
   while (restoreFns.length) restoreFns.pop()?.();
+};
+
+const replaceTransactionWithPrisma = () => {
+  replaceMethod(prisma, '$transaction', async (callback: unknown) => {
+    if (typeof callback !== 'function') throw new Error('Expected transaction callback');
+    return Reflect.apply(callback, undefined, [prisma]);
+  });
 };
 
 const expectRejected = async (promise: Promise<unknown>, message: string, statusCode?: number) => {
