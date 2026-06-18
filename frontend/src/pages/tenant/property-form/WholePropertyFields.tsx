@@ -1,6 +1,6 @@
 import type { FC } from "react";
 import type { PropertyFormState } from "@/hooks/tenant/property-form/propertyFormTypes";
-import { TextField } from "./FormFields";
+import { CurrencyField, TextField } from "./FormFields";
 
 export const WholePropertyFields: FC<{ state: PropertyFormState }> = ({
   state,
@@ -16,16 +16,13 @@ export const WholePropertyFields: FC<{ state: PropertyFormState }> = ({
         Berlaku untuk satu unit properti dengan stok tetap satu.
       </p>
       <div className="mt-4 grid gap-4 md:grid-cols-2">
-        <TextField
+        <CurrencyField
+          control={state.form.control}
           error={errors.whole_property_price}
           helperText="Harga sewa seluruh unit per malam."
           label="Harga per Malam (Rp)"
-          min="1"
           name="whole_property_price"
-          placeholder="Contoh: 1500000"
-          register={state.form.register}
-          step="10000"
-          type="number"
+          placeholder="Contoh: 1.500.000"
         />
         <TextField
           error={errors.whole_property_capacity}

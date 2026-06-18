@@ -1,5 +1,6 @@
 import type { FC } from "react";
-import type { FieldError, UseFormRegister } from "react-hook-form";
+import { Controller, type Control, type FieldError, type UseFormRegister } from "react-hook-form";
+import { formatCurrencyInputValue, readCurrencyInputValue } from "@/lib/currencyInput";
 import type { PropertyFormInput } from "@/hooks/tenant/property-form/propertyFormSchema";
 
 export const PROPERTY_INPUT_CLASS =
@@ -50,6 +51,33 @@ export const TextField: FC<FieldProps> = ({
   </div>
 );
 
+export const CurrencyField: FC<Omit<FieldProps, "register" | "type"> & {
+  control: Control<PropertyFormInput>;
+}> = ({ control, error, helperText, label, name, placeholder }) => (
+  <div>
+    <FieldLabel label={label} />
+    <Controller
+      control={control}
+      name={name}
+      render={({ field }) => (
+        <div className="relative">
+          <span className="absolute left-3 top-1/2 -translate-y-1/2 text-xs font-semibold text-slate-400">Rp</span>
+          <input
+            {...field}
+            inputMode="numeric"
+            placeholder={placeholder}
+            value={formatCurrencyInputValue(String(field.value ?? ""))}
+            onChange={(event) => field.onChange(readCurrencyInputValue(event.target.value))}
+            className={`${PROPERTY_INPUT_CLASS} pl-10 ${error ? "border-red-500 focus:border-red-500 focus:ring-red-500" : ""}`}
+          />
+        </div>
+      )}
+    />
+    {helperText && !error && <FieldHelperText text={helperText} />}
+    {error && <FieldErrorText message={error.message} />}
+  </div>
+);
+
 export const TextAreaField: FC<FieldProps & { rows?: number }> = ({
   error,
   label,
@@ -69,11 +97,7 @@ export const TextAreaField: FC<FieldProps & { rows?: number }> = ({
       maxLength={maxLength}
       className={`${PROPERTY_INPUT_CLASS} resize-y ${error ? "border-red-500 focus:border-red-500 focus:ring-red-500" : ""}`}
     />
-    {helperText && !error && (
-      <p className="mt-1.5 text-xs text-slate-500 dark:text-slate-400">
-        {helperText}
-      </p>
-    )}
+    {helperText && !error && <FieldHelperText text={helperText} />}
     {error && <FieldErrorText message={error.message} />}
   </div>
 );
@@ -86,4 +110,8 @@ export const FieldLabel: FC<{ label: string }> = ({ label }) => (
 
 export const FieldErrorText: FC<{ message?: string }> = ({ message }) => (
   <p className="mt-1.5 text-xs font-medium text-red-500">{message}</p>
+);
+
+const FieldHelperText: FC<{ text: string }> = ({ text }) => (
+  <p className="mt-1.5 text-xs text-slate-500 dark:text-slate-400">{text}</p>
 );
