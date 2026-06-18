@@ -1,4 +1,5 @@
 import { AppError } from '../../middlewares/errorHandler';
+import { MAX_ADULT_CAPACITY } from '../../constants/validation';
 import type { CreateOrderData, GuestCounts } from './orderTypes';
 
 export const pickGuestCounts = ({ adults, children, babies }: CreateOrderData) => ({
@@ -25,6 +26,7 @@ export const buildGuestCreateData = (context: GuestCreateSource) => ({
 
 const validateAdultCount = (adults: number, capacity: number) => {
   if (adults < 1) throw new AppError("Pemesanan harus menyertakan minimal 1 orang dewasa", 400);
+  if (adults > MAX_ADULT_CAPACITY) throw new AppError(`Jumlah orang dewasa maksimal ${MAX_ADULT_CAPACITY} orang`, 400);
   if (adults > capacity) throw new AppError(`Jumlah orang dewasa melebihi kapasitas kamar (${capacity} orang)`, 400);
 };
 

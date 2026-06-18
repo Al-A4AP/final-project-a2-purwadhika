@@ -1,10 +1,11 @@
 import type { BookingGuests, GuestType } from "./bookingTypes";
+import { MAX_ADULT_CAPACITY } from "@/constants/validation";
 
 const clamp = (value: number, min: number, max: number) =>
   Math.max(min, Math.min(max, value));
 
 const updateAdults = (guests: BookingGuests, capacity: number, delta: number) => {
-  const adults = clamp(guests.adults + delta, 1, capacity);
+  const adults = clamp(guests.adults + delta, 1, Math.min(capacity, MAX_ADULT_CAPACITY));
   return { adults, children: Math.min(adults, guests.children), babies: Math.min(adults, guests.babies) };
 };
 

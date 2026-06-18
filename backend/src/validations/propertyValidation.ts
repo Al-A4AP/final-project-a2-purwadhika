@@ -7,11 +7,15 @@ import {
   PROVINCE_MAX_LENGTH,
   PROVINCE_MIN_LENGTH,
   PROPERTY_DESCRIPTION_MAX_LENGTH,
+  MAX_ADULT_CAPACITY,
+  MAX_DAILY_PRICE,
 } from '../constants/validation';
 
 const propertyDescriptionSchema = z.string().trim().max(PROPERTY_DESCRIPTION_MAX_LENGTH, `Deskripsi maksimal ${PROPERTY_DESCRIPTION_MAX_LENGTH} karakter`);
 const positiveIntegerString = (label: string) =>
   z.string().regex(/^[1-9]\d*$/, `${label} harus lebih dari 0`);
+const boundedPositiveIntegerString = (label: string, max: number) =>
+  positiveIntegerString(label).refine((value) => Number(value) <= max, `${label} maksimal ${max}`);
 
 const propertyFields = {
   name: z.string().trim().min(3, 'Nama minimal 3 karakter'),
@@ -22,8 +26,8 @@ const propertyFields = {
   amenities: z.string().optional(),
   categoryId: z.string().min(1, 'Kategori wajib dipilih'),
   rental_type: z.enum(['PER_ROOM', 'WHOLE_PROPERTY']).default('PER_ROOM'),
-  whole_property_price: positiveIntegerString('Harga sewa').optional(),
-  whole_property_capacity: positiveIntegerString('Kapasitas').optional(),
+  whole_property_price: boundedPositiveIntegerString('Harga sewa', MAX_DAILY_PRICE).optional(),
+  whole_property_capacity: boundedPositiveIntegerString('Kapasitas dewasa', MAX_ADULT_CAPACITY).optional(),
   latitude: z.string().optional(),
   longitude: z.string().optional(),
 };
@@ -51,9 +55,9 @@ export const updatePropertySchema = z.object(propertyFields).partial().extend({
 
 export const createRoomSchema = z.object({
   room_type: z.string().trim().min(3, 'Tipe kamar minimal 3 karakter'),
-  base_price: z.string().regex(/^\d+$/, 'Harga harus berupa angka'),
-  child_price: z.string().regex(/^\d+$/, 'Harga anak harus berupa angka').optional().or(z.literal('')),
-  capacity: z.string().regex(/^\d+$/, 'Kapasitas harus berupa angka'),
+  base_price: boundedPositiveIntegerString('Harga per malam', MAX_DAILY_PRICE),
+  child_price: boundedPositiveIntegerString('Harga anak per malam', MAX_DAILY_PRICE).optional().or(z.literal('')),
+  capacity: boundedPositiveIntegerString('Kapasitas dewasa', MAX_ADULT_CAPACITY),
   quantity: z.string()
     .regex(/^[1-9]\d*$/, 'Jumlah kamar harus minimal 1')
     .refine((value) => Number(value) <= 20, 'Stok kamar maksimal 20.')

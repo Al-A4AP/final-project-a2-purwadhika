@@ -1,4 +1,5 @@
 import { z } from 'zod';
+import { MAX_ADULT_CAPACITY } from '../constants/validation';
 
 export const createOrderSchema = z.object({
   roomId: z.string().min(1, 'Pilih kamar'),
@@ -14,10 +15,13 @@ export const createOrderSchema = z.object({
   guest_ktp_address: optionalText(),
   guest_ktp_number: z.string().trim().regex(/^\d{16}$/, 'Nomor KTP harus terdiri dari 16 digit angka').optional().or(z.literal('')),
   voucher_code: z.string().trim().min(3, 'Kode voucher minimal 3 karakter').optional().or(z.literal('')),
-  adults: z.number().int().min(1, 'Minimal 1 orang dewasa'),
-  children: z.number().int().min(0, 'Jumlah anak-anak tidak boleh negatif'),
-  babies: z.number().int().min(0, 'Jumlah bayi tidak boleh negatif'),
-}).superRefine(requireGuestIdentity);
+  adults: z.number().int().min(1, 'Minimal 1 orang dewasa').max(MAX_ADULT_CAPACITY, `Maksimal ${MAX_ADULT_CAPACITY} orang dewasa`),
+  children: z.number().int().min(0, 'Jumlah anak-anak tidak boleh negatif').max(MAX_ADULT_CAPACITY),
+  babies: z.number().int().min(0, 'Jumlah bayi tidak boleh negatif').max(MAX_ADULT_CAPACITY),
+}).superRefine((data, ctx) => {
+  requireGuestIdentity(data, ctx);
+  requireGuestRatios(data, ctx);
+});
 
 function optionalText() {
   return z.string().trim().optional().or(z.literal(''));
@@ -33,6 +37,15 @@ function requireGuestIdentity(data: z.infer<typeof createOrderSchema>, ctx: z.Re
 function requireField(value: unknown, path: string, message: string, ctx: z.RefinementCtx) {
   if (typeof value === 'string' && value.trim()) return;
   ctx.addIssue({ code: 'custom', message, path: [path] });
+}
+
+function requireGuestRatios(data: z.infer<typeof createOrderSchema>, ctx: z.RefinementCtx) {
+  if (data.children > data.adults) {
+    ctx.addIssue({ code: 'custom', message: 'Jumlah anak-anak tidak boleh melebihi jumlah orang dewasa', path: ['children'] });
+  }
+  if (data.babies > data.adults) {
+    ctx.addIssue({ code: 'custom', message: 'Jumlah bayi tidak boleh melebihi jumlah orang dewasa', path: ['babies'] });
+  }
 }
 
 export const updateOrderStatusSchema = z.object({

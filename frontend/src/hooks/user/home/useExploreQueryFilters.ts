@@ -1,6 +1,7 @@
 import { useEffect, useMemo } from "react";
 import { useSearchParams } from "react-router-dom";
 import { useFilterStore, type FilterValues } from "@/stores/filterStore";
+import { MAX_ADULT_CAPACITY } from "@/constants/validation";
 
 const QUERY_KEYS = [
   "adults", "amenities", "babies", "capacity", "category", "check_in_date",
@@ -35,12 +36,18 @@ const buildQueryFilters = (
   ...readPagingFilters(params, current),
 });
 
-const readGuestFilters = (params: URLSearchParams) => ({
-  adults: readPositiveInt(params, "adults") ?? 1,
-  babies: readNonNegativeInt(params, "babies") ?? 0,
-  capacity: readPositiveInt(params, "capacity"),
-  children: readNonNegativeInt(params, "children") ?? 0,
-});
+const readGuestFilters = (params: URLSearchParams) => {
+  const adults = readAdults(params);
+  return {
+    adults,
+    babies: Math.min(readNonNegativeInt(params, "babies") ?? 0, adults),
+    capacity: adults,
+    children: Math.min(readNonNegativeInt(params, "children") ?? 0, adults),
+  };
+};
+
+const readAdults = (params: URLSearchParams) =>
+  Math.min(readPositiveInt(params, "adults") ?? readPositiveInt(params, "capacity") ?? 1, MAX_ADULT_CAPACITY);
 
 const readLocationFilters = (params: URLSearchParams) => ({
   category: readText(params, "category"),

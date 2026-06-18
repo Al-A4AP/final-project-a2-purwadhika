@@ -16,9 +16,15 @@ const createLocationSetters = (set: FilterSet) => ({
   setSearch: (search: string) => set({ search, page: 1 }),
 });
 const createGuestSetters = (set: FilterSet) => ({
-  setAdults: (adults: number) => set((s) => ({ adults, capacity: adults + s.children, page: 1 })),
-  setChildren: (children: number) => set((s) => ({ children, capacity: s.adults + children, page: 1 })),
-  setBabies: (babies: number) => set({ babies }),
+  setAdults: (adults: number) => set((state) => ({
+    adults,
+    babies: Math.min(state.babies, adults),
+    capacity: adults,
+    children: Math.min(state.children, adults),
+    page: 1,
+  })),
+  setChildren: (children: number) => set((state) => ({ children: Math.min(children, state.adults), capacity: state.adults, page: 1 })),
+  setBabies: (babies: number) => set((state) => ({ babies: Math.min(babies, state.adults) })),
   setCapacity: (capacity: number) => set({ capacity, page: 1 }),
 });
 const createSortingSetters = (set: FilterSet) => ({

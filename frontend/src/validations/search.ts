@@ -1,19 +1,24 @@
 import { z } from 'zod';
+import { MAX_ADULT_CAPACITY } from '@/constants/validation';
 
 export const searchFormSchema = z.object({
   city: z.string().optional(),
   check_in_date: z.string().optional(),
   check_out_date: z.string().optional(),
-  adults: z.coerce.number().min(1, 'Minimal 1 dewasa').max(20),
-  children: z.coerce.number().min(0).max(20),
-  babies: z.coerce.number().min(0).max(10),
-}).refine(
-  (data) => !data.check_in_date || !data.check_out_date || new Date(data.check_out_date) > new Date(data.check_in_date),
-  {
-    message: 'Tanggal check-out harus lebih besar dari check-in',
-    path: ['check_out_date'],
+  adults: z.coerce.number().int().min(1, 'Minimal 1 dewasa').max(MAX_ADULT_CAPACITY),
+  children: z.coerce.number().int().min(0).max(MAX_ADULT_CAPACITY),
+  babies: z.coerce.number().int().min(0).max(MAX_ADULT_CAPACITY),
+}).superRefine((data, ctx) => {
+  if (data.check_in_date && data.check_out_date && new Date(data.check_out_date) <= new Date(data.check_in_date)) {
+    ctx.addIssue({ code: 'custom', message: 'Tanggal check-out harus lebih besar dari check-in', path: ['check_out_date'] });
   }
-);
+  if (data.children > data.adults) {
+    ctx.addIssue({ code: 'custom', message: 'Jumlah anak tidak boleh melebihi jumlah dewasa', path: ['children'] });
+  }
+  if (data.babies > data.adults) {
+    ctx.addIssue({ code: 'custom', message: 'Jumlah bayi tidak boleh melebihi jumlah dewasa', path: ['babies'] });
+  }
+});
 
 export type SearchFormInput = z.infer<typeof searchFormSchema>;
 

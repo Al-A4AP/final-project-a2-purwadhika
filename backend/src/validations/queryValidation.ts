@@ -1,5 +1,6 @@
 import { OrderStatus } from '@prisma/client';
 import { z } from 'zod';
+import { MAX_ADULT_CAPACITY } from '../constants/validation';
 
 const revenuePeriods = ['weekly', 'monthly', 'quarterly', 'six_months', 'yearly', 'all_time'] as const;
 const orderDirections = ['asc', 'desc'] as const;
@@ -28,8 +29,8 @@ const optionalEnum = <T extends readonly [string, ...string[]]>(values: T) =>
 const optionalPositiveInt = (max: number) =>
   z.preprocess(cleanScalar, z.coerce.number().int().positive().max(max).optional());
 
-const optionalNonNegativeNumber = () =>
-  z.preprocess(cleanScalar, z.coerce.number().min(0).optional());
+const optionalNonNegativeNumber = (max?: number) =>
+  z.preprocess(cleanScalar, z.coerce.number().min(0).max(max ?? Number.MAX_SAFE_INTEGER).optional());
 
 const optionalDateString = () =>
   z.preprocess(cleanScalar, z.string().refine(isValidDate, 'Format tanggal tidak valid').optional());
@@ -53,13 +54,21 @@ export const propertyListQuerySchema = z.object({
   city: optionalString(),
   check_in_date: optionalDateString(),
   check_out_date: optionalDateString(),
-  capacity: optionalPositiveInt(100),
-  adults: optionalPositiveInt(100),
-  children: optionalNonNegativeNumber(),
-  babies: optionalNonNegativeNumber(),
+  capacity: optionalPositiveInt(MAX_ADULT_CAPACITY),
+  adults: optionalPositiveInt(MAX_ADULT_CAPACITY),
+  children: optionalNonNegativeNumber(MAX_ADULT_CAPACITY),
+  babies: optionalNonNegativeNumber(MAX_ADULT_CAPACITY),
   min_price: optionalNonNegativeNumber(),
   max_price: optionalNonNegativeNumber(),
   amenities: z.preprocess(cleanAmenities, z.union([z.string(), z.array(z.string())]).optional()),
+}).superRefine((data, ctx) => {
+  const adults = data.adults ?? data.capacity ?? 1;
+  if (data.children !== undefined && data.children > adults) {
+    ctx.addIssue({ code: 'custom', message: 'Jumlah anak-anak tidak boleh melebihi jumlah orang dewasa', path: ['children'] });
+  }
+  if (data.babies !== undefined && data.babies > adults) {
+    ctx.addIssue({ code: 'custom', message: 'Jumlah bayi tidak boleh melebihi jumlah orang dewasa', path: ['babies'] });
+  }
 });
 
 export const propertyDetailQuerySchema = z.object({

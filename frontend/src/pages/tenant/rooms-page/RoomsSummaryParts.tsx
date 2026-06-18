@@ -6,7 +6,7 @@ export const RoomsSummaryCards: FC<{ averagePrice: number; maxCapacity: number; 
   <div className="mb-8 grid grid-cols-1 gap-4 sm:grid-cols-3">
     <SummaryCard icon={<BedDouble size={24} />} iconClass="bg-blue-50 text-blue-600 dark:bg-blue-900/30 dark:text-blue-400" label="Total Tipe Kamar" value={String(props.totalRooms)} />
     <SummaryCard icon={<Banknote size={24} />} iconClass="bg-emerald-50 text-emerald-600 dark:bg-emerald-900/30 dark:text-emerald-400" label="Rata-rata Harga" value={props.totalRooms ? formatPrice(props.averagePrice) : "-"} />
-    <SummaryCard icon={<Users size={24} />} iconClass="bg-violet-50 text-violet-600 dark:bg-violet-900/30 dark:text-violet-400" label="Kapasitas Maksimal" value={props.totalRooms ? `${props.maxCapacity} Orang` : "-"} />
+    <SummaryCard icon={<Users size={24} />} iconClass="bg-violet-50 text-violet-600 dark:bg-violet-900/30 dark:text-violet-400" label="Kapasitas Dewasa" value={props.totalRooms ? `${props.maxCapacity} Dewasa` : "-"} />
   </div>
 );
 

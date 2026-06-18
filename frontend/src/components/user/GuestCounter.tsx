@@ -1,5 +1,6 @@
 import type { FC } from 'react';
 import { CounterStepper } from '@/components/common/CounterStepper';
+import { MAX_ADULT_CAPACITY } from '@/constants/validation';
 
 type GuestKey = 'adults' | 'children' | 'babies';
 
@@ -50,7 +51,7 @@ const GuestCopy: FC<{ guestType: GuestType }> = ({ guestType }) => (
 
 const GuestSummary: FC<Pick<Props, 'guests' | 'roomCapacity'>> = ({ guests, roomCapacity }) => (
   <div className="text-xs text-gray-400 border-t dark:border-slate-700 pt-3 flex flex-col sm:flex-row justify-between gap-2">
-    <span>Total tamu: <strong>{guests.adults + guests.children} orang</strong>{guests.babies > 0 ? ` + ${guests.babies} bayi` : ''}</span>
+    <span><strong>{guests.adults} Dewasa</strong>, {guests.children} Anak, {guests.babies} Bayi</span>
     <span className="text-gray-500">Kapasitas kamar: <strong>{roomCapacity} Dewasa</strong> (Maks. Anak & Bayi sesuai jumlah Dewasa)</span>
   </div>
 );
@@ -59,6 +60,6 @@ const isDecreaseDisabled = (key: GuestKey, guests: Props['guests']) =>
   guests[key] <= (key === 'adults' ? 1 : 0);
 
 const isIncreaseDisabled = (key: GuestKey, guests: Props['guests'], roomCapacity: number) =>
-  (key === 'adults' && guests.adults >= roomCapacity) ||
+  (key === 'adults' && guests.adults >= Math.min(roomCapacity, MAX_ADULT_CAPACITY)) ||
   (key === 'children' && guests.children >= guests.adults) ||
   (key === 'babies' && guests.babies >= guests.adults);

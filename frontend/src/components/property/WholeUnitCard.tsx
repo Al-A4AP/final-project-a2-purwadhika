@@ -47,7 +47,7 @@ const WholeUnitInfo: FC<WholeUnitCardProps> = ({ amenities, room }) => (
 
 const RoomDescription: FC<{ room: Room }> = ({ room }) => (
   <div className="space-y-1">
-    <span className="flex items-center gap-1 text-sm text-gray-600 dark:text-gray-400"><BedDouble size={16} /> Kapasitas: {room.capacity} orang</span>
+    <span className="flex items-center gap-1 text-sm text-gray-600 dark:text-gray-400"><BedDouble size={16} /> Kapasitas: {room.capacity} dewasa</span>
     {room.description && <p className="text-sm text-gray-500">{room.description}</p>}
   </div>
 );

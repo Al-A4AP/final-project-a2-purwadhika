@@ -27,7 +27,7 @@ export const useSearchFormLogic = (options: SearchFormLogicOptions = {}) => {
   const guests = useGuestSummary(filters.adults, filters.children, filters.babies);
   const onSubmit = createSubmitHandler(data => submitSearch(
     data,
-    { filters, navigate, submitMode: options.submitMode || "scroll", totalGuests: guests.totalGuests },
+    { filters, navigate, submitMode: options.submitMode || "scroll" },
     () => setGuestOpen(false),
   ), options.onSubmitted);
   return { dates: search.dates, filters, form: search.form, guestOpen, guests, onSubmit, setGuestOpen };
@@ -85,11 +85,10 @@ const getCheckoutMinDate = (checkInVal: string | undefined, tomorrow: string) =>
 };
 
 const useGuestSummary = (adults: number, children: number, babies: number) => {
-  const totalGuests = adults + children;
   const guestSummary = [`${adults} Dewasa`, children > 0 ? `${children} Anak` : "", babies > 0 ? `${babies} Bayi` : ""]
     .filter(Boolean)
     .join(", ");
-  return { guestSummary, totalGuests };
+  return { guestSummary };
 };
 
 const submitSearch = (
@@ -97,7 +96,7 @@ const submitSearch = (
   options: SubmitSearchOptions,
   closeGuests: () => void,
 ) => {
-  applySearchValues(data, options.filters, options.totalGuests);
+  applySearchValues(data, options.filters);
   options.filters.applyFilters();
   closeGuests();
   handleSubmitNavigation(options);
@@ -108,19 +107,18 @@ const handleSubmitNavigation = (options: SubmitSearchOptions) => {
   scrollToResults();
 };
 
-const applySearchValues = (data: SearchFormInput, filters: FilterStoreState, totalGuests: number) => {
+const applySearchValues = (data: SearchFormInput, filters: FilterStoreState) => {
   filters.setCity(data.city || "");
   filters.setCheckInDate(data.check_in_date || "");
   filters.setCheckOutDate(data.check_out_date || "");
   filters.setAdults(filters.adults);
   filters.setChildren(filters.children);
   filters.setBabies(filters.babies);
-  filters.setCapacity(totalGuests || 1);
+  filters.setCapacity(filters.adults);
 };
 
 interface SubmitSearchOptions {
   filters: FilterStoreState;
   navigate: NavigateFunction;
   submitMode: SearchSubmitMode;
-  totalGuests: number;
 }

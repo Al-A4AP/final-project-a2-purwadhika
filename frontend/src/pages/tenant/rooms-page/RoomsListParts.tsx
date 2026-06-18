@@ -38,7 +38,7 @@ export const DesktopRoomPriceCapacity: FC<RoomOnlyProps> = ({ room }) => (
   <div className="space-y-1.5">
     <div className="text-sm font-semibold text-emerald-600 dark:text-emerald-400">{formatPrice(room.base_price)} / malam</div>
     <div className="flex items-center gap-2 text-xs font-medium text-slate-700 dark:text-slate-300">
-      <Users size={14} className="text-slate-400" /> Maksimal {room.capacity} Orang
+      <Users size={14} className="text-slate-400" /> Maksimal {room.capacity} Dewasa
     </div>
   </div>
 );

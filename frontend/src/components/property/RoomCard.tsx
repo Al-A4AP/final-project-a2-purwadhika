@@ -41,7 +41,7 @@ const RoomImage: FC<{ room: Room }> = ({ room }) => (
 const RoomDetails: FC<{ amenities?: string[]; room: Room }> = ({ amenities, room }) => (
   <div className="flex-1">
     <h3 className="mb-2 text-xl font-bold text-gray-900 dark:text-white">{room.room_type}</h3>
-    <span className="mb-4 flex items-center gap-1 text-sm text-gray-600 dark:text-gray-400"><BedDouble size={16} /> Kapasitas: {room.capacity}</span>
+    <span className="mb-4 flex items-center gap-1 text-sm text-gray-600 dark:text-gray-400"><BedDouble size={16} /> Kapasitas: {room.capacity} dewasa</span>
     {room.description && <p className="mb-4 text-sm text-gray-500">{room.description}</p>}
     <AmenitiesList amenities={amenities} compact />
   </div>

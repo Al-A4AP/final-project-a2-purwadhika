@@ -12,8 +12,7 @@ const parseAmenities = (amenities?: string | string[]) => {
 };
 
 const capacityValue = (filters: PropertyFilters) => {
-  const guestCount = Number(filters.adults || 0) + Number(filters.children || 0);
-  return Number(filters.capacity || guestCount || 0);
+  return Number(filters.adults || filters.capacity || 0);
 };
 
 const baseConditions = () => [

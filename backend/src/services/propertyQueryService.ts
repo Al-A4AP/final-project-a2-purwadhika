@@ -29,7 +29,7 @@ export const buildOrderBy = (sort: string, order: string) => {
 
 const buildRoomFilter = (filters: PropertyFilters): Prisma.RoomWhereInput => {
   const roomWhere: Prisma.RoomWhereInput = { deleted_at: null };
-  const capacity = Number(filters.capacity || Number(filters.adults || 0) + Number(filters.children || 0));
+  const capacity = Number(filters.adults || filters.capacity || 0);
   const minPrice = toNonNegative(filters.min_price);
   const maxPrice = toNonNegative(filters.max_price);
   if (capacity > 0) roomWhere.capacity = { gte: capacity };
