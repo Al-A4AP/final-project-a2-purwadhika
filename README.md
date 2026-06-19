@@ -233,5 +233,5 @@ Status dokumentasi terakhir: 19 Juni 2026.
 - Frontend lint dan build terakhir lulus.
 - Backend build dan ownership test terakhir lulus (10/10).
 - File source aktif `frontend/src` dan `backend/src` saat ini tidak melewati 200 baris.
-- Function-length audit adalah alat bantu advisory, bukan blocker build; snapshot terbaru 112 kandidat.
+- Function-length audit adalah alat bantu advisory, bukan blocker build; snapshot terbaru 101 kandidat.
 - Dokumentasi audit, rencana perbaikan, dan handover tersedia di folder [`docs`](./docs/README.md).

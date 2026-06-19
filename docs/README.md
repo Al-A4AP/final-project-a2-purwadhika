@@ -32,9 +32,9 @@ README di folder `frontend` dan `backend` tidak dibuat ulang.
 | --- | --- |
 | Tanggal audit | 19 Juni 2026 |
 | File source >200 baris | Tidak ditemukan pada `frontend/src` dan `backend/src` |
-| Function-length advisory | 112 kandidat |
-| Frontend advisory | 99 kandidat |
-| Backend advisory | 13 kandidat |
+| Function-length advisory | 101 kandidat |
+| Frontend advisory | 92 kandidat |
+| Backend advisory | 9 kandidat |
 | `any` / `as any` / `as unknown as` | Tidak ditemukan pada scan `frontend/src` dan `backend/src` |
 | `console.log` | Tidak ditemukan pada scan `frontend/src` dan `backend/src` |
 | `debugger` | Tidak ditemukan pada scan `frontend/src` dan `backend/src` |
@@ -79,13 +79,13 @@ README di folder `frontend` dan `backend` tidak dibuat ulang.
 | Upload payment proof | Tersedia | Validasi upload dan status `WAITING_CONFIRMATION` | `frontend/src/pages/user/booking/ManualProofUpload.tsx`, `backend/src/middlewares/uploadMiddleware.ts` |
 | Payment deadline | Tersedia | `WAITING_PAYMENT` 1 jam, auto-cancel via cron | `backend/src/constants/orderConstants.ts`, `backend/src/cron/` |
 | Midtrans payment | Tersedia | Payment/retry aktif hanya saat order valid | `frontend/src/lib/midtransSnap.ts`, `backend/src/services/midtransService.ts` |
-| Manual payment confirmation | Tersedia | Tenant approve/reject manual proof; timeout 2 jam | `frontend/src/pages/tenant/OrdersPage.tsx`, `backend/src/services/order/tenantOrderStatus.ts` |
+| Manual payment confirmation | Tersedia | Tenant reject wajib alasan 10-200 karakter; timeout 2 jam | `frontend/src/pages/tenant/OrdersPage.tsx`, `backend/src/services/order/tenantOrderStatus.ts` |
 | User order list | Tersedia | Filter, detail, cancel/retry sesuai status | `frontend/src/pages/user/OrdersPage.tsx`, `frontend/src/pages/user/orders/` |
 | Tenant order list | Tersedia | Ownership scoped ke tenant property | `frontend/src/pages/tenant/OrdersPage.tsx`, `backend/src/services/order/tenantOrderList.ts` |
 | Email order reminder/notification | Tersedia | Email content sudah dipecah per domain | `backend/src/utils/emailService.ts`, `backend/src/utils/emailContent/` |
 | User cancel order | Tersedia | Cancel hanya untuk kondisi yang valid | `backend/src/services/order/userCancelOrder.ts` |
 | Review setelah checkout | Tersedia | Rating wajib, comment optional max 100 karakter | `frontend/src/pages/user/UserReviewsPage.tsx`, `backend/src/services/reviewService.ts` |
-| Tenant reply review | Tersedia | Tenant hanya bisa reply review propertinya sendiri | `frontend/src/pages/tenant/ReviewsPage.tsx`, `backend/src/services/tenantReviewService.ts` |
+| Tenant reply review | Tersedia | Owner-only; reply opsional dan maksimal 200 karakter | `frontend/src/pages/tenant/ReviewsPage.tsx`, `backend/src/services/tenantReviewService.ts` |
 | Sales report | Tersedia | Filter periode dan KPI pendapatan tersedia | `frontend/src/pages/tenant/ReportsPage.tsx`, `backend/src/services/tenantReportService.ts` |
 | Property report / occupancy | Tersedia | Kalender okupasi digabung ke property report; `/tenant/occupancy` redirect | `frontend/src/pages/tenant/PropertyReportPage.tsx`, `frontend/src/components/tenant/occupancy-calendar/` |
 | Voucher tambahan | Tersedia sebagai pengembangan | Active flow hanya `PERCENTAGE` dan `FREE_NIGHTS`; `NOMINAL` removed | `frontend/src/pages/tenant/VouchersPage.tsx`, `backend/src/services/voucherService.ts` |
@@ -130,7 +130,7 @@ Property Detail
 ## Clean Code Notes
 
 - `npm run audit:functions` adalah alat bantu audit, bukan hard rule build.
-- Function-length advisory terbaru: 112 kandidat (99 frontend, 13 backend).
+- Function-length advisory terbaru: 101 kandidat (92 frontend, 9 backend).
 - File source aktif >200 baris: tidak ditemukan pada `frontend/src` dan `backend/src`.
 - Residue scan untuk `any`, unsafe cast, `console.log`, dan `debugger` bersih.
 - Refactor terakhir memecah beberapa komponen dashboard, review, saved properties, property report, serta presentational UI.

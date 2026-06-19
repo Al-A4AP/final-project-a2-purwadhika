@@ -26,6 +26,8 @@ Perubahan penting yang sudah tercermin pada kondisi project:
 - Tenant category maksimal 5 milik sendiri; kategori global dan tenant lain tetap dapat dipakai serta tidak dihitung.
 - Saved property hanya untuk authenticated USER; GUEST dan TENANT tidak melihat atau memodifikasi love.
 - Brand PURWALOKA pada tenant sidebar desktop/mobile mengarah ke homepage.
+- Tenant wajib mengisi alasan 10-200 karakter saat menolak pembayaran manual.
+- Balasan review tenant tetap opsional dengan batas maksimal 200 karakter.
 
 Catatan utama: perlindungan double booking tetap membutuhkan manual concurrency QA sebelum dinyatakan selesai secara operasional.
 
@@ -53,9 +55,9 @@ Item berikut sudah dipindahkan ke resolved pada source flow aktif:
 | Backend build | Lulus |
 | Backend ownership test | Lulus, 10/10 |
 | File source >200 baris | Tidak ditemukan pada `frontend/src` dan `backend/src` |
-| Function length audit advisory | 112 kandidat manual review |
-| Frontend function advisory | 99 kandidat |
-| Backend function advisory | 13 kandidat |
+| Function length audit advisory | 101 kandidat manual review |
+| Frontend function advisory | 92 kandidat |
+| Backend function advisory | 9 kandidat |
 | `any` / cast residue | Tidak ditemukan pada scan source |
 | `console.*` | Tidak ditemukan pada scan source |
 | `debugger` | Tidak ditemukan |
@@ -315,7 +317,7 @@ Status: buildable dan lint lulus.
 Catatan:
 
 - Tidak ada file >200 baris.
-- 99 kandidat function/component frontend masih menjadi advisory manual review.
+- 92 kandidat function/component frontend masih menjadi advisory manual review.
 
 ### Backend
 
@@ -324,7 +326,7 @@ Status: buildable dan ownership test lulus.
 Catatan:
 
 - Tidak ditemukan file source aktif >200 baris pada `frontend/src` dan `backend/src`.
-- 13 kandidat function backend masih menjadi advisory manual review.
+- 9 kandidat function backend masih menjadi advisory manual review.
 - Sisa file >200 baris perlu dibersihkan bertahap.
 
 ### Clean Code
@@ -334,7 +336,7 @@ Status: membaik pada type/log residue, masih perlu file-size cleanup.
 Temuan tersisa:
 
 - Tidak ditemukan file source aktif >200 baris pada `frontend/src` dan `backend/src`.
-- 112 function-length advisory candidates.
+- 101 function-length advisory candidates.
 - Tidak ditemukan `as any`, `as unknown as`, `console.*`, atau `debugger` pada scan source.
 - `orderService.ts` sudah turun dari sekitar 377 baris menjadi 184 baris.
 - `voucherService.ts` sudah turun dari 203 baris menjadi 116 baris.

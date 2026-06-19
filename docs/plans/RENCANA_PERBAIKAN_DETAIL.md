@@ -16,9 +16,9 @@ Status verifikasi terakhir:
 | Backend build | Lulus |
 | Backend ownership test | Lulus, 10/10 |
 | File source >200 baris | Tidak ditemukan pada `frontend/src` dan `backend/src` |
-| Function length audit | 112 kandidat advisory |
-| Frontend advisory | 99 kandidat |
-| Backend advisory | 13 kandidat |
+| Function length audit | 101 kandidat advisory |
+| Frontend advisory | 92 kandidat |
+| Backend advisory | 9 kandidat |
 | `any` / cast residue | Tidak ditemukan pada scan source |
 | `console.*` | Tidak ditemukan pada scan source |
 | `debugger` | Tidak ditemukan |
@@ -38,6 +38,15 @@ Status: selesai, perlu manual QA concurrency.
 - CTA pembayaran/retry hanya aktif untuk `WAITING_PAYMENT` yang belum expired.
 - Voucher transaction timeout sudah diperbaiki dengan scope transaction yang lebih pendek.
 - Double booking protection sudah memakai advisory lock, availability recheck, dan atomic voucher update.
+- Tenant reject manual payment wajib menyertakan alasan 10-200 karakter; alasan diteruskan ke email rejection user.
+
+### Review Reply Validation
+
+Status: selesai.
+
+- Balasan tenant tetap opsional.
+- Jika diisi, maksimal 200 karakter.
+- Frontend, route utama, legacy alias, dan backend service memakai rule yang sama.
 
 ### Security dan Session
 

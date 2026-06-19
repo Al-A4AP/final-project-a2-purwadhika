@@ -3,12 +3,16 @@ import prisma from '../../config/prisma';
 import { buildTenantRejectionRefundReason } from '../../constants/orderConstants';
 import { AppError } from '../../middlewares/errorHandler';
 import { sendPaymentConfirmationEmail, sendPaymentRejectionEmail } from '../../utils/emailService';
+import {
+  TENANT_REJECTION_REASON_MAX_LENGTH,
+  TENANT_REJECTION_REASON_MIN_LENGTH,
+} from '../../constants/validation';
 
 export const updateTenantOrderStatus = async (orderId: string, tenantId: string, status: string, payment_rejection_reason?: string) => {
   const order = await findTenantOrderForStatus(orderId, tenantId);
   const transition = buildTenantStatusUpdate(order.status, status, payment_rejection_reason);
   const updatedOrder = await prisma.order.update({ where: { id: orderId }, data: transition.updateData });
-  await handleOrderStatusEmail(order, transition.finalStatus, status);
+  await handleOrderStatusEmail(order, transition);
   return updatedOrder;
 };
 
@@ -25,31 +29,40 @@ const buildTenantStatusUpdate = (currentStatus: OrderStatus, requestedStatus: st
   throw new AppError(`Transisi status dari ${currentStatus} ke ${requestedStatus} tidak diperbolehkan`, 400);
 };
 
-const handleOrderStatusEmail = async (order: TenantStatusOrder, finalStatus: OrderStatus, requestedStatus: string) => {
-  if (finalStatus === OrderStatus.PROCESSED) await sendPaymentConfirmationEmail(order.user.email, order.order_number).catch(() => {});
-  if (shouldSendRejectionEmail(order.status, requestedStatus)) await sendPaymentRejectionEmail(order.user.email, order.order_number).catch(() => {});
+const handleOrderStatusEmail = async (order: TenantStatusOrder, transition: TenantStatusTransition) => {
+  if (transition.finalStatus === OrderStatus.PROCESSED) await sendPaymentConfirmationEmail(order.user.email, order.order_number).catch(() => {});
+  if (transition.rejectionReason) await sendPaymentRejectionEmail(order.user.email, order.order_number, transition.rejectionReason).catch(() => {});
 };
 
 const processedTransition = (): TenantStatusTransition =>
   ({ finalStatus: OrderStatus.PROCESSED, updateData: { status: OrderStatus.PROCESSED, payment_verified_at: new Date() } });
 
 const rejectedManualTransition = (payment_rejection_reason?: string): TenantStatusTransition => {
-  if (!payment_rejection_reason?.trim()) throw new AppError('Alasan penolakan wajib diisi', 400);
+  const rejectionReason = validateRejectionReason(payment_rejection_reason);
   return {
     finalStatus: OrderStatus.CANCELLED,
+    rejectionReason,
     updateData: {
       status: OrderStatus.CANCELLED,
       canceled_at: new Date(),
-      payment_rejection_reason: buildTenantRejectionRefundReason(payment_rejection_reason),
+      payment_rejection_reason: buildTenantRejectionRefundReason(rejectionReason),
     },
   };
 };
 
+const validateRejectionReason = (reason?: string) => {
+  const normalized = reason?.trim() || '';
+  if (normalized.length < TENANT_REJECTION_REASON_MIN_LENGTH) {
+    throw new AppError(`Alasan penolakan minimal ${TENANT_REJECTION_REASON_MIN_LENGTH} karakter`, 400);
+  }
+  if (normalized.length > TENANT_REJECTION_REASON_MAX_LENGTH) {
+    throw new AppError(`Alasan penolakan maksimal ${TENANT_REJECTION_REASON_MAX_LENGTH} karakter`, 400);
+  }
+  return normalized;
+};
+
 const cancelledTransition = (): TenantStatusTransition =>
   ({ finalStatus: OrderStatus.CANCELLED, updateData: { status: OrderStatus.CANCELLED, canceled_at: new Date() } });
-
-const shouldSendRejectionEmail = (currentStatus: OrderStatus, requestedStatus: string) =>
-  isManualRejection(currentStatus, requestedStatus);
 
 const isManualRejection = (currentStatus: OrderStatus, requestedStatus: string) =>
   currentStatus === OrderStatus.WAITING_CONFIRMATION
@@ -61,5 +74,6 @@ type TenantStatusOrder = Prisma.OrderGetPayload<{ include: typeof tenantStatusIn
 
 interface TenantStatusTransition {
   finalStatus: OrderStatus;
+  rejectionReason?: string;
   updateData: Prisma.OrderUpdateInput;
 }

@@ -3,6 +3,7 @@ import { toast } from "react-hot-toast";
 import { tenantService } from "@/services/tenantService";
 import type { Review, ReviewReply } from "@/types";
 import type { ReplyTextMap, SubmittingMap } from "./tenantReviewsTypes";
+import { REVIEW_REPLY_MAX_LENGTH } from "@/constants/validation";
 
 export const useReviewReplies = (setReviews: React.Dispatch<React.SetStateAction<Review[]>>) => {
   const [replyText, setReplyText] = useState<ReplyTextMap>({});
@@ -18,8 +19,11 @@ const useReplySubmit = (
   setReviews: React.Dispatch<React.SetStateAction<Review[]>>,
   setSubmitting: React.Dispatch<React.SetStateAction<SubmittingMap>>,
 ) => useCallback(async (reviewId: string) => {
-  const text = replyText[reviewId]?.trim();
-  if (!text) { toast.error("Balasan tidak boleh kosong"); return; }
+  const text = replyText[reviewId]?.trim() || "";
+  if (text.length > REVIEW_REPLY_MAX_LENGTH) {
+    toast.error(`Balasan maksimal ${REVIEW_REPLY_MAX_LENGTH} karakter`);
+    return;
+  }
   await submitReply(reviewId, text, setReplyText, setReviews, setSubmitting);
 }, [replyText, setReplyText, setReviews, setSubmitting]);
 

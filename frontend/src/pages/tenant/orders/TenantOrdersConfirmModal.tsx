@@ -11,6 +11,8 @@ export const TenantOrdersConfirmModal: FC<{ onCancel: () => void; state: TenantO
     confirmDisabled={Boolean(state.updating)}
     onConfirm={state.confirmModal.onConfirm}
     onCancel={onCancel}
+    reasonMaxLength={state.confirmModal.reasonMaxLength}
+    reasonMinLength={state.confirmModal.reasonMinLength}
     showReasonInput={state.confirmModal.showReasonInput}
   />
 );

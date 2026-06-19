@@ -1,5 +1,5 @@
 import { z } from 'zod';
-import { REVIEW_COMMENT_MAX_LENGTH } from '../constants/validation';
+import { REVIEW_COMMENT_MAX_LENGTH, REVIEW_REPLY_MAX_LENGTH } from '../constants/validation';
 
 const normalizeComment = (value: unknown) =>
   typeof value === 'string' ? value.trim() : '';
@@ -10,5 +10,5 @@ export const createReviewSchema = z.object({
 });
 
 export const replyReviewSchema = z.object({
-  reply_text: z.string().trim().min(1, 'Balasan tidak boleh kosong').max(1000, 'Balasan maksimal 1000 karakter'),
+  reply_text: z.string().trim().max(REVIEW_REPLY_MAX_LENGTH, `Balasan maksimal ${REVIEW_REPLY_MAX_LENGTH} karakter`),
 });

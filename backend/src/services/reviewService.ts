@@ -3,6 +3,8 @@ import {
   findReviewableOrder, findTenantReview, softDeleteReviewRecord,
 } from './review/reviewQueries';
 import { assertReviewAllowed, assertValidRating } from './review/reviewRules';
+import { REVIEW_REPLY_MAX_LENGTH } from '../constants/validation';
+import { AppError } from '../middlewares/errorHandler';
 
 export const createReview = async (userId: string, orderId: string, rating: number, comment: string) => {
   assertValidRating(rating);
@@ -16,7 +18,7 @@ export const getPropertyReviews = (propertyId: string) => findPropertyReviews(pr
 
 export const replyReview = async (tenantId: string, reviewId: string, reply_text: string) => {
   await ensureTenantCanManageReview(tenantId, reviewId, 'membalas');
-  return createReviewReplyRecord(reviewId, tenantId, reply_text);
+  return createReviewReplyRecord(reviewId, tenantId, normalizeReviewReply(reply_text));
 };
 
 export const deleteTenantReview = async (tenantId: string, reviewId: string) => {
@@ -40,4 +42,12 @@ const ensureTenantCanManageReview = async (tenantId: string, reviewId: string, a
   if (!review || review.property.tenantId !== tenantId) {
     throw new Error(`Review tidak ditemukan atau Anda tidak berhak ${action}`);
   }
+};
+
+const normalizeReviewReply = (replyText: string) => {
+  const normalized = replyText.trim();
+  if (normalized.length > REVIEW_REPLY_MAX_LENGTH) {
+    throw new AppError(`Balasan maksimal ${REVIEW_REPLY_MAX_LENGTH} karakter`, 400);
+  }
+  return normalized;
 };

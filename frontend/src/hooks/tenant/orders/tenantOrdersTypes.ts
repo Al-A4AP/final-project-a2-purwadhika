@@ -24,6 +24,8 @@ export interface ConfirmModalState {
   isOpen: boolean;
   message: string;
   onConfirm: (reason?: string) => void;
+  reasonMaxLength?: number;
+  reasonMinLength?: number;
   title: string;
   showReasonInput?: boolean;
 }

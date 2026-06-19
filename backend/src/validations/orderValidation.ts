@@ -1,5 +1,5 @@
 import { z } from 'zod';
-import { MAX_ADULT_CAPACITY } from '../constants/validation';
+import { MAX_ADULT_CAPACITY, TENANT_REJECTION_REASON_MAX_LENGTH } from '../constants/validation';
 
 export const createOrderSchema = z.object({
   roomId: z.string().min(1, 'Pilih kamar'),
@@ -50,7 +50,9 @@ function requireGuestRatios(data: z.infer<typeof createOrderSchema>, ctx: z.Refi
 
 export const updateOrderStatusSchema = z.object({
   status: z.enum(['PROCESSED', 'CANCELLED', 'WAITING_PAYMENT']),
-  payment_rejection_reason: z.string().trim().optional(),
+  payment_rejection_reason: z.string().trim()
+    .max(TENANT_REJECTION_REASON_MAX_LENGTH, `Alasan penolakan maksimal ${TENANT_REJECTION_REASON_MAX_LENGTH} karakter`)
+    .optional(),
 });
 
 export const paymentAttemptSchema = z.object({

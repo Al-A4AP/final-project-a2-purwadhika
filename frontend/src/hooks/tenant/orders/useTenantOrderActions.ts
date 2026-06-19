@@ -6,6 +6,10 @@ import { orderService } from "@/services/orderService";
 import type { Order } from "@/types";
 import { canTransitionOrder, getConfirmMessage } from "./orderTransitions";
 import type { ConfirmModalState } from "./tenantOrdersTypes";
+import {
+  TENANT_REJECTION_REASON_MAX_LENGTH,
+  TENANT_REJECTION_REASON_MIN_LENGTH,
+} from "@/constants/validation";
 
 type SubmitGuard = { current: boolean };
 
@@ -53,7 +57,7 @@ export const useTenantOrderActions = (orders: Order[], refetch: () => void) => {
 const requestStatusUpdate = (options: StatusRequestOptions) => {
   const order = options.orders.find((item) => item.id === options.orderId);
   if (!order || !validateTransition(order, options.status)) return;
-  options.setConfirmModal(createConfirmModal(options));
+  options.setConfirmModal(createConfirmModal(options, order));
 };
 
 const validateTransition = (order: Order, status: string) => {
@@ -62,13 +66,15 @@ const validateTransition = (order: Order, status: string) => {
   return false;
 };
 
-const createConfirmModal = (options: StatusRequestOptions): ConfirmModalState => ({
+const createConfirmModal = (options: StatusRequestOptions, order: Order): ConfirmModalState => ({
   confirmText: "Ya",
   isOpen: true,
   message: getConfirmMessage(options.status),
   onConfirm: (reason) => confirmStatusUpdate({ ...options, reason }),
+  reasonMaxLength: TENANT_REJECTION_REASON_MAX_LENGTH,
+  reasonMinLength: TENANT_REJECTION_REASON_MIN_LENGTH,
   title: "Konfirmasi Aksi",
-  showReasonInput: options.status === "WAITING_PAYMENT",
+  showReasonInput: order.status === "WAITING_CONFIRMATION" && options.status === "CANCELLED",
 });
 
 const confirmStatusUpdate = async (options: StatusRequestOptions & { reason?: string }) => {

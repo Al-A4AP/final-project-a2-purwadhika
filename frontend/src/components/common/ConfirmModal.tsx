@@ -10,12 +10,16 @@ interface ConfirmModalProps {
   confirmDisabled?: boolean;
   onConfirm: (reason?: string) => void | Promise<void>;
   onCancel: () => void;
+  reasonMaxLength?: number;
+  reasonMinLength?: number;
   showReasonInput?: boolean;
 }
 
-export const ConfirmModal: FC<ConfirmModalProps> = (props) => {
+export const ConfirmModal: FC<ConfirmModalProps> = (props) =>
+  props.isOpen ? <ConfirmModalContent {...props} /> : null;
+
+const ConfirmModalContent: FC<ConfirmModalProps> = (props) => {
   const [reason, setReason] = useState("");
-  if (!props.isOpen) return null;
   return (
     <ConfirmModalShell>
       <ConfirmModalBody {...props} reason={reason} setReason={setReason} />
@@ -36,18 +40,41 @@ const ConfirmModalBody: FC<ConfirmModalProps & { reason: string, setReason: (v: 
     <h3 className="mb-2 text-lg font-bold text-gray-900 dark:text-white">{props.title}</h3>
     <p className={props.showReasonInput ? "mb-2 text-sm leading-relaxed text-gray-600 dark:text-gray-350" : "mb-6 text-sm leading-relaxed text-gray-600 dark:text-gray-350"}>{props.message}</p>
     {props.showReasonInput && (
-      <textarea
-        className="mb-6 w-full resize-none rounded-lg border border-slate-200 p-3 text-sm focus:border-slate-400 focus:outline-none dark:border-slate-600 dark:bg-slate-900 dark:text-white"
-        placeholder="Tulis alasan penolakan..."
-        rows={3}
-        value={props.reason}
-        onChange={(e) => props.setReason(e.target.value)}
-        required
-      />
+      <ReasonField {...props} />
     )}
-    <ConfirmModalActions {...props} confirmDisabled={props.confirmDisabled || (props.showReasonInput ? !props.reason.trim() : false)} onConfirm={() => props.onConfirm(props.reason)} />
+    <ConfirmModalActions {...props} confirmDisabled={props.confirmDisabled || isReasonInvalid(props)} onConfirm={() => props.onConfirm(props.reason.trim())} />
   </>
 );
+
+const ReasonField: FC<ConfirmModalProps & { reason: string; setReason: (value: string) => void }> = (props) => (
+  <div className="mb-6">
+    <textarea
+      className="w-full resize-none rounded-lg border border-slate-200 p-3 text-sm focus:border-slate-400 focus:outline-none dark:border-slate-600 dark:bg-slate-900 dark:text-white"
+      placeholder="Tulis alasan penolakan..."
+      rows={3}
+      value={props.reason}
+      onChange={(event) => props.setReason(event.target.value)}
+      minLength={props.reasonMinLength}
+      maxLength={props.reasonMaxLength}
+      required
+    />
+    <ReasonFieldHelp {...props} />
+  </div>
+);
+
+const ReasonFieldHelp: FC<Pick<ConfirmModalProps, "reasonMaxLength" | "reasonMinLength"> & { reason: string }> = (props) => (
+  <div className="mt-1 flex justify-between gap-3 text-xs text-slate-500">
+    <span>{props.reasonMinLength ? `Minimal ${props.reasonMinLength} karakter` : null}</span>
+    <span>{props.reasonMaxLength ? `${props.reason.length}/${props.reasonMaxLength}` : null}</span>
+  </div>
+);
+
+const isReasonInvalid = (props: ConfirmModalProps & { reason: string }) => {
+  if (!props.showReasonInput) return false;
+  const length = props.reason.trim().length;
+  return length < (props.reasonMinLength || 1)
+    || Boolean(props.reasonMaxLength && length > props.reasonMaxLength);
+};
 
 const ConfirmModalActions: FC<ConfirmModalProps> = (props) => (
   <div className="flex justify-end gap-3">

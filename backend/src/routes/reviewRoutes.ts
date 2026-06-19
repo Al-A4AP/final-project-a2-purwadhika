@@ -9,7 +9,7 @@ const router = Router();
 router.get('/properties/:propertyId/reviews', getPropertyReviewsCtrl);
 router.post('/orders/:orderId/reviews', requireAuth, requireRole(['USER']), validate(createReviewSchema), createReviewCtrl);
 router.post('/reviews/:reviewId/replies', requireAuth, requireRole(['TENANT']), validate(replyReviewSchema), replyReviewCtrl);
-router.post('/reviews/:reviewId/reply', requireAuth, requireRole(['TENANT']), replyReviewCtrl);
+router.post('/reviews/:reviewId/reply', requireAuth, requireRole(['TENANT']), validate(replyReviewSchema), replyReviewCtrl);
 router.delete('/reviews/:reviewId', requireAuth, requireRole(['TENANT']), deleteReviewCtrl);
 
 export default router;

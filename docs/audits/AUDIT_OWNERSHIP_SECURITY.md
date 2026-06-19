@@ -17,6 +17,8 @@ Risiko besar yang sebelumnya aktif sudah diturunkan:
 - Voucher nominal sudah dihapus dari active flow.
 - `domicile_address` tidak ditemukan pada source aktif.
 - Login attempt guard sudah aktif: 5 gagal login -> lock sementara 15 menit.
+- Tenant rejection reason divalidasi 10-200 karakter tanpa mengubah owner-scoped order lookup.
+- Review reply tetap melewati tenant ownership guard dan kini dibatasi maksimal 200 karakter.
 
 Risiko yang masih perlu ditindaklanjuti:
 
@@ -35,7 +37,7 @@ Risiko yang masih perlu ditindaklanjuti:
 | `frontend npm run lint` | Lulus |
 | Scan browser storage | Tidak ditemukan auth token aktif di localStorage |
 | File source >200 baris | Tidak ditemukan pada `frontend/src` dan `backend/src` |
-| Function-length advisory | 112 kandidat: 99 frontend, 13 backend |
+| Function-length advisory | 101 kandidat: 92 frontend, 9 backend |
 | Unsafe type/log residue | Tidak ditemukan `any`, `as any`, `as unknown as`, `console.log`, atau `debugger` pada scan source |
 
 ## Ownership
