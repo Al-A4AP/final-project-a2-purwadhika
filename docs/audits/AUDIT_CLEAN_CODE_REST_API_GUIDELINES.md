@@ -11,9 +11,9 @@ Dokumen ini sudah disinkronkan dengan kondisi repository setelah refactor batch 
 Hasil audit aktual:
 
 - File source >200 baris pada `frontend/src` dan `backend/src`: tidak ditemukan.
-- Function-length advisory: 112 kandidat.
-- Frontend function advisory: 99 kandidat.
-- Backend function advisory: 13 kandidat.
+- Function-length advisory: 103 kandidat.
+- Frontend function advisory: 94 kandidat.
+- Backend function advisory: 9 kandidat.
 - Scan `any`, `as any`, `as unknown as`, `console.log`, dan `debugger`: tidak ditemukan pada `frontend/src` dan `backend/src`.
 - REST API jalur utama resource-oriented; beberapa legacy alias masih aktif untuk backward compatibility.
 
@@ -22,9 +22,9 @@ Hasil audit aktual:
 | Pemeriksaan | Hasil |
 | --- | --- |
 | Scan file source >200 baris | Tidak ditemukan |
-| `npm run audit:functions` | 112 kandidat manual review, advisory only |
-| Frontend function advisory | 99 kandidat |
-| Backend function advisory | 13 kandidat |
+| `npm run audit:functions` | 103 kandidat manual review, advisory only |
+| Frontend function advisory | 94 kandidat |
+| Backend function advisory | 9 kandidat |
 | Scan `any` | Tidak ditemukan |
 | Scan `as any` | Tidak ditemukan |
 | Scan `as unknown as` | Tidak ditemukan |
@@ -60,10 +60,64 @@ Catatan:
 
 Ringkasan aktual:
 
-- Total kandidat: 112.
-- Frontend kandidat: 99.
-- Backend kandidat: 13.
-- Batch terbaru menurunkan baseline 117 menjadi 112 melalui tepat 5 kandidat SAFE.
+- Total kandidat: 103.
+- Frontend kandidat: 94.
+- Backend kandidat: 9.
+- Batch terbaru menurunkan baseline 108 menjadi 103 melalui 5 kandidat frontend presentational SAFE.
+
+Audit backend function di atas 30 baris:
+
+| File | Function | Lines | Risk | Action |
+| --- | --- | ---: | --- | --- |
+| `backend/src/services/order/tenantRefundCompletion.ts` | `markRefundComplete` | 37 | HIGH | Retained; payment/refund state, ownership-scoped query, dan audit fields |
+| `backend/src/services/order/userCancelOrder.ts` | `cancelUserOrder` | 32 | HIGH | Retained; order transition, manual-refund branch, dan email workflow |
+
+Kandidat frontend yang selesai pada batch ini:
+
+| File | Function | Before | Result |
+| --- | --- | ---: | --- |
+| `frontend/src/pages/tenant/rooms-page/RoomsPageHeader.tsx` | `RoomsPageHeader` | 35 | Resolved melalui private header/action components |
+| `frontend/src/pages/user/UserDashboardPage.tsx` | `UserDashboardPage` | 35 | Resolved melalui display-state composition |
+| `frontend/src/pages/tenant/tenant-dashboard/TenantRevenuePanel.tsx` | `TenantRevenuePanel` | 33 | Resolved melalui title/select/chart helpers |
+| `frontend/src/components/tenant/orders-table/OrdersTableCells.tsx` | `OrderStatusCell` | 27 | Resolved melalui status/proof display helpers |
+| `frontend/src/pages/user/HomePage.tsx` | `PromosCta` | 31 | Resolved melalui data-driven promo cards |
+
+Audit seluruh kandidat di atas 50 baris:
+
+| File | Function | Lines | Domain | Risk | Action |
+| --- | --- | ---: | --- | --- | --- |
+| `frontend/src/pages/tenant/categories/CategoryFormModal.tsx` | `CategoryFormModal` | 119 | category form | MEDIUM | Retained; form state dan submit modal |
+| `frontend/src/pages/tenant/property-form/PropertyImageField.tsx` | `PropertyImageField` | 104 | upload | HIGH | Retained |
+| `frontend/src/hooks/tenant/room-form/useRoomImageField.ts` | `useRoomImageField` | 100 | upload/API | HIGH | Retained |
+| `frontend/src/pages/user/BookingDetailPage.tsx` | `BookingDetailPage` | 89 | booking/payment/upload | HIGH | Retained |
+| `frontend/src/components/common/ImageCropperModal.tsx` | `ImageCropperModal` | 88 | upload/crop | HIGH | Retained |
+| `frontend/src/pages/user/orders/UserOrdersContent.tsx` | `UserOrdersContent` | 82 | order/payment upload | HIGH | Retained |
+| `frontend/src/components/property/ReservationPanel.tsx` | `ReservationPanel` | 73 | booking/availability CTA | HIGH | Retained |
+| `frontend/src/pages/tenant/vouchers/AssignVoucherModal.tsx` | `AssignVoucherModal` | 70 | voucher mutation | HIGH | Retained |
+| `frontend/src/pages/user/PropertyDetailPage.tsx` | `PropertyDetailView` | 60 | booking/availability | HIGH | Retained |
+| `frontend/src/pages/user/orders/BookingPropertySummary.tsx` | `BookingPropertySummary` | 59 | booking | HIGH | Retained despite display-only role |
+| `frontend/src/pages/user/orders/BookingPaymentPanel.tsx` | `BookingPaymentPanel` | 58 | payment/refund | HIGH | Retained |
+| `frontend/src/pages/tenant/property-form/PropertyBasicFields.tsx` | `RentalTypeField` | 55 | property form | MEDIUM | Retained; form register/watch |
+| `frontend/src/hooks/user/reviews/useUserReviewsState.ts` | `useReviewOrders` | 54 | server-state hook | MEDIUM | Retained; fetch lifecycle and stale-request guard |
+| `frontend/src/pages/tenant/property-form/PropertyBasicFields.tsx` | `CategoryField` | 53 | property form | MEDIUM | Retained; form registration and role grouping |
+| `frontend/src/pages/user/PaymentSuccessPage.tsx` | `PaymentSuccessPage` | 52 | payment navigation | HIGH | Retained |
+
+Hasil audit >50: tidak ada kandidat SAFE. Tidak ada refactor source dilakukan pada batch ini. Total advisory tetap 103, frontend 94, dan backend 9.
+
+Kandidat yang selesai pada batch backend 19 Juni 2026:
+
+| File | Function | Before | Result |
+| --- | --- | ---: | --- |
+| `backend/src/scripts/backfill.ts` | `backfill` | 44 | Resolved melalui helper extraction; urutan query tetap |
+| `backend/src/services/tenantProperty/dashboardStats.ts` | `buildRevenueTrend` | 35 | Resolved melalui formatter dan map helper |
+| `backend/src/services/categoryService.ts` | `findCategoryPage` | 16 | Resolved melalui query helper |
+| `backend/src/services/categoryService.ts` | `updateCategory` | 18 | Resolved melalui DTO builder; ownership flow dan query order tetap |
+
+Kandidat backend yang dipertahankan:
+
+| Risk | Candidates | Alasan |
+| --- | ---: | --- |
+| HIGH | 9 | Order/refund/transaction, availability, voucher validation, dan booking profile sync |
 
 Kandidat yang selesai pada batch USER-only saved-property:
 
@@ -329,4 +383,4 @@ Status: masih aktif, bukan blocker runtime.
 
 ## Kesimpulan
 
-Clean code membaik: tidak ada file source aktif >200 baris, residue type/log/debug bersih, dan function advisory turun dari 117 menjadi 112 kandidat pada batch ini. Pekerjaan lanjutan utama adalah refactor kandidat function secara selektif, cleanup folder kosong, PII minimization, dan REST legacy alias cleanup setelah regression test.
+Clean code tetap stabil: tidak ada file source aktif >200 baris, residue type/log/debug bersih, dan function advisory berada pada 103 kandidat. Audit seluruh kandidat >50 tidak menemukan kandidat SAFE; 4 MEDIUM dan 11 HIGH sengaja dipertahankan agar form state, upload, booking, payment, availability, dan voucher behavior tidak berubah. Pekerjaan lanjutan utama adalah refactor kandidat function secara selektif, cleanup folder kosong, PII minimization, dan REST legacy alias cleanup setelah regression test.

@@ -71,15 +71,22 @@ const findCategoryPage = (
   limit: number,
   tenantId: string,
 ) => Promise.all([
-  prisma.propertyCategory.findMany({
-    where,
-    orderBy,
-    skip: (page - 1) * limit,
-    take: limit,
-  }),
+  findCategories(where, orderBy, page, limit),
   prisma.propertyCategory.count({ where }),
   prisma.propertyCategory.count({ where: { tenantId } }),
 ]);
+
+const findCategories = (
+  where: Prisma.PropertyCategoryWhereInput,
+  orderBy: Prisma.PropertyCategoryOrderByWithRelationInput,
+  page: number,
+  limit: number,
+) => prisma.propertyCategory.findMany({
+  where,
+  orderBy,
+  skip: (page - 1) * limit,
+  take: limit,
+});
 
 export const listCategories = async (
   tenantId: string,
@@ -112,6 +119,12 @@ export const createCategory = async (tenantId: string, data: CategoryInput) => {
   });
 };
 
+const buildCategoryUpdateData = (data: CategoryInput) => ({
+  name: data.name.trim(),
+  description: data.description,
+  default_rental_type: data.default_rental_type,
+});
+
 export const updateCategory = async (
   id: string,
   tenantId: string,
@@ -123,11 +136,7 @@ export const updateCategory = async (
   await ensureNameAvailable(data.name, prisma, id);
   return prisma.propertyCategory.update({
     where: { id },
-    data: { 
-      name: data.name.trim(),
-      description: data.description,
-      default_rental_type: data.default_rental_type
-    },
+    data: buildCategoryUpdateData(data),
   });
 };
 

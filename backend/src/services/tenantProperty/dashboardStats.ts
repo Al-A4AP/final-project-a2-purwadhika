@@ -32,39 +32,45 @@ const aggregateRevenue = (tenantId: string, start: Date, end: Date) => prisma.or
   _sum: { total_price: true },
 });
 
+type RevenueTrendOrder = {
+  payment_verified_at: Date | null;
+  total_price: number;
+};
+
+const formatRevenueTrendKey = (date: Date, isDaily: boolean) =>
+  isDaily
+    ? date.toLocaleDateString('id-ID', { day: 'numeric', month: 'short' })
+    : date.toLocaleDateString('id-ID', { month: 'short', year: 'numeric' });
+
+const initializeRevenueTrend = (start: Date, end: Date, isDaily: boolean) => {
+  const trend = new Map<string, number>();
+  const current = new Date(start);
+  while (current < end) {
+    trend.set(formatRevenueTrendKey(current, isDaily), 0);
+    if (isDaily) current.setDate(current.getDate() + 1);
+    else current.setMonth(current.getMonth() + 1);
+  }
+  return trend;
+};
+
+const addOrdersToRevenueTrend = (
+  trend: Map<string, number>,
+  orders: RevenueTrendOrder[],
+  isDaily: boolean,
+) => orders.forEach((order) => {
+  if (!order.payment_verified_at) return;
+  const key = formatRevenueTrendKey(new Date(order.payment_verified_at), isDaily);
+  if (trend.has(key)) trend.set(key, trend.get(key)! + order.total_price);
+});
+
 const buildRevenueTrend = async (tenantId: string, start: Date, end: Date, period: DashboardRevenuePeriod) => {
   const orders = await prisma.order.findMany({
     where: { property: { tenantId }, status: { in: ['PROCESSED', 'COMPLETED'] }, ...buildVerifiedRevenueDateWhere(start, end) },
     select: { payment_verified_at: true, total_price: true }
   });
-
   const isDaily = period === 'weekly' || period === 'monthly';
-  const trendMap = new Map<string, number>();
-
-  let current = new Date(start);
-  while (current < end) {
-    let key = '';
-    if (isDaily) {
-      key = current.toLocaleDateString('id-ID', { day: 'numeric', month: 'short' });
-      current.setDate(current.getDate() + 1);
-    } else {
-      key = current.toLocaleDateString('id-ID', { month: 'short', year: 'numeric' });
-      current.setMonth(current.getMonth() + 1);
-    }
-    trendMap.set(key, 0);
-  }
-
-  orders.forEach(order => {
-    if (!order.payment_verified_at) return;
-    const date = new Date(order.payment_verified_at);
-    const key = isDaily 
-      ? date.toLocaleDateString('id-ID', { day: 'numeric', month: 'short' })
-      : date.toLocaleDateString('id-ID', { month: 'short', year: 'numeric' });
-    if (trendMap.has(key)) {
-      trendMap.set(key, trendMap.get(key)! + order.total_price);
-    }
-  });
-
+  const trendMap = initializeRevenueTrend(start, end, isDaily);
+  addOrdersToRevenueTrend(trendMap, orders, isDaily);
   return Array.from(trendMap.entries()).map(([label, amount]) => ({ label, amount }));
 };
 

@@ -53,23 +53,21 @@ export const OrderStatusCell: FC<{ order: Order }> = ({ order }) => {
     <td className="px-6 py-4">
       <div className="flex flex-col items-start gap-2">
         <OrderStatusBadge status={order.status} />
-        {refundStatus === "PENDING" && (
-          <span className="inline-flex items-center justify-center rounded-md px-2 py-1 text-center text-xs font-medium bg-orange-100 text-orange-800">
-            Refund Diperlukan
-          </span>
-        )}
-        {refundStatus === "COMPLETED" && (
-          <span className="inline-flex items-center justify-center rounded-md px-2 py-1 text-center text-xs font-medium bg-emerald-100 text-emerald-800">
-            Refund Selesai
-          </span>
-        )}
-        {order.payment_proof_url && (
-          <PaymentProofLink
-            orderNumber={order.order_number}
-            url={order.payment_proof_url}
-          />
-        )}
+        <RefundStatusLabel status={refundStatus} />
+        <OrderPaymentProof order={order} />
       </div>
     </td>
   );
 };
+
+const RefundStatusLabel: FC<{ status: ReturnType<typeof getUserRefundStatus> }> = ({ status }) => {
+  if (status === "PENDING") return <span className="inline-flex items-center justify-center rounded-md bg-orange-100 px-2 py-1 text-center text-xs font-medium text-orange-800">Refund Diperlukan</span>;
+  if (status === "COMPLETED") return <span className="inline-flex items-center justify-center rounded-md bg-emerald-100 px-2 py-1 text-center text-xs font-medium text-emerald-800">Refund Selesai</span>;
+  return null;
+};
+
+const OrderPaymentProof: FC<{ order: Order }> = ({ order }) => (
+  order.payment_proof_url
+    ? <PaymentProofLink orderNumber={order.order_number} url={order.payment_proof_url} />
+    : null
+);

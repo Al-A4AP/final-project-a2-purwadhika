@@ -30,6 +30,28 @@ const TRUST_ITEMS = [
   { icon: ShieldCheck, title: "Tenant Terverifikasi", text: "Keamanan terjamin dengan verifikasi host ketat." },
   { icon: CreditCard, title: "Reservasi Aman", text: "Transaksi dilindungi sistem keamanan berstandar tinggi." },
 ];
+const PROMO_ITEMS = [
+  {
+    icon: ShieldCheck,
+    iconClass: "bg-blue-100 text-blue-600 dark:bg-blue-900/30 dark:text-blue-400",
+    cardClass: "border-blue-100 bg-blue-50/50",
+    title: "Dapatkan Voucher Menginap",
+    text: "Gunakan voucher aktif dari tenant saat reservasi dan nikmati potongan khusus.",
+    to: "/auth/register",
+    linkClass: "bg-slate-900 hover:bg-slate-800 dark:bg-white dark:text-slate-900 dark:hover:bg-slate-200",
+    linkText: "Daftar Sekarang",
+  },
+  {
+    icon: Building2,
+    iconClass: "bg-red-100 text-red-600 dark:bg-red-900/30 dark:text-red-400",
+    cardClass: "border-red-100 bg-red-50/50",
+    title: "Ayo daftar sebagai tenant",
+    text: "Kelola properti, kamar, harga musiman, dan reservasi tamu dari satu dashboard sentral.",
+    to: "/auth/register/tenant",
+    linkClass: "bg-red-600 hover:bg-red-700",
+    linkText: "Mulai Menjadi Tenant",
+  },
+] as const;
 
 type PropertyState = ReturnType<typeof useHomePageState>["propertyState"];
 type HomePageState = ReturnType<typeof useHomePageState>;
@@ -149,33 +171,29 @@ const TrustItem: FC<{ icon: LucideIcon; text: string; title: string }> = ({ icon
 const PromosCta: FC = () => (
   <section className="mx-auto max-w-7xl px-4 py-12">
     <div className="grid gap-6 lg:grid-cols-2">
-      <div className="flex flex-col gap-6 rounded-3xl border border-blue-100 bg-blue-50/50 p-8 shadow-sm dark:border-slate-800 dark:bg-slate-800">
-        <div>
-          <div className="mb-4 inline-block rounded-xl bg-blue-100 p-3 text-blue-600 dark:bg-blue-900/30 dark:text-blue-400">
-            <ShieldCheck size={24} />
-          </div>
-          <h2 className="text-2xl font-bold text-slate-900 dark:text-white">Dapatkan Voucher Menginap</h2>
-          <p className="mt-2 text-slate-600 dark:text-slate-400">Gunakan voucher aktif dari tenant saat reservasi dan nikmati potongan khusus.</p>
-        </div>
-        <Link to="/auth/register" className="mt-auto inline-flex w-full items-center justify-center gap-2 rounded-xl bg-slate-900 px-5 py-3 text-center text-sm font-bold text-white transition hover:bg-slate-800 dark:bg-white dark:text-slate-900 dark:hover:bg-slate-200 sm:w-fit">
-          Daftar Sekarang <ArrowRight size={16} />
-        </Link>
-      </div>
-      
-      <div className="flex flex-col gap-6 rounded-3xl border border-red-100 bg-red-50/50 p-8 shadow-sm dark:border-slate-800 dark:bg-slate-800">
-        <div>
-          <div className="mb-4 inline-block rounded-xl bg-red-100 p-3 text-red-600 dark:bg-red-900/30 dark:text-red-400">
-            <Building2 size={24} />
-          </div>
-          <h2 className="text-2xl font-bold text-slate-900 dark:text-white">Ayo daftar sebagai tenant</h2>
-          <p className="mt-2 text-slate-600 dark:text-slate-400">Kelola properti, kamar, harga musiman, dan reservasi tamu dari satu dashboard sentral.</p>
-        </div>
-        <Link to="/auth/register/tenant" className="mt-auto inline-flex w-full items-center justify-center gap-2 rounded-xl bg-red-600 px-5 py-3 text-center text-sm font-bold text-white transition hover:bg-red-700 sm:w-fit">
-          Mulai Menjadi Tenant <ArrowRight size={16} />
-        </Link>
-      </div>
+      {PROMO_ITEMS.map((item) => <PromoCard key={item.to} item={item} />)}
     </div>
   </section>
 );
+
+const PromoCard: FC<{ item: typeof PROMO_ITEMS[number] }> = ({ item }) => (
+  <div className={`flex flex-col gap-6 rounded-3xl border p-8 shadow-sm dark:border-slate-800 dark:bg-slate-800 ${item.cardClass}`}>
+    <PromoCardContent item={item} />
+    <Link to={item.to} className={`mt-auto inline-flex w-full items-center justify-center gap-2 rounded-xl px-5 py-3 text-center text-sm font-bold text-white transition sm:w-fit ${item.linkClass}`}>
+      {item.linkText} <ArrowRight size={16} />
+    </Link>
+  </div>
+);
+
+const PromoCardContent: FC<{ item: typeof PROMO_ITEMS[number] }> = ({ item }) => {
+  const Icon = item.icon;
+  return (
+    <div>
+      <div className={`mb-4 inline-block rounded-xl p-3 ${item.iconClass}`}><Icon size={24} /></div>
+      <h2 className="text-2xl font-bold text-slate-900 dark:text-white">{item.title}</h2>
+      <p className="mt-2 text-slate-600 dark:text-slate-400">{item.text}</p>
+    </div>
+  );
+};
 
 export default HomePage;

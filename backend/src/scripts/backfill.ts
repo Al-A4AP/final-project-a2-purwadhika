@@ -8,18 +8,16 @@ const scriptLogger = {
   info: (message: string) => process.stdout.write(`${message}\n`),
 };
 
-const backfill = async () => {
-  scriptLogger.info('Starting backfill...');
-  
-  const updates = [
-    { name: 'Hotel', description: 'Akomodasi dengan layanan kamar/fasilitas harian.', default_rental_type: 'PER_ROOM' },
-    { name: 'Apartemen', description: 'Unit tinggal modern, dapat dikelola sebagai unit/kamar.', default_rental_type: 'PER_ROOM' },
-    { name: 'Rumah', description: 'Properti hunian yang disewakan sebagai satu unit utuh.', default_rental_type: 'WHOLE_PROPERTY' },
-    { name: 'Villa', description: 'Properti liburan yang disewakan sebagai satu unit utuh.', default_rental_type: 'WHOLE_PROPERTY' },
-    { name: 'Kost', description: 'Kamar sewa jangka pendek/menengah.', default_rental_type: 'PER_ROOM' },
-  ] as const;
+const categoryUpdates = [
+  { name: 'Hotel', description: 'Akomodasi dengan layanan kamar/fasilitas harian.', default_rental_type: 'PER_ROOM' },
+  { name: 'Apartemen', description: 'Unit tinggal modern, dapat dikelola sebagai unit/kamar.', default_rental_type: 'PER_ROOM' },
+  { name: 'Rumah', description: 'Properti hunian yang disewakan sebagai satu unit utuh.', default_rental_type: 'WHOLE_PROPERTY' },
+  { name: 'Villa', description: 'Properti liburan yang disewakan sebagai satu unit utuh.', default_rental_type: 'WHOLE_PROPERTY' },
+  { name: 'Kost', description: 'Kamar sewa jangka pendek/menengah.', default_rental_type: 'PER_ROOM' },
+] as const;
 
-  for (const item of updates) {
+const updateCategories = async () => {
+  for (const item of categoryUpdates) {
     await prisma.propertyCategory.updateMany({
       where: { name: item.name },
       data: {
@@ -29,27 +27,33 @@ const backfill = async () => {
     });
     scriptLogger.info(`Updated category: ${item.name}`);
   }
+};
 
-  // Backfill existing properties
+const getRentalType = (categoryName: string) =>
+  ['Rumah', 'Villa'].includes(categoryName) ? 'WHOLE_PROPERTY' : 'PER_ROOM';
+
+const updatePropertyRentalType = (
+  property: { id: string; category: { name: string } },
+) => prisma.property.update({
+  where: { id: property.id },
+  data: { rental_type: getRentalType(property.category.name) },
+});
+
+const updatePropertyRentalTypes = async () => {
   const properties = await prisma.property.findMany({
     include: { category: true },
   });
 
   for (const property of properties) {
-    if (['Rumah', 'Villa'].includes(property.category.name)) {
-      await prisma.property.update({
-        where: { id: property.id },
-        data: { rental_type: 'WHOLE_PROPERTY' },
-      });
-    } else {
-      await prisma.property.update({
-        where: { id: property.id },
-        data: { rental_type: 'PER_ROOM' },
-      });
-    }
+    await updatePropertyRentalType(property);
   }
   scriptLogger.info(`Updated rental_type for ${properties.length} properties`);
+};
 
+const backfill = async () => {
+  scriptLogger.info('Starting backfill...');
+  await updateCategories();
+  await updatePropertyRentalTypes();
   scriptLogger.info('Backfill completed successfully!');
 };
 
