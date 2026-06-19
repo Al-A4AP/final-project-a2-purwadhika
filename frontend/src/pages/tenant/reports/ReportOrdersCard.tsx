@@ -21,19 +21,8 @@ const ReportOrdersPagination: FC<{ analytics: DashboardAnalytics; onPageChange: 
   </div>
 );
 
-const ReportOrdersList: FC<{ analytics: DashboardAnalytics }> = ({ analytics }) => {
-  if (analytics.recentOrders.length === 0) {
-    return (
-      <EmptyState 
-        className="border-0 bg-transparent px-0 py-10 dark:bg-transparent" 
-        title="Belum ada pesanan masuk" 
-        description="Transaksi yang sesuai filter laporan akan tampil di sini." 
-      />
-    );
-  }
-  return (
-    <div className="space-y-1">
-      {analytics.recentOrders.map((order) => <ReportOrderItem key={order.id} order={order} />)}
-    </div>
-  );
-};
+const ReportOrdersList: FC<{ analytics: DashboardAnalytics }> = ({ analytics }) => (
+  analytics.recentOrders.length
+    ? <div className="space-y-1">{analytics.recentOrders.map((order) => <ReportOrderItem key={order.id} order={order} />)}</div>
+    : <EmptyState className="border-0 bg-transparent px-0 py-10 dark:bg-transparent" title="Belum ada pesanan masuk" description="Transaksi yang sesuai filter laporan akan tampil di sini." />
+);

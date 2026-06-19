@@ -17,12 +17,12 @@ export const RoomImageDropzone: FC<RoomImageDropzoneProps> = ({
       {previewUrl ? <RoomImagePreview previewUrl={previewUrl} /> : <RoomImagePlaceholder />}
       <input type="file" accept="image/*" onChange={onFileChange} className="hidden" />
     </label>
-    {isEditing && (
-      <p className="mt-1.5 text-[10px] text-slate-500 dark:text-slate-400">
-        Pilih file baru untuk mengganti foto utama kamar.
-      </p>
-    )}
+    {isEditing && <ImageReplacementHint />}
   </div>
+);
+
+const ImageReplacementHint = () => (
+  <p className="mt-1.5 text-[10px] text-slate-500 dark:text-slate-400">Pilih file baru untuk mengganti foto utama kamar.</p>
 );
 
 const RoomImagePreview: FC<{ previewUrl: string }> = ({ previewUrl }) => (

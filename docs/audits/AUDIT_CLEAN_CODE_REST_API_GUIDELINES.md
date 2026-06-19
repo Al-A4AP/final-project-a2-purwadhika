@@ -1,6 +1,6 @@
 # Audit Clean Code dan REST API Guidelines
 
-Tanggal audit: 18 Juni 2026
+Tanggal audit: 19 Juni 2026
 Project: PURWALOKA - Property Renting Web App  
 Acuan: `docs/guidelines/PURWADHIKA.md`, `docs/guidelines/REST_API_GUIDELINES.md`, `docs/guidelines/CODE_LINE_CHECK_GUIDELINES.md`
 
@@ -11,8 +11,8 @@ Dokumen ini sudah disinkronkan dengan kondisi repository setelah refactor batch 
 Hasil audit aktual:
 
 - File source >200 baris pada `frontend/src` dan `backend/src`: tidak ditemukan.
-- Function-length advisory: 117 kandidat.
-- Frontend function advisory: 104 kandidat.
+- Function-length advisory: 112 kandidat.
+- Frontend function advisory: 99 kandidat.
 - Backend function advisory: 13 kandidat.
 - Scan `any`, `as any`, `as unknown as`, `console.log`, dan `debugger`: tidak ditemukan pada `frontend/src` dan `backend/src`.
 - REST API jalur utama resource-oriented; beberapa legacy alias masih aktif untuk backward compatibility.
@@ -22,8 +22,8 @@ Hasil audit aktual:
 | Pemeriksaan | Hasil |
 | --- | --- |
 | Scan file source >200 baris | Tidak ditemukan |
-| `npm run audit:functions` | 117 kandidat manual review, advisory only |
-| Frontend function advisory | 104 kandidat |
+| `npm run audit:functions` | 112 kandidat manual review, advisory only |
+| Frontend function advisory | 99 kandidat |
 | Backend function advisory | 13 kandidat |
 | Scan `any` | Tidak ditemukan |
 | Scan `as any` | Tidak ditemukan |
@@ -60,10 +60,20 @@ Catatan:
 
 Ringkasan aktual:
 
-- Total kandidat: 117.
-- Frontend kandidat: 104.
+- Total kandidat: 112.
+- Frontend kandidat: 99.
 - Backend kandidat: 13.
-- Batch terbaru menurunkan baseline 122 menjadi 117 melalui tepat 5 kandidat SAFE.
+- Batch terbaru menurunkan baseline 117 menjadi 112 melalui tepat 5 kandidat SAFE.
+
+Kandidat yang selesai pada batch USER-only saved-property:
+
+| File | Function | Before | Result |
+| --- | --- | ---: | --- |
+| `frontend/src/pages/tenant/reviews/ReviewsSkeleton.tsx` | `ReviewsSkeleton` | 22 | Resolved |
+| `frontend/src/components/tenant/room-form/RoomImageDropzone.tsx` | `RoomImageDropzone` | 17 | Resolved |
+| `frontend/src/pages/tenant/reports/ReportOrdersCard.tsx` | `ReportOrdersList` | 16 | Resolved |
+| `frontend/src/pages/tenant/tenant-dashboard/TenantDashboardHeader.tsx` | `TenantDashboardHeader` | 16 | Resolved |
+| `frontend/src/components/tenant/room-form/RoomGalleryGrid.tsx` | `RoomGalleryGrid` | 16 | Resolved |
 
 Kandidat yang selesai pada batch saved-property/navigation:
 
@@ -319,4 +329,4 @@ Status: masih aktif, bukan blocker runtime.
 
 ## Kesimpulan
 
-Clean code membaik: tidak ada file source aktif >200 baris, residue type/log/debug bersih, dan function advisory turun dari 122 menjadi 117 kandidat pada batch ini. Pekerjaan lanjutan utama adalah refactor kandidat function secara selektif, cleanup folder kosong, PII minimization, dan REST legacy alias cleanup setelah regression test.
+Clean code membaik: tidak ada file source aktif >200 baris, residue type/log/debug bersih, dan function advisory turun dari 117 menjadi 112 kandidat pada batch ini. Pekerjaan lanjutan utama adalah refactor kandidat function secara selektif, cleanup folder kosong, PII minimization, dan REST legacy alias cleanup setelah regression test.

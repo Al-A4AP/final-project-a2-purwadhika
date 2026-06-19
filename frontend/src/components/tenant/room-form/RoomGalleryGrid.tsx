@@ -13,9 +13,7 @@ interface RoomGalleryGridProps {
 
 export const RoomGalleryGrid: FC<RoomGalleryGridProps> = (props) => (
   <div className="border-t border-slate-100 pt-4 dark:border-slate-800">
-    <label className="mb-3 block text-sm font-semibold text-slate-700 dark:text-slate-300">
-      Foto Tambahan
-    </label>
+    <GallerySectionLabel />
     <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 md:grid-cols-4">
       {props.images.map((image, index) => (
         <GalleryImageCard key={image.id} image={image} isMain={index === 0} {...props} />
@@ -26,6 +24,10 @@ export const RoomGalleryGrid: FC<RoomGalleryGridProps> = (props) => (
       />
     </div>
   </div>
+);
+
+const GallerySectionLabel = () => (
+  <label className="mb-3 block text-sm font-semibold text-slate-700 dark:text-slate-300">Foto Tambahan</label>
 );
 
 interface GalleryImageCardProps extends Pick<RoomGalleryGridProps, "canDelete" | "onDelete" | "onSetMain"> {

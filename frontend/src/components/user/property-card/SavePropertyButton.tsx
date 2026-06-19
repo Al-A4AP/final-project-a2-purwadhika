@@ -12,10 +12,10 @@ interface SavePropertyButtonProps {
 
 export const SavePropertyButton: FC<SavePropertyButtonProps> = ({ property, className = "", variant = "overlay" }) => {
   const hydrated = useAuthStore((state) => state.hydrated);
-  const isTenant = useAuthStore((state) => state.user?.role === "TENANT");
+  const isUser = useAuthStore((state) => state.user?.role === "USER");
   const { isSaved, toggleSave } = useSavedProperties();
   const saved = isSaved(property.id);
-  if (!hydrated || isTenant) return null;
+  if (!hydrated || !isUser) return null;
   return <SavePropertyControl className={className} property={property} saved={saved} toggleSave={toggleSave} variant={variant} />;
 };
 

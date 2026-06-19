@@ -1,6 +1,6 @@
 # Audit Keseluruhan PURWADHIKA
 
-Tanggal audit: 18 Juni 2026
+Tanggal audit: 19 Juni 2026
 Project: PURWALOKA - Property Renting Web App  
 Acuan: `docs/guidelines/PURWADHIKA.md`
 
@@ -24,7 +24,7 @@ Perubahan penting yang sudah tercermin pada kondisi project:
 - Double booking protection sudah memakai advisory lock, availability recheck, dan atomic voucher update.
 - Explore search query inconsistency sudah diselesaikan: tombol `Cari` dan `Terapkan Filter` memakai helper query Explore yang sama.
 - Tenant category maksimal 5 milik sendiri; kategori global dan tenant lain tetap dapat dipakai serta tidak dihitung.
-- Saved property dibatasi ke USER, guest behavior lokal dipertahankan, dan TENANT tidak melihat/memodifikasi love.
+- Saved property hanya untuk authenticated USER; GUEST dan TENANT tidak melihat atau memodifikasi love.
 - Brand PURWALOKA pada tenant sidebar desktop/mobile mengarah ke homepage.
 
 Catatan utama: perlindungan double booking tetap membutuhkan manual concurrency QA sebelum dinyatakan selesai secara operasional.
@@ -53,8 +53,8 @@ Item berikut sudah dipindahkan ke resolved pada source flow aktif:
 | Backend build | Lulus |
 | Backend ownership test | Lulus, 10/10 |
 | File source >200 baris | Tidak ditemukan pada `frontend/src` dan `backend/src` |
-| Function length audit advisory | 117 kandidat manual review |
-| Frontend function advisory | 104 kandidat |
+| Function length audit advisory | 112 kandidat manual review |
+| Frontend function advisory | 99 kandidat |
 | Backend function advisory | 13 kandidat |
 | `any` / cast residue | Tidak ditemukan pada scan source |
 | `console.*` | Tidak ditemukan pada scan source |
@@ -315,7 +315,7 @@ Status: buildable dan lint lulus.
 Catatan:
 
 - Tidak ada file >200 baris.
-- 104 kandidat function/component frontend masih menjadi advisory manual review.
+- 99 kandidat function/component frontend masih menjadi advisory manual review.
 
 ### Backend
 
@@ -334,7 +334,7 @@ Status: membaik pada type/log residue, masih perlu file-size cleanup.
 Temuan tersisa:
 
 - Tidak ditemukan file source aktif >200 baris pada `frontend/src` dan `backend/src`.
-- 117 function-length advisory candidates.
+- 112 function-length advisory candidates.
 - Tidak ditemukan `as any`, `as unknown as`, `console.*`, atau `debugger` pada scan source.
 - `orderService.ts` sudah turun dari sekitar 377 baris menjadi 184 baris.
 - `voucherService.ts` sudah turun dari 203 baris menjadi 116 baris.

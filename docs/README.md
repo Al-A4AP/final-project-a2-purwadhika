@@ -2,7 +2,7 @@
 
 Folder ini menyimpan dokumentasi audit, guideline, handover, dan rencana perbaikan PURWALOKA. Root `README.md` sengaja dibuat ringkas untuk reviewer, mentor, recruiter, dan developer baru; detail audit internal diletakkan di folder ini.
 
-Tanggal sinkronisasi dokumentasi terbaru: 18 Juni 2026.
+Tanggal sinkronisasi dokumentasi terbaru: 19 Juni 2026.
 
 ## Document Map
 
@@ -30,10 +30,10 @@ README di folder `frontend` dan `backend` tidak dibuat ulang.
 
 | Area | Status aktual |
 | --- | --- |
-| Tanggal audit | 18 Juni 2026 |
+| Tanggal audit | 19 Juni 2026 |
 | File source >200 baris | Tidak ditemukan pada `frontend/src` dan `backend/src` |
-| Function-length advisory | 117 kandidat |
-| Frontend advisory | 104 kandidat |
+| Function-length advisory | 112 kandidat |
+| Frontend advisory | 99 kandidat |
 | Backend advisory | 13 kandidat |
 | `any` / `as any` / `as unknown as` | Tidak ditemukan pada scan `frontend/src` dan `backend/src` |
 | `console.log` | Tidak ditemukan pada scan `frontend/src` dan `backend/src` |
@@ -61,7 +61,7 @@ README di folder `frontend` dan `backend` tidak dibuat ulang.
 | Reset password | Tersedia | Forgot/reset password memakai resolver custom | `frontend/src/pages/auth/`, `backend/src/services/authService.ts` |
 | Profile user/tenant | Tersedia | Customer: KTP/name/address/phone. Tenant: name/phone/operational address | `frontend/src/pages/user/ProfilePage.tsx`, `frontend/src/components/user/profile/` |
 | Property detail | Tersedia | Detail properti, kamar, gallery, map, availability, review | `frontend/src/pages/user/PropertyDetailPage.tsx`, `backend/src/services/propertyDetailService.ts` |
-| Saved property | Tersedia | USER-only controls; TENANT hidden/blocked; guest behavior lokal dipertahankan | `frontend/src/hooks/useSavedProperties.ts`, `frontend/src/components/user/property-card/SavePropertyButton.tsx` |
+| Saved property | Tersedia | Hanya authenticated USER; GUEST dan TENANT hidden/blocked | `frontend/src/hooks/useSavedProperties.ts`, `frontend/src/components/user/property-card/SavePropertyButton.tsx` |
 | Property category management | Tersedia | Shared category, owner-only mutation, dan limit 5 kategori milik sendiri per tenant | `frontend/src/pages/tenant/CategoriesPage.tsx`, `backend/src/services/categoryService.ts` |
 | Tenant property CRUD | Tersedia | Property form/list dan ownership guard tersedia | `frontend/src/pages/tenant/PropertyFormPage.tsx`, `backend/src/services/tenantPropertyService.ts` |
 | Tenant room CRUD | Tersedia | Max 5 jenis kamar/property dan stock max 20 | `frontend/src/pages/tenant/RoomsPage.tsx`, `backend/src/services/tenantRoomService.ts` |
@@ -130,7 +130,7 @@ Property Detail
 ## Clean Code Notes
 
 - `npm run audit:functions` adalah alat bantu audit, bukan hard rule build.
-- Function-length advisory terbaru: 117 kandidat (104 frontend, 13 backend).
+- Function-length advisory terbaru: 112 kandidat (99 frontend, 13 backend).
 - File source aktif >200 baris: tidak ditemukan pada `frontend/src` dan `backend/src`.
 - Residue scan untuk `any`, unsafe cast, `console.log`, dan `debugger` bersih.
 - Refactor terakhir memecah beberapa komponen dashboard, review, saved properties, property report, serta presentational UI.

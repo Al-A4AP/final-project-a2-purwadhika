@@ -45,13 +45,13 @@ const subscribeSavedProperties = (
 
 export const useSavedProperties = () => {
   const hydrated = useAuthStore((state) => state.hydrated);
-  const isTenant = useAuthStore((state) => state.user?.role === "TENANT");
+  const isUser = useAuthStore((state) => state.user?.role === "USER");
   const [savedProperties, setSavedProperties] =
     useState<SavedProperty[]>(savedPropertiesStore);
 
   useEffect(() => subscribeSavedProperties(setSavedProperties), []);
 
-  return useSavedPropertyActions(savedProperties, setSavedProperties, hydrated && !isTenant);
+  return useSavedPropertyActions(savedProperties, setSavedProperties, hydrated && isUser);
 };
 
 const useSavedPropertyActions = (

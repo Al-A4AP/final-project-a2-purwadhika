@@ -1,6 +1,6 @@
 # Audit Ownership dan Keamanan
 
-Tanggal audit: 18 Juni 2026
+Tanggal audit: 19 Juni 2026
 Project: PURWALOKA - Property Renting Web App  
 Acuan: ownership data, authorization, browser storage, PII, transaksi, dan hardening backend.
 
@@ -35,7 +35,7 @@ Risiko yang masih perlu ditindaklanjuti:
 | `frontend npm run lint` | Lulus |
 | Scan browser storage | Tidak ditemukan auth token aktif di localStorage |
 | File source >200 baris | Tidak ditemukan pada `frontend/src` dan `backend/src` |
-| Function-length advisory | 117 kandidat: 104 frontend, 13 backend |
+| Function-length advisory | 112 kandidat: 99 frontend, 13 backend |
 | Unsafe type/log residue | Tidak ditemukan `any`, `as any`, `as unknown as`, `console.log`, atau `debugger` pada scan source |
 
 ## Ownership
@@ -96,9 +96,9 @@ Status: implemented.
 
 - Saved property tidak memiliki endpoint atau model backend; storage tetap localStorage.
 - Route `/saved-properties` tetap dilindungi sebagai USER-only.
-- Tombol love pada property card dan property detail tidak dirender untuk TENANT.
-- Shared hook memblokir read exposure dan mutation untuk TENANT.
-- Guest mempertahankan behavior wishlist lokal yang sudah ada.
+- Tombol love pada property card dan property detail hanya dirender untuk authenticated USER.
+- Shared hook memblokir read exposure dan mutation untuk TENANT maupun GUEST.
+- Route `/saved-properties` tetap USER-only.
 - Tidak ada perubahan API contract.
 
 ## Auth dan Session Security
@@ -255,7 +255,7 @@ Storage yang masih dipakai:
 | Lokasi | Storage | Tujuan | Risiko |
 | --- | --- | --- | --- |
 | `frontend/src/stores/theme/themeStorage.ts` | localStorage | Preferensi tema | Rendah |
-| `frontend/src/hooks/savedPropertiesStorage.ts` | localStorage | Wishlist lokal USER/guest; tersembunyi dan diblokir untuk TENANT | Rendah-menengah |
+| `frontend/src/hooks/savedPropertiesStorage.ts` | localStorage | Wishlist lokal authenticated USER; GUEST/TENANT diblokir oleh UI dan hook | Rendah-menengah |
 | `frontend/src/lib/authNotice.ts` | sessionStorage | Notice auth sementara | Rendah |
 | `frontend/src/lib/browserStorageCleanup.ts` | localStorage remove | Bersihkan legacy auth storage | Positif |
 
