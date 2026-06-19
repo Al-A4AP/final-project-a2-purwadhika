@@ -11,8 +11,8 @@ Dokumen ini sudah disinkronkan dengan kondisi repository setelah refactor batch 
 Hasil audit aktual:
 
 - File source >200 baris pada `frontend/src` dan `backend/src`: tidak ditemukan.
-- Function-length advisory: 103 kandidat.
-- Frontend function advisory: 94 kandidat.
+- Function-length advisory: 102 kandidat.
+- Frontend function advisory: 93 kandidat.
 - Backend function advisory: 9 kandidat.
 - Scan `any`, `as any`, `as unknown as`, `console.log`, dan `debugger`: tidak ditemukan pada `frontend/src` dan `backend/src`.
 - REST API jalur utama resource-oriented; beberapa legacy alias masih aktif untuk backward compatibility.
@@ -22,8 +22,8 @@ Hasil audit aktual:
 | Pemeriksaan | Hasil |
 | --- | --- |
 | Scan file source >200 baris | Tidak ditemukan |
-| `npm run audit:functions` | 103 kandidat manual review, advisory only |
-| Frontend function advisory | 94 kandidat |
+| `npm run audit:functions` | 102 kandidat manual review, advisory only |
+| Frontend function advisory | 93 kandidat |
 | Backend function advisory | 9 kandidat |
 | Scan `any` | Tidak ditemukan |
 | Scan `as any` | Tidak ditemukan |
@@ -60,8 +60,8 @@ Catatan:
 
 Ringkasan aktual:
 
-- Total kandidat: 103.
-- Frontend kandidat: 94.
+- Total kandidat: 102.
+- Frontend kandidat: 93.
 - Backend kandidat: 9.
 - Batch terbaru menurunkan baseline 108 menjadi 103 melalui 5 kandidat frontend presentational SAFE.
 
@@ -103,6 +103,14 @@ Audit seluruh kandidat di atas 50 baris:
 | `frontend/src/pages/user/PaymentSuccessPage.tsx` | `PaymentSuccessPage` | 52 | payment navigation | HIGH | Retained |
 
 Hasil audit >50: tidak ada kandidat SAFE. Tidak ada refactor source dilakukan pada batch ini. Total advisory tetap 103, frontend 94, dan backend 9.
+
+Targeted review kandidat terbesar berikutnya:
+
+| File | Function | Before | Risk | Result |
+| --- | --- | ---: | --- | --- |
+| `frontend/src/pages/tenant/categories/CategoryFormModal.tsx` | `CategoryFormModal` | 119 | MEDIUM | Resolved melalui presentational fields/actions extraction |
+
+Submit orchestration tetap berada di `useCategoryForm`. Native `required`, `maxLength`, character count, serta kondisi tombol submit tetap identik. Kandidat property image, room image hook, cropper, booking detail, user orders, dan reservation panel dipertahankan karena HIGH risk.
 
 Kandidat yang selesai pada batch backend 19 Juni 2026:
 
@@ -383,4 +391,4 @@ Status: masih aktif, bukan blocker runtime.
 
 ## Kesimpulan
 
-Clean code tetap stabil: tidak ada file source aktif >200 baris, residue type/log/debug bersih, dan function advisory berada pada 103 kandidat. Audit seluruh kandidat >50 tidak menemukan kandidat SAFE; 4 MEDIUM dan 11 HIGH sengaja dipertahankan agar form state, upload, booking, payment, availability, dan voucher behavior tidak berubah. Pekerjaan lanjutan utama adalah refactor kandidat function secara selektif, cleanup folder kosong, PII minimization, dan REST legacy alias cleanup setelah regression test.
+Clean code membaik: tidak ada file source aktif >200 baris, residue type/log/debug bersih, dan function advisory turun menjadi 102 kandidat. `CategoryFormModal` diselesaikan tanpa mengubah submit atau validation behavior; kandidat upload, image processing, booking, payment, availability, dan order workflow tetap dipertahankan. Pekerjaan lanjutan utama adalah refactor kandidat function secara selektif, cleanup folder kosong, PII minimization, dan REST legacy alias cleanup setelah regression test.
