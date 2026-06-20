@@ -11,26 +11,25 @@ interface ReservationStepperProps {
 }
 
 export const ReservationStepper: FC<ReservationStepperProps> = ({ state }) => {
-  const [currentStep, setCurrentStep] = useState(1);
   const [proofFile, setProofFile] = useState<File | null>(null);
 
   const isManual = state.paymentMethod === "MANUAL";
   const totalSteps = isManual ? 6 : 5;
   const steps = buildReservationSteps(isManual);
-  const canContinue = canContinueStep(currentStep, isManual, proofFile, state) && !state.processing;
+  const canContinue = canContinueStep(state.currentStep, isManual, proofFile, state) && !state.processing;
   const handleNext = async () => {
-    if (currentStep === 3 && !await state.createPendingOrder()) return;
-    setCurrentStep((p) => Math.min(p + 1, totalSteps));
+    if (state.currentStep === 3 && !await state.createPendingOrder()) return;
+    state.setCurrentStep((step) => Math.min(step + 1, totalSteps));
   };
-  const handlePrev = () => setCurrentStep((p) => Math.max(p - 1, 1));
+  const handlePrev = () => state.setCurrentStep((step) => Math.max(step - 1, 1));
 
   return (
     <div className="mx-auto max-w-4xl px-4 py-8 md:py-12">
-      <ReservationStepIndicator currentStep={currentStep} steps={steps} totalSteps={totalSteps} />
+      <ReservationStepIndicator currentStep={state.currentStep} steps={steps} totalSteps={totalSteps} />
 
       <div className="rounded-3xl border border-slate-100 bg-white p-6 shadow-xl dark:border-slate-800 dark:bg-slate-900 md:p-8">
         <ReservationStepContent
-          currentStep={currentStep}
+          currentStep={state.currentStep}
           isManual={isManual}
           proofFile={proofFile}
           state={state}
@@ -39,7 +38,7 @@ export const ReservationStepper: FC<ReservationStepperProps> = ({ state }) => {
         />
         <ReservationStepperActions
           canContinue={canContinue}
-          currentStep={currentStep}
+          currentStep={state.currentStep}
           totalSteps={totalSteps}
           onNext={handleNext}
           onPrev={handlePrev}

@@ -3,20 +3,27 @@ import { useAuthStore } from "@/stores/authStore";
 import type { User } from "@/types";
 import type { BookingGuestIdentity } from "./bookingTypes";
 
-export const useBookingGuestIdentity = () => {
+export const useBookingGuestIdentity = (
+  bookingForSelf: boolean,
+  setBookingForSelf: (value: boolean) => void,
+) => {
   const user = useAuthStore((state) => state.user);
-  const [bookingForSelf, setBookingForSelf] = useState(true);
-  const [manualIdentity, setManualIdentity] = useState<BookingGuestIdentity>(() => buildManualIdentity(user));
+  const [manualIdentity, setManualIdentity] = useState<BookingGuestIdentity>(buildManualIdentity);
   const identity = useMemo(() => (
     bookingForSelf ? buildUserIdentity(user) : manualIdentity
   ), [bookingForSelf, manualIdentity, user]);
-
-  const setGuestIdentityField = (field: keyof BookingGuestIdentity, value: boolean | string) => {
-    if (field === "bookingForSelf") return updateBookingMode(Boolean(value), user, setBookingForSelf, setManualIdentity);
-    setManualIdentity((current) => ({ ...current, [field]: value }));
-  };
-
+  const setGuestIdentityField = buildIdentitySetter(setBookingForSelf, setManualIdentity);
   return { guestIdentity: identity, setGuestIdentityField };
+};
+
+const buildIdentitySetter = (
+  setBookingForSelf: (value: boolean) => void,
+  setManualIdentity: (identity: BookingGuestIdentity | IdentityUpdater) => void,
+) => (field: keyof BookingGuestIdentity, value: boolean | string) => {
+  if (field === "bookingForSelf") {
+    return updateBookingMode(Boolean(value), setBookingForSelf, setManualIdentity);
+  }
+  setManualIdentity((current) => ({ ...current, [field]: value }));
 };
 
 const buildUserIdentity = (user: User | null): BookingGuestIdentity => ({
@@ -29,17 +36,23 @@ const buildUserIdentity = (user: User | null): BookingGuestIdentity => ({
   phone: user?.phone || "",
 });
 
-const buildManualIdentity = (user: User | null): BookingGuestIdentity => ({
-  ...buildUserIdentity(user),
+const buildManualIdentity = (): BookingGuestIdentity => ({
   bookingForSelf: false,
+  email: "",
+  ktpAddress: "",
+  ktpNumber: "",
+  legalName: "",
+  name: "",
+  phone: "",
 });
 
 const updateBookingMode = (
   value: boolean,
-  user: User | null,
   setBookingForSelf: (value: boolean) => void,
-  setManualIdentity: (identity: BookingGuestIdentity) => void,
+  setManualIdentity: (identity: BookingGuestIdentity | IdentityUpdater) => void,
 ) => {
   setBookingForSelf(value);
-  if (!value) setManualIdentity(buildManualIdentity(user));
+  if (!value) setManualIdentity(buildManualIdentity());
 };
+
+type IdentityUpdater = (current: BookingGuestIdentity) => BookingGuestIdentity;

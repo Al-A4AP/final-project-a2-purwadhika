@@ -6,8 +6,12 @@ import { toUtcDateTime } from "./bookingDates";
 import type { BookingQuery, BookingTotals } from "./bookingTypes";
 import type { VoucherPreview } from "@/types";
 
-export const useBookingVoucher = (query: BookingQuery, totals: BookingTotals | null) => {
-  const [voucherCode, setVoucherCode] = useState("");
+export const useBookingVoucher = (
+  query: BookingQuery,
+  totals: BookingTotals | null,
+  voucherCode: string,
+  setVoucherCode: (code: string) => void,
+) => {
   const [voucherLoading, setVoucherLoading] = useState(false);
   const [voucherPreview, setVoucherPreview] = useState<VoucherPreview | null>(null);
   const applyVoucher = () => previewVoucher(query, totals, voucherCode, setVoucherLoading, setVoucherPreview);

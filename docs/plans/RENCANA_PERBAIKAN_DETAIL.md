@@ -1,6 +1,6 @@
 # Rencana Perbaikan Detail
 
-Tanggal update: 19 Juni 2026
+Tanggal update: 21 Juni 2026
 Acuan: audit final hardening, clean code, REST API guidelines, ownership, security, dan PURWADHIKA.
 
 ## Ringkasan
@@ -24,6 +24,19 @@ Status verifikasi terakhir:
 | `debugger` | Tidak ditemukan |
 
 ## Selesai Pada Hardening Terbaru
+
+### Booking Draft Persistence
+
+Status: selesai; manual browser QA tersisa.
+
+- Draft booking memakai `sessionStorage`.
+- Restore hanya dilakukan jika property, room, check-in, dan check-out lengkap.
+- Draft key berbeda untuk kombinasi property/room/tanggal yang berbeda.
+- Persisted field dibatasi pada query booking, guest counts, booking-for-self, voucher code, step, dan payment method.
+- KTP, nama legal, alamat KTP, phone, email, identitas tamu lengkap, dan file bukti pembayaran tidak disimpan.
+- Self booking mengambil ulang profile; manual guest identity dimulai kosong setelah refresh.
+- Draft dihapus setelah order berhasil dibuat.
+- Backend, API contract, database, dan migration tidak berubah.
 
 ### Booking dan Payment
 

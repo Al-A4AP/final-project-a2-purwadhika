@@ -54,6 +54,8 @@ export type BookingPageState = {
   updateGuest: (type: GuestType, delta: number) => void;
   agreementAccepted: boolean;
   setAgreementAccepted: (accepted: boolean) => void;
+  currentStep: number;
+  setCurrentStep: (step: number | ((current: number) => number)) => void;
   paymentMethod: PaymentMethod;
   setPaymentMethod: (method: PaymentMethod) => void;
   processing: boolean;

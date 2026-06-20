@@ -13,7 +13,7 @@ import type { BookingGuestIdentity, BookingGuests, BookingQuery, PaymentMethod }
 export const useBookingCheckout = (params: {
   agreementAccepted: boolean; query: BookingQuery; property: PropertyDetail | null; room: Room | null;
   guestIdentity: BookingGuestIdentity; guests: BookingGuests; paymentMethod: PaymentMethod; navigate: NavigateFunction;
-  voucherCode: string;
+  voucherCode: string; onOrderCreated: () => void;
 }) => {
   const [processing, setProcessing] = useState(false);
   const processingRef = useRef(false);
@@ -65,6 +65,7 @@ const reserveOrder = async (
     const result = await createOrder(params);
     state.setCreatedOrder(result.order);
     state.setSnapToken(result.snapToken || null);
+    params.onOrderCreated();
     toast.success(getReservationMessage(result.order.total_price));
     return true;
   } catch (err) {
@@ -87,6 +88,7 @@ const createAndStoreOrder = async (params: CheckoutParams, state: CheckoutOrderS
   const result = await createOrder(params);
   state.setCreatedOrder(result.order);
   state.setSnapToken(result.snapToken || null);
+  params.onOrderCreated();
   return result.order;
 };
 

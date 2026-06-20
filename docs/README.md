@@ -2,11 +2,12 @@
 
 Folder ini menyimpan dokumentasi audit, guideline, handover, dan rencana perbaikan PURWALOKA. Root `README.md` sengaja dibuat ringkas untuk reviewer, mentor, recruiter, dan developer baru; detail audit internal diletakkan di folder ini.
 
-Tanggal sinkronisasi dokumentasi terbaru: 19 Juni 2026.
+Tanggal sinkronisasi dokumentasi terbaru: 21 Juni 2026.
 
 ## Document Map
 
 - `audits/AUDIT_CLEAN_CODE_REST_API_GUIDELINES.md`: audit clean code, function-length advisory lengkap, file >200, residue scan, REST API, dan legacy folder.
+- `audits/AUDIT_BOOKING_DRAFT_PERSISTENCE.md`: audit persistence draft booking non-PII, lifecycle, storage key, dan hasil verifikasi.
 - `audits/AUDIT_OWNERSHIP_SECURITY.md`: audit ownership, authorization, storage, PII, token blacklist, booking lock, voucher, dan security.
 - `audits/AUDIT_PURWADHIKA_FINAL.md`: audit keseluruhan berdasarkan requirement PURWADHIKA.
 - `audits/AUDIT_ZOD_RESOLVER_BUG.md`: histori bug resolver React Hook Form/Zod.
@@ -30,7 +31,7 @@ README di folder `frontend` dan `backend` tidak dibuat ulang.
 
 | Area | Status aktual |
 | --- | --- |
-| Tanggal audit | 19 Juni 2026 |
+| Tanggal audit | 21 Juni 2026 |
 | File source >200 baris | Tidak ditemukan pada `frontend/src` dan `backend/src` |
 | Function-length advisory | 101 kandidat |
 | Frontend advisory | 92 kandidat |
@@ -40,6 +41,7 @@ README di folder `frontend` dan `backend` tidak dibuat ulang.
 | `debugger` | Tidak ditemukan pada scan `frontend/src` dan `backend/src` |
 | Empty legacy folders | `frontend/src/hooks/tenant/occupancy`, `frontend/src/pages/tenant/occupancy` |
 | Occupancy route | Masih ada redirect `/tenant/occupancy` ke `/tenant/property-report` |
+| Booking draft | sessionStorage, non-PII only, scoped per property/room/date |
 
 ## Status Fitur PURWADHIKA
 
