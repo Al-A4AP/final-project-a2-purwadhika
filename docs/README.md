@@ -8,6 +8,7 @@ Tanggal sinkronisasi dokumentasi terbaru: 21 Juni 2026.
 
 - `audits/AUDIT_CLEAN_CODE_REST_API_GUIDELINES.md`: audit clean code, function-length advisory lengkap, file >200, residue scan, REST API, dan legacy folder.
 - `audits/AUDIT_BOOKING_DRAFT_PERSISTENCE.md`: audit persistence draft booking non-PII, lifecycle, storage key, dan hasil verifikasi.
+- `audits/AUDIT_BROWSER_STORAGE_POLICY.md`: inventaris localStorage/sessionStorage, klasifikasi persistence, migrasi filter, dan pemeriksaan PII.
 - `audits/AUDIT_OWNERSHIP_SECURITY.md`: audit ownership, authorization, storage, PII, token blacklist, booking lock, voucher, dan security.
 - `audits/AUDIT_PURWADHIKA_FINAL.md`: audit keseluruhan berdasarkan requirement PURWADHIKA.
 - `audits/AUDIT_ZOD_RESOLVER_BUG.md`: histori bug resolver React Hook Form/Zod.
@@ -42,6 +43,7 @@ README di folder `frontend` dan `backend` tidak dibuat ulang.
 | Empty legacy folders | `frontend/src/hooks/tenant/occupancy`, `frontend/src/pages/tenant/occupancy` |
 | Occupancy route | Masih ada redirect `/tenant/occupancy` ke `/tenant/property-report` |
 | Booking draft | sessionStorage, non-PII only, scoped per property/room/date |
+| Browser storage policy | localStorage hanya preference/persistent state; temporary state memakai sessionStorage |
 
 ## Status Fitur PURWADHIKA
 

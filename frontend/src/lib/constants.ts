@@ -125,7 +125,6 @@ export const API_BASE_URL =
 
 export const STORAGE_KEYS = {
   THEME: "app_theme",
-  FILTERS: "property_filters",
 };
 
 export const REGEX = {

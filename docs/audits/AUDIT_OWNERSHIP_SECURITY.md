@@ -258,12 +258,14 @@ Storage yang masih dipakai:
 | --- | --- | --- | --- |
 | `frontend/src/stores/theme/themeStorage.ts` | localStorage | Preferensi tema | Rendah |
 | `frontend/src/hooks/savedPropertiesStorage.ts` | localStorage | Wishlist lokal authenticated USER; GUEST/TENANT diblokir oleh UI dan hook | Rendah-menengah |
+| `frontend/src/stores/filter/filterPersistence.ts` | sessionStorage | Filter/search property sementara; migrasi satu kali membersihkan localStorage lama | Rendah |
 | `frontend/src/lib/authNotice.ts` | sessionStorage | Notice auth sementara | Rendah |
 | `frontend/src/hooks/user/booking/bookingDraftStorage.ts` | sessionStorage | Draft booking non-PII, scoped per property/room/date | Rendah |
 | `frontend/src/lib/browserStorageCleanup.ts` | localStorage remove | Bersihkan legacy auth storage | Positif |
 
 Tidak ditemukan JWT auth token aktif di localStorage.
 Draft booking tidak menyimpan KTP, nama legal, alamat, phone, email, atau identitas tamu lengkap.
+Filter/search tidak lagi dipersist lintas browser session.
 
 ## Upload Security
 
