@@ -1,15 +1,16 @@
 import type { FC } from "react";
 import type { BookingPageState } from "@/hooks/user/booking/bookingTypes";
+import { MAX_PHONE_NUMBER_LENGTH, MAX_KTP_NUMBER_LENGTH, ADDRESS_MAX_LENGTH } from "@/constants/validation";
 
 type FieldKey = "email" | "ktpAddress" | "ktpNumber" | "legalName" | "name" | "phone";
 
-const fields: { key: FieldKey; label: string; placeholder: string; required?: boolean }[] = [
+const fields: { key: FieldKey; label: string; placeholder: string; required?: boolean, maxLength? : number }[] = [
   { key: "name", label: "Nama Pemesan", placeholder: "Nama yang mudah dihubungi" },
   { key: "legalName", label: "Nama sesuai KTP", placeholder: "Nama legal tamu", required: true },
-  { key: "phone", label: "Nomor Telepon", placeholder: "+62 812 xxxx xxxx", required: true },
-  { key: "ktpNumber", label: "Nomor KTP", placeholder: "16 digit angka KTP", required: true },
+  { key: "phone", label: "Nomor Telepon", placeholder: "+62 812 xxxx xxxx", required: true,  maxLength: MAX_PHONE_NUMBER_LENGTH },
+  { key: "ktpNumber", label: "Nomor KTP", placeholder: "16 digit angka KTP", required: true, maxLength: MAX_KTP_NUMBER_LENGTH },
   { key: "email", label: "Email", placeholder: "email@contoh.com" },
-  { key: "ktpAddress", label: "Alamat sesuai KTP", placeholder: "Alamat lengkap pada KTP", required: true },
+  { key: "ktpAddress", label: "Alamat sesuai KTP", placeholder: "Alamat lengkap pada KTP", required: true, maxLength: ADDRESS_MAX_LENGTH },
 ];
 
 export const GuestIdentityForm: FC<{ state: BookingPageState }> = ({ state }) => (
@@ -48,7 +49,7 @@ const GuestIdentityField: FC<{ field: (typeof fields)[number]; state: BookingPag
       disabled={state.guestIdentity.bookingForSelf}
       className="h-11 w-full rounded-xl border border-slate-200 bg-white px-3 text-sm text-slate-900 outline-none transition focus:border-slate-400 focus:ring-2 focus:ring-slate-100 disabled:bg-slate-100 disabled:text-slate-500 dark:border-slate-700 dark:bg-slate-900 dark:text-white dark:disabled:bg-slate-800"
       inputMode={field.key === "phone" || field.key === "ktpNumber" ? "numeric" : undefined}
-      maxLength={field.key === "ktpNumber" ? 16 : undefined}
+      maxLength={field.maxLength}
     />
   </label>
 );
