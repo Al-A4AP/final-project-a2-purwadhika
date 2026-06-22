@@ -1,6 +1,6 @@
 # Rencana Perbaikan Detail
 
-Tanggal update: 21 Juni 2026
+Tanggal update: 22 Juni 2026
 Acuan: audit final hardening, clean code, REST API guidelines, ownership, security, dan PURWADHIKA.
 
 ## Ringkasan
@@ -16,9 +16,9 @@ Status verifikasi terakhir:
 | Backend build | Lulus |
 | Backend ownership test | Lulus, 10/10 |
 | File source >200 baris | Tidak ditemukan pada `frontend/src` dan `backend/src` |
-| Function length audit | 101 kandidat advisory |
+| Function length audit | 100 kandidat advisory |
 | Frontend advisory | 92 kandidat |
-| Backend advisory | 9 kandidat |
+| Backend advisory | 8 kandidat |
 | `any` / cast residue | Tidak ditemukan pada scan source |
 | `console.*` | Tidak ditemukan pada scan source |
 | `debugger` | Tidak ditemukan |
@@ -32,9 +32,10 @@ Status: selesai; manual browser QA tersisa.
 - Draft booking memakai `sessionStorage`.
 - Restore hanya dilakukan jika property, room, check-in, dan check-out lengkap.
 - Draft key berbeda untuk kombinasi property/room/tanggal yang berbeda.
-- Persisted field dibatasi pada query booking, guest counts, booking-for-self, voucher code, step, dan payment method.
-- KTP, nama legal, alamat KTP, phone, email, identitas tamu lengkap, dan file bukti pembayaran tidak disimpan.
-- Self booking mengambil ulang profile; manual guest identity dimulai kosong setelah refresh.
+- Persisted field mencakup query booking, guest counts, booking-for-self, identity non-KTP, voucher code, step, dan payment method.
+- Nama pemesan, nama legal, phone, email, dan alamat sesuai KTP dipulihkan.
+- Nomor KTP/NIK, file bukti pembayaran, upload payload, dan token tidak disimpan.
+- Self booking mengambil ulang profile; manual guest identity memulihkan non-KTP dan mengosongkan nomor KTP.
 - Draft dihapus setelah order berhasil dibuat.
 - Backend, API contract, database, dan migration tidak berubah.
 
@@ -153,6 +154,7 @@ Status: selesai.
 - PURWALOKA tenant sidebar brand sekarang menuju home pada desktop dan mobile drawer.
 - Function advisory batch terbaru: 122 -> 117 melalui 5 kandidat presentasional.
 - Function advisory batch 19 Juni: 117 -> 112 melalui 5 kandidat presentasional.
+- Function advisory 22 Juni: 101 -> 100 melalui extraction pure helper penggabungan rentang availability; frontend tetap 92 dan backend 9 -> 8.
 
 ## Tahap Berikutnya
 
@@ -220,10 +222,12 @@ Prioritas: P2
 
 Status:
 
-- 112 kandidat function/component >15 baris.
-- 99 kandidat di `frontend/src`.
-- 13 kandidat di `backend/src`.
+- 100 kandidat function/component >15 baris.
+- 92 kandidat di `frontend/src`.
+- 8 kandidat di `backend/src`.
 - Ini alat bantu audit, bukan hard rule otomatis.
+
+Delapan kandidat backend yang tersisa dipertahankan sengaja. Kandidat tersebut menyentuh order/refund transaction, ownership, availability/pricing, voucher validation, booking profile sync, atau query semantics laporan.
 
 Rencana:
 
@@ -264,27 +268,25 @@ Rencana:
 ### Tahap 7 - Legacy Empty Folder Cleanup
 
 Risiko: rendah  
-Prioritas: P2
+Status: selesai 22 Juni 2026
 
-Temuan:
+Hasil:
 
-- `frontend/src/hooks/tenant/occupancy` kosong.
-- `frontend/src/pages/tenant/occupancy` kosong.
+- `frontend/src/hooks/tenant/occupancy` sudah dihapus setelah dipastikan kosong dan orphan.
+- `frontend/src/pages/tenant/occupancy` sudah dihapus setelah dipastikan kosong dan orphan.
 
 Catatan:
 
-- Folder kosong aman dihapus.
-- Jangan hapus route `/tenant/occupancy` tanpa keputusan UX, karena route masih dipakai sebagai redirect ke `/tenant/property-report`.
-- Jangan hapus `frontend/src/components/tenant/occupancy-calendar`, karena komponen masih dipakai pada property report.
+- Route `/tenant/occupancy` tetap dipertahankan sebagai redirect ke `/tenant/property-report`.
+- `frontend/src/components/tenant/occupancy-calendar` tetap dipertahankan karena masih dipakai pada property report.
 
 ## Recommended Execution Order
 
 1. Manual QA concurrency dan payment expiry.
 2. PII/data minimization.
 3. Function length batch kecil.
-4. Legacy empty folder cleanup.
-5. Legacy schema migration jika user setuju.
-6. REST legacy alias cleanup.
+4. Legacy schema migration jika user setuju.
+5. REST legacy alias cleanup.
 
 ## Guardrail
 

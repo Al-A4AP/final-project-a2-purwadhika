@@ -2,6 +2,12 @@ import prisma from '../../config/prisma';
 import type { OrderStatus } from '@prisma/client';
 
 const ACTIVE_OCCUPANCY_STATUSES: OrderStatus[] = ['WAITING_PAYMENT', 'WAITING_CONFIRMATION', 'PROCESSED', 'COMPLETED'];
+const DAY_IN_MS = 86_400_000;
+
+type MillisecondRange = {
+  start: number;
+  end: number;
+};
 
 export const findOccupancyCalendar = async (tenantId: string) => {
   const properties = await prisma.property.findMany({
@@ -33,25 +39,26 @@ export const findOccupancyCalendar = async (tenantId: string) => {
 };
 
 const mergeAvailabilityToRanges = (availability: { date: Date }[]) => {
-  if (availability.length === 0) return [];
   const sorted = availability.map((a) => a.date.getTime()).sort((a, b) => a - b);
-  const ranges: { start_date: Date; end_date: Date }[] = [];
-  let currentStart = sorted[0]!;
-  let currentEnd = sorted[0]!;
-
-  for (let i = 1; i < sorted.length; i++) {
-    const time = sorted[i]!;
-    if (time - currentEnd === 86400000) {
-      currentEnd = time;
-    } else {
-      ranges.push({ start_date: new Date(currentStart), end_date: new Date(currentEnd) });
-      currentStart = time;
-      currentEnd = time;
-    }
-  }
-  ranges.push({ start_date: new Date(currentStart), end_date: new Date(currentEnd) });
-  return ranges;
+  return toDateRanges(mergeConsecutiveDates(sorted));
 };
+
+const mergeConsecutiveDates = (dates: number[]) =>
+  dates.reduce<MillisecondRange[]>((ranges, date) => {
+    const currentRange = ranges[ranges.length - 1];
+    if (currentRange && date - currentRange.end === DAY_IN_MS) {
+      currentRange.end = date;
+    } else {
+      ranges.push({ start: date, end: date });
+    }
+    return ranges;
+  }, []);
+
+const toDateRanges = (ranges: MillisecondRange[]) =>
+  ranges.map(({ start, end }) => ({
+    start_date: new Date(start),
+    end_date: new Date(end),
+  }));
 
 const buildRoomOccupancySelect = () => ({
   id: true,

@@ -1,6 +1,6 @@
 # Audit Clean Code dan REST API Guidelines
 
-Tanggal audit: 19 Juni 2026
+Tanggal audit terakhir: 22 Juni 2026
 Project: PURWALOKA - Property Renting Web App  
 Acuan: `docs/guidelines/PURWADHIKA.md`, `docs/guidelines/REST_API_GUIDELINES.md`, `docs/guidelines/CODE_LINE_CHECK_GUIDELINES.md`
 
@@ -11,9 +11,9 @@ Dokumen ini sudah disinkronkan dengan kondisi repository setelah refactor batch 
 Hasil audit aktual:
 
 - File source >200 baris pada `frontend/src` dan `backend/src`: tidak ditemukan.
-- Function-length advisory: 101 kandidat.
+- Function-length advisory: 100 kandidat.
 - Frontend function advisory: 92 kandidat.
-- Backend function advisory: 9 kandidat.
+- Backend function advisory: 8 kandidat.
 - Scan `any`, `as any`, `as unknown as`, `console.log`, dan `debugger`: tidak ditemukan pada `frontend/src` dan `backend/src`.
 - REST API jalur utama resource-oriented; beberapa legacy alias masih aktif untuk backward compatibility.
 
@@ -22,9 +22,9 @@ Hasil audit aktual:
 | Pemeriksaan | Hasil |
 | --- | --- |
 | Scan file source >200 baris | Tidak ditemukan |
-| `npm run audit:functions` | 101 kandidat manual review, advisory only |
+| `npm run audit:functions` | 100 kandidat manual review, advisory only |
 | Frontend function advisory | 92 kandidat |
-| Backend function advisory | 9 kandidat |
+| Backend function advisory | 8 kandidat |
 | Scan `any` | Tidak ditemukan |
 | Scan `as any` | Tidak ditemukan |
 | Scan `as unknown as` | Tidak ditemukan |
@@ -60,17 +60,24 @@ Catatan:
 
 Ringkasan aktual:
 
-- Total kandidat: 101.
+- Total kandidat: 100.
 - Frontend kandidat: 92.
-- Backend kandidat: 9.
-- Batch terbaru menurunkan baseline 108 menjadi 103 melalui 5 kandidat frontend presentational SAFE.
+- Backend kandidat: 8.
+- Batch 22 Juni menurunkan total 101 menjadi 100 melalui extraction pure helper penggabungan rentang availability.
 
-Audit backend function di atas 30 baris:
+Audit seluruh kandidat backend sebelum refactor aman:
 
 | File | Function | Lines | Risk | Action |
 | --- | --- | ---: | --- | --- |
 | `backend/src/services/order/tenantRefundCompletion.ts` | `markRefundComplete` | 37 | HIGH | Retained; payment/refund state, ownership-scoped query, dan audit fields |
 | `backend/src/services/order/userCancelOrder.ts` | `cancelUserOrder` | 32 | HIGH | Retained; order transition, manual-refund branch, dan email workflow |
+| `backend/src/services/orderService.ts` | `executeOrderTransaction` | 28 | HIGH | Retained; transaction, lock, availability, voucher, dan order creation |
+| `backend/src/services/tenantReport/occupancyQuery.ts` | `findOccupancyCalendar` | 28 | MEDIUM | Retained; query dan report-shaping semantics |
+| `backend/src/services/propertyDetail/roomStatus.ts` | `buildRoomStatus` | 25 | HIGH | Retained; availability, pricing, dan date-range queries |
+| `backend/src/services/orderService.ts` | `buildOrderCreateData` | 20 | HIGH | Retained; order payload dan status/payment semantics |
+| `backend/src/services/tenantReport/occupancyQuery.ts` | `mergeAvailabilityToRanges` | 20 | SAFE | Resolved melalui pure date-range helpers |
+| `backend/src/validations/voucherValidation.ts` | `validateVoucherRules` | 20 | HIGH | Retained; voucher business validation |
+| `backend/src/services/orderService.ts` | `syncUserProfileFromBooking` | 19 | HIGH | Retained; booking side effect dan profile PII mutation |
 
 Kandidat frontend yang selesai pada batch ini:
 
@@ -129,11 +136,7 @@ Kandidat yang selesai pada batch backend 19 Juni 2026:
 | `backend/src/services/categoryService.ts` | `findCategoryPage` | 16 | Resolved melalui query helper |
 | `backend/src/services/categoryService.ts` | `updateCategory` | 18 | Resolved melalui DTO builder; ownership flow dan query order tetap |
 
-Kandidat backend yang dipertahankan:
-
-| Risk | Candidates | Alasan |
-| --- | ---: | --- |
-| HIGH | 9 | Order/refund/transaction, availability, voucher validation, dan booking profile sync |
+Kandidat backend yang dipertahankan: 7 HIGH dan 1 MEDIUM. Tidak ada kandidat SAFE tersisa setelah extraction pure helper.
 
 Kandidat yang selesai pada batch USER-only saved-property:
 
@@ -311,17 +314,17 @@ Tabel rinci di bawah adalah snapshot kandidat historis 17 Juni 2026 untuk tracea
 
 | Folder | Used? | Import Found? | Recommendation |
 | --- | --- | --- | --- |
-| `frontend/src/hooks/tenant/occupancy` | Tidak, folder kosong | Tidak | SAFE TO DELETE folder kosong |
-| `frontend/src/pages/tenant/occupancy` | Tidak, folder kosong | Tidak | SAFE TO DELETE folder kosong |
+| `frontend/src/hooks/tenant/occupancy` | Tidak | Tidak | Dihapus 22 Juni 2026 |
+| `frontend/src/pages/tenant/occupancy` | Tidak | Tidak | Dihapus 22 Juni 2026 |
 | `frontend/src/components/tenant/occupancy-calendar` | Ya | Ya | DO NOT DELETE |
 | `/tenant/occupancy` route | Ya, redirect ke `/tenant/property-report` | Ya | DO NOT DELETE tanpa keputusan UX |
 
 ## Legacy / Orphan Classification
 
-### SAFE TO DELETE
+### CLEANUP COMPLETED
 
-- `frontend/src/hooks/tenant/occupancy`: folder kosong.
-- `frontend/src/pages/tenant/occupancy`: folder kosong.
+- `frontend/src/hooks/tenant/occupancy`: folder kosong dihapus.
+- `frontend/src/pages/tenant/occupancy`: folder kosong dihapus.
 
 ### MAYBE DELETE
 
@@ -392,11 +395,10 @@ Status: masih aktif, bukan blocker runtime.
 
 1. Lanjutkan function-length refactor per batch kecil, mulai dari presentational UI yang aman.
 2. Jangan memecah function hanya demi angka jika readability memburuk.
-3. Cleanup dua folder occupancy kosong dapat dilakukan terpisah karena tidak berisi file.
-4. Jangan hapus route `/tenant/occupancy` sebelum keputusan UX/compatibility jelas.
-5. Jangan hapus legacy REST alias sebelum frontend dan QA benar-benar aman.
-6. PII/data minimization pada list order/report tetap menjadi prioritas P1.
+3. Pertahankan route `/tenant/occupancy` sampai keputusan UX/compatibility berubah.
+4. Jangan hapus legacy REST alias sebelum frontend dan QA benar-benar aman.
+5. PII/data minimization pada list order/report tetap menjadi prioritas P1.
 
 ## Kesimpulan
 
-Clean code membaik: tidak ada file source aktif >200 baris, residue type/log/debug bersih, dan function advisory turun menjadi 101 kandidat. Reject reason dan review reply validation kini konsisten pada frontend/backend tanpa mengubah ownership atau API contract. Kandidat upload, image processing, booking, payment, availability, dan order workflow tetap dipertahankan. Pekerjaan lanjutan utama adalah refactor kandidat function secara selektif, cleanup folder kosong, PII minimization, dan REST legacy alias cleanup setelah regression test.
+Clean code membaik: tidak ada file source aktif >200 baris, residue type/log/debug bersih, dan function advisory turun menjadi 100 kandidat. Reject reason dan review reply validation konsisten pada frontend/backend tanpa mengubah ownership atau API contract. Dua folder occupancy kosong sudah dibersihkan, sedangkan route redirect dan komponen aktif tetap dipertahankan. Kandidat backend tersisa sengaja dipertahankan karena risikonya; pekerjaan lanjutan utama adalah PII minimization dan REST legacy alias cleanup setelah regression test.

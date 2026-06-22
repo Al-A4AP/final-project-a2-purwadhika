@@ -29,10 +29,12 @@ Final Project Purwadhika JCWDBGPM-11, Group 1:
 
 - Dashboard tenant dengan ringkasan operasional.
 - CRUD kategori, properti, kamar, ketersediaan, dan peak season; kategori shared dengan limit 5 kategori milik sendiri per tenant.
+- Maksimal 20 properti per tenant, kapasitas dewasa maksimal 30, dan harga harian maksimal Rp100.000.000.
 - Manajemen voucher tenant.
 - Manajemen reservasi dan konfirmasi pembayaran manual.
 - Laporan pendapatan, laporan properti, dan kalender ketersediaan.
 - Review tamu, balasan review, dan penghapusan review sesuai ownership.
+- Penolakan pembayaran manual wajib menyertakan alasan 10-200 karakter; balasan review opsional maksimal 200 karakter.
 - Brand PURWALOKA pada sidebar tenant dapat diklik untuk kembali ke homepage.
 
 ## Feature Status PURWADHIKA
@@ -51,8 +53,8 @@ Final Project Purwadhika JCWDBGPM-11, Group 1:
 | Profile user dan tenant | Tersedia | `frontend/src/pages/user/ProfilePage.tsx`, `frontend/src/components/user/profile/`, `backend/src/services/userService.ts` |
 | Property detail, kamar, harga, availability, review | Tersedia | `frontend/src/pages/user/PropertyDetailPage.tsx`, `frontend/src/components/property/`, `backend/src/services/propertyDetailService.ts` |
 | Tenant category CRUD | Tersedia; shared, owner-only mutation, max 5 kategori milik sendiri | `frontend/src/pages/tenant/CategoriesPage.tsx`, `backend/src/services/categoryService.ts` |
-| Tenant property CRUD | Tersedia | `frontend/src/pages/tenant/PropertiesListPage.tsx`, `frontend/src/pages/tenant/PropertyFormPage.tsx`, `backend/src/services/tenantPropertyService.ts` |
-| Tenant room CRUD | Tersedia | `frontend/src/pages/tenant/RoomsPage.tsx`, `backend/src/services/tenantRoomService.ts` |
+| Tenant property CRUD | Tersedia; maksimal 20 properti per tenant, harga harian maksimal Rp100.000.000 | `frontend/src/pages/tenant/PropertiesListPage.tsx`, `frontend/src/pages/tenant/PropertyFormPage.tsx`, `backend/src/services/tenantPropertyService.ts` |
+| Tenant room CRUD | Tersedia; kapasitas dewasa maksimal 30 | `frontend/src/pages/tenant/RoomsPage.tsx`, `backend/src/services/tenantRoomService.ts` |
 | Room availability management | Tersedia | `frontend/src/components/tenant/OccupancyCalendar.tsx`, `backend/src/services/availabilityService.ts` |
 | Peak season rate management | Tersedia | `frontend/src/pages/tenant/PeakSeasonPage.tsx`, `backend/src/services/tenantRoom/` |
 | Tenant sales report | Tersedia | `frontend/src/pages/tenant/ReportsPage.tsx`, `backend/src/services/tenantReportService.ts` |
@@ -110,6 +112,8 @@ Backend:
 Backend adalah source of truth untuk auth, role access, ownership, booking, availability, payment, voucher, review, status order, dan validasi final. Frontend bertanggung jawab sebagai presentation dan orchestration layer untuk UI, form, route guard, modal, toast, dan client-side UX guard.
 
 Order dibuat pada tahap `Lanjut ke Pembayaran`, kemudian status awal menjadi `WAITING_PAYMENT` dan inventory dikunci. `WAITING_PAYMENT` berlaku 1 jam. Transfer manual yang sudah upload bukti menjadi `WAITING_CONFIRMATION` dan wajib dikonfirmasi tenant maksimal 2 jam. Sistem memiliki auto-cancel via cron, advisory lock untuk mengurangi risiko double booking, dan persistent token blacklist untuk logout multi-instance.
+
+Draft booking sementara memakai `sessionStorage` dan dipisahkan berdasarkan properti, kamar, serta tanggal. Detail tamu, voucher, langkah aktif, metode pembayaran, dan identitas non-KTP dapat dipulihkan setelah refresh. Nomor KTP/NIK, token, bukti pembayaran, dan file upload tidak disimpan di browser storage.
 
 ## Folder Structure
 
@@ -228,10 +232,12 @@ npm run test:ownership
 
 ## Current Project Status
 
-Status dokumentasi terakhir: 19 Juni 2026.
+Status dokumentasi terakhir: 22 Juni 2026.
 
 - Frontend lint dan build terakhir lulus.
 - Backend build dan ownership test terakhir lulus (10/10).
 - File source aktif `frontend/src` dan `backend/src` saat ini tidak melewati 200 baris.
-- Function-length audit adalah alat bantu advisory, bukan blocker build; snapshot terbaru 101 kandidat.
+- Function-length audit adalah alat bantu advisory, bukan blocker build; snapshot terbaru 100 kandidat (92 frontend, 8 backend).
+- Residue scan source untuk `any`, unsafe cast, `console.log`, dan `debugger` bersih.
+- Dua folder occupancy legacy yang kosong sudah dihapus; route redirect `/tenant/occupancy` dan komponen kalender aktif tetap dipertahankan.
 - Dokumentasi audit, rencana perbaikan, dan handover tersedia di folder [`docs`](./docs/README.md).

@@ -2,7 +2,7 @@
 
 Folder ini menyimpan dokumentasi audit, guideline, handover, dan rencana perbaikan PURWALOKA. Root `README.md` sengaja dibuat ringkas untuk reviewer, mentor, recruiter, dan developer baru; detail audit internal diletakkan di folder ini.
 
-Tanggal sinkronisasi dokumentasi terbaru: 21 Juni 2026.
+Tanggal sinkronisasi dokumentasi terbaru: 22 Juni 2026.
 
 ## Document Map
 
@@ -13,7 +13,7 @@ Tanggal sinkronisasi dokumentasi terbaru: 21 Juni 2026.
 - `audits/AUDIT_PURWADHIKA_FINAL.md`: audit keseluruhan berdasarkan requirement PURWADHIKA.
 - `audits/AUDIT_ZOD_RESOLVER_BUG.md`: histori bug resolver React Hook Form/Zod.
 - `plans/RENCANA_PERBAIKAN_DETAIL.md`: backlog aktif dan urutan rekomendasi perbaikan.
-- `HANDOVER.local.md`: ringkasan local-only untuk agent/developer berikutnya.
+- `HANDOVER.local.md`: ringkasan local-only untuk konteks pengembangan internal.
 - `guidelines/PURWADHIKA.md`: requirement final project. Jangan diubah tanpa instruksi eksplisit.
 - `guidelines/REST_API_GUIDELINES.md`: panduan REST resource naming. Jangan diubah tanpa instruksi eksplisit.
 - `guidelines/CODE_LINE_CHECK_GUIDELINES.md`: panduan audit batas baris. Jangan diubah tanpa instruksi eksplisit.
@@ -32,17 +32,17 @@ README di folder `frontend` dan `backend` tidak dibuat ulang.
 
 | Area | Status aktual |
 | --- | --- |
-| Tanggal audit | 21 Juni 2026 |
+| Tanggal audit | 22 Juni 2026 |
 | File source >200 baris | Tidak ditemukan pada `frontend/src` dan `backend/src` |
-| Function-length advisory | 101 kandidat |
+| Function-length advisory | 100 kandidat |
 | Frontend advisory | 92 kandidat |
-| Backend advisory | 9 kandidat |
+| Backend advisory | 8 kandidat |
 | `any` / `as any` / `as unknown as` | Tidak ditemukan pada scan `frontend/src` dan `backend/src` |
 | `console.log` | Tidak ditemukan pada scan `frontend/src` dan `backend/src` |
 | `debugger` | Tidak ditemukan pada scan `frontend/src` dan `backend/src` |
-| Empty legacy folders | `frontend/src/hooks/tenant/occupancy`, `frontend/src/pages/tenant/occupancy` |
+| Empty legacy folders | Dua folder occupancy kosong sudah dihapus |
 | Occupancy route | Masih ada redirect `/tenant/occupancy` ke `/tenant/property-report` |
-| Booking draft | sessionStorage, non-PII only, scoped per property/room/date |
+| Booking draft | sessionStorage, guest identity non-KTP allowlist, scoped per property/room/date |
 | Browser storage policy | localStorage hanya preference/persistent state; temporary state memakai sessionStorage |
 
 ## Status Fitur PURWADHIKA
@@ -134,7 +134,7 @@ Property Detail
 ## Clean Code Notes
 
 - `npm run audit:functions` adalah alat bantu audit, bukan hard rule build.
-- Function-length advisory terbaru: 101 kandidat (92 frontend, 9 backend).
+- Function-length advisory terbaru: 100 kandidat (92 frontend, 8 backend).
 - File source aktif >200 baris: tidak ditemukan pada `frontend/src` dan `backend/src`.
 - Residue scan untuk `any`, unsafe cast, `console.log`, dan `debugger` bersih.
 - Refactor terakhir memecah beberapa komponen dashboard, review, saved properties, property report, serta presentational UI.
@@ -143,8 +143,8 @@ Property Detail
 
 | Folder | Used? | Import Found? | Recommendation |
 | --- | --- | --- | --- |
-| `frontend/src/hooks/tenant/occupancy` | Tidak, folder kosong | Tidak | Safe to delete folder kosong |
-| `frontend/src/pages/tenant/occupancy` | Tidak, folder kosong | Tidak | Safe to delete folder kosong |
+| `frontend/src/hooks/tenant/occupancy` | Tidak | Tidak | Folder kosong dihapus 22 Juni 2026 |
+| `frontend/src/pages/tenant/occupancy` | Tidak | Tidak | Folder kosong dihapus 22 Juni 2026 |
 | `frontend/src/components/tenant/occupancy-calendar` | Ya | Ya | Do not delete |
 | `/tenant/occupancy` route | Ya, redirect | Ya | Do not delete route tanpa keputusan UX |
 

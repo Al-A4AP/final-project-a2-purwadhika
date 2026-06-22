@@ -55,9 +55,9 @@ Item berikut sudah dipindahkan ke resolved pada source flow aktif:
 | Backend build | Lulus |
 | Backend ownership test | Lulus, 10/10 |
 | File source >200 baris | Tidak ditemukan pada `frontend/src` dan `backend/src` |
-| Function length audit advisory | 101 kandidat manual review |
+| Function length audit advisory | 100 kandidat manual review |
 | Frontend function advisory | 92 kandidat |
-| Backend function advisory | 9 kandidat |
+| Backend function advisory | 8 kandidat |
 | `any` / cast residue | Tidak ditemukan pada scan source |
 | `console.*` | Tidak ditemukan pada scan source |
 | `debugger` | Tidak ditemukan |
@@ -326,7 +326,7 @@ Status: buildable dan ownership test lulus.
 Catatan:
 
 - Tidak ditemukan file source aktif >200 baris pada `frontend/src` dan `backend/src`.
-- 9 kandidat function backend masih menjadi advisory manual review.
+- 8 kandidat function backend masih menjadi advisory manual review dan dipertahankan karena menyentuh transaksi, ownership, availability/pricing, voucher, profile sync, atau query semantics.
 - Sisa file >200 baris perlu dibersihkan bertahap.
 
 ### Clean Code
@@ -336,7 +336,7 @@ Status: membaik pada type/log residue, masih perlu file-size cleanup.
 Temuan tersisa:
 
 - Tidak ditemukan file source aktif >200 baris pada `frontend/src` dan `backend/src`.
-- 101 function-length advisory candidates.
+- 100 function-length advisory candidates.
 - Tidak ditemukan `as any`, `as unknown as`, `console.*`, atau `debugger` pada scan source.
 - `orderService.ts` sudah turun dari sekitar 377 baris menjadi 184 baris.
 - `voucherService.ts` sudah turun dari 203 baris menjadi 116 baris.
@@ -350,7 +350,7 @@ Temuan tersisa:
 | P1 | PII/data minimization pada order/report list | Sedang |
 | P1 | Audit legacy referral/voucher schema sebelum migration | Tinggi jika destructive |
 | P2 | Function-length batch kecil | Rendah-sedang |
-| P2 | Cleanup folder occupancy kosong | Rendah |
+| Selesai | Cleanup dua folder occupancy kosong; route redirect dan komponen aktif dipertahankan | Rendah |
 | P2 | REST legacy alias cleanup | Sedang |
 
 ## Kesimpulan

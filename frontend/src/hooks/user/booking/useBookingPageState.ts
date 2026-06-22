@@ -30,7 +30,12 @@ const useBookingRouteState = () => {
 const useBookingFormState = (route: BookingRouteState) => {
   const draft = useBookingDraft(route.query);
   const guests = useBookingGuests(route.data.room, draft.draft, draft.setGuests);
-  const identity = useBookingGuestIdentity(draft.draft.bookingForSelf, draft.setBookingForSelf);
+  const identity = useBookingGuestIdentity(
+    draft.draft.bookingForSelf,
+    draft.setBookingForSelf,
+    draft.draftIdentity,
+    draft.setGuestIdentity,
+  );
   const [agreementAccepted, setAgreementAccepted] = useState(false);
   const totals = useMemo(() => getBookingTotals(route.query, route.data.room), [route.query, route.data.room]);
   const voucher = useBookingVoucher(route.query, totals, draft.draft.voucherCode, draft.setVoucherCode);

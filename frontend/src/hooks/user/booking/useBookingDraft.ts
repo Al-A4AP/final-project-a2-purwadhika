@@ -2,9 +2,11 @@ import { useCallback, useEffect, useState, type Dispatch, type SetStateAction } 
 import {
   clearBookingDraft,
   getBookingDraft,
+  getBookingDraftIdentity,
   getBookingDraftKey,
   saveBookingDraft,
   type BookingDraft,
+  type BookingDraftIdentity,
 } from "./bookingDraftStorage";
 import type { BookingGuests, BookingQuery, PaymentMethod } from "./bookingTypes";
 
@@ -16,7 +18,12 @@ export const useBookingDraft = (query: BookingQuery) => {
   const [persistenceEnabled, setPersistenceEnabled] = useState(Boolean(key));
   useDraftPersistence(key, draft, persistenceEnabled);
   const clearDraft = useClearDraft(key, setPersistenceEnabled);
-  return { draft, clearDraft, ...buildDraftSetters(setDraft) };
+  return {
+    draft,
+    draftIdentity: getBookingDraftIdentity(draft),
+    clearDraft,
+    ...buildDraftSetters(setDraft),
+  };
 };
 
 const useDraftPersistence = (key: string | null, draft: BookingDraft, enabled: boolean) => {
@@ -34,6 +41,11 @@ const useClearDraft = (key: string | null, setEnabled: (enabled: boolean) => voi
   }, [key, setEnabled]);
 
 const buildDraftSetters = (setDraft: Dispatch<SetStateAction<BookingDraft>>) => ({
+  ...buildMainDraftSetters(setDraft),
+  ...buildIdentityDraftSetter(setDraft),
+});
+
+const buildMainDraftSetters = (setDraft: Dispatch<SetStateAction<BookingDraft>>) => ({
   setGuests: (guests: BookingGuests | GuestUpdater) =>
     setDraft((current) => mergeGuests(current, resolveGuests(guests, current))),
   setBookingForSelf: (bookingForSelf: boolean) =>
@@ -46,12 +58,20 @@ const buildDraftSetters = (setDraft: Dispatch<SetStateAction<BookingDraft>>) => 
     setDraft((current) => ({ ...current, paymentMethod })),
 });
 
+const buildIdentityDraftSetter = (setDraft: Dispatch<SetStateAction<BookingDraft>>) => ({
+  setGuestIdentity: (identity: BookingDraftIdentity) =>
+    setDraft((current) => (
+      hasSameIdentity(current, identity) ? current : { ...current, ...identity }
+    )),
+});
+
 const loadInitialDraft = (query: BookingQuery, key: string | null) => {
   const stored = key ? getBookingDraft(key) : null;
   return stored && matchesQuery(stored, query) ? stored : buildDefaultDraft(query);
 };
 
 const buildDefaultDraft = (query: BookingQuery): BookingDraft => ({
+  ...buildEmptyDraftIdentity(),
   propertyId: query.propertyId || "",
   roomId: query.roomId || "",
   checkIn: query.checkIn || "",
@@ -63,6 +83,14 @@ const buildDefaultDraft = (query: BookingQuery): BookingDraft => ({
   voucherCode: "",
   currentStep: 1,
   paymentMethod: "MIDTRANS",
+});
+
+const buildEmptyDraftIdentity = (): BookingDraftIdentity => ({
+  guestName: "",
+  guestKtpName: "",
+  guestPhone: "",
+  guestEmail: "",
+  guestKtpAddress: "",
 });
 
 const matchesQuery = (draft: BookingDraft, query: BookingQuery) =>
@@ -87,6 +115,16 @@ const toGuests = (draft: BookingDraft): BookingGuests => ({
   children: draft.children,
   babies: draft.babies,
 });
+
+const hasSameIdentity = (
+  draft: BookingDraft,
+  identity: BookingDraftIdentity,
+) =>
+  draft.guestName === identity.guestName &&
+  draft.guestKtpName === identity.guestKtpName &&
+  draft.guestPhone === identity.guestPhone &&
+  draft.guestEmail === identity.guestEmail &&
+  draft.guestKtpAddress === identity.guestKtpAddress;
 
 type GuestUpdater = (current: BookingGuests) => BookingGuests;
 type StepUpdater = (current: number) => number;

@@ -37,7 +37,7 @@ Risiko yang masih perlu ditindaklanjuti:
 | `frontend npm run lint` | Lulus |
 | Scan browser storage | Tidak ditemukan auth token aktif di localStorage |
 | File source >200 baris | Tidak ditemukan pada `frontend/src` dan `backend/src` |
-| Function-length advisory | 101 kandidat: 92 frontend, 9 backend |
+| Function-length advisory | 100 kandidat: 92 frontend, 8 backend |
 | Unsafe type/log residue | Tidak ditemukan `any`, `as any`, `as unknown as`, `console.log`, atau `debugger` pada scan source |
 
 ## Ownership
@@ -260,11 +260,11 @@ Storage yang masih dipakai:
 | `frontend/src/hooks/savedPropertiesStorage.ts` | localStorage | Wishlist lokal authenticated USER; GUEST/TENANT diblokir oleh UI dan hook | Rendah-menengah |
 | `frontend/src/stores/filter/filterPersistence.ts` | sessionStorage | Filter/search property sementara; migrasi satu kali membersihkan localStorage lama | Rendah |
 | `frontend/src/lib/authNotice.ts` | sessionStorage | Notice auth sementara | Rendah |
-| `frontend/src/hooks/user/booking/bookingDraftStorage.ts` | sessionStorage | Draft booking non-PII, scoped per property/room/date | Rendah |
+| `frontend/src/hooks/user/booking/bookingDraftStorage.ts` | sessionStorage | Draft booking scoped per property/room/date; identity non-KTP allowlist | Rendah-menengah |
 | `frontend/src/lib/browserStorageCleanup.ts` | localStorage remove | Bersihkan legacy auth storage | Positif |
 
 Tidak ditemukan JWT auth token aktif di localStorage.
-Draft booking tidak menyimpan KTP, nama legal, alamat, phone, email, atau identitas tamu lengkap.
+Draft booking menyimpan nama pemesan, nama legal, phone, email, dan alamat sesuai KTP untuk restore sementara. Nomor KTP/NIK, token, payment proof, dan upload payload tidak disimpan.
 Filter/search tidak lagi dipersist lintas browser session.
 
 ## Upload Security
@@ -285,7 +285,4 @@ Ownership dasar baik dan test lulus. Risiko utama yang tersisa bukan cross-tenan
 
 Audit dokumentasi 17 Juni 2026 menemukan dua folder kosong:
 
-- `frontend/src/hooks/tenant/occupancy`
-- `frontend/src/pages/tenant/occupancy`
-
-Folder kosong tersebut aman dihapus pada cleanup terpisah. Route `/tenant/occupancy` tidak boleh langsung dihapus karena masih digunakan sebagai redirect ke `/tenant/property-report`, dan komponen `frontend/src/components/tenant/occupancy-calendar` masih aktif dipakai pada laporan properti.
+Folder kosong `frontend/src/hooks/tenant/occupancy` dan `frontend/src/pages/tenant/occupancy` dihapus pada 22 Juni 2026 setelah dipastikan kosong dan orphan. Route `/tenant/occupancy` tetap digunakan sebagai redirect ke `/tenant/property-report`, dan komponen `frontend/src/components/tenant/occupancy-calendar` tetap aktif pada laporan properti.
