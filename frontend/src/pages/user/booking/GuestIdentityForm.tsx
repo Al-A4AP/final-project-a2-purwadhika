@@ -1,15 +1,15 @@
 import type { FC } from "react";
 import type { BookingPageState } from "@/hooks/user/booking/bookingTypes";
-import { MAX_PHONE_NUMBER_LENGTH, MAX_KTP_NUMBER_LENGTH, ADDRESS_MAX_LENGTH } from "@/constants/validation";
+import { MAX_PHONE_NUMBER_LENGTH, MAX_KTP_NUMBER_LENGTH, ADDRESS_MAX_LENGTH, MAX_EMAIL_LENGTH, MAX_NAME_LENGTH, MAX_USERNAME_LENGTH } from "@/constants/validation";
 
 type FieldKey = "email" | "ktpAddress" | "ktpNumber" | "legalName" | "name" | "phone";
 
 const fields: { key: FieldKey; label: string; placeholder: string; required?: boolean, maxLength? : number }[] = [
-  { key: "name", label: "Nama Pemesan", placeholder: "Nama yang mudah dihubungi" },
-  { key: "legalName", label: "Nama sesuai KTP", placeholder: "Nama legal tamu", required: true },
+  { key: "name", label: "Nama Pemesan", placeholder: "Nama yang mudah dihubungi", required: true, maxLength: MAX_USERNAME_LENGTH },
+  { key: "legalName", label: "Nama sesuai KTP", placeholder: "Nama legal tamu", required: true, maxLength: MAX_NAME_LENGTH },
   { key: "phone", label: "Nomor Telepon", placeholder: "+62 812 xxxx xxxx", required: true,  maxLength: MAX_PHONE_NUMBER_LENGTH },
   { key: "ktpNumber", label: "Nomor KTP", placeholder: "16 digit angka KTP", required: true, maxLength: MAX_KTP_NUMBER_LENGTH },
-  { key: "email", label: "Email", placeholder: "email@contoh.com" },
+  { key: "email", label: "Email", placeholder: "email@contoh.com", maxLength: MAX_EMAIL_LENGTH },
   { key: "ktpAddress", label: "Alamat sesuai KTP", placeholder: "Alamat lengkap pada KTP", required: true, maxLength: ADDRESS_MAX_LENGTH },
 ];
 

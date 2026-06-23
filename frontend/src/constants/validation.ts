@@ -17,3 +17,6 @@ export const MAX_ADULT_CAPACITY = 30;
 export const MAX_DAILY_PRICE = 100_000_000;
 export const MAX_PHONE_NUMBER_LENGTH = 15;
 export const MAX_KTP_NUMBER_LENGTH = 16;
+export const MAX_EMAIL_LENGTH = 64;
+export const MAX_USERNAME_LENGTH = 30;
+export const MAX_NAME_LENGTH = 50;
