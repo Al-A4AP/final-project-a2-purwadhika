@@ -1,6 +1,6 @@
 # Audit Clean Code dan REST API Guidelines
 
-Tanggal audit terakhir: 22 Juni 2026
+Tanggal audit terakhir: 23 Juni 2026
 Project: PURWALOKA - Property Renting Web App  
 Acuan: `docs/guidelines/PURWADHIKA.md`, `docs/guidelines/REST_API_GUIDELINES.md`, `docs/guidelines/CODE_LINE_CHECK_GUIDELINES.md`
 
@@ -137,6 +137,8 @@ Kandidat yang selesai pada batch backend 19 Juni 2026:
 | `backend/src/services/categoryService.ts` | `updateCategory` | 18 | Resolved melalui DTO builder; ownership flow dan query order tetap |
 
 Kandidat backend yang dipertahankan: 7 HIGH dan 1 MEDIUM. Tidak ada kandidat SAFE tersisa setelah extraction pure helper.
+
+Audit 23 Juni mempertahankan seluruh 8 kandidat production. Perubahan voucher ownership dilakukan pada query/guard helper yang tidak termasuk kandidat >15 baris. Fixture regression test diringkas secara mekanis sehingga total advisory tetap 100.
 
 Kandidat yang selesai pada batch USER-only saved-property:
 

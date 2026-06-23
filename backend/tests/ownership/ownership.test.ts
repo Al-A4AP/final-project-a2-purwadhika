@@ -10,6 +10,7 @@ type UserMidtransOrderModule = typeof import('../../src/services/order/userMidtr
 type RoomOwnershipModule = typeof import('../../src/services/tenantRoom/roomOwnership');
 type ReviewServiceModule = typeof import('../../src/services/reviewService');
 type CategoryServiceModule = typeof import('../../src/services/categoryService');
+type VoucherServiceModule = typeof import('../../src/services/voucherService');
 
 const prisma = require('../../src/config/prisma').default as PrismaClientInstance;
 const { cancelUserOrder } = require('../../src/services/order/userCancelOrder') as UserCancelOrderModule;
@@ -17,6 +18,7 @@ const { retryUserMidtransPayment } = require('../../src/services/order/userMidtr
 const { ensureTenantProperty, verifyPeakRateOwner, verifyRoomOwner } = require('../../src/services/tenantRoom/roomOwnership') as RoomOwnershipModule;
 const { deleteTenantReview, replyReview } = require('../../src/services/reviewService') as ReviewServiceModule;
 const { createCategory, updateCategory } = require('../../src/services/categoryService') as CategoryServiceModule;
+const { applyVoucherToOrder, previewUserVoucher } = require('../../src/services/voucherService') as VoucherServiceModule;
 const restoreFns: Array<() => void> = [];
 
 afterEach(() => restoreMocks());
@@ -125,6 +127,53 @@ describe('ownership regression', () => {
 
     assert.deepEqual(getWhere(countQuery), { tenantId: 'tenant-1' });
   });
+
+  it('allows Tenant A voucher for Tenant A property', async () => {
+    mockVoucherOwnership('tenant-a', buildVoucher('tenant-a', 'PERCENTAGE'));
+    replaceMethod(prisma.userVoucher, 'count', async () => 0);
+
+    const result = await previewUserVoucher('user-1', buildVoucherPreviewInput());
+
+    assert.equal(result.discountAmount, 10000);
+    assert.equal(result.finalPrice, 90000);
+  });
+
+  it('rejects Tenant A voucher preview for Tenant B property', async () => {
+    mockVoucherOwnership('tenant-b', buildVoucher('tenant-a', 'PERCENTAGE'));
+
+    await expectRejected(
+      previewUserVoucher('user-1', buildVoucherPreviewInput()),
+      'Voucher tidak berlaku untuk properti ini.',
+      400,
+    );
+  });
+
+  it('rejects assigned Tenant A voucher for Tenant B before usage changes', async () => {
+    const calls = mockVoucherUsageCalls();
+    mockVoucherOwnership('tenant-b', buildVoucher('tenant-a', 'PERCENTAGE'));
+
+    await expectCrossTenantCheckoutRejected();
+
+    assert.deepEqual(calls, { assignment: 0, quota: 0 });
+  });
+
+  it('rejects Tenant A FREE_NIGHTS voucher for Tenant B before quota changes', async () => {
+    const calls = mockVoucherUsageCalls();
+    mockVoucherOwnership('tenant-b', buildVoucher('tenant-a', 'FREE_NIGHTS'));
+
+    await expectCrossTenantCheckoutRejected();
+
+    assert.deepEqual(calls, { assignment: 0, quota: 0 });
+  });
+
+  it('rejects Tenant A PERCENTAGE voucher for Tenant B before quota changes', async () => {
+    const calls = mockVoucherUsageCalls();
+    mockVoucherOwnership('tenant-b', buildVoucher('tenant-a', 'PERCENTAGE'));
+
+    await expectCrossTenantCheckoutRejected();
+
+    assert.deepEqual(calls, { assignment: 0, quota: 0 });
+  });
 });
 
 const replaceMethod = (target: object, methodName: string, replacement: (...args: Array<unknown>) => unknown) => {
@@ -172,3 +221,56 @@ const buildPeakRateForTenant = (tenantId: string) =>
 
 const buildReviewForTenant = (tenantId: string) =>
   ({ id: 'review-1', property: { tenantId } });
+
+const mockVoucherOwnership = (propertyTenantId: string, voucher: ReturnType<typeof buildVoucher>) => {
+  replaceMethod(prisma.property, 'findFirst', async () => ({ tenantId: propertyTenantId }));
+  replaceMethod(prisma.voucher, 'findFirst', async () => voucher);
+};
+
+const mockVoucherUsageCalls = () => {
+  const calls = { assignment: 0, quota: 0 };
+  replaceMethod(prisma.userVoucher, 'count', async () => { calls.assignment += 1; return 1; });
+  replaceMethod(prisma.voucher, 'updateMany', async () => { calls.quota += 1; return { count: 1 }; });
+  return calls;
+};
+
+const expectCrossTenantCheckoutRejected = () =>
+  expectRejected(
+    applyVoucherToOrder(prisma, 'property-1', 'TENANTA10', 'user-1', {
+      subtotal: 100000,
+      totalNights: 2,
+    }),
+    'Voucher tidak berlaku untuk properti ini.',
+    400,
+  );
+
+const buildVoucherPreviewInput = () => ({
+  propertyId: 'property-1',
+  subtotal: 100000,
+  total_nights: 2,
+  voucher_code: 'TENANTA10',
+});
+
+const buildVoucher = (tenantId: string, discountType: 'PERCENTAGE' | 'FREE_NIGHTS') => ({
+  ...voucherFixture,
+  tenantId,
+  discount_type: discountType,
+  discount_value: discountType === 'PERCENTAGE' ? 10 : 1,
+});
+
+const voucherFixture = {
+  id: 'voucher-a',
+  code: 'TENANTA10',
+  name: 'Voucher Tenant A',
+  description: null,
+  max_discount: null,
+  quota: 10,
+  used_count: 0,
+  starts_at: new Date('2026-01-01T00:00:00.000Z'),
+  expires_at: new Date('2027-01-01T00:00:00.000Z'),
+  is_active: true,
+  new_user_only: false,
+  deleted_at: null,
+  created_at: new Date('2026-01-01T00:00:00.000Z'),
+  updated_at: new Date('2026-01-01T00:00:00.000Z'),
+};

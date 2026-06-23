@@ -1,6 +1,6 @@
 # Rencana Perbaikan Detail
 
-Tanggal update: 22 Juni 2026
+Tanggal update: 23 Juni 2026
 Acuan: audit final hardening, clean code, REST API guidelines, ownership, security, dan PURWADHIKA.
 
 ## Ringkasan
@@ -14,7 +14,7 @@ Status verifikasi terakhir:
 | Frontend lint | Lulus |
 | Frontend build | Lulus |
 | Backend build | Lulus |
-| Backend ownership test | Lulus, 10/10 |
+| Backend ownership test | Lulus, 15/15 |
 | File source >200 baris | Tidak ditemukan pada `frontend/src` dan `backend/src` |
 | Function length audit | 100 kandidat advisory |
 | Frontend advisory | 92 kandidat |
@@ -107,6 +107,14 @@ Catatan: jika masih ada legacy schema/data di database, migration destructive ha
 ### Voucher
 
 Status: selesai pada flow aktif.
+
+Voucher ownership:
+
+- Voucher hanya berlaku untuk property/room milik tenant pembuat voucher.
+- Preview dan checkout memakai backend guard yang sama.
+- Assigned voucher dan new-user voucher tetap tunduk pada tenant property ownership.
+- Ownership divalidasi sebelum discount, quota increment, dan assigned usage update.
+- Cross-tenant request ditolak dengan pesan `Voucher tidak berlaku untuk properti ini.`
 
 Voucher yang didukung:
 

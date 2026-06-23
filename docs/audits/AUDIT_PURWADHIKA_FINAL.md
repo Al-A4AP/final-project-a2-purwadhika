@@ -1,6 +1,6 @@
 # Audit Keseluruhan PURWADHIKA
 
-Tanggal audit: 19 Juni 2026
+Tanggal audit terakhir: 23 Juni 2026
 Project: PURWALOKA - Property Renting Web App  
 Acuan: `docs/guidelines/PURWADHIKA.md`
 
@@ -53,7 +53,7 @@ Item berikut sudah dipindahkan ke resolved pada source flow aktif:
 | Frontend lint | Lulus |
 | Frontend build | Lulus |
 | Backend build | Lulus |
-| Backend ownership test | Lulus, 10/10 |
+| Backend ownership test | Lulus, 15/15 |
 | File source >200 baris | Tidak ditemukan pada `frontend/src` dan `backend/src` |
 | Function length audit advisory | 100 kandidat manual review |
 | Frontend function advisory | 92 kandidat |
@@ -234,6 +234,11 @@ Catatan:
 - PII/KTP pada list tenant order tetap perlu data minimization review.
 
 ### Voucher
+
+- Voucher hanya berlaku untuk property/room milik tenant pembuat voucher.
+- Preview dan checkout memakai ownership guard backend yang sama.
+- Assigned voucher dan new-user voucher tetap ditolak untuk property tenant lain.
+- Ownership divalidasi sebelum discount, quota, dan usage assignment.
 
 Status: tersedia.
 

@@ -22,6 +22,7 @@ Final Project Purwadhika JCWDBGPM-11, Group 1:
 - Booking dibuat saat user menekan `Lanjut ke Pembayaran` pada tahap tinjauan.
 - Pembayaran via Midtrans atau transfer manual.
 - Voucher aktif: `PERCENTAGE` dan `FREE_NIGHTS`.
+- Voucher hanya berlaku untuk properti/kamar milik tenant pembuat voucher, termasuk voucher assigned dan khusus pengguna baru.
 - Riwayat reservasi, properti tersimpan, profile, dan review setelah checkout.
 - Love/properti tersimpan hanya tersedia untuk authenticated USER; GUEST dan TENANT tidak menerima kontrol love.
 
@@ -232,10 +233,10 @@ npm run test:ownership
 
 ## Current Project Status
 
-Status dokumentasi terakhir: 22 Juni 2026.
+Status dokumentasi terakhir: 23 Juni 2026.
 
 - Frontend lint dan build terakhir lulus.
-- Backend build dan ownership test terakhir lulus (10/10).
+- Backend build dan ownership test terakhir lulus (15/15).
 - File source aktif `frontend/src` dan `backend/src` saat ini tidak melewati 200 baris.
 - Function-length audit adalah alat bantu advisory, bukan blocker build; snapshot terbaru 100 kandidat (92 frontend, 8 backend).
 - Residue scan source untuk `any`, unsafe cast, `console.log`, dan `debugger` bersih.

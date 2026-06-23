@@ -1,12 +1,12 @@
 # Audit Ownership dan Keamanan
 
-Tanggal audit: 19 Juni 2026
+Tanggal audit terakhir: 23 Juni 2026
 Project: PURWALOKA - Property Renting Web App  
 Acuan: ownership data, authorization, browser storage, PII, transaksi, dan hardening backend.
 
 ## Ringkasan
 
-Ownership dasar berada pada kondisi baik. Regression test ownership lulus 10/10, termasuk category owner scope dan category quota scope. Auth token memakai HTTP-only cookie, bukan localStorage. Persistent token blacklist sudah database-backed dan bukan in-memory, sehingga aman untuk deployment multi-instance.
+Ownership dasar berada pada kondisi baik. Regression test ownership lulus 15/15, termasuk category owner scope, category quota scope, dan voucher tenant scope. Auth token memakai HTTP-only cookie, bukan localStorage. Persistent token blacklist sudah database-backed dan bukan in-memory, sehingga aman untuk deployment multi-instance.
 
 Risiko besar yang sebelumnya aktif sudah diturunkan:
 
@@ -31,7 +31,7 @@ Risiko yang masih perlu ditindaklanjuti:
 
 | Pemeriksaan | Hasil |
 | --- | --- |
-| `backend npm run test:ownership` | Lulus, 10/10 |
+| `backend npm run test:ownership` | Lulus, 15/15 |
 | `backend npm run build` | Lulus |
 | `frontend npm run build` | Lulus |
 | `frontend npm run lint` | Lulus |
@@ -229,6 +229,15 @@ Status:
 - `NOMINAL` sudah tidak tersedia pada form dan ditolak service aktif.
 - `FREE_NIGHTS` menggunakan jumlah malam gratis maksimal sesuai durasi inap dan mengutamakan malam termurah jika nightly breakdown tersedia.
 - Zero-payment dari voucher langsung masuk `PROCESSED` tanpa membuat transaksi Midtrans.
+
+### Voucher Tenant Ownership
+
+- Voucher menyimpan `tenantId`.
+- Backend membandingkan tenant voucher dengan tenant property pada shared lookup preview/checkout.
+- Assigned voucher dan new-user voucher tidak dapat melewati tenant mismatch.
+- Ownership guard berjalan sebelum discount, atomic quota increment, dan assignment usage update.
+- Error cross-tenant: `Voucher tidak berlaku untuk properti ini.`
+- Regression coverage mencakup same-tenant PASS serta cross-tenant preview, assigned, FREE_NIGHTS, dan PERCENTAGE rejection.
 
 Recommended fix:
 

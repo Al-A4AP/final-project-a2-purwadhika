@@ -2,7 +2,7 @@
 
 Folder ini menyimpan dokumentasi audit, guideline, handover, dan rencana perbaikan PURWALOKA. Root `README.md` sengaja dibuat ringkas untuk reviewer, mentor, recruiter, dan developer baru; detail audit internal diletakkan di folder ini.
 
-Tanggal sinkronisasi dokumentasi terbaru: 22 Juni 2026.
+Tanggal sinkronisasi dokumentasi terbaru: 23 Juni 2026.
 
 ## Document Map
 
@@ -32,7 +32,7 @@ README di folder `frontend` dan `backend` tidak dibuat ulang.
 
 | Area | Status aktual |
 | --- | --- |
-| Tanggal audit | 22 Juni 2026 |
+| Tanggal audit | 23 Juni 2026 |
 | File source >200 baris | Tidak ditemukan pada `frontend/src` dan `backend/src` |
 | Function-length advisory | 100 kandidat |
 | Frontend advisory | 92 kandidat |
@@ -44,6 +44,7 @@ README di folder `frontend` dan `backend` tidak dibuat ulang.
 | Occupancy route | Masih ada redirect `/tenant/occupancy` ke `/tenant/property-report` |
 | Booking draft | sessionStorage, guest identity non-KTP allowlist, scoped per property/room/date |
 | Browser storage policy | localStorage hanya preference/persistent state; temporary state memakai sessionStorage |
+| Voucher ownership | Voucher hanya berlaku pada property/room milik tenant pembuat voucher |
 
 ## Status Fitur PURWADHIKA
 
@@ -120,12 +121,14 @@ Property Detail
 - Auth token memakai HTTP-only cookie.
 - Persistent token blacklist sudah database-backed dengan SHA256 hash.
 - Login attempt guard aktif: 5 gagal login mengunci akun sementara selama 15 menit.
-- Ownership test terakhir lulus 10/10.
+- Ownership test terakhir lulus 15/15.
 - PII/KTP response minimization pada order/report list tetap menjadi rekomendasi P1.
 
 ## Voucher Flow Aktual
 
 - Voucher aktif hanya `PERCENTAGE` dan `FREE_NIGHTS`.
+- Voucher tenant-bound: preview dan checkout menolak voucher jika tenant voucher berbeda dari tenant properti.
+- Rule tenant-bound juga berlaku untuk assigned voucher dan voucher khusus pengguna baru sebelum discount, quota, atau usage diproses.
 - Voucher `NOMINAL` tidak tersedia pada form/flow aktif.
 - `FREE_NIGHTS` memakai `discountedNights = min(freeNights, stayNights)`.
 - Jika nightly breakdown tersedia, diskon diterapkan pada malam termurah terlebih dahulu.

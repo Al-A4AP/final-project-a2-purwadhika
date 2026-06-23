@@ -19,9 +19,12 @@ export const findActiveVoucherForProperty = async (
 ) => {
   const tenantId = await findPropertyTenantId(db, propertyId);
   const voucher = await db.voucher.findFirst({
-    where: buildActiveVoucherWhere(tenantId, code),
+    where: buildActiveVoucherWhere(code),
   });
   if (!voucher) throw new AppError('Voucher tidak valid atau sudah tidak aktif', 400);
+  if (voucher.tenantId !== tenantId) {
+    throw new AppError('Voucher tidak berlaku untuk properti ini.', 400);
+  }
   return voucher;
 };
 
@@ -55,13 +58,12 @@ const findPropertyTenantId = async (db: DbClient, propertyId: string) => {
   return property.tenantId;
 };
 
-const buildActiveVoucherWhere = (tenantId: string, code: string): Prisma.VoucherWhereInput => ({
+const buildActiveVoucherWhere = (code: string): Prisma.VoucherWhereInput => ({
   code: normalizeVoucherCode(code),
   deleted_at: null,
   expires_at: { gte: new Date() },
   is_active: true,
   starts_at: { lte: new Date() },
-  tenantId,
 });
 
 const buildVoucherCodeWhere = (code: string, exceptId?: string): Prisma.VoucherWhereInput => ({
